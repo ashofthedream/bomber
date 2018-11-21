@@ -14,29 +14,30 @@ import java.util.concurrent.TimeUnit;
 public @interface WarmUp {
 
     /**
-     * @return number of threads
-     */
-    int threads() default 1;
-
-    /**
-     * @return number of total iterations for all threads
-     */
-    long totalIterations() default Long.MAX_VALUE;
-
-    /**
-     * @return number of iterations per each thread.
-     */
-    long threadIterations() default Long.MAX_VALUE;
-
-    /**
      * @return test time
      */
-    long time() default 30;
+    long time() default 60;
 
     /**
      * @return time unit for time
      */
     TimeUnit timeUnit() default TimeUnit.SECONDS;
+
+    /**
+     * @return number of threads
+     */
+    int threads() default 1;
+
+    /**
+     * @return number of total invocations for all threads
+     */
+    long totalInvocations() default Long.MAX_VALUE;
+
+    /**
+     * @return number of invocations per each thread.
+     */
+    long threadInvocations() default Long.MAX_VALUE;
+
 
     boolean disabled() default false;
 }

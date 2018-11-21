@@ -13,29 +13,9 @@ import java.util.concurrent.TimeUnit;
 public @interface LoadTestCase {
 
     /**
-     * @return test case name, if empty class name will be used
-     */
-    String value() default "";
-
-    /**
-     * @return test case name, if empty - {@link this#value() will be used}
+     * @return test case name
      */
     String name() default "";
-
-    /**
-     * @return number of threads
-     */
-    int threads() default 1;
-
-    /**
-     * @return number of total iterations for all threads
-     */
-    long totalIterations() default Long.MAX_VALUE;
-
-    /**
-     * @return number of iterations per each thread.
-     */
-    long threadIterations() default Long.MAX_VALUE;
 
     /**
      * @return test time
@@ -46,6 +26,21 @@ public @interface LoadTestCase {
      * @return time unit for time
      */
     TimeUnit timeUnit() default TimeUnit.SECONDS;
+
+    /**
+     * @return number of threads
+     */
+    int threads() default 1;
+
+    /**
+     * @return number of total invocations for all threads
+     */
+    long totalInvocations() default Long.MAX_VALUE;
+
+    /**
+     * @return number of invocations per each thread.
+     */
+    long threadInvocations() default Long.MAX_VALUE;
 
 
     /**
