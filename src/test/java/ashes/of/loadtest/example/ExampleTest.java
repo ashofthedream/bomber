@@ -6,10 +6,13 @@ import ashes.of.loadtest.TestCase;
 import ashes.of.loadtest.annotations.*;
 import ashes.of.loadtest.settings.Settings;
 import ashes.of.loadtest.sink.HdrHistogramSink;
+import ashes.of.loadtest.sink.Log4jSink;
 import ashes.of.loadtest.stopwatch.Stopwatch;
+import ashes.of.loadtest.throttler.Limiter;
 import org.junit.Test;
 
 
+@Limit(time = 5)
 @LoadTestCase(name = "example-test", time = 10)
 @WarmUp(disabled = true)
 @Baseline(disabled = true)
@@ -41,12 +44,11 @@ public class ExampleTest implements TestCase {
 
     @Test
     public void builderExample() {
-        new TestSuiteBuilder<ExampleTest>()
-
+        new TestSuiteBuilder()
                 // log all times to console via log4j and HdrHistogram
-                // .timeSink(new Log4jTimeSink())
+                .sink(new Log4jSink())
                 .sink(new HdrHistogramSink())
-
+                .limiter(Limiter.withRate(1, 5_000))
                 // disabled baseline and warm-up stages
                 .settings(b -> b
                     .baseline(Settings::disabled)
@@ -62,8 +64,8 @@ public class ExampleTest implements TestCase {
 
     @Test
     public void annotationsExample() {
-        new TestSuiteBuilder<ExampleTest>()
-                // .sink(new Log4jSink())
+        new TestSuiteBuilder()
+                .sink(new Log4jSink())
                 .sink(new HdrHistogramSink())
 
                 // add example test case via annotations

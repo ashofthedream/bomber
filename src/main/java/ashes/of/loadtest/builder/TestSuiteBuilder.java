@@ -4,6 +4,7 @@ import ashes.of.loadtest.TestCase;
 import ashes.of.loadtest.annotations.*;
 import ashes.of.loadtest.settings.Settings;
 import ashes.of.loadtest.sink.Sink;
+import ashes.of.loadtest.throttler.Limiter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -16,60 +17,80 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 
-public class TestSuiteBuilder<TC extends TestCase> {
+public class TestSuiteBuilder {
     private static final Logger log = LogManager.getLogger(TestSuiteBuilder.class);
 
     /**
      * Test cases for run
      */
-    private final List<TestCaseBuilder<TC>> testCases = new ArrayList<>();
+    private final List<TestCaseBuilder<? extends TestCase>> testCases = new ArrayList<>();
     private final List<Sink> sinks = new ArrayList<>();
     private final SettingsBuilder settings = new SettingsBuilder();
 
+    private Supplier<Limiter> limiter = Limiter::alwaysPass;
 
-    public TestSuiteBuilder<TC> settings(Consumer<SettingsBuilder> consumer) {
+
+    public TestSuiteBuilder settings(Consumer<SettingsBuilder> consumer) {
         consumer.accept(settings);
         return this;
     }
 
+    /**
+     * @param limiter shared limiter
+     * @return builder
+     */
+    public TestSuiteBuilder limiter(Limiter limiter) {
+        return limiter(() -> limiter);
+    }
 
-    public TestSuiteBuilder<TC> sink(Sink sink) {
+    /**
+     * @param limiter shared request limiter
+     * @return builder
+     */
+    public TestSuiteBuilder limiter(Supplier<Limiter> limiter) {
+        this.limiter = limiter;
+        return this;
+    }
+
+    public TestSuiteBuilder sink(Sink sink) {
         this.sinks.add(sink);
         return this;
     }
 
-    public TestSuiteBuilder<TC> sinks(List<Sink> sinks) {
+    public TestSuiteBuilder sinks(List<Sink> sinks) {
         this.sinks.addAll(sinks);
         return this;
     }
 
-    
-    private <F extends TestCase> TestCaseBuilder<TC> newTestCase() {
-        return new TestCaseBuilder<TC>()
-                .settings(b -> b.copyOf(settings))
+
+    private <T extends TestCase> TestCaseBuilder<T> newTestCase() {
+        return new TestCaseBuilder<T>()
+                .settings(settings)
+                .limiter(limiter)
                 .sinks(sinks);
     }
 
-    public TestSuiteBuilder<TC> testCase(Consumer<TestCaseBuilder<TC>> consumer) {
-        TestCaseBuilder<TC> b = newTestCase();
+    public <T extends TestCase> TestSuiteBuilder testCase(Consumer<TestCaseBuilder<T>> consumer) {
+        TestCaseBuilder<T> b = newTestCase();
         consumer.accept(b);
 
         testCases.add(b);
         return this;
     }
 
-    public TestSuiteBuilder<TC> testCase(Class<TC> cls) {
-        TestCaseBuilder<TC> b = newTestCase();
+    public <T extends TestCase> TestSuiteBuilder testCase(Class<T> cls) {
+        TestCaseBuilder<T> b = newTestCase();
 
         Baseline baseline = cls.getAnnotation(Baseline.class);
         if (baseline != null)
-            b.settings(s -> s.baseline(makeSettings(baseline)));
+            b.settings().baseline(makeSettings(baseline));
 
         WarmUp warmUp = cls.getAnnotation(WarmUp.class);
         if (warmUp != null)
-            b.settings(s -> s.warmUp(makeSettings(warmUp)));
+            b.settings().warmUp(makeSettings(warmUp));
 
-        Supplier<TC> supplier = () -> {
+
+        Supplier<T> supplier = () -> {
             try {
                 return cls.getConstructor().newInstance();
             } catch (Exception e) {
@@ -80,7 +101,8 @@ public class TestSuiteBuilder<TC extends TestCase> {
         LoadTestCase test = cls.getAnnotation(LoadTestCase.class);
         if (test != null) {
             b       .name(!test.name().isEmpty() ? test.name() : cls.getSimpleName())
-                    .settings(s -> s.test(makeSettings(test)));
+                    .settings()
+                            .test(makeSettings(test));
 
 
             if (test.concurrent()) {
@@ -92,6 +114,11 @@ public class TestSuiteBuilder<TC extends TestCase> {
         } else {
             b.name(cls.getSimpleName());
         }
+
+        Limit limit = cls.getAnnotation(Limit.class);
+        if (limit != null)
+            b.limiter(Limiter.withRate(limit.count(), limit.time(), limit.timeUnit()));
+
 
         for (Method method : cls.getDeclaredMethods()) {
             BeforeAll beforeAll = method.getAnnotation(BeforeAll.class);
@@ -108,13 +135,12 @@ public class TestSuiteBuilder<TC extends TestCase> {
 
             LoadTest loadTest = method.getAnnotation(LoadTest.class);
             if (loadTest != null) {
-                log.debug("Found test method: {}", method.getName());
-
+                String value = loadTest.value();
+                String name = !value.isEmpty() ? value : method.getName();
+                log.debug("Found test method: {}, name: {}", method.getName(), name);
                 try {
-                    String value = loadTest.value();
-
                     MethodHandle mh = MethodHandles.lookup().unreflect(method);
-                    String name = !value.isEmpty() ? value : method.getName();
+
                     b.test(name, (testCase, stopwatch) -> mh.bindTo(testCase).invoke(stopwatch));
                 } catch (Exception e) {
                     log.warn("Can't mh method: {}", method.getName(), e);

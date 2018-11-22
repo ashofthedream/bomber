@@ -38,7 +38,7 @@ public interface Sink {
      * @param context test case context
      * @param elapsed elapsed time of all test in test cases in nanoseconds
      */
-    default void afterTests(TestCaseContext context, long elapsed) {}
+    default void afterAllTests(TestCaseContext context, long elapsed) {}
 
     /**
      * Invokes after stage ends

@@ -28,8 +28,8 @@ public class Log4jSink implements Sink {
     }
 
     @Override
-    public void afterTests(TestCaseContext context, long elapsed) {
-        log.info("afterTests stage: {}, testCase: {}, thread: {}, it: {}, ts: {}, time: {}",
+    public void afterAllTests(TestCaseContext context, long elapsed) {
+        log.info("afterAllTests stage: {}, testCase: {}, thread: {}, it: {}, ts: {}, time: {}",
                 context.getStage(), context.getName(), context.getThreadName(), context.getInvocationNumber(), context.getStartTime(), elapsed);
     }
 }

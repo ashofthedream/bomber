@@ -15,6 +15,7 @@ import ashes.of.loadtest.TestCase;
 import ashes.of.loadtest.settings.Settings;
 import ashes.of.loadtest.sink.Sink;
 import ashes.of.loadtest.stopwatch.Stopwatch;
+import ashes.of.loadtest.throttler.Limiter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -37,7 +38,7 @@ public class TestCaseRunner<T extends TestCase> {
     private final List<Sink> sinks;
     private final Supplier<T> testCase;
     private final Map<String, Test<T>> tests;
-
+    private final Supplier<Limiter> throttler;
 
 
     public TestCaseRunner(String testCaseName,
@@ -45,7 +46,8 @@ public class TestCaseRunner<T extends TestCase> {
                           Settings settings,
                           List<Sink> sinks,
                           Map<String, Test<T>> tests,
-                          Supplier<T> testCase) {
+                          Supplier<T> testCase,
+                          Supplier<Limiter> throttler) {
         this.testCaseName = testCaseName;
         this.stage = stage;
         this.settings = new Settings(settings);
@@ -53,6 +55,7 @@ public class TestCaseRunner<T extends TestCase> {
         this.testCase = testCase;
         this.sinks = sinks;
         this.tests = tests;
+        this.throttler = throttler;
     }
 
     public Stage getStage() {
@@ -136,13 +139,14 @@ public class TestCaseRunner<T extends TestCase> {
         try {
             T testCase = this.testCase.get();
             BooleanSupplier checker = runChecker();
+            Limiter limiter = this.throttler.get();
 
             startLatch.countDown();
 
             // if we can't start in 60 seconds – something works bad
             startLatch.await(30, SECONDS);
 
-            runTestCase(testCase, checker);
+            runTestCase(testCase, checker, limiter);
         } catch (Throwable e) {
             log.warn("runTestCase test: {}, stage: {} failed", testCaseName, stage, e);
         } finally {
@@ -158,7 +162,7 @@ public class TestCaseRunner<T extends TestCase> {
                 getRemainTime() >= 0;
     }
 
-    private void runTestCase(T testCase, BooleanSupplier checker) throws Exception {
+    private void runTestCase(T testCase, BooleanSupplier checker, Limiter limiter) throws Exception {
         log.trace("beforeAll stage: {}, test: {}", stage, testCaseName);
         String threadName = Thread.currentThread().getName();
         AtomicLong invocations = new AtomicLong();
@@ -169,7 +173,7 @@ public class TestCaseRunner<T extends TestCase> {
             TestCaseContext context = new TestCaseContext(stage, testCaseName, threadName, inv, Instant.now());
 
             long start = System.nanoTime();
-            tests.forEach((name, test) -> test(context, name, testCase, test));
+            tests.forEach((name, test) -> test(context, name, testCase, test, limiter));
             long elapsed = System.nanoTime() - start;
 
             sinkAfterTests(context, elapsed);
@@ -180,14 +184,17 @@ public class TestCaseRunner<T extends TestCase> {
     }
 
     private void sinkAfterTests(TestCaseContext context, long elapsed) {
-        sinks.forEach(sink -> sink.afterTests(context, elapsed));
+        sinks.forEach(sink -> sink.afterAllTests(context, elapsed));
     }
 
 
-    private void test(TestCaseContext tcc, String testName, T testCase, Test<T> test) {
+    private void test(TestCaseContext tcc, String testName, T testCase, Test<T> test, Limiter limiter) {
         TestContext context = new TestContext(tcc, testName, Instant.now());
         log.trace("test stage: {}, testCase: {}, test: {}, inv: {}", stage,
                 tcc.getName(), context.getName(), tcc.getInvocationNumber());
+
+        if (!limiter.awaitForPass())
+            throw new RuntimeException("Limiter await failed");
 
         beforeTest(context, testCase);
 
