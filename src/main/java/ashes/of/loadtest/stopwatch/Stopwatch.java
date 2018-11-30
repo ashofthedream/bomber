@@ -1,23 +1,41 @@
 package ashes.of.loadtest.stopwatch;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 
 public class Stopwatch {
 
     private final long init = System.nanoTime();
-    private final Map<String, Long> labels = new LinkedHashMap<>();
+    private final List<Lap> laps = new ArrayList<>();
 
-
-    public void record(String label) {
-        labels.put(label, System.nanoTime() - init);
-    }
 
     public long elapsed() {
         return System.nanoTime() - init;
     }
 
-    public Map<String, Long> getLabels() {
-        return labels;
+
+    /**
+     * Creates new lap with specified label
+     *
+     * @param label label for lap
+     * @return created lap
+     */
+    public Lap lap(String label) {
+        Lap lap = new Lap(label);
+        laps.add(lap);
+
+        return lap;
+    }
+
+    public Stream<Lap> laps() {
+        return laps.stream()
+                .filter(Lap::isStopped);
+    }
+
+    public Map<String, List<Lap>> lapsByLabel() {
+        return laps()
+                .collect(Collectors.groupingBy(Lap::getName));
     }
 }

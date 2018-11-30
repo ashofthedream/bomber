@@ -7,18 +7,19 @@ import ashes.of.loadtest.annotations.*;
 import ashes.of.loadtest.settings.Settings;
 import ashes.of.loadtest.sink.HdrHistogramSink;
 import ashes.of.loadtest.sink.Log4jSink;
+import ashes.of.loadtest.stopwatch.Lap;
 import ashes.of.loadtest.stopwatch.Stopwatch;
 import ashes.of.loadtest.throttler.Limiter;
 import org.junit.Test;
 
 
 @Limit(time = 5)
-@LoadTestCase(name = "example-test", time = 10)
+@LoadTestCase(name = "example-test", time = 20)
 @WarmUp(disabled = true)
 @Baseline(disabled = true)
 public class ExampleTest implements TestCase {
 
-    private ExampleHttpClient client = new ExampleHttpClient("localhost", 8080);
+    private final ExampleHttpClient client = new ExampleHttpClient("localhost", 8080);
 
     @LoadTest
     public void oneSlowRequest(Stopwatch stopwatch) throws Exception {
@@ -27,10 +28,13 @@ public class ExampleTest implements TestCase {
 
     @LoadTest
     public void twoFastRequests(Stopwatch stopwatch) throws Exception {
+        Lap someFastRequest = stopwatch.lap("someFastRequest");
         client.someFastRequest();
-        stopwatch.record("someFastRequest");
+        someFastRequest.stop();
+
+        Lap anotherFastRequest = stopwatch.lap("anotherFastRequest");
         client.anotherFastRequest();
-        stopwatch.record("anotherFastRequest");
+        anotherFastRequest.stop();
     }
 
 

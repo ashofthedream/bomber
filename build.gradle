@@ -17,6 +17,9 @@ repositories {
 
 
 dependencies {
+    compile group: 'com.google.code.findbugs',      name: 'jsr305',                         version: '3.0.2'
+    compile group: 'com.google.guava',              name: 'guava',                          version: '27.0-jre'
+
     compile group: 'org.apache.logging.log4j',      name: 'log4j-1.2-api',                  version: '2.10.0'
 
     compile group: 'org.hdrhistogram',              name: 'HdrHistogram',                   version: '2.1.10'
