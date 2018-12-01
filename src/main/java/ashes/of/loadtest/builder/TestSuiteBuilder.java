@@ -4,6 +4,7 @@ import ashes.of.loadtest.TestCase;
 import ashes.of.loadtest.annotations.*;
 import ashes.of.loadtest.settings.Settings;
 import ashes.of.loadtest.sink.Sink;
+import ashes.of.loadtest.stopwatch.Stopwatch;
 import ashes.of.loadtest.throttler.Limiter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -12,22 +13,25 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 
 public class TestSuiteBuilder {
     private static final Logger log = LogManager.getLogger(TestSuiteBuilder.class);
 
     /**
-     * Test cases for run
+     * TestWithStopwatch cases for run
      */
     private final List<TestCaseBuilder<? extends TestCase>> testCases = new ArrayList<>();
     private final List<Sink> sinks = new ArrayList<>();
     private final SettingsBuilder settings = new SettingsBuilder();
 
-    private Supplier<Limiter> limiter = Limiter::alwaysPass;
+    private Supplier<Limiter> limiter = Limiter::alwaysPermit;
 
 
     public TestSuiteBuilder settings(Consumer<SettingsBuilder> consumer) {
@@ -70,7 +74,7 @@ public class TestSuiteBuilder {
                 .sinks(sinks);
     }
 
-    public <T extends TestCase> TestSuiteBuilder testCase(Consumer<TestCaseBuilder<T>> consumer) {
+    public <T extends TestCase> TestSuiteBuilder testBuilder(Consumer<TestCaseBuilder<T>> consumer) {
         TestCaseBuilder<T> b = newTestCase();
         consumer.accept(b);
 
@@ -78,25 +82,31 @@ public class TestSuiteBuilder {
         return this;
     }
 
-    public <T extends TestCase> TestSuiteBuilder testCase(Class<T> cls) {
+    public <T extends TestCase> TestSuiteBuilder testInstance(T testCase) {
+        return testCase((Class<T>) testCase.getClass(), () -> testCase);
+    }
+
+    public <T extends TestCase> TestSuiteBuilder testClass(Class<T> cls) {
+        return testCase(cls, () -> {
+            try {
+                return cls.getConstructor().newInstance();
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to create new instance of test case", e);
+            }
+        });
+    }
+
+    private <T extends TestCase> TestSuiteBuilder testCase(Class<T> cls, Supplier<T> supplier) {
         TestCaseBuilder<T> b = newTestCase();
 
         Baseline baseline = cls.getAnnotation(Baseline.class);
         if (baseline != null)
             b.settings().baseline(makeSettings(baseline));
 
-        WarmUp warmUp = cls.getAnnotation(WarmUp.class);
+        Warmup warmUp = cls.getAnnotation(Warmup.class);
         if (warmUp != null)
             b.settings().warmUp(makeSettings(warmUp));
 
-
-        Supplier<T> supplier = () -> {
-            try {
-                return cls.getConstructor().newInstance();
-            } catch (Exception e) {
-                throw new RuntimeException("Failed to create new instance of test case", e);
-            }
-        };
 
         LoadTestCase test = cls.getAnnotation(LoadTestCase.class);
         if (test != null) {
@@ -121,42 +131,29 @@ public class TestSuiteBuilder {
 
 
         for (Method method : cls.getDeclaredMethods()) {
-            BeforeAll beforeAll = method.getAnnotation(BeforeAll.class);
-            if (beforeAll != null) {
-                log.debug("Found beforeAll method: {}", method.getName());
-            }
+            try {
+                BeforeAll beforeAll = method.getAnnotation(BeforeAll.class);
+                if (beforeAll != null)
+                    buildBeforeAll(b, method, beforeAll);
 
+                BeforeEach beforeEach = method.getAnnotation(BeforeEach.class);
+                if (beforeEach != null)
+                    buildBeforeEach(b, method, beforeEach);
 
-            BeforeLoadTest beforeTest = method.getAnnotation(BeforeLoadTest.class);
-            if (beforeAll != null) {
-                log.debug("Found beforeTest method: {}", method.getName());
-            }
+                LoadTest loadTest = method.getAnnotation(LoadTest.class);
+                if (loadTest != null)
+                    buildTest(b, method, loadTest);
 
+                AfterEach afterEach = method.getAnnotation(AfterEach.class);
+                if (afterEach != null)
+                    buildAfterEach(b, method, afterEach);
 
-            LoadTest loadTest = method.getAnnotation(LoadTest.class);
-            if (loadTest != null) {
-                String value = loadTest.value();
-                String name = !value.isEmpty() ? value : method.getName();
-                log.debug("Found test method: {}, name: {}", method.getName(), name);
-                try {
-                    MethodHandle mh = MethodHandles.lookup().unreflect(method);
+                AfterAll afterAll = method.getAnnotation(AfterAll.class);
+                if (afterAll != null)
+                    buildAfterAll(b, method, afterAll);
 
-                    b.test(name, (testCase, stopwatch) -> mh.bindTo(testCase).invoke(stopwatch));
-                } catch (Exception e) {
-                    log.warn("Can't mh method: {}", method.getName(), e);
-                }
-            }
-
-
-            AfterLoadTest afterTest = method.getAnnotation(AfterLoadTest.class);
-            if (afterTest != null) {
-                log.debug("Found afterTest method: {}", method.getName());
-            }
-
-
-            AfterAll afterAll = method.getAnnotation(AfterAll.class);
-            if (afterAll != null) {
-                log.debug("Found afterAll method: {}", method.getName());
+            } catch (Exception e) {
+                log.warn("Can't mh method: {}", method.getName(), e);
             }
         }
 
@@ -167,25 +164,94 @@ public class TestSuiteBuilder {
 
     private Settings makeSettings(LoadTestCase ann) {
         return new Settings()
-                .threads(ann.threads())
-                .threadIterationCount(ann.threadInvocations())
-                .totalIterationCount(ann.totalInvocations())
+                .threadCount(ann.threads())
+                .threadInvocationCount(ann.threadInvocations())
+                .totalInvocationCount(ann.totalInvocations())
                 .time(ann.time(), ann.timeUnit());
     }
 
-    private Settings makeSettings(WarmUp ann) {
+    private Settings makeSettings(Warmup ann) {
         return new Settings()
-                .threads(ann.threads())
-                .threadIterationCount(ann.threadInvocations())
-                .totalIterationCount(ann.totalInvocations())
+                .threadCount(ann.threads())
+                .threadInvocationCount(ann.threadInvocations())
+                .totalInvocationCount(ann.totalInvocations())
                 .time(ann.time(), ann.timeUnit())
-                .setDisabled(ann.disabled());
+                .disabled(ann.disabled());
     }
 
     private Settings makeSettings(Baseline ann) {
         return new Settings()
                 .time(ann.time(), ann.timeUnit())
-                .setDisabled(ann.disabled());
+                .disabled(ann.disabled());
+    }
+
+
+    private <T extends TestCase> void buildBeforeAll(TestCaseBuilder<T> b, Method method, BeforeAll beforeAll) throws Exception {
+        log.debug("Found beforeAll method: {}", method.getName());
+        boolean onlyOnce = beforeAll.onlyOnce();
+        AtomicBoolean onlyOnceCheck = new AtomicBoolean();
+
+        MethodHandle mh = MethodHandles.lookup().unreflect(method);
+        b.beforeAll(testCase -> {
+
+            if (!onlyOnceCheck.compareAndSet(false, onlyOnce))
+                return;
+
+            mh.bindTo(testCase).invoke();
+        });
+    }
+
+    private <T extends TestCase> void buildBeforeEach(TestCaseBuilder<T> b, Method method, BeforeEach beforeEach) throws Exception {
+        log.debug("Found beforeEach method: {}", method.getName());
+        MethodHandle mh = MethodHandles.lookup().unreflect(method);
+        b.beforeEach(testCase ->
+                mh.bindTo(testCase).invoke());
+    }
+
+    private <T extends TestCase> void buildTest(TestCaseBuilder<T> b, Method method, LoadTest loadTest) throws Exception {
+        String value = loadTest.value();
+        String name = !value.isEmpty() ? value : method.getName();
+        log.debug("Found test method: {}, name: {}", method.getName(), name);
+        MethodHandle mh = MethodHandles.lookup().unreflect(method);
+
+        b.test(name, (testCase, stopwatch) -> {
+            Class<?>[] types = method.getParameterTypes();
+            Object[] params = Stream.of(types)
+                    .map(param -> {
+                        if (param.equals(Stopwatch.class))
+                            return stopwatch;
+
+                        throw new RuntimeException("Skip test " + name + ": not allowed parameters (only Stopwatch is allowed)");
+                    })
+                    .toArray();
+
+            log.trace("bind test method with params: {}", Arrays.toString(params));
+
+            if (params.length == 0)
+                mh.bindTo(testCase).invoke();
+            else
+                mh.bindTo(testCase).invokeWithArguments(params);
+        });
+    }
+
+    private <T extends TestCase> void buildAfterEach(TestCaseBuilder<T> b, Method method, AfterEach afterEach) throws Exception {
+        log.debug("Found afterEach method: {}", method.getName());
+        MethodHandle mh = MethodHandles.lookup().unreflect(method);
+        b.afterEach(testCase ->
+                mh.bindTo(testCase).invoke());
+    }
+
+    private <T extends TestCase> void buildAfterAll(TestCaseBuilder<T> b, Method method, AfterAll afterAll) throws Exception {
+        log.debug("Found afterAll method: {}", method.getName());
+        boolean onlyOnce = afterAll.onlyOnce();
+        AtomicBoolean onlyOnceCheck = new AtomicBoolean();
+        MethodHandle mh = MethodHandles.lookup().unreflect(method);
+        b.afterAll(testCase -> {
+            if (!onlyOnceCheck.compareAndSet(false, onlyOnce))
+                return;
+
+            mh.bindTo(testCase).invoke();
+        });
     }
 
 

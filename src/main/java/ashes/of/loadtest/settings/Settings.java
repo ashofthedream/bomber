@@ -27,33 +27,33 @@ public class Settings {
     /**
      * Invocation count per each thread
      */
-    private long threadInvocations = Long.MAX_VALUE;
+    private long threadInvocationsCount = Long.MAX_VALUE;
 
     /**
      * Overall invocation count
      */
-    private long totalInvocations = Long.MAX_VALUE;
+    private long totalInvocationsCount = Long.MAX_VALUE;
 
 
     public Settings(Settings settings) {
         this.disabled = settings.isDisabled();
         this.time = settings.getTime();
         this.threads = settings.getThreads();
-        this.threadInvocations = settings.getThreadInvocations();
-        this.totalInvocations = settings.getTotalInvocations();
+        this.threadInvocationsCount = settings.getThreadInvocationsCount();
+        this.totalInvocationsCount = settings.getTotalInvocationsCount();
     }
 
     public Settings() {
     }
 
 
-    public Settings setDisabled(boolean disabled) {
+    public Settings disabled(boolean disabled) {
         this.disabled = disabled;
         return this;
     }
 
     public Settings disabled() {
-        setDisabled(true);
+        disabled(true);
         return this;
     }
 
@@ -72,20 +72,20 @@ public class Settings {
     }
 
 
-    public Settings threads(int threads) {
+    public Settings threadCount(int threads) {
         this.threads = threads;
         return this;
     }
 
 
-    public Settings threadIterationCount(long threadIterationCount) {
-        this.threadInvocations = threadIterationCount;
+    public Settings threadInvocationCount(long count) {
+        this.threadInvocationsCount = count;
         return this;
     }
 
 
-    public Settings totalIterationCount(long totalIterationCount) {
-        this.totalInvocations = totalIterationCount;
+    public Settings totalInvocationCount(long count) {
+        this.totalInvocationsCount = count;
         return this;
     }
 
@@ -102,11 +102,11 @@ public class Settings {
         return threads;
     }
 
-    public long getThreadInvocations() {
-        return threadInvocations;
+    public long getThreadInvocationsCount() {
+        return threadInvocationsCount;
     }
 
-    public long getTotalInvocations() {
-        return totalInvocations;
+    public long getTotalInvocationsCount() {
+        return totalInvocationsCount;
     }
 }

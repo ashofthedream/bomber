@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @Inherited
-public @interface WarmUp {
+public @interface Warmup {
 
     /**
      * @return test time

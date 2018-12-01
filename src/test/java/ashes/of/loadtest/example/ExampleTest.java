@@ -10,19 +10,46 @@ import ashes.of.loadtest.sink.Log4jSink;
 import ashes.of.loadtest.stopwatch.Lap;
 import ashes.of.loadtest.stopwatch.Stopwatch;
 import ashes.of.loadtest.throttler.Limiter;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 
 
 @Limit(time = 5)
 @LoadTestCase(name = "example-test", time = 20)
-@WarmUp(disabled = true)
+@Warmup(disabled = true)
 @Baseline(disabled = true)
 public class ExampleTest implements TestCase {
+    private static final Logger log = LogManager.getLogger(ExampleTest.class);
 
     private final ExampleHttpClient client = new ExampleHttpClient("localhost", 8080);
 
+    @Override
+    @BeforeAll
+    public void beforeAll() {
+        log.info("This method will be invoked before all test");
+    }
+
+    @Override
+    @AfterAll
+    public void afterAll() {
+        log.info("This method will be invoked after all test");
+    }
+
+    @Override
+    @BeforeEach
+    public void beforeEach() {
+        log.info("This method will be invoked before each test invocation");
+    }
+
+    @Override
+    @AfterEach
+    public void afterEach() {
+        log.info("This method will be invoked after each test invocation");
+    }
+
     @LoadTest
-    public void oneSlowRequest(Stopwatch stopwatch) throws Exception {
+    public void oneSlowRequest() throws Exception {
         client.someSlowRequest();
     }
 
@@ -58,11 +85,11 @@ public class ExampleTest implements TestCase {
                     .baseline(Settings::disabled)
                     .warmUp(Settings::disabled)
                     .test(settings -> settings
-                            .threads(1)
+                            .threadCount(1)
                             .time(20_000)))
 
                 // add example test case via static init method
-                .testCase(ExampleTest::init)
+                .testBuilder(ExampleTest::init)
                 .run();
     }
 
@@ -73,7 +100,7 @@ public class ExampleTest implements TestCase {
                 .sink(new HdrHistogramSink())
 
                 // add example test case via annotations
-                .testCase(ExampleTest.class)
+                .testClass(ExampleTest.class)
                 .run();
     }
 }

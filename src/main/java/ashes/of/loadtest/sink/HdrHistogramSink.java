@@ -1,6 +1,6 @@
 package ashes.of.loadtest.sink;
 
-import ashes.of.loadtest.runner.TestContext;
+import ashes.of.loadtest.runner.Context;
 import ashes.of.loadtest.settings.Settings;
 import ashes.of.loadtest.Stage;
 import ashes.of.loadtest.stopwatch.Stopwatch;
@@ -15,6 +15,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.NavigableMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.atomic.LongAdder;
 
@@ -37,7 +38,7 @@ public class HdrHistogramSink implements Sink {
             overall.computeIfAbsent(startTime, k -> new ConcurrentHistogram(2))
                     .recordValue(elapsed);
 
-            Map<String, Histogram> map = laps.computeIfAbsent(startTime, k -> new LinkedHashMap<>());
+            Map<String, Histogram> map = laps.computeIfAbsent(startTime, k -> new ConcurrentHashMap<>());
 
             stopwatch.lapsByLabel().forEach((label, laps) -> {
                 Histogram h = map.computeIfAbsent(label, l -> new ConcurrentHistogram(2));
@@ -70,21 +71,21 @@ public class HdrHistogramSink implements Sink {
 
 
     @Override
-    public void beforeRun(Stage stage, String testCase, Instant startTime, Settings settings) {
+    public void beforeAll(Stage stage, String testCase, Instant startTime, Settings settings) {
         stats.clear();
     }
 
     @Override
-    public void afterTest(TestContext context, long elapsed, Stopwatch stopwatch, @Nullable Throwable throwable) {
-        Instant startTime = context.getStartTime()
+    public void afterEach(Context context, long elapsed, Stopwatch stopwatch, @Nullable Throwable throwable) {
+        Instant startTime = context.getTimestamp()
                 .truncatedTo(resolution);
 
-        stats.computeIfAbsent(context.getName(), Stats::new)
+        stats.computeIfAbsent(context.getTest(), Stats::new)
                 .log(startTime, elapsed, stopwatch, throwable);
     }
 
     @Override
-    public void afterRun(Stage stage, String testCase, Instant startTime, Settings settings) {
+    public void afterAll(Stage stage, String testCase, Instant startTime, Settings settings) {
         stats.forEach(this::printStats);
     }
 

@@ -14,12 +14,12 @@ public interface TestCase {
     /**
      * This method will be invoked every time before each test method
      */
-    default void beforeTest() throws Exception {}
+    default void beforeEach() throws Exception {}
 
     /**
      * This method will be invoked every time after each test method
      */
-    default void afterTest() throws Exception {}
+    default void afterEach() throws Exception {}
 
     /**
      * This method will be invoked once in each thread after all test methods

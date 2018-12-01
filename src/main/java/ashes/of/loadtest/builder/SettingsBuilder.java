@@ -12,7 +12,7 @@ public class SettingsBuilder {
             .time(Duration.ofSeconds(30));
 
     private Settings warmUp = new Settings()
-            .threads(1)
+            .threadCount(1)
             .time(Duration.ofSeconds(30));
 
     private Settings test = new Settings();

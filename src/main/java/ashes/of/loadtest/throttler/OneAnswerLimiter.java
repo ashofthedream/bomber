@@ -9,7 +9,7 @@ public class OneAnswerLimiter implements Limiter {
     }
 
     @Override
-    public boolean awaitForPass(long ms) {
+    public boolean waitForAcquire(long ms) {
         if (!answer) {
             try {
                 Thread.sleep(ms);
@@ -21,12 +21,12 @@ public class OneAnswerLimiter implements Limiter {
     }
 
     @Override
-    public boolean awaitForPass() {
-        return awaitForPass(Long.MAX_VALUE);
+    public boolean waitForAcquire() {
+        return waitForAcquire(Long.MAX_VALUE);
     }
 
     @Override
-    public boolean tryPass() {
+    public boolean tryAcquire() {
         return answer;
     }
 }

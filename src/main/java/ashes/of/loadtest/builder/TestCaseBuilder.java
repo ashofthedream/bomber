@@ -21,8 +21,13 @@ import java.util.function.Supplier;
 public class TestCaseBuilder<T extends TestCase> {
     private static final Logger log = LogManager.getLogger(TestCaseBuilder.class);
 
-    private final Map<String, Test<T>> tests = new LinkedHashMap<>();
-    private final Map<String, Test<T>> noop = ImmutableMap.of("noop", (test, stopwatch) -> {});
+    private final List<LifeCycle<T>> beforeAll = new ArrayList<>();
+    private final List<LifeCycle<T>> beforeEach = new ArrayList<>();
+    private final List<LifeCycle<T>> afterEach = new ArrayList<>();
+    private final List<LifeCycle<T>> afterAll = new ArrayList<>();
+
+    private final Map<String, TestWithStopwatch<T>> tests = new LinkedHashMap<>();
+    private final Map<String, TestWithStopwatch<T>> noop = ImmutableMap.of("noop", (test, stopwatch) -> {});
 
     private final List<Sink> sinks = new ArrayList<>();
     private final SettingsBuilder settings = new SettingsBuilder();
@@ -30,7 +35,7 @@ public class TestCaseBuilder<T extends TestCase> {
 
     private String name;
     private Supplier<T> testCase;
-    private Supplier<Limiter> limiter = Limiter::alwaysPass;
+    private Supplier<Limiter> limiter = Limiter::alwaysPermit;
 
 
 
@@ -95,8 +100,33 @@ public class TestCaseBuilder<T extends TestCase> {
         return testCase(() -> testCase);
     }
 
-    public TestCaseBuilder<T> test(String name, Test<T> test) {
+
+    public TestCaseBuilder<T> beforeAll(LifeCycle<T> before) {
+        beforeAll.add(before);
+        return this;
+    }
+
+    public TestCaseBuilder<T> beforeEach(LifeCycle<T> before) {
+        beforeEach.add(before);
+        return this;
+    }
+
+    public TestCaseBuilder<T> test(String name, TestNoArgs<T> test) {
+        return test(name, (tc, stopwatch) -> test.run(tc));
+    }
+
+    public TestCaseBuilder<T> test(String name, TestWithStopwatch<T> test) {
         this.tests.put(name, test);
+        return this;
+    }
+
+    public TestCaseBuilder<T> afterEach(LifeCycle<T> after) {
+        afterEach.add(after);
+        return this;
+    }
+
+    public TestCaseBuilder<T> afterAll(LifeCycle<T> after) {
+        afterAll.add(after);
         return this;
     }
 
@@ -112,15 +142,15 @@ public class TestCaseBuilder<T extends TestCase> {
     private void run() {
         try {
             log.info("Start testCase: {}", name);
-            new TestCaseRunner<>(name, Stage.Baseline, settings.getBaseline(), sinks, noop,  testCase, limiter).run();
-            new TestCaseRunner<>(name, Stage.WarmUp,   settings.getWarmUp(),   sinks, tests, testCase, limiter).run();
-            new TestCaseRunner<>(name, Stage.Test,     settings.getTest(),     sinks, tests, testCase, limiter).run();
+
+            new TestCaseRunner<>(name, Stage.Baseline, settings.getBaseline(), sinks, beforeAll, beforeEach,  noop, testCase, afterEach, afterAll, limiter).run();
+            new TestCaseRunner<>(name, Stage.WarmUp,   settings.getWarmUp(),   sinks, beforeAll, beforeEach, tests, testCase, afterEach, afterAll, limiter).run();
+            new TestCaseRunner<>(name, Stage.Test,     settings.getTest(),     sinks, beforeAll, beforeEach, tests, testCase, afterEach, afterAll, limiter).run();
 
             log.info("End testCase: {}", name);
         } catch (Exception e) {
             log.warn("Some shit happened", e);
         }
     }
-
-
 }
+

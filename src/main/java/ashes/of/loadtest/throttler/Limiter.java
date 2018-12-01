@@ -7,25 +7,25 @@ import java.util.concurrent.TimeUnit;
 public interface Limiter {
 
     /**
-     * @see this#awaitForPass(long)
+     * @see this#waitForAcquire(long)
      */
-    default boolean awaitForPass(Duration duration) {
-        return awaitForPass(duration.toMillis());
+    default boolean waitForAcquire(Duration duration) {
+        return waitForAcquire(duration.toMillis());
     }
 
     /**
-     * @see this#awaitForPass(long)
+     * @see this#waitForAcquire(long)
      */
-    default boolean awaitForPass(long time, TimeUnit unit) {
-        return awaitForPass(unit.toMillis(time));
+    default boolean waitForAcquire(long time, TimeUnit unit) {
+        return waitForAcquire(unit.toMillis(time));
     }
 
 
-    boolean awaitForPass(long ms);
+    boolean waitForAcquire(long ms);
 
-    boolean awaitForPass();
+    boolean waitForAcquire();
 
-    boolean tryPass();
+    boolean tryAcquire();
 
 
     static Limiter withRate(int count, Duration duration) {
@@ -41,11 +41,11 @@ public interface Limiter {
     }
 
 
-    static Limiter alwaysPass() {
+    static Limiter alwaysPermit() {
         return new OneAnswerLimiter(true);
     }
 
-    static Limiter neverPass() {
+    static Limiter neverPermit() {
         return new OneAnswerLimiter(false);
     }
 }
