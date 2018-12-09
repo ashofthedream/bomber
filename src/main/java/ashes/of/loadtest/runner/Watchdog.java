@@ -11,12 +11,12 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 public class Watchdog {
     private static final Logger log = LogManager.getLogger(Watchdog.class);
 
-    private final TestCaseRunner<?> runner;
+    private final Runner<?> runner;
     private final CountDownLatch startLatch;
     private final CountDownLatch endLatch;
 
 
-    public Watchdog(TestCaseRunner<?> runner, CountDownLatch startLatch, CountDownLatch endLatch) {
+    public Watchdog(Runner<?> runner, CountDownLatch startLatch, CountDownLatch endLatch) {
         this.runner = runner;
         this.startLatch = startLatch;
         this.endLatch = endLatch;

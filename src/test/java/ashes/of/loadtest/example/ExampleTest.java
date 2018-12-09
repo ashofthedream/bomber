@@ -2,14 +2,13 @@ package ashes.of.loadtest.example;
 
 import ashes.of.loadtest.builder.TestCaseBuilder;
 import ashes.of.loadtest.builder.TestSuiteBuilder;
-import ashes.of.loadtest.TestCase;
 import ashes.of.loadtest.annotations.*;
-import ashes.of.loadtest.settings.Settings;
+import ashes.of.loadtest.builder.Settings;
 import ashes.of.loadtest.sink.HdrHistogramSink;
 import ashes.of.loadtest.sink.Log4jSink;
 import ashes.of.loadtest.stopwatch.Lap;
 import ashes.of.loadtest.stopwatch.Stopwatch;
-import ashes.of.loadtest.throttler.Limiter;
+import ashes.of.loadtest.limiter.Limiter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Test;
@@ -19,30 +18,26 @@ import org.junit.Test;
 @LoadTestCase(name = "example-test", time = 20)
 @Warmup(disabled = true)
 @Baseline(disabled = true)
-public class ExampleTest implements TestCase {
+public class ExampleTest {
     private static final Logger log = LogManager.getLogger(ExampleTest.class);
 
     private final ExampleHttpClient client = new ExampleHttpClient("localhost", 8080);
 
-    @Override
     @BeforeAll
     public void beforeAll() {
         log.info("This method will be invoked before all test");
     }
 
-    @Override
     @AfterAll
     public void afterAll() {
         log.info("This method will be invoked after all test");
     }
 
-    @Override
     @BeforeEach
     public void beforeEach() {
         log.info("This method will be invoked before each test invocation");
     }
 
-    @Override
     @AfterEach
     public void afterEach() {
         log.info("This method will be invoked after each test invocation");
@@ -65,11 +60,15 @@ public class ExampleTest implements TestCase {
     }
 
 
-    public static void init(TestCaseBuilder<ExampleTest> builder) {
+    private static void init(TestCaseBuilder<ExampleTest> builder) {
         builder .name("example_test")
                 .testCase(ExampleTest::new)
+                .beforeAll(ExampleTest::beforeAll)
+                .beforeEach(ExampleTest::beforeEach)
                 .test("one_slow_request", ExampleTest::oneSlowRequest)
-                .test("two_fast_requests", ExampleTest::twoFastRequests);
+                .test("two_fast_requests", ExampleTest::twoFastRequests)
+                .afterEach(ExampleTest::afterEach)
+                .afterAll(ExampleTest::afterAll);
     }
 
 
@@ -89,7 +88,8 @@ public class ExampleTest implements TestCase {
                             .time(20_000)))
 
                 // add example test case via static init method
-                .testBuilder(ExampleTest::init)
+                .addBuilder(ExampleTest::init)
+                .build()
                 .run();
     }
 
@@ -100,7 +100,8 @@ public class ExampleTest implements TestCase {
                 .sink(new HdrHistogramSink())
 
                 // add example test case via annotations
-                .testClass(ExampleTest.class)
+                .addClass(ExampleTest.class)
+                .build()
                 .run();
     }
 }

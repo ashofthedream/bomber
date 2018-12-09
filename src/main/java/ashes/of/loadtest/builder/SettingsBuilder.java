@@ -1,7 +1,5 @@
 package ashes.of.loadtest.builder;
 
-import ashes.of.loadtest.settings.Settings;
-
 import java.time.Duration;
 import java.util.function.Consumer;
 

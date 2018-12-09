@@ -1,4 +1,4 @@
-package ashes.of.loadtest;
+package ashes.of.loadtest.runner;
 
 
 public enum Stage {

@@ -1,4 +1,4 @@
-package ashes.of.loadtest.settings;
+package ashes.of.loadtest.builder;
 
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
@@ -22,7 +22,7 @@ public class Settings {
     /**
      * Thread count
      */
-    private int threads = 1;
+    private int threadsCount = 1;
 
     /**
      * Invocation count per each thread
@@ -38,7 +38,7 @@ public class Settings {
     public Settings(Settings settings) {
         this.disabled = settings.isDisabled();
         this.time = settings.getTime();
-        this.threads = settings.getThreads();
+        this.threadsCount = settings.getThreadsCount();
         this.threadInvocationsCount = settings.getThreadInvocationsCount();
         this.totalInvocationsCount = settings.getTotalInvocationsCount();
     }
@@ -73,7 +73,7 @@ public class Settings {
 
 
     public Settings threadCount(int threads) {
-        this.threads = threads;
+        this.threadsCount = threads;
         return this;
     }
 
@@ -98,8 +98,8 @@ public class Settings {
         return time;
     }
 
-    public int getThreads() {
-        return threads;
+    public int getThreadsCount() {
+        return threadsCount;
     }
 
     public long getThreadInvocationsCount() {
@@ -108,5 +108,16 @@ public class Settings {
 
     public long getTotalInvocationsCount() {
         return totalInvocationsCount;
+    }
+
+    @Override
+    public String toString() {
+        return "Settings{" +
+                "disabled=" + disabled +
+                ", time=" + time +
+                ", threadsCount=" + threadsCount +
+                ", threadInvocationsCount=" + threadInvocationsCount +
+                ", totalInvocationsCount=" + totalInvocationsCount +
+                '}';
     }
 }

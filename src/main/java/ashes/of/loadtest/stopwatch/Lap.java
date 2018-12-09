@@ -2,9 +2,9 @@ package ashes.of.loadtest.stopwatch;
 
 public class Lap {
 
-    private final String name;
-
     private final long init = System.nanoTime();
+
+    private final String name;
     private volatile long stop;
 
     public Lap(String name) {
@@ -29,14 +29,12 @@ public class Lap {
         stop = System.nanoTime();
     }
 
-
     /**
      * @return elapsed time in nanoseconds
      */
     public long elapsed() {
         if (!isStopped())
             stop();
-
 
         return stop - init;
     }

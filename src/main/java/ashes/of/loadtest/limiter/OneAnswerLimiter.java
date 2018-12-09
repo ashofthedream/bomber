@@ -1,4 +1,4 @@
-package ashes.of.loadtest.throttler;
+package ashes.of.loadtest.limiter;
 
 
 public class OneAnswerLimiter implements Limiter {

@@ -1,5 +1,15 @@
 package ashes.of.loadtest.runner;
 
+import ashes.of.loadtest.LifeCycle;
+import ashes.of.loadtest.TestWithStopwatch;
+import ashes.of.loadtest.builder.Settings;
+import ashes.of.loadtest.limiter.Limiter;
+import ashes.of.loadtest.sink.Sink;
+import ashes.of.loadtest.stopwatch.Stopwatch;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import javax.annotation.Nullable;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -9,21 +19,11 @@ import java.util.concurrent.atomic.LongAdder;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
-import ashes.of.loadtest.*;
-import ashes.of.loadtest.settings.Settings;
-import ashes.of.loadtest.sink.Sink;
-import ashes.of.loadtest.stopwatch.Stopwatch;
-import ashes.of.loadtest.throttler.Limiter;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import javax.annotation.Nullable;
-
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 
-public class TestCaseRunner<T extends TestCase> {
-    private static final Logger log = LogManager.getLogger(TestCaseRunner.class);
+public class Runner<T> {
+    private static final Logger log = LogManager.getLogger(Runner.class);
 
     private final String testCaseName;
     private final Stage stage;
@@ -40,22 +40,21 @@ public class TestCaseRunner<T extends TestCase> {
     private final List<LifeCycle<T>> beforeEach;
     private final List<LifeCycle<T>> afterEach;
     private final List<LifeCycle<T>> afterAll;
-
     private final Map<String, TestWithStopwatch<T>> tests;
-    private final Supplier<Limiter> throttler;
+    private final Supplier<Limiter> limiter;
 
 
-    public TestCaseRunner(String testCaseName,
-                          Stage stage,
-                          Settings settings,
-                          List<Sink> sinks,
-                          List<LifeCycle<T>> beforeAll,
-                          List<LifeCycle<T>> beforeEach,
-                          Map<String, TestWithStopwatch<T>> tests,
-                          Supplier<T> testCase,
-                          List<LifeCycle<T>> afterEach,
-                          List<LifeCycle<T>> afterAll,
-                          Supplier<Limiter> throttler) {
+    public Runner(String testCaseName,
+                  Stage stage,
+                  Settings settings,
+                  List<Sink> sinks,
+                  List<LifeCycle<T>> beforeAll,
+                  List<LifeCycle<T>> beforeEach,
+                  Map<String, TestWithStopwatch<T>> tests,
+                  Supplier<T> testCase,
+                  List<LifeCycle<T>> afterEach,
+                  List<LifeCycle<T>> afterAll,
+                  Supplier<Limiter> limiter) {
         this.testCaseName = testCaseName;
         this.stage = stage;
         this.settings = new Settings(settings);
@@ -67,7 +66,7 @@ public class TestCaseRunner<T extends TestCase> {
         this.afterEach = afterEach;
         this.afterAll = afterAll;
         this.sinks = sinks;
-        this.throttler = throttler;
+        this.limiter = limiter;
     }
 
     public Stage getStage() {
@@ -80,10 +79,6 @@ public class TestCaseRunner<T extends TestCase> {
 
     public long getRemainOps() {
         return totalRemainInvs.get();
-    }
-
-    public Instant getStartTime() {
-        return startTime;
     }
 
     public long getRemainTime() {
@@ -104,30 +99,30 @@ public class TestCaseRunner<T extends TestCase> {
      */
     public void run() {
         if (settings.isDisabled()) {
-            log.info("Ignore disabled stage: {}, test: {}", stage, testCaseName);
+            log.info("Ignore disabled {}", logMeta());
             return;
         }
 
-        startTime = Instant.now();
-        log.info("start stage: {}, test: {}, threads: {}, iterations total: {} per thread: {}, duration: {}",
-                stage, testCaseName, settings.getThreads(), settings.getTotalInvocationsCount(), settings.getThreadInvocationsCount(), settings.getTime());
+        log.info("Start {}, threads: {}, iterations total: {} per thread: {}, duration: {}",
+                logMeta(), settings.getThreadsCount(), settings.getTotalInvocationsCount(), settings.getThreadInvocationsCount(), settings.getTime());
 
         sinks.forEach(sink -> sink.beforeAll(stage, testCaseName, startTime, settings));
 
-        CountDownLatch begin = new CountDownLatch(settings.getThreads());
-        CountDownLatch end = new CountDownLatch(settings.getThreads());
+        CountDownLatch begin = new CountDownLatch(settings.getThreadsCount());
+        CountDownLatch end = new CountDownLatch(settings.getThreadsCount());
 
+        startTime = Instant.now();
         startWatchdogThread(begin, end);
         startWorkerThreads(begin, end);
 
         try {
-            log.info("await for end of stage: {}, test: {}, elapsed {}ms", stage, testCaseName, getElapsedTime());
+            log.info("Await for end of {}, elapsed {}ms", logMeta(), getElapsedTime());
             end.await();
         } catch (InterruptedException e) {
             log.error("We'he been interrupted", e);
         }
 
-        log.info("end stage: {}, test: {}, elapsed {}ms", stage, testCaseName, getElapsedTime());
+        log.info("End {} elapsed {}ms", logMeta(), getElapsedTime());
         sinks.forEach(sink -> sink.afterAll(stage, testCaseName, startTime, settings));
     }
 
@@ -137,7 +132,7 @@ public class TestCaseRunner<T extends TestCase> {
     }
 
     private void startWorkerThreads(CountDownLatch startLatch, CountDownLatch endLatch) {
-        for (int i = 0; i < settings.getThreads(); i++)
+        for (int i = 0; i < settings.getThreadsCount(); i++)
             startWorkerThread(() -> runTestCase(startLatch, endLatch), i);
     }
 
@@ -151,23 +146,23 @@ public class TestCaseRunner<T extends TestCase> {
     private void runTestCase(CountDownLatch startLatch, CountDownLatch endLatch) {
         try {
             T testCase = this.testCase.get();
-            Limiter limiter = this.throttler.get();
+            Limiter limiter = this.limiter.get();
 
             startLatch.countDown();
 
             // if we can't start in 60 seconds – something works bad
-            startLatch.await(30, SECONDS);
+            startLatch.await(60, SECONDS);
 
-            log.trace("beforeAll stage: {}, test: {}", stage, testCaseName);
+            log.trace("beforeAll {}", this::logMeta);
             beforeAll.forEach(l -> beforeAll(l, testCase));
 
             tests.forEach((name, test) -> runTest(name, testCase, test, limiter));
 
-            log.trace("afterAll stage: {}, test: {}", stage, testCaseName);
+            log.trace("afterAll {}", this::logMeta);
             afterAll.forEach(l -> afterAll(l, testCase));
 
         } catch (Throwable e) {
-            log.warn("runTestCase test: {}, stage: {} failed", testCaseName, stage, e);
+            log.warn("runTestCase {} failed", logMeta(), e);
         } finally {
             endLatch.countDown();
         }
@@ -185,9 +180,7 @@ public class TestCaseRunner<T extends TestCase> {
             long inv = invocations.getAndIncrement();
             Context ctx = new Context(stage, testCaseName, testName, threadName, inv, Instant.now());
 
-            log.trace("runTest stage: {}, testCase: {}, test: {}, inv: {}",
-                    ctx.getStage(), ctx.getTestCase(), ctx.getTest(), ctx.getInv());
-
+            log.trace("runTest {}", logMeta(ctx));
             beforeEach(ctx, testCase);
 
             Stopwatch stopwatch = new Stopwatch();
@@ -197,8 +190,7 @@ public class TestCaseRunner<T extends TestCase> {
 
                 sinkAfterEach(ctx, stopwatch.elapsed(), stopwatch, null);
             } catch (Throwable th) {
-                log.debug("test stage: {}, testCase: {}, test: {}, inv: {} failed",
-                        ctx.getStage(), ctx.getTestCase(), ctx.getTest(), ctx.getInv(), th);
+                log.debug("runTest {} failed", logMeta(ctx), th);
                 errorCount.increment();
                 sinkAfterEach(ctx, stopwatch.elapsed(), stopwatch, th);
             }
@@ -220,28 +212,26 @@ public class TestCaseRunner<T extends TestCase> {
         try {
             l.call(testCase);
         } catch (Throwable th) {
-            log.warn("beforeAll stage: {}, testCase: {} failed", stage, testCaseName, th);
+            log.warn("beforeAll {} failed", logMeta(), th);
         }
     }
 
     private void beforeEach(Context context, T testCase) {
-        log.trace("beforeEach test: {}, inv: {}", testCaseName, context.getInv());
         beforeEach.forEach(l -> {
             try {
                 l.call(testCase);
             } catch (Throwable th) {
-                log.warn("beforeEach test: {}, inv: {} failed. ", testCaseName, context.getInv(), th);
+                log.warn("beforeEach {} failed.", logMeta(context), th);
             }
         });
     }
 
     private void afterEach(Context context, T testCase) {
-        log.trace("afterEach test: {}, inv: {}", context.getTest(), context.getInv());
         afterEach.forEach(l -> {
             try {
                 l.call(testCase);
             } catch (Throwable th) {
-                log.warn("afterEach test: {}, inv: {} failed. ", testCaseName, context.getInv(), th);
+                log.warn("afterEach {} failed.", logMeta(context), th);
             }
         });
     }
@@ -250,7 +240,7 @@ public class TestCaseRunner<T extends TestCase> {
         try {
             l.call(testCase);
         } catch (Throwable th) {
-            log.warn("afterAll stage: {}, testCase: {} failed", stage, testCaseName, th);
+            log.warn("afterAll {} failed", logMeta(), th);
         }
     }
 
@@ -259,10 +249,17 @@ public class TestCaseRunner<T extends TestCase> {
         sinks.forEach(sink -> sink.afterEach(context, elapsed, stopwatch, th));
     }
 
+    private String logMeta() {
+        return String.format("stage: %s, testCase: %s", stage, testCaseName);
+    }
+
+    private String logMeta(Context ctx) {
+        return String.format("stage: %s, testCase: %s, test: %s, inv: %d", stage, testCaseName, ctx.getTest(), ctx.getInv());
+    }
 
     @Override
     public String toString() {
-        return "TestCaseRunner{" +
+        return "Runner{" +
                 "testCaseName='" + testCaseName + '\'' +
                 '}';
     }

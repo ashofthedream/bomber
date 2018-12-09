@@ -15,7 +15,6 @@ public class Stopwatch {
         return System.nanoTime() - init;
     }
 
-
     /**
      * Creates new lap with specified label
      *
@@ -29,11 +28,17 @@ public class Stopwatch {
         return lap;
     }
 
+    /**
+     * @return stream of stopped laps
+     */
     public Stream<Lap> laps() {
         return laps.stream()
                 .filter(Lap::isStopped);
     }
 
+    /**
+     * @return list of stopped laps by label
+     */
     public Map<String, List<Lap>> lapsByLabel() {
         return laps()
                 .collect(Collectors.groupingBy(Lap::getName));

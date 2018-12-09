@@ -1,7 +1,5 @@
 package ashes.of.loadtest.runner;
 
-import ashes.of.loadtest.Stage;
-
 import java.time.Instant;
 
 
@@ -45,5 +43,17 @@ public class Context {
 
     public Instant getTimestamp() {
         return timestamp;
+    }
+
+    @Override
+    public String toString() {
+        return "Context{" +
+                "stage=" + stage +
+                ", testCase='" + testCase + '\'' +
+                ", test='" + test + '\'' +
+                ", thread='" + thread + '\'' +
+                ", inv=" + inv +
+                ", timestamp=" + timestamp +
+                '}';
     }
 }

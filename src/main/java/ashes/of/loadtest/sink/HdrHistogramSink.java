@@ -1,8 +1,8 @@
 package ashes.of.loadtest.sink;
 
 import ashes.of.loadtest.runner.Context;
-import ashes.of.loadtest.settings.Settings;
-import ashes.of.loadtest.Stage;
+import ashes.of.loadtest.builder.Settings;
+import ashes.of.loadtest.runner.Stage;
 import ashes.of.loadtest.stopwatch.Stopwatch;
 import org.HdrHistogram.ConcurrentHistogram;
 import org.HdrHistogram.Histogram;

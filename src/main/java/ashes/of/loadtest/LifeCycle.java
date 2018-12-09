@@ -1,7 +1,7 @@
 package ashes.of.loadtest;
 
 @FunctionalInterface
-public interface LifeCycle<T extends TestCase> {
+public interface LifeCycle<T> {
 
     /**
      * One of lifecycle (BeforeAll, BeforeEach, AfterEach, AfterAll) method

@@ -1,4 +1,4 @@
-package ashes.of.loadtest.throttler;
+package ashes.of.loadtest.limiter;
 
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicReferenceArray;

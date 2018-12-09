@@ -1,8 +1,5 @@
-package ashes.of.loadtest.annotations.lifecycle;
+package ashes.of.loadtest.builder;
 
-import ashes.of.loadtest.TestCase;
-import ashes.of.loadtest.annotations.*;
-import ashes.of.loadtest.builder.TestSuiteBuilder;
 import ashes.of.loadtest.sink.Log4jSink;
 import ashes.of.loadtest.stopwatch.Lap;
 import ashes.of.loadtest.stopwatch.Stopwatch;
@@ -15,16 +12,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static org.junit.Assert.assertEquals;
 
 
-public class LifecycleTest {
-    private static final Logger log = LogManager.getLogger(LifecycleTest.class);
+public class TestCaseBuilderTest {
+    private static final Logger log = LogManager.getLogger(TestCaseBuilderTest.class);
 
 
-
-
-    @LoadTestCase(time = 20, threadInvocations = 10, threads = 2)
-    @Warmup(disabled = true)
-    @Baseline(disabled = true)
-    public static class AllLifecycleMethodsTest implements TestCase {
+    public static class AllLifecycleMethodsTest {
 
         private final AtomicInteger beforeAll = new AtomicInteger();
         private final AtomicInteger beforeEach = new AtomicInteger();
@@ -33,42 +25,31 @@ public class LifecycleTest {
         private final AtomicInteger afterEach = new AtomicInteger();
         private final AtomicInteger afterAll = new AtomicInteger();
 
-
-        @Override
-        @BeforeAll
         public void beforeAll() {
             log.info("This method will be invoked before all the tests in each thread");
             beforeAll.incrementAndGet();
         }
 
-        @Override
-        @AfterAll
         public void afterAll() {
             log.debug("This method will be invoked after all the tests in each thread");
             afterAll.incrementAndGet();
         }
 
-        @Override
-        @BeforeEach
         public void beforeEach() {
             log.debug("This method will be invoked before each test invocation");
             beforeEach.incrementAndGet();
         }
 
-        @Override
-        @AfterEach
         public void afterEach() {
             log.debug("This method will be invoked after each test invocation");
             afterEach.incrementAndGet();
         }
 
-        @LoadTest
         public void testA() {
             log.debug("testA");
             testA.incrementAndGet();
         }
 
-        @LoadTest
         public void testB(Stopwatch stopwatch) {
             Lap lap = stopwatch.lap("testB-lap-1");
             log.debug("testB");
@@ -82,11 +63,25 @@ public class LifecycleTest {
     public void testAllLifecycleMethods() {
         AllLifecycleMethodsTest test = new AllLifecycleMethodsTest();
 
-        new TestSuiteBuilder()
+        new TestCaseBuilder<AllLifecycleMethodsTest>()
+                .name("testAllLifecycleMethods")
+                .testCase(test)
+                .settings(s -> s
+                        .baseline(Settings::disabled)
+                        .warmUp(Settings::disabled)
+                        .test(settings -> settings
+                                .time(20_000)
+                                .threadCount(2)
+                                .threadInvocationCount(10)))
                 .sink(new Log4jSink())
-                .testInstance(test)
+                .beforeAll(AllLifecycleMethodsTest::beforeAll)
+                .beforeEach(AllLifecycleMethodsTest::beforeEach)
+                .test("testA", AllLifecycleMethodsTest::testA)
+                .test("testB", AllLifecycleMethodsTest::testB)
+                .afterEach(AllLifecycleMethodsTest::afterEach)
+                .afterAll(AllLifecycleMethodsTest::afterAll)
+                .build()
                 .run();
-
 
         assertEquals("beforeAll: 1 x thread",                   2, test.beforeAll.get());
         assertEquals("beforeEach: 10 Inv x Threads * Count",   40, test.beforeEach.get());
@@ -98,29 +93,21 @@ public class LifecycleTest {
 
 
 
-    @LoadTestCase(time = 20, threadInvocations = 10, threads = 2)
-    @Warmup(disabled = true)
-    @Baseline(disabled = true)
-    public static class BeforeAllAndAfterAllOnlyOnceTest implements TestCase {
+    public static class BeforeAllAndAfterAllOnlyOnceTest {
 
         private final AtomicInteger beforeAll = new AtomicInteger();
         private final AtomicInteger afterAll = new AtomicInteger();
 
-        @Override
-        @BeforeAll(onlyOnce = true)
         public void beforeAll() {
             log.info("This method will be invoked before all the tests only once");
             beforeAll.incrementAndGet();
         }
 
-        @Override
-        @AfterAll(onlyOnce = true)
         public void afterAll() {
             log.info("This method will be invoked after all the tests only once");
             afterAll.incrementAndGet();
         }
 
-        @LoadTest
         public void test() {
             log.debug("test");
         }
@@ -128,12 +115,23 @@ public class LifecycleTest {
 
 
     @Test
-    public void beforeAllWithOnlyOnceFlagShouldBeInvokedOnlyOnce() {
+    public void beforeAllWithOnlyOnceShouldBeInvokedOnlyOnce() {
         BeforeAllAndAfterAllOnlyOnceTest test = new BeforeAllAndAfterAllOnlyOnceTest();
 
-        new TestSuiteBuilder()
+        new TestCaseBuilder<BeforeAllAndAfterAllOnlyOnceTest>()
+                .name("beforeAllWithOnlyOnceShouldBeInvokedOnlyOnce")
+                .testCase(test)
+                .settings(b -> b
+                        .baseline(Settings::disabled)
+                        .warmUp(Settings::disabled)
+                        .test(settings -> settings
+                                .time(20_000)
+                                .threadCount(2)
+                                .threadInvocationCount(10)))
                 .sink(new Log4jSink())
-                .testInstance(test)
+                .beforeAll(true, BeforeAllAndAfterAllOnlyOnceTest::beforeAll)
+                .test("test", BeforeAllAndAfterAllOnlyOnceTest::test)
+                .build()
                 .run();
 
         assertEquals("beforeAll: onlyOnce = true",              1, test.beforeAll.get());
@@ -141,12 +139,26 @@ public class LifecycleTest {
 
 
     @Test
-    public void afterAllWithOnlyOnceFlagShouldBeInvokedOnlyOnce() {
+    public void afterAllWithOnlyOnceShouldBeInvokedOnlyOnce() {
         BeforeAllAndAfterAllOnlyOnceTest test = new BeforeAllAndAfterAllOnlyOnceTest();
 
-        new TestSuiteBuilder()
+
+
+
+        new TestCaseBuilder<BeforeAllAndAfterAllOnlyOnceTest>()
+                .name("afterAllWithOnlyOnceShouldBeInvokedOnlyOnce")
+                .testCase(test)
+                .settings(b -> b
+                        .baseline(Settings::disabled)
+                        .warmUp(Settings::disabled)
+                        .test(settings -> settings
+                                .time(20_000)
+                                .threadCount(2)
+                                .threadInvocationCount(10)))
                 .sink(new Log4jSink())
-                .testInstance(test)
+                .test("test", BeforeAllAndAfterAllOnlyOnceTest::test)
+                .afterAll(true, BeforeAllAndAfterAllOnlyOnceTest::afterAll)
+                .build()
                 .run();
 
         assertEquals("afterAll: onlyOnce = true",              1, test.afterAll.get());
