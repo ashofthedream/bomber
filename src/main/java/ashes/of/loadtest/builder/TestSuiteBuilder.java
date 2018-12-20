@@ -66,13 +66,16 @@ public class TestSuiteBuilder {
                 .sinks(sinks);
     }
 
+    public <T> TestSuiteBuilder addBuilder(TestCaseBuilder<T> builder) {
+        testCases.add(builder);
+        return this;
+    }
 
     public <T> TestSuiteBuilder addBuilder(Consumer<TestCaseBuilder<T>> consumer) {
         TestCaseBuilder<T> b = newTestCase();
         consumer.accept(b);
 
-        testCases.add(b);
-        return this;
+        return addBuilder(b);
     }
 
     public <T> TestSuiteBuilder addInstance(T testCase) {

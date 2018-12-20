@@ -1,46 +1,48 @@
 package ashes.of.loadtest.stopwatch;
 
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
+
 public class Lap {
 
     private final long init = System.nanoTime();
 
-    private final String name;
-    private volatile long stop;
+    private final String label;
+    private final List<Long> records = new CopyOnWriteArrayList<>();
 
-    public Lap(String name) {
-        this.name = name;
+    public Lap(String label) {
+        this.label = label;
     }
 
-    public String getName() {
-        return name;
+    public String getLabel() {
+        return label;
     }
 
     /**
-     * @return true if this laps is stopped
+     * @return records
      */
-    public boolean isStopped() {
-        return stop != 0;
+    public List<Long> records() {
+        return records;
     }
 
     /**
      * Stops this lap
      */
-    public void stop() {
-        stop = System.nanoTime();
-    }
-
-    /**
-     * @return elapsed time in nanoseconds
-     */
     public long elapsed() {
-        if (!isStopped())
-            stop();
+        long elapsed = System.nanoTime() - init;
+        records.add(elapsed);
 
-        return stop - init;
+        return elapsed;
     }
 
     @Override
     public String toString() {
-        return "Lap{" + name + ":" + (elapsed() / 1_000_000.) + "ms}";
+        List<Double> millis = records.stream()
+                .mapToDouble(elapsed -> elapsed / 1_000_000.)
+                .boxed()
+                .collect(Collectors.toList());
+
+        return "Lap{" + label + ": " + millis + "}";
     }
 }

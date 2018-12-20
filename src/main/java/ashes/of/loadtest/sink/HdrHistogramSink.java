@@ -40,10 +40,10 @@ public class HdrHistogramSink implements Sink {
 
             Map<String, Histogram> map = laps.computeIfAbsent(startTime, k -> new ConcurrentHashMap<>());
 
-            stopwatch.lapsByLabel().forEach((label, laps) -> {
+            stopwatch.laps().forEach((label, lap) -> {
                 Histogram h = map.computeIfAbsent(label, l -> new ConcurrentHistogram(2));
 
-                laps.forEach(lap -> h.recordValue(lap.elapsed()));
+                lap.records().forEach(h::recordValue);
             });
 
             if (throwable == null)

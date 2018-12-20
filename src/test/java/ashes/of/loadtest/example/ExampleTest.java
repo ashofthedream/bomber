@@ -52,11 +52,11 @@ public class ExampleTest {
     public void twoFastRequests(Stopwatch stopwatch) throws Exception {
         Lap someFastRequest = stopwatch.lap("someFastRequest");
         client.someFastRequest();
-        someFastRequest.stop();
+        someFastRequest.elapsed();
 
         Lap anotherFastRequest = stopwatch.lap("anotherFastRequest");
         client.anotherFastRequest();
-        anotherFastRequest.stop();
+        anotherFastRequest.elapsed();
     }
 
 

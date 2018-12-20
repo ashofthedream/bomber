@@ -1,14 +1,13 @@
 package ashes.of.loadtest.stopwatch;
 
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 public class Stopwatch {
 
     private final long init = System.nanoTime();
-    private final List<Lap> laps = new ArrayList<>();
+    private final Map<String, Lap> laps = new ConcurrentHashMap<>();
 
 
     public long elapsed() {
@@ -22,25 +21,13 @@ public class Stopwatch {
      * @return created lap
      */
     public Lap lap(String label) {
-        Lap lap = new Lap(label);
-        laps.add(lap);
-
-        return lap;
+        return laps.computeIfAbsent(label, Lap::new);
     }
 
     /**
-     * @return stream of stopped laps
+     * @return laps by label
      */
-    public Stream<Lap> laps() {
-        return laps.stream()
-                .filter(Lap::isStopped);
-    }
-
-    /**
-     * @return list of stopped laps by label
-     */
-    public Map<String, List<Lap>> lapsByLabel() {
-        return laps()
-                .collect(Collectors.groupingBy(Lap::getName));
+    public Map<String, Lap> laps() {
+        return laps;
     }
 }

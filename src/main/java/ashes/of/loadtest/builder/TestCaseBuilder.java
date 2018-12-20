@@ -299,7 +299,7 @@ public class TestCaseBuilder<T> {
 
                 proxy = types.length == 0 ?
                         (tc, sw) -> bind.invoke() :
-                        (tc, sw) -> bind.invokeWithArguments(stopwatch) ;
+                        (tc, sw) -> bind.invokeWithArguments(sw) ;
 
                 ref.set(proxy);
             }

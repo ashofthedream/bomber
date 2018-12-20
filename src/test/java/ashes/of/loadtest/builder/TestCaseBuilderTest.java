@@ -53,7 +53,7 @@ public class TestCaseBuilderTest {
         public void testB(Stopwatch stopwatch) {
             Lap lap = stopwatch.lap("testB-lap-1");
             log.debug("testB");
-            lap.stop();
+            lap.elapsed();
             testB.incrementAndGet();
         }
     }
