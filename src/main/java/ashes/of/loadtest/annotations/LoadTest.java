@@ -12,7 +12,12 @@ import java.lang.annotation.*;
 public @interface LoadTest {
 
     /**
-     * @return test name, if empty method name will be used
+     * Test name, if empty method name will be used
      */
     String value() default "";
+
+    /**
+     * Marks test as disabled
+     */
+    boolean disabled() default false;
 }

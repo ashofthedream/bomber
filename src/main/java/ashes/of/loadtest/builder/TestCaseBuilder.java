@@ -274,7 +274,11 @@ public class TestCaseBuilder<T> {
     private void buildTest(Method method, LoadTest loadTest) throws Exception {
         String value = loadTest.value();
         String name = !value.isEmpty() ? value : method.getName();
-        log.debug("Found test method: {}, name: {}", method.getName(), name);
+        log.debug("Found test method: {}, name: {}, disabled: {}", method.getName(), name, loadTest.disabled());
+
+        if (loadTest.disabled())
+            return;
+
         MethodHandle mh = MethodHandles.lookup().unreflect(method);
 
         AtomicReference<TestWithStopwatch<T>> ref = new AtomicReference<>();
