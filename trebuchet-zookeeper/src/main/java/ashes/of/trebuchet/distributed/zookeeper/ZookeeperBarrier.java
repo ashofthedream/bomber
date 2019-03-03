@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
+
 public class ZookeeperBarrier implements Barrier {
     private static final Logger log = LogManager.getLogger();
 
@@ -30,6 +31,7 @@ public class ZookeeperBarrier implements Barrier {
     @Override
     public void enter(String test) {
         try {
+            log.trace("test: {} enter", test);
             getOrCreateBarrier(test).enter(awaitTime.toMillis(), TimeUnit.MILLISECONDS);
         } catch (Exception e) {
             log.error("Can't enter", e);
@@ -39,6 +41,7 @@ public class ZookeeperBarrier implements Barrier {
     @Override
     public void leave(String test) {
         try {
+            log.trace("test: {} leave", test);
             getOrCreateBarrier(test).leave(awaitTime.toMillis(), TimeUnit.MILLISECONDS);
         } catch (Exception e) {
             log.error("Can't leave", e);

@@ -2,6 +2,7 @@ package ashes.of.trebuchet.runner;
 
 import ashes.of.trebuchet.builder.Settings;
 import ashes.of.trebuchet.distibuted.Barrier;
+import ashes.of.trebuchet.distibuted.BarrierBuilder;
 import ashes.of.trebuchet.limiter.Limiter;
 import ashes.of.trebuchet.sink.Sink;
 import ashes.of.trebuchet.stopwatch.Stopwatch;
@@ -41,7 +42,7 @@ public class Runner<T> {
     private final List<LifeCycle<T>> afterAll;
     private final Map<String, Test<T>> tests;
     private final Supplier<Limiter> limiter;
-    private final Barrier barrier;
+    private final BarrierBuilder barrier;
 
     public Runner(String testCaseName,
                   Stage stage,
@@ -53,7 +54,8 @@ public class Runner<T> {
                   Supplier<T> testCase,
                   List<LifeCycle<T>> afterEach,
                   List<LifeCycle<T>> afterAll,
-                  Supplier<Limiter> limiter, Barrier barrier) {
+                  Supplier<Limiter> limiter,
+                  BarrierBuilder barrier) {
         this.testCaseName = testCaseName;
         this.stage = stage;
         this.settings = new Settings(settings);
@@ -82,6 +84,10 @@ public class Runner<T> {
     }
 
     public long getRemainTime() {
+        return getRemainTime(startTime);
+    }
+
+    private long getRemainTime(Instant startTime) {
         return (startTime.toEpochMilli() + settings.getTime().toMillis()) - System.currentTimeMillis();
     }
 
@@ -111,9 +117,10 @@ public class Runner<T> {
         CountDownLatch begin = new CountDownLatch(settings.getThreadsCount());
         CountDownLatch end = new CountDownLatch(settings.getThreadsCount());
 
+        Barrier b = barrier.workers(settings.getThreadsCount()).build();
         startTime = Instant.now();
         startWatchdogThread(begin, end);
-        startWorkerThreads(begin, end);
+        startWorkerThreads(begin, end, b);
 
         try {
             log.info("Await for end of {}, elapsed {}ms", logMeta(), getElapsedTime());
@@ -131,9 +138,9 @@ public class Runner<T> {
         new Watchdog(this, startLatch, endLatch).startInNewThread();
     }
 
-    private void startWorkerThreads(CountDownLatch startLatch, CountDownLatch endLatch) {
+    private void startWorkerThreads(CountDownLatch startLatch, CountDownLatch endLatch, Barrier barrier) {
         for (int i = 0; i < settings.getThreadsCount(); i++)
-            startWorkerThread(() -> runTestCase(startLatch, endLatch), i);
+            startWorkerThread(() -> runTestCase(startLatch, endLatch, barrier), i);
     }
 
     private void startWorkerThread(Runnable runnable, int index) {
@@ -143,7 +150,7 @@ public class Runner<T> {
     }
 
 
-    private void runTestCase(CountDownLatch startLatch, CountDownLatch endLatch) {
+    private void runTestCase(CountDownLatch startLatch, CountDownLatch endLatch, Barrier barrier) {
         try {
             T testCase = this.testCase.get();
             Limiter limiter = this.limiter.get();
@@ -156,11 +163,10 @@ public class Runner<T> {
             log.trace("beforeAll {}", this::logMeta);
             beforeAll.forEach(l -> beforeAll(l, testCase));
 
-            tests.forEach((name, test) -> runTest(name, testCase, test, limiter));
+            tests.forEach((name, test) -> runTest(name, testCase, test, limiter, barrier));
 
             log.trace("afterAll {}", this::logMeta);
             afterAll.forEach(l -> afterAll(l, testCase));
-
         } catch (Throwable e) {
             log.warn("runTestCase {} failed", logMeta(), e);
         } finally {
@@ -169,7 +175,7 @@ public class Runner<T> {
     }
 
 
-    private void runTest(String testName, T testCase, Test<T> test, Limiter limiter) {
+    private void runTest(String testName, T testCase, Test<T> test, Limiter limiter, Barrier barrier) {
         String threadName = Thread.currentThread().getName();
         AtomicLong invocations = new AtomicLong();
         BooleanSupplier checker = checker();
@@ -203,11 +209,12 @@ public class Runner<T> {
     }
 
     private BooleanSupplier checker() {
+        Instant startTime = Instant.now();
         AtomicLong threadRemainInvs = new AtomicLong(settings.getThreadInvocationsCount());
         return () ->
                 totalRemainInvs.decrementAndGet() >= 0 &&
                 threadRemainInvs.decrementAndGet() >= 0 &&
-                getRemainTime() >= 0;
+                getRemainTime(startTime) >= 0;
     }
 
 

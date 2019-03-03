@@ -56,7 +56,7 @@ public class HistogramSink implements Sink {
     private final LongAdder noErrors = new LongAdder();
 
     private final ChronoUnit resolution;
-    private final Map<String, Stats> stats = new LinkedHashMap<>();
+    private final Map<String, Stats> stats = new ConcurrentSkipListMap<>();
 
 
     public HistogramSink(ChronoUnit resolution) {

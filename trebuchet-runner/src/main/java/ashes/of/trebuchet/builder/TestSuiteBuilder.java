@@ -1,7 +1,7 @@
 package ashes.of.trebuchet.builder;
 
-import ashes.of.trebuchet.distibuted.Barrier;
-import ashes.of.trebuchet.distibuted.LocalBarrier;
+import ashes.of.trebuchet.distibuted.BarrierBuilder;
+import ashes.of.trebuchet.distibuted.NoBarrier;
 import ashes.of.trebuchet.sink.Sink;
 import ashes.of.trebuchet.limiter.Limiter;
 import com.google.common.base.Preconditions;
@@ -25,7 +25,7 @@ public class TestSuiteBuilder {
     private final SettingsBuilder settings = new SettingsBuilder();
 
     private Supplier<Limiter> limiter = Limiter::alwaysPermit;
-    private Barrier barrier = new LocalBarrier();
+    private BarrierBuilder barrier = new NoBarrier.Builder();
 
     public TestSuiteBuilder settings(Consumer<SettingsBuilder> consumer) {
         consumer.accept(settings);
@@ -33,7 +33,7 @@ public class TestSuiteBuilder {
     }
 
 
-    public TestSuiteBuilder barrier(Barrier barrier) {
+    public TestSuiteBuilder barrier(BarrierBuilder barrier) {
         this.barrier = barrier;
         return this;
     }

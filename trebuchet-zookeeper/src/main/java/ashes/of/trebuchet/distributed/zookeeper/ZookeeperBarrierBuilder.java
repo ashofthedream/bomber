@@ -1,5 +1,8 @@
 package ashes.of.trebuchet.distributed.zookeeper;
 
+import ashes.of.trebuchet.distibuted.Barrier;
+import ashes.of.trebuchet.distibuted.BarrierBuilder;
+import ashes.of.trebuchet.distibuted.LocalBarrier;
 import com.google.common.base.Preconditions;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
@@ -7,10 +10,11 @@ import org.apache.curator.retry.RetryOneTime;
 
 import java.time.Duration;
 
-public class ZookeeperBarrierBuilder {
+
+public class ZookeeperBarrierBuilder extends BarrierBuilder {
 
     private String url = "localhost:2181";
-    private int members = 1;
+    private int nodes = 1;
     private Duration awaitTime = Duration.ofMinutes(1);
 
 
@@ -19,8 +23,8 @@ public class ZookeeperBarrierBuilder {
         return this;
     }
 
-    public ZookeeperBarrierBuilder members(int members) {
-        this.members = members;
+    public ZookeeperBarrierBuilder members(int nodes) {
+        this.nodes = nodes;
         return this;
     }
 
@@ -30,8 +34,8 @@ public class ZookeeperBarrierBuilder {
     }
 
 
-    public ZookeeperBarrier build() {
-        Preconditions.checkArgument(members > 0, "Members should be greater than 0");
+    public Barrier build() {
+        Preconditions.checkArgument(nodes > 0, "Nodes should be greater than 0");
         Preconditions.checkNotNull(awaitTime, "awaitTime should not be null");
 
         CuratorFramework cf = CuratorFrameworkFactory.builder()
@@ -41,6 +45,6 @@ public class ZookeeperBarrierBuilder {
 
         cf.start();
 
-        return new ZookeeperBarrier(cf, members, awaitTime);
+        return new LocalBarrier(workers, new ZookeeperBarrier(cf, nodes, awaitTime));
     }
 }

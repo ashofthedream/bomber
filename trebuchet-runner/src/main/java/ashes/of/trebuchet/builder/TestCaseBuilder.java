@@ -1,7 +1,7 @@
 package ashes.of.trebuchet.builder;
 
-import ashes.of.trebuchet.distibuted.Barrier;
-import ashes.of.trebuchet.distibuted.LocalBarrier;
+import ashes.of.trebuchet.distibuted.BarrierBuilder;
+import ashes.of.trebuchet.distibuted.NoBarrier;
 import ashes.of.trebuchet.runner.*;
 import ashes.of.trebuchet.runner.Test;
 import ashes.of.trebuchet.annotations.*;
@@ -38,7 +38,7 @@ public class TestCaseBuilder<T> {
     private final List<Sink> sinks = new ArrayList<>();
     private final SettingsBuilder settings = new SettingsBuilder();
 
-    private Barrier barrier = new LocalBarrier();
+    private BarrierBuilder barrier = new NoBarrier.Builder();
 
     private String name;
     private Supplier<T> testCase;
@@ -71,7 +71,7 @@ public class TestCaseBuilder<T> {
         return this;
     }
 
-    public TestCaseBuilder<T> barrier(Barrier barrier) {
+    public TestCaseBuilder<T> barrier(BarrierBuilder barrier) {
         this.barrier = barrier;
         return this;
     }
