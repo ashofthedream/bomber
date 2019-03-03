@@ -1,9 +1,8 @@
-package ashes.of.trebuchet.sink.hdrhistogram;
+package ashes.of.trebuchet.sink;
 
 import ashes.of.trebuchet.runner.Context;
 import ashes.of.trebuchet.builder.Settings;
 import ashes.of.trebuchet.runner.Stage;
-import ashes.of.trebuchet.sink.Sink;
 import ashes.of.trebuchet.stopwatch.Stopwatch;
 import org.HdrHistogram.ConcurrentHistogram;
 import org.HdrHistogram.Histogram;
@@ -13,15 +12,13 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.NavigableMap;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.atomic.LongAdder;
 
 
-public class HdrHistogramSink implements Sink {
+public class HistogramSink implements Sink {
 
     private static class Stats {
         private final NavigableMap<Instant, Histogram> overall = new ConcurrentSkipListMap<>();
@@ -62,11 +59,11 @@ public class HdrHistogramSink implements Sink {
     private final Map<String, Stats> stats = new LinkedHashMap<>();
 
 
-    public HdrHistogramSink(ChronoUnit resolution) {
+    public HistogramSink(ChronoUnit resolution) {
         this.resolution = resolution;
     }
 
-    public HdrHistogramSink() {
+    public HistogramSink() {
         this(ChronoUnit.SECONDS);
     }
 
@@ -163,6 +160,16 @@ public class HdrHistogramSink implements Sink {
                 ms(h.getMaxValue()),
                 h.getTotalCount());
     }
+
+    public long getErrorCount() {
+        return stats.values().stream()
+                .map(stats -> stats.errors)
+                .map(SortedMap::values)
+                .flatMap(Collection::stream)
+                .mapToLong(LongAdder::sum)
+                .sum();
+    }
+
 
     private static double ms(long value) {
         return value / 1_000_000.0;

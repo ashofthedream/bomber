@@ -1,6 +1,7 @@
 package ashes.of.trebuchet.runner;
 
 import ashes.of.trebuchet.builder.Settings;
+import ashes.of.trebuchet.distibuted.Barrier;
 import ashes.of.trebuchet.limiter.Limiter;
 import ashes.of.trebuchet.sink.Sink;
 import ashes.of.trebuchet.stopwatch.Stopwatch;
@@ -21,7 +22,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 
 
 public class Runner<T> {
-    private static final Logger log = LogManager.getLogger(Runner.class);
+    private static final Logger log = LogManager.getLogger();
 
     private final String testCaseName;
     private final Stage stage;
@@ -38,9 +39,9 @@ public class Runner<T> {
     private final List<LifeCycle<T>> beforeEach;
     private final List<LifeCycle<T>> afterEach;
     private final List<LifeCycle<T>> afterAll;
-    private final Map<String, TestWithStopwatch<T>> tests;
+    private final Map<String, Test<T>> tests;
     private final Supplier<Limiter> limiter;
-
+    private final Barrier barrier;
 
     public Runner(String testCaseName,
                   Stage stage,
@@ -48,11 +49,11 @@ public class Runner<T> {
                   List<Sink> sinks,
                   List<LifeCycle<T>> beforeAll,
                   List<LifeCycle<T>> beforeEach,
-                  Map<String, TestWithStopwatch<T>> tests,
+                  Map<String, Test<T>> tests,
                   Supplier<T> testCase,
                   List<LifeCycle<T>> afterEach,
                   List<LifeCycle<T>> afterAll,
-                  Supplier<Limiter> limiter) {
+                  Supplier<Limiter> limiter, Barrier barrier) {
         this.testCaseName = testCaseName;
         this.stage = stage;
         this.settings = new Settings(settings);
@@ -65,6 +66,7 @@ public class Runner<T> {
         this.afterAll = afterAll;
         this.sinks = sinks;
         this.limiter = limiter;
+        this.barrier = barrier;
     }
 
     public Stage getStage() {
@@ -167,10 +169,11 @@ public class Runner<T> {
     }
 
 
-    private void runTest(String testName, T testCase, TestWithStopwatch<T> test, Limiter limiter) {
+    private void runTest(String testName, T testCase, Test<T> test, Limiter limiter) {
         String threadName = Thread.currentThread().getName();
         AtomicLong invocations = new AtomicLong();
         BooleanSupplier checker = checker();
+        barrier.enter(testName);
         while (checker.getAsBoolean()) {
             if (!limiter.waitForAcquire())
                 throw new RuntimeException("Limiter await failed");
@@ -195,6 +198,8 @@ public class Runner<T> {
 
             afterEach(ctx, testCase);
         }
+
+        barrier.leave(testName);
     }
 
     private BooleanSupplier checker() {

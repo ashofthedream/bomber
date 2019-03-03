@@ -4,7 +4,7 @@ import ashes.of.trebuchet.builder.TestCaseBuilder;
 import ashes.of.trebuchet.builder.TestSuiteBuilder;
 import ashes.of.trebuchet.annotations.*;
 import ashes.of.trebuchet.builder.Settings;
-import ashes.of.trebuchet.sink.hdrhistogram.HdrHistogramSink;
+import ashes.of.trebuchet.sink.HistogramSink;
 import ashes.of.trebuchet.sink.Log4jSink;
 import ashes.of.trebuchet.stopwatch.Lap;
 import ashes.of.trebuchet.stopwatch.Stopwatch;
@@ -75,7 +75,7 @@ public class ExampleTest {
         new TestSuiteBuilder()
                 // log all times to console via log4j and HdrHistogram
                 .sink(new Log4jSink())
-                .sink(new HdrHistogramSink())
+                .sink(new HistogramSink())
                 .limiter(Limiter.withRate(1, 5_000))
                 // disabled baseline and warm-up stages
                 .settings(b -> b
@@ -94,7 +94,7 @@ public class ExampleTest {
     public void runAnnotationsExample() {
         new TestSuiteBuilder()
                 .sink(new Log4jSink())
-                .sink(new HdrHistogramSink())
+                .sink(new HistogramSink())
 
                 // add example test case via annotations
                 .addClass(ExampleTest.class)

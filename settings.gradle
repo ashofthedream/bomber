@@ -1,5 +1,8 @@
 include 'trebuchet-datadog-sink'
 include 'trebuchet-example'
-include 'trebuchet-hdrhistogram-sink'
+include 'trebuchet-example-spring'
 include 'trebuchet-influx-sink'
 include 'trebuchet-runner'
+include 'trebuchet-zookeeper'
+
+include 'trebuchet-dev'

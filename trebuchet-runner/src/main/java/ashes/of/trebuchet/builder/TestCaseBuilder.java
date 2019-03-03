@@ -1,12 +1,11 @@
 package ashes.of.trebuchet.builder;
 
-import ashes.of.trebuchet.runner.LifeCycle;
-import ashes.of.trebuchet.runner.TestNoArgs;
-import ashes.of.trebuchet.runner.TestWithStopwatch;
+import ashes.of.trebuchet.distibuted.Barrier;
+import ashes.of.trebuchet.distibuted.LocalBarrier;
+import ashes.of.trebuchet.runner.*;
+import ashes.of.trebuchet.runner.Test;
 import ashes.of.trebuchet.annotations.*;
 import ashes.of.trebuchet.limiter.Limiter;
-import ashes.of.trebuchet.runner.Runner;
-import ashes.of.trebuchet.runner.Stage;
 import ashes.of.trebuchet.sink.Sink;
 import ashes.of.trebuchet.stopwatch.Stopwatch;
 import com.google.common.base.Preconditions;
@@ -26,19 +25,20 @@ import java.util.stream.Stream;
 
 
 public class TestCaseBuilder<T> {
-    private static final Logger log = LogManager.getLogger(TestCaseBuilder.class);
+    private static final Logger log = LogManager.getLogger();
 
     private final List<LifeCycle<T>> beforeAll = new ArrayList<>();
     private final List<LifeCycle<T>> beforeEach = new ArrayList<>();
     private final List<LifeCycle<T>> afterEach = new ArrayList<>();
     private final List<LifeCycle<T>> afterAll = new ArrayList<>();
 
-    private final Map<String, TestWithStopwatch<T>> tests = new LinkedHashMap<>();
-    private final Map<String, TestWithStopwatch<T>> noop = ImmutableMap.of("noop", (test, stopwatch) -> {});
+    private final Map<String, Test<T>> tests = new LinkedHashMap<>();
+    private final Map<String, Test<T>> noop = ImmutableMap.of("noop", (test, stopwatch) -> {});
 
     private final List<Sink> sinks = new ArrayList<>();
     private final SettingsBuilder settings = new SettingsBuilder();
 
+    private Barrier barrier = new LocalBarrier();
 
     private String name;
     private Supplier<T> testCase;
@@ -68,6 +68,11 @@ public class TestCaseBuilder<T> {
                 .test(builder.getTest());
 
 
+        return this;
+    }
+
+    public TestCaseBuilder<T> barrier(Barrier barrier) {
+        this.barrier = barrier;
         return this;
     }
 
@@ -134,7 +139,7 @@ public class TestCaseBuilder<T> {
         return test(name, (tc, stopwatch) -> test.run(tc));
     }
 
-    public TestCaseBuilder<T> test(String name, TestWithStopwatch<T> test) {
+    public TestCaseBuilder<T> test(String name, Test<T> test) {
         this.tests.put(name, test);
         return this;
     }
@@ -161,13 +166,14 @@ public class TestCaseBuilder<T> {
     }
 
 
-    private LifeCycle<T> onlyOnce(LifeCycle<T> after) {
+    private LifeCycle<T> onlyOnce(LifeCycle<T> method) {
         AtomicBoolean onlyOnceCheck = new AtomicBoolean();
         return tc -> {
-            if (!onlyOnceCheck.compareAndSet(false, true))
-                return;
-
-            after.call(tc);
+            // first thread initializes the content, all other - wait for initialization
+            synchronized (onlyOnceCheck) {
+                if (onlyOnceCheck.compareAndSet(false, true))
+                    method.call(tc);
+            }
         };
     }
 
@@ -281,10 +287,10 @@ public class TestCaseBuilder<T> {
 
         MethodHandle mh = MethodHandles.lookup().unreflect(method);
 
-        AtomicReference<TestWithStopwatch<T>> ref = new AtomicReference<>();
+        AtomicReference<Test<T>> ref = new AtomicReference<>();
 
         test(name, (testCase, stopwatch) -> {
-            TestWithStopwatch<T> proxy = ref.get();
+            Test<T> proxy = ref.get();
             if (proxy == null) {
                 log.warn("init proxy method: {}", name);
                 Class<?>[] types = method.getParameterTypes();
@@ -326,8 +332,9 @@ public class TestCaseBuilder<T> {
 
 
     public Runnable build() {
-        Preconditions.checkNotNull(name,     "Name is null");
-        Preconditions.checkNotNull(testCase, "TestCase is null");
+        Preconditions.checkNotNull(name,     "name is null");
+        Preconditions.checkNotNull(testCase, "testCase is null");
+        Preconditions.checkNotNull(barrier,  "barrier is null");
 
         return this::run;
     }
@@ -336,9 +343,9 @@ public class TestCaseBuilder<T> {
         try {
             log.info("Start testCase: {}", name);
 
-            new Runner<>(name, Stage.Baseline, settings.getBaseline(), sinks, beforeAll, beforeEach,  noop, testCase, afterEach, afterAll, Limiter::alwaysPermit).run();
-            new Runner<>(name, Stage.WarmUp,   settings.getWarmUp(),   sinks, beforeAll, beforeEach, tests, testCase, afterEach, afterAll, limiter).run();
-            new Runner<>(name, Stage.Test,     settings.getTest(),     sinks, beforeAll, beforeEach, tests, testCase, afterEach, afterAll, limiter).run();
+            new Runner<>(name, Stage.Baseline, settings.getBaseline(), sinks, beforeAll, beforeEach,  noop, testCase, afterEach, afterAll, Limiter::alwaysPermit, barrier).run();
+            new Runner<>(name, Stage.WarmUp,   settings.getWarmUp(),   sinks, beforeAll, beforeEach, tests, testCase, afterEach, afterAll, limiter, barrier).run();
+            new Runner<>(name, Stage.Test,     settings.getTest(),     sinks, beforeAll, beforeEach, tests, testCase, afterEach, afterAll, limiter, barrier).run();
 
             log.info("End testCase: {}", name);
         } catch (Exception e) {

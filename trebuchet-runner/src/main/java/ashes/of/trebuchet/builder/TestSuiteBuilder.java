@@ -1,5 +1,7 @@
 package ashes.of.trebuchet.builder;
 
+import ashes.of.trebuchet.distibuted.Barrier;
+import ashes.of.trebuchet.distibuted.LocalBarrier;
 import ashes.of.trebuchet.sink.Sink;
 import ashes.of.trebuchet.limiter.Limiter;
 import com.google.common.base.Preconditions;
@@ -13,20 +15,26 @@ import java.util.function.Supplier;
 
 
 public class TestSuiteBuilder {
-    private static final Logger log = LogManager.getLogger(TestSuiteBuilder.class);
+    private static final Logger log = LogManager.getLogger();
 
     /**
-     * TestWithStopwatch cases for run
+     * Test cases for run
      */
     private final List<TestCaseBuilder<?>> testCases = new ArrayList<>();
     private final List<Sink> sinks = new ArrayList<>();
     private final SettingsBuilder settings = new SettingsBuilder();
 
     private Supplier<Limiter> limiter = Limiter::alwaysPermit;
-
+    private Barrier barrier = new LocalBarrier();
 
     public TestSuiteBuilder settings(Consumer<SettingsBuilder> consumer) {
         consumer.accept(settings);
+        return this;
+    }
+
+
+    public TestSuiteBuilder barrier(Barrier barrier) {
+        this.barrier = barrier;
         return this;
     }
 
@@ -61,6 +69,7 @@ public class TestSuiteBuilder {
 
     private <T> TestCaseBuilder<T> newTestCase() {
         return new TestCaseBuilder<T>()
+                .barrier(barrier)
                 .settings(settings)
                 .limiter(limiter)
                 .sinks(sinks);

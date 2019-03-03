@@ -9,7 +9,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 
 
 public class Watchdog {
-    private static final Logger log = LogManager.getLogger(Watchdog.class);
+    private static final Logger log = LogManager.getLogger();
 
     private final Runner<?> runner;
     private final CountDownLatch startLatch;
