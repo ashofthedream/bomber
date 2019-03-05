@@ -1,0 +1,10 @@
+
+server:
+  port: 8088
+
+
+zookeeper:
+  host: localhost
+  port: 2181
+
+

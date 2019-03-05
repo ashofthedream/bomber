@@ -2,6 +2,7 @@ include 'trebuchet-datadog-sink'
 include 'trebuchet-example'
 include 'trebuchet-example-spring'
 include 'trebuchet-influx-sink'
+include 'trebuchet-manager'
 include 'trebuchet-runner'
 include 'trebuchet-zookeeper'
 

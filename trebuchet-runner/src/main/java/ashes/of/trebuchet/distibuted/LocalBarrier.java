@@ -1,5 +1,7 @@
 package ashes.of.trebuchet.distibuted;
 
+import ashes.of.trebuchet.builder.Settings;
+import ashes.of.trebuchet.runner.Stage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -19,15 +21,15 @@ public class LocalBarrier implements Barrier {
 
         public NamedCascadeBarrier(String name, int members, Barrier next) {
             this.name = name;
-            this.enter = new CyclicBarrier(members, () -> next.enter(name));
-            this.leave = new CyclicBarrier(members, () -> next.leave(name));
+            this.enter = new CyclicBarrier(members, () -> next.testStart(name));
+            this.leave = new CyclicBarrier(members, () -> next.testFinish(name));
         }
         
         public void enter() {
             try {
                 enter.await();
             } catch (Exception e) {
-                log.error("Can't enter barrier: {}", name, e);
+                log.error("Can't start test: {}", name, e);
             }
         }
 
@@ -35,7 +37,7 @@ public class LocalBarrier implements Barrier {
             try {
                 leave.await();
             } catch (Exception e) {
-                log.error("Can't leave barrier: {}", name, e);
+                log.error("Can't finish test: {}", name, e);
             }
         }
     }
@@ -55,21 +57,35 @@ public class LocalBarrier implements Barrier {
         this(members, new NoBarrier());
     }
 
+    @Override
+    public void init(String name, Settings settings) {
+
+    }
 
     @Override
-    public void enter(String test) {
+    public void stageStart(Stage stage) {
+
+    }
+
+    @Override
+    public void testStart(String test) {
         NamedCascadeBarrier barrier = getOrCreateBarrier(test);
         String thread = Thread.currentThread().getName();
-        log.trace("test: {}, thread: {} try to enter barrier", test, thread);
+        log.trace("test: {}, thread: {} try to start test barrier", test, thread);
         barrier.enter();
     }
 
     @Override
-    public void leave(String test) {
+    public void testFinish(String test) {
         NamedCascadeBarrier barrier = getOrCreateBarrier(test);
         String thread = Thread.currentThread().getName();
-        log.trace("test: {}, thread: {} try to leave barrier", test, thread);
+        log.trace("test: {}, thread: {} try to finish test barrier", test, thread);
         barrier.leave();
+    }
+
+    @Override
+    public void stageLeave(Stage stage) {
+
     }
 
 

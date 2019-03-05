@@ -3,10 +3,10 @@ version = '1.0.0-SNAPSHOT'
 
 dependencies {
     compile project(':trebuchet-runner')
-    compile('org.apache.curator:curator-recipes:4.1.0') {
-        exclude group: 'org.apache.zookeeper', module: 'zookeeper'
+    
+    compile(    group: 'org.apache.curator',            name: 'curator-recipes',                version: '4.1.0') {
+        exclude group: 'org.apache.zookeeper',          module: 'zookeeper'
     }
 
-    compile group: 'org.apache.zookeeper', name: 'zookeeper', version: '3.4.13'
-
+    compile     group: 'org.apache.zookeeper',          name: 'zookeeper',                      version: '3.4.13'
 }

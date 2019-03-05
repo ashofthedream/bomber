@@ -118,6 +118,8 @@ public class Runner<T> {
         CountDownLatch end = new CountDownLatch(settings.getThreadsCount());
 
         Barrier b = barrier.workers(settings.getThreadsCount()).build();
+        b.init(testCaseName, settings);
+        b.stageStart(stage);
         startTime = Instant.now();
         startWatchdogThread(begin, end);
         startWorkerThreads(begin, end, b);
@@ -131,6 +133,7 @@ public class Runner<T> {
 
         log.info("End {} elapsed {}ms", logMeta(), getElapsedTime());
         sinks.forEach(sink -> sink.afterAll(stage, testCaseName, startTime, settings));
+        b.stageLeave(stage);
     }
 
 
@@ -179,7 +182,7 @@ public class Runner<T> {
         String threadName = Thread.currentThread().getName();
         AtomicLong invocations = new AtomicLong();
         BooleanSupplier checker = checker();
-        barrier.enter(testName);
+        barrier.testStart(testName);
         while (checker.getAsBoolean()) {
             if (!limiter.waitForAcquire())
                 throw new RuntimeException("Limiter await failed");
@@ -205,7 +208,7 @@ public class Runner<T> {
             afterEach(ctx, testCase);
         }
 
-        barrier.leave(testName);
+        barrier.testFinish(testName);
     }
 
     private BooleanSupplier checker() {

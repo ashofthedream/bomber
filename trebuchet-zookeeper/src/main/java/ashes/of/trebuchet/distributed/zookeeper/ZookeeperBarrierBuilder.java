@@ -2,7 +2,6 @@ package ashes.of.trebuchet.distributed.zookeeper;
 
 import ashes.of.trebuchet.distibuted.Barrier;
 import ashes.of.trebuchet.distibuted.BarrierBuilder;
-import ashes.of.trebuchet.distibuted.LocalBarrier;
 import com.google.common.base.Preconditions;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
@@ -45,6 +44,6 @@ public class ZookeeperBarrierBuilder extends BarrierBuilder {
 
         cf.start();
 
-        return new LocalBarrier(workers, new ZookeeperBarrier(cf, nodes, awaitTime));
+        return new LocalDelegateBarrier(workers, new ZookeeperBarrier(cf, nodes, awaitTime));
     }
 }
