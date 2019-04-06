@@ -3,6 +3,7 @@ package ashes.of.trebuchet.manager.dto;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+
 public class LoginRequest {
     public final String username;
     public final String password;

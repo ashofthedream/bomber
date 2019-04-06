@@ -106,13 +106,13 @@ public class SecurityConfiguration {
 
 
     @Bean
-    public SecurityWebFilterChain securitygWebFilterChain(ServerHttpSecurity http, AuthenticationWebFilter authFilter) {
+    public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http, AuthenticationWebFilter authFilter) {
         return http
                 .csrf().disable()
 
                 .authorizeExchange()
                 .pathMatchers("/manager/login").permitAll()
-                .anyExchange().authenticated()
+                .anyExchange().permitAll()
 
                 .and()
 

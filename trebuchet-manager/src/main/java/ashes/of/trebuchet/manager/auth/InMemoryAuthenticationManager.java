@@ -38,7 +38,5 @@ public class InMemoryAuthenticationManager implements ReactiveAuthenticationMana
         List<GrantedAuthority> authorities = ImmutableList.of(new SimpleGrantedAuthority("ROLE_ADMIN"));
 
         return Mono.just(new UsernamePasswordAuthenticationToken(user, null, authorities));
-
-
     }
 }

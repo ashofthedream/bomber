@@ -19,19 +19,21 @@ public class InstancesController {
     private final CuratorFramework cf;
     private final InstanceService instanceService;
 
-
     public InstancesController(CuratorFramework cf, InstanceService instanceService) {
         this.cf = cf;
         this.instanceService = instanceService;
     }
 
-
+    /**
+     * @return all managed instances
+     */
     @GetMapping
     public ResponseEntity<?> getInstances() {
         log.debug("get all instances");
 
         return ResponseEntities.ok(instanceService.getInstances());
     }
+
 
     @PostMapping("/temp/createInstance")
     public ResponseEntity<?> getInstances(@RequestBody String data) {
