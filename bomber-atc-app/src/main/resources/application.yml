@@ -1,15 +1,5 @@
-spring:
-  jackson:
-    date-format: "yyyy-MM-dd HH:mm:ss"
-    serialization:
-      write-dates-as-timestamps: false
-      WRITE_DATES_AS_TIMESTAMPS: false
-      WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS: false
-
 server:
   port: 8088
-
-
 
 zookeeper:
   host: localhost
