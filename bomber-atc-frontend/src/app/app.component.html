@@ -1,0 +1,20 @@
+<nz-layout class="layout">
+  <nz-header>
+    <app-header></app-header>
+  </nz-header>
+
+  <nz-layout>
+    <nz-sider nzWidth="250">
+      <app-main-menu></app-main-menu>
+    </nz-sider>
+
+    <nz-content class="content">
+      <router-outlet></router-outlet>
+    </nz-content>
+
+  </nz-layout>
+
+  <nz-footer class="footer">
+    <app-footer></app-footer>
+  </nz-footer>
+</nz-layout>

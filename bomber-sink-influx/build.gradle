@@ -1,0 +1,7 @@
+version = '1.0.0-SNAPSHOT'
+
+
+dependencies {
+    compile project(':bomber-sink')
+    compile group: 'org.influxdb',                  name: 'influxdb-java',                  version: '2.14'
+}
