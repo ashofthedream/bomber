@@ -1,6 +1,5 @@
 package ashes.of.bomber.squadron;
 
-import ashes.of.bomber.core.Settings;
 import ashes.of.bomber.core.Stage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -13,7 +12,7 @@ import java.util.concurrent.CyclicBarrier;
 public class LocalBarrier implements Barrier {
     private static final Logger log = LogManager.getLogger();
 
-    
+
     private static class NamedCascadeBarrier {
         private final String name;
         private final CyclicBarrier enter;
@@ -24,7 +23,7 @@ public class LocalBarrier implements Barrier {
             this.enter = new CyclicBarrier(members, () -> next.testStart(name));
             this.leave = new CyclicBarrier(members, () -> next.testFinish(name));
         }
-        
+
         public void enter() {
             try {
                 enter.await();

@@ -7,6 +7,8 @@ import ashes.of.bomber.core.stopwatch.Stopwatch;
 import ashes.of.bomber.sink.Sink;
 import org.HdrHistogram.ConcurrentHistogram;
 import org.HdrHistogram.Histogram;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nullable;
 import java.time.Instant;
@@ -20,6 +22,7 @@ import java.util.concurrent.atomic.LongAdder;
 
 
 public class HistogramSink implements Sink {
+    private static final Logger log = LogManager.getLogger();
 
     private static class Stats {
         private final NavigableMap<Instant, Histogram> overall = new ConcurrentSkipListMap<>();
@@ -85,6 +88,7 @@ public class HistogramSink implements Sink {
 
     @Override
     public void afterAll(Stage stage, String testCase, Instant startTime, Settings settings) {
+        log.info("afterAll, printStats");
         stats.forEach(this::printStats);
     }
 

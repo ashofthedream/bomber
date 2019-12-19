@@ -25,7 +25,7 @@ public class DatadogSink implements Sink {
                 .map(Throwable::getMessage)
                 .orElse("");
 
-        client.timer("trebuchet_tests")
+        client.timer("bomber_tests")
                 .tag("stage", context.getStage().name())
                 .tag("testCase", context.getTestCase())
                 .tag("test", context.getTest())
@@ -39,7 +39,7 @@ public class DatadogSink implements Sink {
 
     private void writeLap(Context context, String name, Lap lap) {
         lap.records().forEach(record -> {
-            client.timer("trebuchet_stopwatch_laps")
+            client.timer("bomber_stopwatch_laps")
                     .tag("stage", context.getStage().name())
                     .tag("testCase", context.getTestCase())
                     .tag("test", context.getTest())

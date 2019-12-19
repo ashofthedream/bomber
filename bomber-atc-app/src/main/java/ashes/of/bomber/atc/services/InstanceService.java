@@ -31,7 +31,7 @@ public class InstanceService {
 
     public InstanceService(CuratorFramework cf) {
         this.cf = cf;
-        this.ppc = new PathChildrenCache(cf, "/trebuchet/instances", true);
+        this.ppc = new PathChildrenCache(cf, "/bomber/instances", true);
     }
 
 

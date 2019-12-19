@@ -23,7 +23,7 @@ public class InfluxDbSink implements Sink {
     @Override
     public void afterEach(Context context, long elapsed, Stopwatch stopwatch, @Nullable Throwable throwable) {
         String error = Optional.ofNullable(throwable).map(Throwable::getMessage).orElse("");
-        influxDB.write(Point.measurement("trebuchet_tests")
+        influxDB.write(Point.measurement("bomber_tests")
                 .time(context.getTimestamp().toEpochMilli(), TimeUnit.MILLISECONDS)
                 .tag("stage",           context.getStage().name())
                 .tag("testCase",        context.getTestCase())
@@ -40,7 +40,7 @@ public class InfluxDbSink implements Sink {
 
     private void writeLap(Context context, String name, Lap lap) {
         lap.records().forEach(record -> {
-            influxDB.write(Point.measurement("trebuchet_stopwatch_laps")
+            influxDB.write(Point.measurement("bomber_stopwatch_laps")
                     .time(context.getTimestamp().toEpochMilli(), TimeUnit.MILLISECONDS)
                     .tag("stage",           context.getStage().name())
                     .tag("testCase",        context.getTestCase())
