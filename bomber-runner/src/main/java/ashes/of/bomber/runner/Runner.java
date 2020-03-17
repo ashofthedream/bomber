@@ -198,16 +198,16 @@ public class Runner<T> {
             log.trace("runTest {}", logMeta(ctx));
             beforeEach(ctx, testCase);
 
-            Stopwatch stopwatch = new Stopwatch();
+            Stopwatch stopwatch = new Stopwatch(record -> sinks.forEach(sink -> sink.afterEachLap(ctx, record)));
             try {
                 // test
                 test.run(testCase, stopwatch);
 
-                sinkAfterEach(ctx, stopwatch.elapsed(), stopwatch, null);
+                sinkAfterEach(ctx, stopwatch.elapsed(), null);
             } catch (Throwable th) {
                 log.debug("runTest {} failed", logMeta(ctx), th);
                 errorCount.increment();
-                sinkAfterEach(ctx, stopwatch.elapsed(), stopwatch, th);
+                sinkAfterEach(ctx, stopwatch.elapsed(), th);
             }
 
             afterEach(ctx, testCase);
@@ -263,8 +263,8 @@ public class Runner<T> {
     }
 
 
-    private void sinkAfterEach(Context context, long elapsed, Stopwatch stopwatch, @Nullable Throwable th) {
-        sinks.forEach(sink -> sink.afterEach(context, elapsed, stopwatch, th));
+    private void sinkAfterEach(Context context, long elapsed, @Nullable Throwable th) {
+        sinks.forEach(sink -> sink.afterEachTest(context, elapsed, th));
     }
 
     private String logMeta() {

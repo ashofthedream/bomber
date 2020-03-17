@@ -5,7 +5,8 @@ import ashes.of.bomber.builder.TestCaseBuilder;
 import ashes.of.bomber.builder.TestSuiteBuilder;
 import ashes.of.bomber.core.Settings;
 import ashes.of.bomber.core.limiter.Limiter;
-import ashes.of.bomber.example.model.User;
+import ashes.of.bomber.core.stopwatch.Lap;
+import ashes.of.bomber.core.stopwatch.Stopwatch;
 import ashes.of.bomber.sink.HistogramSink;
 import ashes.of.bomber.sink.Log4jSink;
 import org.apache.logging.log4j.LogManager;
@@ -70,13 +71,28 @@ public class UserControllerTest {
             log.debug("getUserById: {}", response.statusCode());
         }
 
-        public void getUsers() {
+        public void getUsersBlock() {
+            log.debug("time");
             ClientResponse response = webClient.get()
                     .uri("/users/{id}", 1 + random.nextInt(1000))
                     .exchange()
                     .block();
 
             log.debug("getUsers: {}", response.statusCode());
+        }
+
+        public void getUsersSubscribe(Stopwatch stopwatch) {
+            Lap lap = stopwatch.lap("getUsers");
+            webClient.get()
+                    .uri("/users/{id}", 1 + random.nextInt(1000))
+                    .exchange()
+                    .subscribe(response -> {
+                        log.debug("getUsers success: {}", response.statusCode());
+                        lap.success();
+                    }, throwable -> {
+                        log.debug("getUsers failure", throwable);
+                        lap.fail(throwable.getMessage());
+                    });
         }
     }
 
@@ -114,10 +130,11 @@ public class UserControllerTest {
         builder.name("example_test")
                 .testCase(() -> new UserControllerLoadTest(webClient))
                 .beforeAll(UserControllerLoadTest::beforeAll)
-                .beforeEach(UserControllerLoadTest::beforeEach)
-                .test("getUserById", UserControllerLoadTest::getUserById)
-                .test("getUsers", UserControllerLoadTest::getUsers)
-                .afterEach(UserControllerLoadTest::afterEach)
+//                .beforeEach(UserControllerLoadTest::beforeEach)
+//                .test("getUserById", UserControllerLoadTest::getUserById)
+//                .test("getUsersBlock", UserControllerLoadTest::getUsersBlock)
+                .test("getUsersSubscribe", UserControllerLoadTest::getUsersSubscribe)
+//                .afterEach(UserControllerLoadTest::afterEach)
                 .afterAll(UserControllerLoadTest::afterAll);
     }
 

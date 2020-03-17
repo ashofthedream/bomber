@@ -2,7 +2,6 @@ package ashes.of.bomber.sink.datadog;
 
 import ashes.of.bomber.core.Context;
 import ashes.of.bomber.core.stopwatch.Lap;
-import ashes.of.bomber.core.stopwatch.Stopwatch;
 import ashes.of.bomber.sink.Sink;
 import ashes.of.datadog.client.DatadogClient;
 
@@ -18,34 +17,33 @@ public class DatadogSink implements Sink {
         this.client = client;
     }
 
+    @Override
+    public void afterEachLap(Context context, Lap.Record record) {
+        String error = Optional.ofNullable(record.getError())
+                .orElse("");
+
+        client.timer("bomber_stopwatch_laps")
+                .tag("stage",    context.getStage().name())
+                .tag("testCase", context.getTestCase())
+                .tag("test",     context.getTest())
+                .tag("thread",   context.getThread())
+                .tag("error",    error)
+                .tag("label",    record.getLabel())
+                .nanos(record.getElapsed());
+    }
 
     @Override
-    public void afterEach(Context context, long elapsed, Stopwatch stopwatch, @Nullable Throwable throwable) {
+    public void afterEachTest(Context context, long elapsed, @Nullable Throwable throwable) {
         String error = Optional.ofNullable(throwable)
                 .map(Throwable::getMessage)
                 .orElse("");
 
         client.timer("bomber_tests")
-                .tag("stage", context.getStage().name())
+                .tag("stage",    context.getStage().name())
                 .tag("testCase", context.getTestCase())
-                .tag("test", context.getTest())
-                .tag("thread", context.getThread())
-                .tag("error", error)
+                .tag("test",     context.getTest())
+                .tag("thread",   context.getThread())
+                .tag("error",    error)
                 .nanos(elapsed);
-
-        stopwatch.laps().forEach((name, lap) -> writeLap(context, name, lap));
-    }
-
-
-    private void writeLap(Context context, String name, Lap lap) {
-        lap.records().forEach(record -> {
-            client.timer("bomber_stopwatch_laps")
-                    .tag("stage", context.getStage().name())
-                    .tag("testCase", context.getTestCase())
-                    .tag("test", context.getTest())
-                    .tag("thread", context.getThread())
-                    .tag("lap", name)
-                    .nanos(record);
-        });
     }
 }

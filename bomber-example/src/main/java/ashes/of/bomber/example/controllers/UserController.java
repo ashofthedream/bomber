@@ -25,6 +25,7 @@ public class UserController {
 
     @GetMapping("/users/{id}")
     public ResponseEntity<User> getUser(@PathVariable("id") Long id) {
+
         sleepQuietlyAround(20);
 
         if (withProbability(0.05))
@@ -74,7 +75,7 @@ public class UserController {
             double spread = time * Math.max(0.0, Math.min(sp, 1.0));
             double timeout = time + random.nextDouble() * spread * 2 - spread;
 
-            log.info("timeout: {}, val: {}", Math.round(timeout), spread);
+            log.trace("timeout: {}, spread: {}", Math.round(timeout), spread);
             Thread.sleep(Math.round(timeout));
         } catch (InterruptedException e) {
             log.error("interrupted", e);

@@ -3,7 +3,7 @@ package ashes.of.bomber.sink;
 import ashes.of.bomber.core.Context;
 import ashes.of.bomber.core.Settings;
 import ashes.of.bomber.core.Stage;
-import ashes.of.bomber.core.stopwatch.Stopwatch;
+import ashes.of.bomber.core.stopwatch.Lap;
 
 import javax.annotation.Nullable;
 import java.time.Instant;
@@ -25,11 +25,18 @@ public interface Sink {
      * Invokes after test invocation
      *
      * @param context test context
-     * @param elapsed elapsed time in nanoseconds
-     * @param stopwatch stopwatch used in test
+     * @param record  lap record
+     */
+    default void afterEachLap(Context context, Lap.Record record) {}
+
+    /**
+     * Invokes after test invocation
+     *
+     * @param context   test context
+     * @param elapsed   elapsed time in nanoseconds
      * @param throwable thrown exception, if methods throws an exception
      */
-    default void afterEach(Context context, long elapsed, Stopwatch stopwatch, @Nullable Throwable throwable) {}
+    default void afterEachTest(Context context, long elapsed, @Nullable Throwable throwable) {}
 
     /**
      * Invokes after all tests then stage ends
