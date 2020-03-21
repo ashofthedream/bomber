@@ -34,7 +34,7 @@ public class Watchdog {
             startLatch.await(60, SECONDS);
         } catch (InterruptedException e) {
             log.error("watchdog stage: {}, testCase: {}. Start latch is broken, check the count on the end",
-                    runner.getState().getStage(), runner.getState().getTestCase());
+                    runner.getState().getStage(), runner.getState().getTestSuite());
         }
 
         while (true) {
@@ -56,7 +56,7 @@ public class Watchdog {
     public void startInNewThread() {
         Thread thread = new Thread(this::watch);
         thread.setDaemon(true);
-        thread.setName(String.format("%s-watchdog", runner.getState().getTestCase()));
+        thread.setName(String.format("%s-watchdog", runner.getState().getTestSuite()));
         thread.start();
     }
 }

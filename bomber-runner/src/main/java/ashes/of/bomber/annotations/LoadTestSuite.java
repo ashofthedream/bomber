@@ -5,13 +5,17 @@ import java.util.concurrent.TimeUnit;
 
 
 /**
- * Enable warm-up stage and defines settings for it
+ * Marks class as load test suite and defines settings for load test stage
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-@Inherited
-public @interface Warmup {
+public @interface LoadTestSuite {
+
+    /**
+     * @return test suite name
+     */
+    String name() default "";
 
     /**
      * @return test time
@@ -38,6 +42,8 @@ public @interface Warmup {
      */
     long threadInvocations() default Long.MAX_VALUE;
 
-
-    boolean disabled() default false;
+    /**
+     * @return indicates that test suite will be shared around all test threads
+     */
+    boolean shared() default false;
 }

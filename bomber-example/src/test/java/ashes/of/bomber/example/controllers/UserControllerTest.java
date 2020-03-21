@@ -1,12 +1,13 @@
 package ashes.of.bomber.example.controllers;
 
 import ashes.of.bomber.annotations.*;
-import ashes.of.bomber.builder.TestCaseBuilder;
 import ashes.of.bomber.builder.TestSuiteBuilder;
+import ashes.of.bomber.builder.TestAppBuilder;
 import ashes.of.bomber.core.Settings;
 import ashes.of.bomber.core.limiter.Limiter;
 import ashes.of.bomber.core.stopwatch.Stopwatch;
 import ashes.of.bomber.core.stopwatch.Clock;
+import ashes.of.bomber.sink.histo.HistogramSink;
 import ashes.of.bomber.sink.histo.HistogramTimelinePrinter;
 import ashes.of.bomber.sink.histo.HistogramTimelineSink;
 import ashes.of.bomber.sink.Log4jSink;
@@ -32,9 +33,9 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 public class UserControllerTest {
     private static final Logger log = LogManager.getLogger();
 
-    @Limit(time = 5)
-    @LoadTestCase(name = "example-test", time = 20)
-    @Warmup(disabled = true)
+    @Throttle(time = 5)
+    @LoadTestSuite(name = "example-test", time = 20)
+    @WarmUp(disabled = true)
     @Baseline(disabled = true)
     public static class UserControllerLoadTest {
         private final Random random = new Random();
@@ -84,8 +85,8 @@ public class UserControllerTest {
             log.debug("getUsers: {}", response.statusCode());
         }
 
-        public void getUsersSubscribe(Clock stopwatch) {
-            Stopwatch lap = stopwatch.stopwatch("getUsers");
+        public void getUsersSubscribe(Clock clock) {
+            Stopwatch sw = clock.stopwatch("getUsers");
             webClient.get()
                     .uri("/users/{id}", 1 + random.nextInt(1000))
                     .exchange()
@@ -95,10 +96,10 @@ public class UserControllerTest {
                     })
                     .subscribe(response -> {
                         log.debug("getUsers success: {}", response.statusCode());
-                        lap.success();
+                        sw.success();
                     }, throwable -> {
                         log.debug("getUsers failure", throwable);
-                        lap.fail(throwable);
+                        sw.fail(throwable);
                     });
         }
     }
@@ -109,15 +110,21 @@ public class UserControllerTest {
 
     @Test
     public void performanceTestWithBuilder() throws Exception {
+        WebClient webClient = WebClient.builder()
+                .baseUrl("http://localhost:" + port)
+                .build();
+
         HistogramTimelinePrinter printer = new HistogramTimelinePrinter(System.out, label -> !label.contains("getUsersSubscribe"));
 
         HistogramTimelineSink timeSink = new HistogramTimelineSink(printer, ChronoUnit.SECONDS);
-        new TestSuiteBuilder()
+        new TestAppBuilder()
                 // log all times to console via log4j and HdrHistogram
 //                .sink(new Log4jSink())
-                .sink(timeSink)
+//                .sink(timeSink)
+                .sink(new HistogramSink())
                 .watcher(new ProgressWatcher())
-                .limiter(Limiter.withRate(1, 100))
+                .sharedLimiter(Limiter.withRate(1, 100))
+
                 // disabled baseline and warm-up stages
                 .settings(b -> b
                         .baseline(Settings::disabled)
@@ -127,21 +134,21 @@ public class UserControllerTest {
                                 .time(10_000)))
 
                 // add example test case via static init method
-                .addBuilder(this::init)
+                .createSuite(this::cteateUserControllerLoadTestSuite)
                 .build()
                 .run();
 
         Thread.sleep(10_000);
     }
 
-    private void init(TestCaseBuilder<UserControllerLoadTest> builder) {
+    private void cteateUserControllerLoadTestSuite(TestSuiteBuilder<UserControllerLoadTest> builder) {
         WebClient webClient = WebClient.builder()
                 .baseUrl("http://localhost:" + port)
                 .build();
 
-        builder.name("example_test")
-                .testCase(() -> new UserControllerLoadTest(webClient))
-//                .beforeAll(UserControllerLoadTest::beforeAll)
+        builder .name("example_test")
+                .instance(() -> new UserControllerLoadTest(webClient))
+                .beforeAll(UserControllerLoadTest::beforeAll)
 //                .beforeEach(UserControllerLoadTest::beforeEach)
 //                .test("getUserById", UserControllerLoadTest::getUserById)
 //                .test("getUsersBlock", UserControllerLoadTest::getUsersBlock)
@@ -154,12 +161,16 @@ public class UserControllerTest {
     @Test
     @Ignore
     public void runAnnotationsExample() {
-        new TestSuiteBuilder()
+        WebClient webClient = WebClient.builder()
+                .baseUrl("http://localhost:" + port)
+                .build();
+
+        new TestAppBuilder()
                 .sink(new Log4jSink())
                 .sink(new HistogramTimelineSink())
 
                 // add example test case via annotations
-                .addClass(UserControllerLoadTest.class)
+                .testSuiteClass(UserControllerLoadTest.class, new Class[] { WebClient.class }, webClient)
                 .build()
                 .run();
     }

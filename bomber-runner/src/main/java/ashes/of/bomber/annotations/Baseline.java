@@ -23,6 +23,5 @@ public @interface Baseline {
      */
     TimeUnit timeUnit() default TimeUnit.SECONDS;
 
-
     boolean disabled() default false;
 }

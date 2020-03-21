@@ -10,23 +10,23 @@ public class State {
 
     private final Stage stage;
     private final Settings settings;
-    private final String testCase;
+    private final String testSuite;
 
     private volatile Instant startTime = Instant.EPOCH;
 
     private final AtomicLong totalRemainInvs;
     private final LongAdder errorCount = new LongAdder();
 
-    public State(Stage stage, Settings settings, String testCase) {
+    public State(Stage stage, Settings settings, String testSuite) {
         this.stage = stage;
         this.settings = settings;
-        this.testCase = testCase;
+        this.testSuite = testSuite;
 
         this.totalRemainInvs = new AtomicLong(settings.getTotalInvocationsCount());
     }
 
-    public String getTestCase() {
-        return testCase;
+    public String getTestSuite() {
+        return testSuite;
     }
 
     public Stage getStage() {

@@ -1,11 +1,10 @@
 ### An annotation based framework for load testing
 
 ```java
-@LoadTestCase(value = "example-test", time = 30, threads = 8)
+@Throttle(threshold = 10)
+@LoadTestSuite(value = "example-test", time = 30, threads = 8)
 @WarmUp(disabled = true)
-@Baseline(disabled = true)
 public class ExampleTest {
-
     private ExampleHttpClient client;
 
     @BeforeAll
@@ -30,31 +29,39 @@ public class ExampleTest {
     }
 
     @LoadTest
-    public void oneSlowRequest(Stopwatch stopwatch) throws Exception {
+    public void oneSlowRequest() throws Exception {
         client.someSlowRequest();
     }
 
     @LoadTest
-    public void twoFastRequests(Stopwatch stopwatch) throws Exception {
+    public void twoFastRequests(Clock clock) throws Exception {
+        Stopwatch fast = clock.stopwatch("someFast");
         client.someFastRequest();
-        stopwatch.elapsed("someFastRequest");
-        client.anotherFastRequest();
-        stopwatch.elapsed("anotherFastRequest");
+        sw.success();
+
+        for (int i = 0; i < 3; i++) {
+            Stopwatch another = clock.stopwatch("anotherFast");
+            try {
+                client.anotherFastRequest();
+                another.success();
+            } catch (Exception e) {
+                another.fail(e);
+            }
+        }
     }
 
 
     public static void main(String... args) {
-        new TestSuite()
+        new TestAppBuilder()
 
                 // add data sinks
                 .sink(new Log4jSink())
                 .sink(new HistogramSink())
                 .sink(new YetAnotherTimeseriesDatabaseSink())
 
-                // add example test case via annotations
-                .testCase(ExampleTest.class)
-
-                // run all of tests
+                // add example test suite via annotations
+                .testSuiteClass(ExampleTest.class)
+                .build()
                 .run();
     }
 ```

@@ -7,15 +7,15 @@ import java.util.concurrent.TimeUnit;
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-public @interface Limit {
+public @interface Throttle {
 
     /**
-     * @return stage time
+     * @return number of permits per time interval
      */
-    int count() default 1;
+    int threshold() default 1;
 
     /**
-     * @return stage time
+     * @return time interval
      */
     long time() default 1;
 
@@ -23,4 +23,9 @@ public @interface Limit {
      * @return time unit for time
      */
     TimeUnit timeUnit() default TimeUnit.SECONDS;
+
+    /**
+     * @return indicates that limiter will be shared around all test threads
+     */
+    boolean shared() default false;
 }

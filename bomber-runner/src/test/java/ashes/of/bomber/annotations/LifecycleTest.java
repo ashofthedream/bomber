@@ -1,6 +1,6 @@
 package ashes.of.bomber.annotations;
 
-import ashes.of.bomber.builder.TestSuiteBuilder;
+import ashes.of.bomber.builder.TestAppBuilder;
 import ashes.of.bomber.sink.Log4jSink;
 import ashes.of.bomber.core.stopwatch.Stopwatch;
 import ashes.of.bomber.core.stopwatch.Clock;
@@ -17,8 +17,8 @@ public class LifecycleTest {
     private static final Logger log = LogManager.getLogger(LifecycleTest.class);
 
 
-    @LoadTestCase(time = 20, threadInvocations = 10, threads = 2)
-    @Warmup(disabled = true)
+    @LoadTestSuite(time = 20, threadInvocations = 10, threads = 2)
+    @WarmUp(disabled = true)
     @Baseline(disabled = true)
     public static class AllLifecycleMethodsTest {
 
@@ -74,9 +74,9 @@ public class LifecycleTest {
     public void testAllLifecycleMethods() {
         AllLifecycleMethodsTest test = new AllLifecycleMethodsTest();
 
-        new TestSuiteBuilder()
+        new TestAppBuilder()
                 .sink(new Log4jSink())
-                .addInstance(test)
+                .addTestSuite(test)
                 .build()
                 .run();
 
@@ -91,8 +91,8 @@ public class LifecycleTest {
 
 
 
-    @LoadTestCase(time = 20, threadInvocations = 10, threads = 2)
-    @Warmup(disabled = true)
+    @LoadTestSuite(time = 20, threadInvocations = 10, threads = 2)
+    @WarmUp(disabled = true)
     @Baseline(disabled = true)
     public static class BeforeAllAndAfterAllOnlyOnceTest {
 
@@ -122,9 +122,9 @@ public class LifecycleTest {
     public void beforeAllWithOnlyOnceFlagShouldBeInvokedOnlyOnce() {
         BeforeAllAndAfterAllOnlyOnceTest test = new BeforeAllAndAfterAllOnlyOnceTest();
 
-        new TestSuiteBuilder()
+        new TestAppBuilder()
                 .sink(new Log4jSink())
-                .addInstance(test)
+                .addTestSuite(test)
                 .build()
                 .run();
 
@@ -136,9 +136,9 @@ public class LifecycleTest {
     public void afterAllWithOnlyOnceFlagShouldBeInvokedOnlyOnce() {
         BeforeAllAndAfterAllOnlyOnceTest test = new BeforeAllAndAfterAllOnlyOnceTest();
 
-        new TestSuiteBuilder()
+        new TestAppBuilder()
                 .sink(new Log4jSink())
-                .addInstance(test)
+                .addTestSuite(test)
                 .build()
                 .run();
 

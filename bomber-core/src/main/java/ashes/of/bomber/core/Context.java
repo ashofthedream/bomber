@@ -6,16 +6,16 @@ import java.time.Instant;
 public class Context {
 
     private final Stage stage;
+    private final String testSuite;
     private final String testCase;
-    private final String test;
     private final String thread;
     private final long inv;
     private final Instant timestamp;
 
-    public Context(Stage stage, String testCase, String test, String thread, long inv, Instant timestamp) {
+    public Context(Stage stage, String testSuite, String testCase, String thread, long inv, Instant timestamp) {
         this.stage = stage;
+        this.testSuite = testSuite;
         this.testCase = testCase;
-        this.test = test;
         this.thread = thread;
         this.inv = inv;
         this.timestamp = timestamp;
@@ -25,12 +25,12 @@ public class Context {
         return stage;
     }
 
-    public String getTestCase() {
-        return testCase;
+    public String getTestSuite() {
+        return testSuite;
     }
 
-    public String getTest() {
-        return test;
+    public String getTestCase() {
+        return testCase;
     }
 
     public String getThread() {
@@ -49,8 +49,8 @@ public class Context {
     public String toString() {
         return "Context{" +
                 "stage=" + stage +
-                ", testCase='" + testCase + '\'' +
-                ", test='" + test + '\'' +
+                ", testCase='" + testSuite + '\'' +
+                ", test='" + testCase + '\'' +
                 ", thread='" + thread + '\'' +
                 ", inv=" + inv +
                 ", timestamp=" + timestamp +

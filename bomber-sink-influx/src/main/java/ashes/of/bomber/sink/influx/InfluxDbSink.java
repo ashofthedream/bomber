@@ -27,7 +27,7 @@ public class InfluxDbSink implements Sink {
     }
 
     @Override
-    public void onTimeRecorded(Context context, Record record) {
+    public void timeRecorded(Context context, Record record) {
         String error = Optional.ofNullable(record.getError())
                 .map(Throwable::getMessage)
                 .orElse("");
@@ -35,8 +35,8 @@ public class InfluxDbSink implements Sink {
         influxDB.write(Point.measurement(lapCollectionName)
                 .time(context.getTimestamp().toEpochMilli(), TimeUnit.MILLISECONDS)
                 .tag("stage",           context.getStage().name())
-                .tag("testCase",        context.getTestCase())
-                .tag("test",            context.getTest())
+                .tag("testCase",        context.getTestSuite())
+                .tag("test",            context.getTestCase())
                 .tag("thread",          context.getThread())
                 .tag("error",           error)
                 .tag("label",           record.getLabel())
@@ -46,13 +46,13 @@ public class InfluxDbSink implements Sink {
     }
 
     @Override
-    public void afterEachTest(Context context, long elapsed, @Nullable Throwable throwable) {
+    public void afterTestCase(Context context, long elapsed, @Nullable Throwable throwable) {
         String error = Optional.ofNullable(throwable).map(Throwable::getMessage).orElse("");
         influxDB.write(Point.measurement(testCollectionName)
                 .time(context.getTimestamp().toEpochMilli(), TimeUnit.MILLISECONDS)
                 .tag("stage",           context.getStage().name())
-                .tag("testCase",        context.getTestCase())
-                .tag("test",            context.getTest())
+                .tag("testCase",        context.getTestSuite())
+                .tag("test",            context.getTestCase())
                 .tag("thread",          context.getThread())
                 .tag("error",           error)
                 .addField("invocation", context.getInv())

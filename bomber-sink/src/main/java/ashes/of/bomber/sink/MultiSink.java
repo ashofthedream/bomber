@@ -18,22 +18,32 @@ public class MultiSink implements Sink {
     }
 
     @Override
-    public void beforeAll(Stage stage, String testCase, Instant startTime, Settings settings) {
-        sinks.forEach(sink -> sink.beforeAll(stage, testCase, startTime, settings));
+    public void afterStartUp() {
+        sinks.forEach(Sink::afterStartUp);
     }
 
     @Override
-    public void onTimeRecorded(Context context, Record record) {
-        sinks.forEach(sink -> sink.onTimeRecorded(context, record));
+    public void beforeTestSuite(Stage stage, String testCase, Instant startTime, Settings settings) {
+        sinks.forEach(sink -> sink.beforeTestSuite(stage, testCase, startTime, settings));
     }
 
     @Override
-    public void afterEachTest(Context context, long elapsed, @Nullable Throwable throwable) {
-        sinks.forEach(sink -> sink.afterEachTest(context, elapsed, throwable));
+    public void timeRecorded(Context context, Record record) {
+        sinks.forEach(sink -> sink.timeRecorded(context, record));
     }
 
     @Override
-    public void afterAll(Stage stage, String testCase, Instant startTime, Settings settings) {
-        sinks.forEach(sink -> sink.afterAll(stage, testCase, startTime, settings));
+    public void afterTestCase(Context context, long elapsed, @Nullable Throwable throwable) {
+        sinks.forEach(sink -> sink.afterTestCase(context, elapsed, throwable));
+    }
+
+    @Override
+    public void afterTestSuite(Stage stage, String testCase, Instant startTime, Settings settings) {
+        sinks.forEach(sink -> sink.afterTestSuite(stage, testCase, startTime, settings));
+    }
+
+    @Override
+    public void afterShutdown() {
+        sinks.forEach(Sink::afterShutdown);
     }
 }

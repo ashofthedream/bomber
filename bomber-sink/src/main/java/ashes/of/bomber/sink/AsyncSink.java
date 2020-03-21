@@ -25,23 +25,34 @@ public class AsyncSink implements Sink {
         this(sink, Executors.newSingleThreadExecutor());
     }
 
+
     @Override
-    public void beforeAll(Stage stage, String testCase, Instant startTime, Settings settings) {
-        ex.execute(() -> sink.beforeAll(stage, testCase, startTime, settings));
+    public void afterStartUp() {
+        ex.execute(sink::afterStartUp);
     }
 
     @Override
-    public void onTimeRecorded(Context context, Record record) {
-        ex.execute(() -> sink.onTimeRecorded(context, record));
+    public void beforeTestSuite(Stage stage, String testCase, Instant startTime, Settings settings) {
+        ex.execute(() -> sink.beforeTestSuite(stage, testCase, startTime, settings));
     }
 
     @Override
-    public void afterEachTest(Context context, long elapsed, @Nullable Throwable throwable) {
-        ex.execute(() -> sink.afterEachTest(context, elapsed, throwable));
+    public void timeRecorded(Context context, Record record) {
+        ex.execute(() -> sink.timeRecorded(context, record));
     }
 
     @Override
-    public void afterAll(Stage stage, String testCase, Instant startTime, Settings settings) {
-        ex.execute(() -> sink.afterAll(stage, testCase, startTime, settings));
+    public void afterTestCase(Context context, long elapsed, @Nullable Throwable throwable) {
+        ex.execute(() -> sink.afterTestCase(context, elapsed, throwable));
+    }
+
+    @Override
+    public void afterTestSuite(Stage stage, String testCase, Instant startTime, Settings settings) {
+        ex.execute(() -> sink.afterTestSuite(stage, testCase, startTime, settings));
+    }
+
+    @Override
+    public void afterShutdown() {
+        ex.execute(sink::afterShutdown);
     }
 }

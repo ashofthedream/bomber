@@ -18,15 +18,15 @@ public class DatadogSink implements Sink {
     }
 
     @Override
-    public void onTimeRecorded(Context context, Record record) {
+    public void timeRecorded(Context context, Record record) {
         String error = Optional.ofNullable(record.getError())
                 .map(Throwable::getMessage)
                 .orElse("");
 
         client.timer("bomber_stopwatch_records")
                 .tag("stage",    context.getStage().name())
-                .tag("testCase", context.getTestCase())
-                .tag("test",     context.getTest())
+                .tag("testCase", context.getTestSuite())
+                .tag("test",     context.getTestCase())
                 .tag("thread",   context.getThread())
                 .tag("error",    error)
                 .tag("label",    record.getLabel())
@@ -34,15 +34,15 @@ public class DatadogSink implements Sink {
     }
 
     @Override
-    public void afterEachTest(Context context, long elapsed, @Nullable Throwable throwable) {
+    public void afterTestCase(Context context, long elapsed, @Nullable Throwable throwable) {
         String error = Optional.ofNullable(throwable)
                 .map(Throwable::getMessage)
                 .orElse("");
 
         client.timer("bomber_tests")
                 .tag("stage",    context.getStage().name())
-                .tag("testCase", context.getTestCase())
-                .tag("test",     context.getTest())
+                .tag("testCase", context.getTestSuite())
+                .tag("test",     context.getTestCase())
                 .tag("thread",   context.getThread())
                 .tag("error",    error)
                 .nanos(elapsed);

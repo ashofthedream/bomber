@@ -10,11 +10,9 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Map;
 import java.util.NavigableMap;
-import java.util.TreeMap;
 import java.util.function.Predicate;
 
 
-// todo add overall diagrams
 public class HistogramTimelinePrinter {
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss.S")
             .withZone(ZoneId.systemDefault());
@@ -35,10 +33,7 @@ public class HistogramTimelinePrinter {
         tests.forEach((name, stats) -> printTestStats(name, stats.timeline, resolution));
     }
 
-    private void printTestStats(String test, NavigableMap<Instant, NavigableMap<String, HistogramTimelineSink.TimeAndErrors>> timeline, ChronoUnit resolution) {
-
-        Map<String, Histogram> overallByLabel = new TreeMap<>();
-
+    private void printTestStats(String test, NavigableMap<Instant, NavigableMap<String, HistogramAndErrors>> timeline, ChronoUnit resolution) {
         out.println();
         out.printf("test: %s, resolution: %s%n", test, resolution);
         out.printf("%-14s %-40s %16s %16s %16s %16s %16s %16s %16s %16s %16s%n", "time", "label", "median", "75.00", "90.00", "95.00", "99.00", "99.90", "max", "count", "errors");
@@ -47,7 +42,7 @@ public class HistogramTimelinePrinter {
         Instant end = timeline.lastKey();
 
         while (time.isBefore(end) || time.equals(end)) {
-            NavigableMap<String, HistogramTimelineSink.TimeAndErrors> times = timeline.get(time);
+            NavigableMap<String, HistogramAndErrors> times = timeline.get(time);
             printForTime(time, times);
 
             time = time.plus(resolution.getDuration());
@@ -57,7 +52,7 @@ public class HistogramTimelinePrinter {
         out.println();
     }
 
-    private void printForTime(Instant ts, @Nullable NavigableMap<String, HistogramTimelineSink.TimeAndErrors> times) {
+    private void printForTime(Instant ts, @Nullable NavigableMap<String, HistogramAndErrors> times) {
         if (times == null) {
             printEmpty(ts);
             return;

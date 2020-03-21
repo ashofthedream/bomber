@@ -5,17 +5,13 @@ import java.util.concurrent.TimeUnit;
 
 
 /**
- * Marks class as load test case and defines settings fot load test stage
+ * Enable warm-up stage and defines settings for it
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-public @interface LoadTestCase {
-
-    /**
-     * @return test case name
-     */
-    String name() default "";
+@Inherited
+public @interface WarmUp {
 
     /**
      * @return test time
@@ -43,8 +39,5 @@ public @interface LoadTestCase {
     long threadInvocations() default Long.MAX_VALUE;
 
 
-    /**
-     * @return should this test run in concurrent mode (one instance shared around all test threads)
-     */
-    boolean concurrent() default false;
+    boolean disabled() default false;
 }
