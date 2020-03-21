@@ -9,6 +9,9 @@ import ashes.of.bomber.core.stopwatch.Clock;
 import ashes.of.bomber.core.stopwatch.Stopwatch;
 import ashes.of.bomber.sink.histo.HistogramTimelinePrinter;
 import ashes.of.bomber.sink.histo.HistogramTimelineSink;
+import ashes.of.bomber.squadron.BarrierBuilder;
+import ashes.of.bomber.squadron.NoBarrier;
+import ashes.of.bomber.squadron.zookeeper.ZookeeperBarrierBuilder;
 import ashes.of.bomber.watcher.ProgressWatcher;
 import lombok.SneakyThrows;
 import org.apache.logging.log4j.LogManager;
@@ -80,12 +83,14 @@ public class UserControllerLoadTest {
     }
 
     private static int port = 8080;
+    private static int members = 1;
 
     public static void main(String... args) {
         port = args.length > 0 ? Integer.parseInt(args[0]) : 8080;
+        members = args.length > 1 ? Integer.parseInt(args[1]) : 1;
 
-//        runTestApp();
-        runTestSuite();
+        runTestApp(members);
+//        runTestSuite();
     }
 
     private static void runTestSuite() {
@@ -114,16 +119,19 @@ public class UserControllerLoadTest {
                 .run();
     }
 
-    private static void runTestApp() {
+    private static void runTestApp(int members) {
         HistogramTimelinePrinter printer = new HistogramTimelinePrinter(System.out, label -> !label.contains("UserController.getUsersAsync"));
         HistogramTimelineSink timeSink = new HistogramTimelineSink(printer, ChronoUnit.SECONDS);
+
+        BarrierBuilder barrier = members > 1 ? new ZookeeperBarrierBuilder().members(members) : new NoBarrier.Builder();
+
         new TestAppBuilder()
                 // log all times to console via log4j and HdrHistogram
 //                .sink(new Log4jSink())
-//                .sink(timeSink)
                 .sink(timeSink)
-                .watcher(3000, new ProgressWatcher())
-                .limiter(Limiter.withRate(1, 100))
+                .barrier(barrier)
+                .watcher(1000, new ProgressWatcher())
+                .limiter(Limiter.withRate(1, 1000))
 
                 // disabled baseline and warm-up stages
                 .settings(b -> b

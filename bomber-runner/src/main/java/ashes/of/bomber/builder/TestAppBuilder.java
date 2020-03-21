@@ -131,6 +131,7 @@ public class TestAppBuilder {
         return addSuite(b);
     }
 
+
     public <T> TestAppBuilder testSuiteObject(T testSuite) {
         return testSuite((Class<T>) testSuite.getClass(), () -> testSuite);
     }
@@ -154,16 +155,16 @@ public class TestAppBuilder {
     }
 
     private <T> TestAppBuilder testSuite(Class<T> cls, Supplier<T> supplier) {
-        TestSuiteBuilder<T> b = new TestSuiteBuilder<T>(this);
-        b.instance(cls, supplier);
+        TestSuiteBuilder<T> builder = new TestSuiteBuilder<T>(this);
+        builder.instance(cls, supplier);
 
-        suites.add(b);
-        return this;
+        return addSuite(builder);
     }
 
 
     public TestApp build() {
         Preconditions.checkArgument(!suites.isEmpty(), "No test suites found");
+
 
         Environment env = new Environment(sinks, watchers, limiter, barrier);
         List<TestSuite<?>> suites = this.suites.stream()

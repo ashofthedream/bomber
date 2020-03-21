@@ -2,6 +2,7 @@ package ashes.of.bomber.squadron.zookeeper;
 
 import ashes.of.bomber.squadron.Barrier;
 import ashes.of.bomber.squadron.BarrierBuilder;
+import ashes.of.bomber.squadron.LocalCascadeBarrier;
 import com.google.common.base.Preconditions;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
@@ -13,7 +14,7 @@ import java.time.Duration;
 public class ZookeeperBarrierBuilder extends BarrierBuilder {
 
     private String url = "localhost:2181";
-    private int nodes = 1;
+    private int members = 1;
     private Duration awaitTime = Duration.ofMinutes(1);
 
 
@@ -22,8 +23,8 @@ public class ZookeeperBarrierBuilder extends BarrierBuilder {
         return this;
     }
 
-    public ZookeeperBarrierBuilder members(int nodes) {
-        this.nodes = nodes;
+    public ZookeeperBarrierBuilder members(int members) {
+        this.members = members;
         return this;
     }
 
@@ -34,7 +35,7 @@ public class ZookeeperBarrierBuilder extends BarrierBuilder {
 
 
     public Barrier build() {
-        Preconditions.checkArgument(nodes > 0, "Nodes should be greater than 0");
+        Preconditions.checkArgument(members > 0, "Nodes should be greater than 0");
         Preconditions.checkNotNull(awaitTime, "awaitTime should not be null");
 
         CuratorFramework cf = CuratorFrameworkFactory.builder()
@@ -44,6 +45,6 @@ public class ZookeeperBarrierBuilder extends BarrierBuilder {
 
         cf.start();
 
-        return new LocalDelegateBarrier(workers, new ZookeeperBarrier(cf, nodes, awaitTime));
+        return new LocalCascadeBarrier(workers, new ZookeeperBarrier(cf, members, awaitTime));
     }
 }

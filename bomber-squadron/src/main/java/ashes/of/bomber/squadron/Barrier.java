@@ -5,9 +5,12 @@ import ashes.of.bomber.core.Stage;
 
 
 public interface Barrier {
-    default void init(String name, Settings settings) {}
-    default void stageStart(Stage stage) {}
-    default void testStart(String test) {}
-    default void testFinish(String test) {}
-    default void stageLeave(Stage stage) {}
+
+    default void enterSuite(Stage stage, String testSuite, Settings settings) {}
+
+    default void enterCase(Stage stage, String testSuite, String testCase) {}
+
+    default void leaveCase(Stage stage, String testSuite, String testCase) {}
+
+    default void leaveSuite(Stage stage, String testSuite, Settings settings) {}
 }

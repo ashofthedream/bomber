@@ -31,12 +31,12 @@ public @interface WarmUp {
     /**
      * @return number of total invocations for all threads
      */
-    long totalInvocations() default Long.MAX_VALUE;
+    long totalInvocations() default 1_000_000_000;
 
     /**
      * @return number of invocations per each thread.
      */
-    long threadInvocations() default Long.MAX_VALUE;
+    long threadInvocations() default 1_000_000_000;
 
 
     boolean disabled() default false;

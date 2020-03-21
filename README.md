@@ -66,4 +66,5 @@ public class ExampleTest {
                 .build()
                 .run();
     }
+}
 ```

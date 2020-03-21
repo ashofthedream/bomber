@@ -82,11 +82,13 @@ public class State {
     }
 
     public long getCaseRemainTime() {
-        return (testCaseStartTime.toEpochMilli() + settings.getTime().toMillis()) - System.currentTimeMillis();
+        long now = System.currentTimeMillis();
+        return ((isCaseStated() ? testCaseStartTime.toEpochMilli() : now) + settings.getTime().toMillis()) - now;
     }
 
     public long getCaseElapsedTime() {
-        return System.currentTimeMillis() - testCaseStartTime.toEpochMilli();
+        long now = System.currentTimeMillis();
+        return now - (isCaseStated() ? testCaseStartTime.toEpochMilli() : now);
     }
 
     public long getSuiteElapsedTime() {

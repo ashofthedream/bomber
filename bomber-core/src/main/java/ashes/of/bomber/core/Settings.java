@@ -27,12 +27,12 @@ public class Settings {
     /**
      * Invocations count per each thread
      */
-    private long threadInvocationsCount = Long.MAX_VALUE;
+    private long threadInvocationsCount = 1_000_000_000;
 
     /**
      * Overall invocations count
      */
-    private long totalInvocationsCount = Long.MAX_VALUE;
+    private long totalInvocationsCount = 1_000_000_000;
 
 
     public Settings(Settings settings) {
