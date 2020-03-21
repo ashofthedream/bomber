@@ -2,8 +2,8 @@ package ashes.of.bomber.annotations;
 
 import ashes.of.bomber.builder.TestSuiteBuilder;
 import ashes.of.bomber.sink.Log4jSink;
-import ashes.of.bomber.core.stopwatch.Lap;
 import ashes.of.bomber.core.stopwatch.Stopwatch;
+import ashes.of.bomber.core.stopwatch.Clock;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Test;
@@ -61,8 +61,8 @@ public class LifecycleTest {
         }
 
         @LoadTest
-        public void testB(Stopwatch stopwatch) {
-            Lap lap = stopwatch.lap("testB-lap-1");
+        public void testB(Clock stopwatch) {
+            Stopwatch lap = stopwatch.stopwatch("testB-lap-1");
             log.debug("testB");
             lap.success();
             testB.incrementAndGet();

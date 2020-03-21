@@ -3,7 +3,7 @@ package ashes.of.bomber.builder;
 import ashes.of.bomber.core.limiter.Limiter;
 import ashes.of.bomber.sink.Sink;
 import ashes.of.bomber.squadron.BarrierBuilder;
-import ashes.of.bomber.squadron.NoBarrier;
+import ashes.of.bomber.watcher.Watcher;
 import com.google.common.base.Preconditions;
 
 import java.util.ArrayList;
@@ -12,17 +12,13 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 
-public class TestSuiteBuilder {
+public class TestSuiteBuilder extends EnvironmentBuilder {
 
     /**
      * Test cases for run
      */
     private final List<TestCaseBuilder<?>> testCases = new ArrayList<>();
-    private final List<Sink> sinks = new ArrayList<>();
     private SettingsBuilder settings = new SettingsBuilder();
-
-    private Supplier<Limiter> limiter = Limiter::alwaysPermit;
-    private BarrierBuilder barrier = new NoBarrier.Builder();
 
     public TestSuiteBuilder settings(SettingsBuilder settings) {
         this.settings = settings;
@@ -68,13 +64,23 @@ public class TestSuiteBuilder {
         return this;
     }
 
+    public TestSuiteBuilder watcher(Watcher watcher) {
+        this.watchers.add(watcher);
+        return this;
+    }
+
+    public TestSuiteBuilder watchers(List<Watcher> watcher) {
+        this.watchers.addAll(watcher);
+        return this;
+    }
 
     private <T> TestCaseBuilder<T> newTestCase() {
         return new TestCaseBuilder<T>()
                 .barrier(barrier)
                 .settings(settings)
                 .limiter(limiter)
-                .sinks(sinks);
+                .sinks(sinks)
+                .watchers(watchers);
     }
 
     public <T> TestSuiteBuilder addBuilder(TestCaseBuilder<T> builder) {

@@ -31,7 +31,7 @@ public class UserController {
         if (withProbability(0.05))
             sleepQuietlyAround(100);
 
-        if (withProbability(0.001))
+        if (withProbability(0.01))
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 
         User user = users.computeIfAbsent(id, k -> {

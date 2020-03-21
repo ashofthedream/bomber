@@ -1,7 +1,7 @@
 package ashes.of.bomber.sink.influx;
 
 import ashes.of.bomber.core.Context;
-import ashes.of.bomber.core.stopwatch.Lap;
+import ashes.of.bomber.core.stopwatch.Record;
 import ashes.of.bomber.sink.Sink;
 import org.influxdb.InfluxDB;
 import org.influxdb.dto.Point;
@@ -23,12 +23,15 @@ public class InfluxDbSink implements Sink {
     }
 
     public InfluxDbSink(InfluxDB influxDB) {
-        this(influxDB, "bomber_stopwatch_laps", "bomber_tests");
+        this(influxDB, "bomber_stopwatch_records", "bomber_tests");
     }
 
     @Override
-    public void afterEachLap(Context context, Lap.Record record) {
-        String error = Optional.ofNullable(record.getError()).orElse("");
+    public void onTimeRecorded(Context context, Record record) {
+        String error = Optional.ofNullable(record.getError())
+                .map(Throwable::getMessage)
+                .orElse("");
+
         influxDB.write(Point.measurement(lapCollectionName)
                 .time(context.getTimestamp().toEpochMilli(), TimeUnit.MILLISECONDS)
                 .tag("stage",           context.getStage().name())

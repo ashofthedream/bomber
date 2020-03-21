@@ -1,38 +1,39 @@
 package ashes.of.bomber.core.stopwatch;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import javax.annotation.Nullable;
 import java.util.function.Consumer;
-
 
 public class Stopwatch {
 
-    private final long init = System.nanoTime();
-    private final Map<String, Lap> laps = new ConcurrentHashMap<>();
-    private final Consumer<Lap.Record> consumer;
+    private final long ts = System.nanoTime();
 
-    public Stopwatch(Consumer<Lap.Record> consumer) {
-        this.consumer = consumer;
+    private final String label;
+    private final Consumer<Record> timeRecorded;
+
+    public Stopwatch(String label, Consumer<Record> timeRecorded) {
+        this.label = label;
+        this.timeRecorded = timeRecorded;
     }
 
-    public long elapsed() {
-        return System.nanoTime() - init;
+
+    public Record success() {
+        Record record = new Record(label, this.ts, System.nanoTime() - this.ts, true, null);
+        timeRecorded.accept(record);
+        return record;
     }
 
-    /**
-     * Creates new lap with specified label
-     *
-     * @param label label for lap
-     * @return created lap
-     */
-    public Lap lap(String label) {
-        return laps.computeIfAbsent(label, k -> new Lap(k, consumer));
+    public Record fail(@Nullable Throwable th) {
+        Record record = new Record(label, this.ts, System.nanoTime() - this.ts, false, th);
+        timeRecorded.accept(record);
+        return record;
     }
 
-    /**
-     * @return laps by label
-     */
-    public Map<String, Lap> laps() {
-        return laps;
+    public Record fail() {
+        return fail(null);
+    }
+
+    @Override
+    public String toString() {
+        return "Stopwatch{" + label + "}";
     }
 }

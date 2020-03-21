@@ -2,16 +2,17 @@ package ashes.of.bomber.builder;
 
 import ashes.of.bomber.core.Settings;
 import ashes.of.bomber.core.Stage;
+import ashes.of.bomber.core.State;
 import ashes.of.bomber.core.limiter.Limiter;
 import ashes.of.bomber.sink.Sink;
 import ashes.of.bomber.squadron.BarrierBuilder;
-import ashes.of.bomber.squadron.NoBarrier;
 import ashes.of.bomber.methods.LifeCycleMethod;
 import ashes.of.bomber.methods.TestNoArgsMethod;
 import ashes.of.bomber.runner.*;
-import ashes.of.bomber.methods.TestWithStopwatchMethod;
+import ashes.of.bomber.methods.TestWithClockMethod;
 import ashes.of.bomber.annotations.*;
-import ashes.of.bomber.core.stopwatch.Stopwatch;
+import ashes.of.bomber.core.stopwatch.Clock;
+import ashes.of.bomber.watcher.Watcher;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import org.apache.logging.log4j.LogManager;
@@ -28,7 +29,7 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 
-public class TestCaseBuilder<T> {
+public class TestCaseBuilder<T> extends EnvironmentBuilder {
     private static final Logger log = LogManager.getLogger();
 
     private final List<LifeCycleMethod<T>> beforeAll = new ArrayList<>();
@@ -36,19 +37,11 @@ public class TestCaseBuilder<T> {
     private final List<LifeCycleMethod<T>> afterEach = new ArrayList<>();
     private final List<LifeCycleMethod<T>> afterAll = new ArrayList<>();
 
-    private final Map<String, TestWithStopwatchMethod<T>> tests = new LinkedHashMap<>();
-    private final Map<String, TestWithStopwatchMethod<T>> noop = ImmutableMap.of("noop", (test, stopwatch) -> {});
-
-    private final List<Sink> sinks = new ArrayList<>();
-    private final SettingsBuilder settings = new SettingsBuilder();
-
-    private BarrierBuilder barrier = new NoBarrier.Builder();
+    private final Map<String, TestWithClockMethod<T>> tests = new LinkedHashMap<>();
+    private final Map<String, TestWithClockMethod<T>> noop = ImmutableMap.of("noop", (test, stopwatch) -> {});
 
     private String name;
     private Supplier<T> testCase;
-    private Supplier<Limiter> limiter = Limiter::alwaysPermit;
-
-
 
     public SettingsBuilder settings() {
         return settings;
@@ -104,6 +97,16 @@ public class TestCaseBuilder<T> {
         return this;
     }
 
+    public TestCaseBuilder<T> watcher(Watcher watcher) {
+        this.watchers.add(watcher);
+        return this;
+    }
+
+    public TestCaseBuilder<T> watchers(List<Watcher> watcher) {
+        this.watchers.addAll(watcher);
+        return this;
+    }
+
 
     public TestCaseBuilder<T> testCase(Supplier<T> testCase) {
         Preconditions.checkNotNull(testCase, "TestCase is null");
@@ -143,7 +146,7 @@ public class TestCaseBuilder<T> {
         return test(name, (tc, stopwatch) -> test.run(tc));
     }
 
-    public TestCaseBuilder<T> test(String name, TestWithStopwatchMethod<T> test) {
+    public TestCaseBuilder<T> test(String name, TestWithClockMethod<T> test) {
         this.tests.put(name, test);
         return this;
     }
@@ -291,16 +294,16 @@ public class TestCaseBuilder<T> {
 
         MethodHandle mh = MethodHandles.lookup().unreflect(method);
 
-        AtomicReference<TestWithStopwatchMethod<T>> ref = new AtomicReference<>();
+        AtomicReference<TestWithClockMethod<T>> ref = new AtomicReference<>();
 
         test(name, (testCase, stopwatch) -> {
-            TestWithStopwatchMethod<T> proxy = ref.get();
+            TestWithClockMethod<T> proxy = ref.get();
             if (proxy == null) {
                 log.warn("init proxy method: {}", name);
                 Class<?>[] types = method.getParameterTypes();
                 Object[] params = Stream.of(types)
                         .map(param -> {
-                            if (param.equals(Stopwatch.class))
+                            if (param.equals(Clock.class))
                                 return stopwatch;
 
                             throw new RuntimeException("Skip test " + name + ": not allowed parameters (only Stopwatch is allowed)");
@@ -347,9 +350,16 @@ public class TestCaseBuilder<T> {
         try {
             log.info("Start testCase: {}", name);
 
-            new Runner<>(name, Stage.Baseline, settings.getBaseline(), sinks, beforeAll, beforeEach,  noop, testCase, afterEach, afterAll, Limiter::alwaysPermit, barrier).run();
-            new Runner<>(name, Stage.WarmUp,   settings.getWarmUp(),   sinks, beforeAll, beforeEach, tests, testCase, afterEach, afterAll, limiter, barrier).run();
-            new Runner<>(name, Stage.Test,     settings.getTest(),     sinks, beforeAll, beforeEach, tests, testCase, afterEach, afterAll, limiter, barrier).run();
+            Environment env = new Environment(sinks, watchers, limiter, barrier);
+            LifeCycle<T> lifeCycle = new LifeCycle<>(beforeAll, beforeEach, afterEach, afterAll);
+
+            State baseline = new State(Stage.Baseline, settings.getBaseline(), name);
+            State warmUp = new State(Stage.WarmUp, settings.getWarmUp(), name);
+            State test = new State(Stage.Test, settings.getTest(), name);
+
+            new Runner<>(baseline, env, lifeCycle, tests, testCase).run();
+            new Runner<>(warmUp,   env, lifeCycle, tests, testCase).run();
+            new Runner<>(test,     env, lifeCycle, tests, testCase).run();
 
             log.info("End testCase: {}", name);
         } catch (Exception e) {

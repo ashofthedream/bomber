@@ -1,7 +1,7 @@
 package ashes.of.bomber.sink.datadog;
 
 import ashes.of.bomber.core.Context;
-import ashes.of.bomber.core.stopwatch.Lap;
+import ashes.of.bomber.core.stopwatch.Record;
 import ashes.of.bomber.sink.Sink;
 import ashes.of.datadog.client.DatadogClient;
 
@@ -18,11 +18,12 @@ public class DatadogSink implements Sink {
     }
 
     @Override
-    public void afterEachLap(Context context, Lap.Record record) {
+    public void onTimeRecorded(Context context, Record record) {
         String error = Optional.ofNullable(record.getError())
+                .map(Throwable::getMessage)
                 .orElse("");
 
-        client.timer("bomber_stopwatch_laps")
+        client.timer("bomber_stopwatch_records")
                 .tag("stage",    context.getStage().name())
                 .tag("testCase", context.getTestCase())
                 .tag("test",     context.getTest())

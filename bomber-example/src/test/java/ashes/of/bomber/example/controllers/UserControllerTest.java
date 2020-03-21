@@ -5,10 +5,12 @@ import ashes.of.bomber.builder.TestCaseBuilder;
 import ashes.of.bomber.builder.TestSuiteBuilder;
 import ashes.of.bomber.core.Settings;
 import ashes.of.bomber.core.limiter.Limiter;
-import ashes.of.bomber.core.stopwatch.Lap;
 import ashes.of.bomber.core.stopwatch.Stopwatch;
-import ashes.of.bomber.sink.HistogramSink;
+import ashes.of.bomber.core.stopwatch.Clock;
+import ashes.of.bomber.sink.histo.HistogramTimelinePrinter;
+import ashes.of.bomber.sink.histo.HistogramTimelineSink;
 import ashes.of.bomber.sink.Log4jSink;
+import ashes.of.bomber.watcher.ProgressWatcher;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Ignore;
@@ -20,6 +22,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.time.temporal.ChronoUnit;
 import java.util.Random;
 
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
@@ -81,17 +84,21 @@ public class UserControllerTest {
             log.debug("getUsers: {}", response.statusCode());
         }
 
-        public void getUsersSubscribe(Stopwatch stopwatch) {
-            Lap lap = stopwatch.lap("getUsers");
+        public void getUsersSubscribe(Clock stopwatch) {
+            Stopwatch lap = stopwatch.stopwatch("getUsers");
             webClient.get()
                     .uri("/users/{id}", 1 + random.nextInt(1000))
                     .exchange()
+                    .doOnNext(response -> {
+                        if (response.statusCode().isError())
+                            throw new RuntimeException("invalid request");
+                    })
                     .subscribe(response -> {
                         log.debug("getUsers success: {}", response.statusCode());
                         lap.success();
                     }, throwable -> {
                         log.debug("getUsers failure", throwable);
-                        lap.fail(throwable.getMessage());
+                        lap.fail(throwable);
                     });
         }
     }
@@ -101,12 +108,15 @@ public class UserControllerTest {
 
 
     @Test
-    public void performanceTestWithBuilder() {
+    public void performanceTestWithBuilder() throws Exception {
+        HistogramTimelinePrinter printer = new HistogramTimelinePrinter(System.out, label -> !label.contains("getUsersSubscribe"));
 
+        HistogramTimelineSink timeSink = new HistogramTimelineSink(printer, ChronoUnit.SECONDS);
         new TestSuiteBuilder()
                 // log all times to console via log4j and HdrHistogram
-                .sink(new Log4jSink())
-                .sink(new HistogramSink())
+//                .sink(new Log4jSink())
+                .sink(timeSink)
+                .watcher(new ProgressWatcher())
                 .limiter(Limiter.withRate(1, 100))
                 // disabled baseline and warm-up stages
                 .settings(b -> b
@@ -120,6 +130,8 @@ public class UserControllerTest {
                 .addBuilder(this::init)
                 .build()
                 .run();
+
+        Thread.sleep(10_000);
     }
 
     private void init(TestCaseBuilder<UserControllerLoadTest> builder) {
@@ -129,13 +141,14 @@ public class UserControllerTest {
 
         builder.name("example_test")
                 .testCase(() -> new UserControllerLoadTest(webClient))
-                .beforeAll(UserControllerLoadTest::beforeAll)
+//                .beforeAll(UserControllerLoadTest::beforeAll)
 //                .beforeEach(UserControllerLoadTest::beforeEach)
 //                .test("getUserById", UserControllerLoadTest::getUserById)
 //                .test("getUsersBlock", UserControllerLoadTest::getUsersBlock)
                 .test("getUsersSubscribe", UserControllerLoadTest::getUsersSubscribe)
 //                .afterEach(UserControllerLoadTest::afterEach)
-                .afterAll(UserControllerLoadTest::afterAll);
+//                .afterAll(UserControllerLoadTest::afterAll)
+        ;
     }
 
     @Test
@@ -143,7 +156,7 @@ public class UserControllerTest {
     public void runAnnotationsExample() {
         new TestSuiteBuilder()
                 .sink(new Log4jSink())
-                .sink(new HistogramSink())
+                .sink(new HistogramTimelineSink())
 
                 // add example test case via annotations
                 .addClass(UserControllerLoadTest.class)

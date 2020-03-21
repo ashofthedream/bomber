@@ -3,7 +3,7 @@ package ashes.of.bomber.sink;
 import ashes.of.bomber.core.Context;
 import ashes.of.bomber.core.Settings;
 import ashes.of.bomber.core.Stage;
-import ashes.of.bomber.core.stopwatch.Lap;
+import ashes.of.bomber.core.stopwatch.Record;
 
 import javax.annotation.Nullable;
 import java.time.Instant;
@@ -27,7 +27,7 @@ public interface Sink {
      * @param context test context
      * @param record  lap record
      */
-    default void afterEachLap(Context context, Lap.Record record) {}
+    default void onTimeRecorded(Context context, Record record) {}
 
     /**
      * Invokes after test invocation
