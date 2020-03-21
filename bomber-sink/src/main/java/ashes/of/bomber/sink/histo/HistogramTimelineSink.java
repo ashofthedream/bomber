@@ -62,7 +62,7 @@ public class HistogramTimelineSink implements Sink {
     }
 
     @Override
-    public void afterShutdown() {
+    public void shutDown() {
         printer.print(tests, resolution);
     }
 }

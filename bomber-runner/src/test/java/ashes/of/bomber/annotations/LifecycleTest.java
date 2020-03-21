@@ -76,7 +76,7 @@ public class LifecycleTest {
 
         new TestAppBuilder()
                 .sink(new Log4jSink())
-                .testSuite(test)
+                .testSuiteObject(test)
                 .build()
                 .run();
 
@@ -123,7 +123,7 @@ public class LifecycleTest {
 
         new TestAppBuilder()
                 .sink(new Log4jSink())
-                .testSuite(test)
+                .testSuiteObject(test)
                 .build()
                 .run();
 
@@ -137,7 +137,7 @@ public class LifecycleTest {
 
         new TestAppBuilder()
                 .sink(new Log4jSink())
-                .testSuite(test)
+                .testSuiteObject(test)
                 .build()
                 .run();
 

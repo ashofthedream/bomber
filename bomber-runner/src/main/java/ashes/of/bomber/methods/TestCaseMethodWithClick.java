@@ -6,6 +6,6 @@ import ashes.of.bomber.core.stopwatch.Clock;
  * Test method with {@link Clock}
  */
 @FunctionalInterface
-public interface TestCaseMethod<T> {
+public interface TestCaseMethodWithClick<T> {
     void run(T suite, Clock clock) throws Throwable;
 }

@@ -7,7 +7,6 @@ import ashes.of.bomber.core.Settings;
 import ashes.of.bomber.core.limiter.Limiter;
 import ashes.of.bomber.core.stopwatch.Clock;
 import ashes.of.bomber.core.stopwatch.Stopwatch;
-import ashes.of.bomber.sink.histo.HistogramSink;
 import ashes.of.bomber.sink.histo.HistogramTimelinePrinter;
 import ashes.of.bomber.sink.histo.HistogramTimelineSink;
 import ashes.of.bomber.watcher.ProgressWatcher;
@@ -85,8 +84,8 @@ public class UserControllerLoadTest {
     public static void main(String... args) {
         port = args.length > 0 ? Integer.parseInt(args[0]) : 8080;
 
-        runTestApp();
-//        runTestSuite();
+//        runTestApp();
+        runTestSuite();
     }
 
     private static void runTestSuite() {
@@ -95,14 +94,15 @@ public class UserControllerLoadTest {
                 .build();
 
         new TestSuiteBuilder<UserControllerLoadTest>()
+                .app(app -> app.sink(new HistogramTimelineSink()))
                 .name("UserController")
                 .settings(b -> b
                         .warmUp(Settings::disabled)
                         .test(settings -> settings
                                 .threadCount(1)
                                 .time(10_000)) )
-                .sink(new HistogramTimelineSink())
-                .sharedLimiter(Limiter.withRate(1, 1000))
+
+                .limiter(Limiter.withRate(1, 1000))
                 .instance(() -> new UserControllerLoadTest(webClient))
                 .beforeAll(UserControllerLoadTest::beforeAll)
 //                .beforeEach(UserControllerLoadTest::beforeEach)
@@ -115,15 +115,15 @@ public class UserControllerLoadTest {
     }
 
     private static void runTestApp() {
-        HistogramTimelinePrinter printer = new HistogramTimelinePrinter(System.out, label -> !label.contains("UserController"));
+        HistogramTimelinePrinter printer = new HistogramTimelinePrinter(System.out, label -> !label.contains("UserController.getUsersAsync"));
         HistogramTimelineSink timeSink = new HistogramTimelineSink(printer, ChronoUnit.SECONDS);
         new TestAppBuilder()
                 // log all times to console via log4j and HdrHistogram
 //                .sink(new Log4jSink())
 //                .sink(timeSink)
                 .sink(timeSink)
-                .watcher(new ProgressWatcher())
-                .sharedLimiter(Limiter.withRate(1, 100))
+                .watcher(3000, new ProgressWatcher())
+                .limiter(Limiter.withRate(1, 100))
 
                 // disabled baseline and warm-up stages
                 .settings(b -> b
@@ -148,7 +148,7 @@ public class UserControllerLoadTest {
                 .instance(() -> new UserControllerLoadTest(webClient))
                 .beforeAll(UserControllerLoadTest::beforeAll)
 //                .beforeEach(UserControllerLoadTest::beforeEach)
-//                .test("getUsersBlock", UserControllerLoadTest::getUserByIdSync)
+                .test("getUsersBlock", UserControllerLoadTest::getUserByIdSync)
                 .test("getUsersAsync", UserControllerLoadTest::getUserByIdAsync)
 //                .afterEach(UserControllerLoadTest::afterEach)
 //                .afterAll(UserControllerLoadTest::afterAll)

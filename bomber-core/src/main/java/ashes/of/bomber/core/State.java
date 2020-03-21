@@ -11,6 +11,7 @@ public class State {
     private final Stage stage;
     private final Settings settings;
     private final String testSuite;
+    private volatile String testCase;
 
     private volatile Instant testSuiteStartTime = Instant.EPOCH;
     private volatile Instant testCaseStartTime = Instant.EPOCH;
@@ -26,6 +27,10 @@ public class State {
 
     public String getTestSuite() {
         return testSuite;
+    }
+
+    public String getTestCase() {
+        return testCase;
     }
 
     public Stage getStage() {
@@ -55,8 +60,9 @@ public class State {
         return !testCaseStartTime.equals(Instant.EPOCH);
     }
 
-    public void startCaseIfNotStarted() {
+    public void startCaseIfNotStarted(String name) {
         if (!isCaseStated()) {
+            testCase = name;
             testCaseStartTime = Instant.now();
             testCaseRemainTotalInvocationCount.set(settings.getTotalInvocationsCount());
         }

@@ -7,7 +7,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -54,10 +53,6 @@ public class TestSuite<T> {
         return lifeCycle.testCases().keySet();
     }
 
-    public Report run() {
-        return new TestApp(env, Collections.singletonList(this))
-                .run();
-    }
 
     public List<State> run(TestApp app) {
         State warmUp = new State(Stage.WarmUp, this.warmUp, name);
@@ -66,8 +61,13 @@ public class TestSuite<T> {
         try {
             log.info("Start testSuite: {}", name);
 
+            app.setState(warmUp);
             new Runner<>(warmUp, env, lifeCycle).run();
+
+            app.setState(test);
             new Runner<>(test, env, lifeCycle).run();
+
+            app.setState(null);
         } catch (Exception e) {
             log.warn("Some shit happened testSuite: {}", name, e);
         }

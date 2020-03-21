@@ -65,6 +65,7 @@ public class TestCaseBuilderTest {
         AllLifecycleMethodsTest test = new AllLifecycleMethodsTest();
 
         new TestSuiteBuilder<AllLifecycleMethodsTest>()
+                .app(app -> app.sink(new Log4jSink()))
                 .name("testAllLifecycleMethods")
                 .sharedInstance(test)
                 .settings(s -> s
@@ -74,7 +75,6 @@ public class TestCaseBuilderTest {
                                 .time(20_000)
                                 .threadCount(2)
                                 .threadInvocationCount(10)))
-                .sink(new Log4jSink())
                 .beforeAll(AllLifecycleMethodsTest::beforeAll)
                 .beforeEach(AllLifecycleMethodsTest::beforeEach)
                 .test("testA", AllLifecycleMethodsTest::testA)
@@ -120,6 +120,7 @@ public class TestCaseBuilderTest {
         BeforeAllAndAfterAllOnlyOnceTest test = new BeforeAllAndAfterAllOnlyOnceTest();
 
         new TestSuiteBuilder<BeforeAllAndAfterAllOnlyOnceTest>()
+                .app(app -> app.sink(new Log4jSink()))
                 .name("beforeAllWithOnlyOnceShouldBeInvokedOnlyOnce")
                 .sharedInstance(test)
                 .settings(b -> b
@@ -129,7 +130,6 @@ public class TestCaseBuilderTest {
                                 .time(20_000)
                                 .threadCount(2)
                                 .threadInvocationCount(10)))
-                .sink(new Log4jSink())
                 .beforeAll(true, BeforeAllAndAfterAllOnlyOnceTest::beforeAll)
                 .test("test", BeforeAllAndAfterAllOnlyOnceTest::test)
                 .build()
@@ -144,6 +144,7 @@ public class TestCaseBuilderTest {
         BeforeAllAndAfterAllOnlyOnceTest test = new BeforeAllAndAfterAllOnlyOnceTest();
 
         new TestSuiteBuilder<BeforeAllAndAfterAllOnlyOnceTest>()
+                .app(app -> app.sink(new Log4jSink()))
                 .name("afterAllWithOnlyOnceShouldBeInvokedOnlyOnce")
                 .sharedInstance(test)
                 .settings(b -> b
@@ -153,7 +154,6 @@ public class TestCaseBuilderTest {
                                 .time(20_000)
                                 .threadCount(2)
                                 .threadInvocationCount(10)))
-                .sink(new Log4jSink())
                 .test("test", BeforeAllAndAfterAllOnlyOnceTest::test)
                 .afterAll(true, BeforeAllAndAfterAllOnlyOnceTest::afterAll)
                 .build()

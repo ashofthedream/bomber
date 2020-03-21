@@ -6,24 +6,33 @@ import ashes.of.bomber.runner.TestSuite;
 import ashes.of.bomber.runner.TestApp;
 import ashes.of.bomber.sink.Sink;
 import ashes.of.bomber.squadron.BarrierBuilder;
+import ashes.of.bomber.squadron.NoBarrier;
 import ashes.of.bomber.watcher.Watcher;
+import ashes.of.bomber.watcher.WatcherConfig;
 import com.google.common.base.Preconditions;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 
-public class TestAppBuilder extends EnvironmentBuilder {
+public class TestAppBuilder {
+
+    private final List<Sink> sinks = new ArrayList<>();
+    private final List<WatcherConfig> watchers = new ArrayList<>();
+    private SettingsBuilder settings = new SettingsBuilder();
+    private BarrierBuilder barrier = new NoBarrier.Builder();
+    private Supplier<Limiter> limiter = Limiter::alwaysPermit;
 
     /**
      * Test suites for run
      */
     private final List<TestSuiteBuilder<?>> suites = new ArrayList<>();
-    private SettingsBuilder settings = new SettingsBuilder();
+
 
     public TestAppBuilder settings(SettingsBuilder settings) {
         this.settings = settings;
@@ -35,21 +44,30 @@ public class TestAppBuilder extends EnvironmentBuilder {
         return this;
     }
 
+    public SettingsBuilder settings() {
+        return this.settings;
+    }
 
     public TestAppBuilder barrier(BarrierBuilder barrier) {
         this.barrier = barrier;
         return this;
     }
 
+
     /**
+     * Adds limiter which will be shared across all workers threads
+     *
      * @param limiter shared limiter
      * @return builder
      */
-    public TestAppBuilder sharedLimiter(Limiter limiter) {
+    public TestAppBuilder limiter(Limiter limiter) {
         return limiter(() -> limiter);
     }
 
     /**
+     * Adds limiter which will be created for each worker thread
+     * note: it may be shared if supplier will return same instance
+     *
      * @param limiter shared request limiter
      * @return builder
      */
@@ -57,6 +75,11 @@ public class TestAppBuilder extends EnvironmentBuilder {
         this.limiter = limiter;
         return this;
     }
+
+    public Supplier<Limiter> limiter() {
+        return limiter;
+    }
+
 
     public TestAppBuilder sink(Sink sink) {
         this.sinks.add(sink);
@@ -68,38 +91,47 @@ public class TestAppBuilder extends EnvironmentBuilder {
         return this;
     }
 
+
+    public TestAppBuilder watcher(long period, TimeUnit unit, Watcher watcher) {
+        this.watchers.add(new WatcherConfig(period, unit, watcher));
+        return this;
+    }
+
+    public TestAppBuilder watcher(long ms, Watcher watcher) {
+        return watcher(ms, TimeUnit.MILLISECONDS, watcher);
+    }
+
     public TestAppBuilder watcher(Watcher watcher) {
-        this.watchers.add(watcher);
+        return watcher(1000, watcher);
+    }
+
+    public TestAppBuilder watchers(long period, TimeUnit unit, List<Watcher> watchers) {
+        watchers.forEach(watcher -> watcher(period, unit, watcher));
         return this;
     }
 
-    public TestAppBuilder watchers(List<Watcher> watcher) {
-        this.watchers.addAll(watcher);
-        return this;
+    public TestAppBuilder watchers(long ms, List<Watcher> watchers) {
+        return watchers(ms, TimeUnit.MILLISECONDS, watchers);
     }
 
-    private <T> TestSuiteBuilder<T> newTestSuite() {
-        return new TestSuiteBuilder<T>()
-                .barrier(barrier)
-                .settings(settings)
-                .limiter(limiter)
-                .sinks(sinks)
-                .watchers(watchers);
+    public TestAppBuilder watchers(List<Watcher> watchers) {
+        return watchers(1000, watchers);
     }
 
-    public <T> TestAppBuilder testSuite(TestSuiteBuilder<T> builder) {
+
+    public <T> TestAppBuilder addSuite(TestSuiteBuilder<T> builder) {
         suites.add(builder);
         return this;
     }
 
     public <T> TestAppBuilder createSuite(Consumer<TestSuiteBuilder<T>> consumer) {
-        TestSuiteBuilder<T> b = newTestSuite();
+        TestSuiteBuilder<T> b = new TestSuiteBuilder<T>(this);
         consumer.accept(b);
 
-        return testSuite(b);
+        return addSuite(b);
     }
 
-    public <T> TestAppBuilder testSuite(T testSuite) {
+    public <T> TestAppBuilder testSuiteObject(T testSuite) {
         return testSuite((Class<T>) testSuite.getClass(), () -> testSuite);
     }
 
@@ -122,7 +154,7 @@ public class TestAppBuilder extends EnvironmentBuilder {
     }
 
     private <T> TestAppBuilder testSuite(Class<T> cls, Supplier<T> supplier) {
-        TestSuiteBuilder<T> b = newTestSuite();
+        TestSuiteBuilder<T> b = new TestSuiteBuilder<T>(this);
         b.instance(cls, supplier);
 
         suites.add(b);
@@ -135,8 +167,9 @@ public class TestAppBuilder extends EnvironmentBuilder {
 
         Environment env = new Environment(sinks, watchers, limiter, barrier);
         List<TestSuite<?>> suites = this.suites.stream()
-                .map(TestSuiteBuilder::build)
+                .map(b -> b.build(env))
                 .collect(Collectors.toList());
+
 
         return new TestApp(env, suites);
     }

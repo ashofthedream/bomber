@@ -14,7 +14,7 @@ public interface Sink {
     /**
      * Invokes then app starts
      */
-    default void afterStartUp() {}
+    default void startUp() {}
 
     /**
      * Invokes before all test then stage starts
@@ -56,5 +56,5 @@ public interface Sink {
     /**
      * Invokes then app
      */
-    default void afterShutdown() {}
+    default void shutDown() {}
 }

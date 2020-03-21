@@ -2,15 +2,12 @@ package ashes.of.bomber.builder;
 
 import ashes.of.bomber.core.Settings;
 import ashes.of.bomber.core.limiter.Limiter;
-import ashes.of.bomber.sink.Sink;
-import ashes.of.bomber.squadron.BarrierBuilder;
 import ashes.of.bomber.methods.LifeCycleMethod;
-import ashes.of.bomber.methods.TestCaseNoArgsMethod;
+import ashes.of.bomber.methods.TestCaseMethodNoArgs;
 import ashes.of.bomber.runner.*;
-import ashes.of.bomber.methods.TestCaseMethod;
+import ashes.of.bomber.methods.TestCaseMethodWithClick;
 import ashes.of.bomber.annotations.*;
 import ashes.of.bomber.core.stopwatch.Clock;
-import ashes.of.bomber.watcher.Watcher;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import org.apache.logging.log4j.LogManager;
@@ -28,81 +25,81 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 
-public class TestSuiteBuilder<T> extends EnvironmentBuilder {
+public class TestSuiteBuilder<T> {
     private static final Logger log = LogManager.getLogger();
+
+    private final TestAppBuilder app;
 
     private final List<LifeCycleMethod<T>> beforeAll = new ArrayList<>();
     private final List<LifeCycleMethod<T>> beforeEach = new ArrayList<>();
     private final List<LifeCycleMethod<T>> afterEach = new ArrayList<>();
     private final List<LifeCycleMethod<T>> afterAll = new ArrayList<>();
 
-    private final Map<String, TestCaseMethod<T>> testCases = new LinkedHashMap<>();
-    private final Map<String, TestCaseMethod<T>> noop = ImmutableMap.of("noop", (test, stopwatch) -> {});
+    private final Map<String, TestCaseMethodWithClick<T>> testCases = new LinkedHashMap<>();
+    private final Map<String, TestCaseMethodWithClick<T>> noop = ImmutableMap.of("noop", (test, stopwatch) -> {});
+
+    private Supplier<Limiter> limiter;
 
     private String name;
     private Supplier<T> testSuite;
+    private SettingsBuilder settings;
 
-    public SettingsBuilder settings() {
-        return settings;
+    public TestSuiteBuilder(TestAppBuilder app) {
+        this.app = app;
+        this.limiter = app.limiter();
+        this.settings = new SettingsBuilder(app.settings());
     }
 
+    public TestSuiteBuilder() {
+        this(new TestAppBuilder());
+    }
 
     public TestSuiteBuilder<T> name(String name) {
         this.name = name;
         return this;
     }
 
+    // todo used only for test reasons
+    @Deprecated
+    public TestSuiteBuilder<T> app(Consumer<TestAppBuilder> consumer) {
+        consumer.accept(app);
+        return this;
+    }
+
+    private SettingsBuilder settings() {
+        return settings;
+    }
 
     public TestSuiteBuilder<T> settings(Consumer<SettingsBuilder> builder) {
         builder.accept(settings);
         return this;
     }
 
-    public TestSuiteBuilder<T> settings(SettingsBuilder builder) {
-        settings.baseline(builder.getBaseline())
-                .warmUp(builder.getWarmUp())
-                .test(builder.getTest());
-
-
+    public TestSuiteBuilder<T> settings(SettingsBuilder settings) {
+        this.settings = new SettingsBuilder(settings);
         return this;
     }
 
-    public TestSuiteBuilder<T> barrier(BarrierBuilder barrier) {
-        this.barrier = barrier;
-        return this;
-    }
 
     /**
-     * @param limiter shared request limiter
+     * Adds limiter which will be shared across all workers threads
+     *
+     * @param limiter shared limiter
      * @return builder
      */
-    public TestSuiteBuilder<T> sharedLimiter(Limiter limiter) {
+    public TestSuiteBuilder<T> limiter(Limiter limiter) {
         return limiter(() -> limiter);
     }
 
+    /**
+     * Adds limiter which will be created for each worker thread
+     * note: it may be shared if supplier will return same instance
+     *
+     * @param limiter shared request limiter
+     * @return builder
+     */
     public TestSuiteBuilder<T> limiter(Supplier<Limiter> limiter) {
         this.limiter = limiter;
-        return this;
-    }
-
-
-    public TestSuiteBuilder<T> sink(Sink sink) {
-        this.sinks.add(sink);
-        return this;
-    }
-
-    public TestSuiteBuilder<T> sinks(List<Sink> sinks) {
-        this.sinks.addAll(sinks);
-        return this;
-    }
-
-    public TestSuiteBuilder<T> watcher(Watcher watcher) {
-        this.watchers.add(watcher);
-        return this;
-    }
-
-    public TestSuiteBuilder<T> watchers(List<Watcher> watcher) {
-        this.watchers.addAll(watcher);
         return this;
     }
 
@@ -141,11 +138,11 @@ public class TestSuiteBuilder<T> extends EnvironmentBuilder {
     }
 
 
-    public TestSuiteBuilder<T> test(String name, TestCaseNoArgsMethod<T> test) {
+    public TestSuiteBuilder<T> test(String name, TestCaseMethodNoArgs<T> test) {
         return test(name, (tc, stopwatch) -> test.run(tc));
     }
 
-    public TestSuiteBuilder<T> test(String name, TestCaseMethod<T> test) {
+    public TestSuiteBuilder<T> test(String name, TestCaseMethodWithClick<T> test) {
         this.testCases.put(name, test);
         return this;
     }
@@ -214,7 +211,7 @@ public class TestSuiteBuilder<T> extends EnvironmentBuilder {
         if (limit != null) {
             Supplier<Limiter> limiter = () -> Limiter.withRate(limit.threshold(), limit.time(), limit.timeUnit());
             if (limit.shared()) {
-                sharedLimiter(limiter.get());
+                limiter(limiter.get());
             } else {
                 limiter(limiter);
             }
@@ -303,10 +300,10 @@ public class TestSuiteBuilder<T> extends EnvironmentBuilder {
             return;
 
         MethodHandle mh = MethodHandles.lookup().unreflect(method);
-        AtomicReference<TestCaseMethod<T>> ref = new AtomicReference<>();
+        AtomicReference<TestCaseMethodWithClick<T>> ref = new AtomicReference<>();
 
         test(name, (suite, clock) -> {
-            TestCaseMethod<T> proxy = ref.get();
+            TestCaseMethodWithClick<T> proxy = ref.get();
             if (proxy == null) {
                 log.warn("init testCase: {} proxy method", name);
                 Class<?>[] types = method.getParameterTypes();
@@ -346,13 +343,17 @@ public class TestSuiteBuilder<T> extends EnvironmentBuilder {
         afterAll(afterAll.onlyOnce(), testCase -> mh.bindTo(testCase).invoke());
     }
 
+    public TestApp build() {
+        return this.app.addSuite(this)
+                .build();
+    }
 
-    public TestSuite<T> build() {
+    public TestSuite<T> build(Environment appEnv) {
         Preconditions.checkNotNull(name,     "name is null");
         Preconditions.checkNotNull(testSuite, "testCase is null");
-        Preconditions.checkNotNull(barrier,  "barrier is null");
+        Preconditions.checkNotNull(appEnv, "env is null");
 
-        Environment env = new Environment(sinks, watchers, limiter, barrier);
+        Environment env = new Environment(appEnv.getSinks(), appEnv.getWatchers(), limiter, appEnv.getBarrier());
         LifeCycle<T> lifeCycle = new LifeCycle<T>(testCases, testSuite, beforeEach, afterEach, afterAll, beforeAll);
 
         return new TestSuite<T>(name, env, lifeCycle, settings.getWarmUp(), settings.getTest());

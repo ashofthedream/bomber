@@ -39,20 +39,22 @@ public class ExampleTest {
         client.someFastRequest();
         sw.success();
 
-        for (int i = 0; i < 3; i++) {
-            Stopwatch another = clock.stopwatch("anotherFast");
-            try {
-                client.anotherFastRequest();
-                another.success();
-            } catch (Exception e) {
-                another.fail(e);
-            }
+        Stopwatch async = clock.stopwatch("async");
+        for (int i = 0; i < 3; i++) {            
+            client.asyncRequest()
+                    .whenComplete((result, throwable) -> {
+                        if (throwable != null) {
+                            async.fail(throwable);       
+                        } else {
+                            async.success();
+                        }
+                    });
         }
     }
 
 
     public static void main(String... args) {
-        new TestAppBuilder()
+        Report report = new TestAppBuilder()
 
                 // add data sinks
                 .sink(new Log4jSink())

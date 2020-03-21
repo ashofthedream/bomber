@@ -17,6 +17,16 @@ public class SettingsBuilder {
     private Settings test = new Settings();
 
 
+    public SettingsBuilder(SettingsBuilder builder) {
+        this.baseline = new Settings(builder.getBaseline());
+        this.warmUp = new Settings(builder.getWarmUp());
+        this.test = new Settings(builder.getTest());
+    }
+
+    public SettingsBuilder() {
+    }
+
+
     public SettingsBuilder baseline(Settings settings) {
         this.baseline = settings;
         return this;

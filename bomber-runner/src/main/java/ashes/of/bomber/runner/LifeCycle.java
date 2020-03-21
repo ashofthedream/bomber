@@ -3,7 +3,7 @@ package ashes.of.bomber.runner;
 import ashes.of.bomber.core.Context;
 import ashes.of.bomber.core.State;
 import ashes.of.bomber.methods.LifeCycleMethod;
-import ashes.of.bomber.methods.TestCaseMethod;
+import ashes.of.bomber.methods.TestCaseMethodWithClick;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -15,7 +15,7 @@ import java.util.function.Supplier;
 public class LifeCycle<T>  {
     private static final Logger log = LogManager.getLogger();
 
-    private final Map<String, TestCaseMethod<T>> testCases;
+    private final Map<String, TestCaseMethodWithClick<T>> testCases;
     private final Supplier<T> testSuite;
     private final List<LifeCycleMethod<T>> beforeAll;
     private final List<LifeCycleMethod<T>> beforeEach;
@@ -23,7 +23,7 @@ public class LifeCycle<T>  {
     private final List<LifeCycleMethod<T>> afterAll;
 
 
-    public LifeCycle(Map<String, TestCaseMethod<T>> testCases,
+    public LifeCycle(Map<String, TestCaseMethodWithClick<T>> testCases,
                      Supplier<T> testSuite,
                      List<LifeCycleMethod<T>> beforeEach,
                      List<LifeCycleMethod<T>> afterEach,
@@ -42,7 +42,7 @@ public class LifeCycle<T>  {
         return testSuite.get();
     }
 
-    public Map<String, TestCaseMethod<T>> testCases() {
+    public Map<String, TestCaseMethodWithClick<T>> testCases() {
         return testCases;
     }
 

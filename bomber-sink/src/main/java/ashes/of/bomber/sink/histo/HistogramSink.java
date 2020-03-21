@@ -20,7 +20,7 @@ public class HistogramSink implements Sink {
     }
 
     @Override
-    public void afterShutdown() {
+    public void shutDown() {
         histograms.forEach((testSuite, map) -> {
 
             System.out.printf("testSuite: %s%n", testSuite);

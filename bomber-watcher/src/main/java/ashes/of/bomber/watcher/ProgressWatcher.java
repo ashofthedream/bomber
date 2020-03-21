@@ -8,15 +8,15 @@ public class ProgressWatcher implements Watcher {
     private static final Logger log = LogManager.getLogger();
 
     @Override
-    public void onStart(State state) {
-        log.warn("watcher onStart. stage: {}, testCase: {}",
+    public void testSuiteStart(State state) {
+        log.warn("testSuiteStart. stage: {}, testCase: {}",
                 state.getStage(), state.getTestSuite());
     }
 
     @Override
     public void watch(State state) {
-        log.info("watcher stage: {}, testSuite: {}, elapsed time: {}ms, remain time: {}ms, remain iterations: {},  errors: {}",
-                state.getStage(), state.getTestSuite(),
+        log.info("current stage: {}, testSuite: {}, testCase: {}. time elapsed: {}ms, remain: {}ms. iterations remain: {},  errors: {}",
+                state.getStage(), state.getTestSuite(), state.getTestCase(),
                 state.getCaseElapsedTime(),
                 state.getCaseRemainTime(),
                 state.getRemainInvocations(),
@@ -24,8 +24,8 @@ public class ProgressWatcher implements Watcher {
     }
 
     @Override
-    public void onEnd(State state) {
-        log.warn("watcher onEnd. stage: {}, testCase: {}",
+    public void testSuiteEnd(State state) {
+        log.warn("testSuiteEnd. stage: {}, testCase: {}",
                 state.getStage(), state.getTestSuite());
     }
 }

@@ -11,8 +11,7 @@ import ashes.of.bomber.sink.MultiSink;
 import ashes.of.bomber.sink.Sink;
 import ashes.of.bomber.squadron.Barrier;
 import ashes.of.bomber.core.stopwatch.Clock;
-import ashes.of.bomber.methods.TestCaseMethod;
-import ashes.of.bomber.watchdog.Watchdog;
+import ashes.of.bomber.methods.TestCaseMethodWithClick;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -73,11 +72,9 @@ public class Runner<T> {
                 .build();
 
         barrier.init(state.getTestSuite(), settings);
-
         barrier.stageStart(state.getStage());
 
-
-        startWatchdogThread(begin, end);
+//        startWatchdogThread(begin, end);
         startWorkerThreads(begin, end, barrier);
 
         try {
@@ -93,11 +90,6 @@ public class Runner<T> {
 
         sink.afterTestSuite(state.getStage(), state.getTestSuite(), state.getTestSuiteStartTime(), settings);
         barrier.stageLeave(state.getStage());
-    }
-
-
-    private void startWatchdogThread(CountDownLatch startLatch, CountDownLatch endLatch) {
-        new Watchdog(this, env.getWatchers(), startLatch, endLatch).startInNewThread();
     }
 
     private void startWorkerThreads(CountDownLatch startLatch, CountDownLatch endLatch, Barrier barrier) {
@@ -141,11 +133,11 @@ public class Runner<T> {
     }
 
 
-    private void runTestCase(String testCase, T testSuite, TestCaseMethod<T> test, Limiter limiter, Barrier barrier) {
+    private void runTestCase(String testCase, T testSuite, TestCaseMethodWithClick<T> test, Limiter limiter, Barrier barrier) {
         log.debug("runTestCase stage: {}, testSuite: {}, testCase: {}",
                 state.getStage(), state.getTestSuite(), testCase);
 
-        state.startCaseIfNotStarted();
+        state.startCaseIfNotStarted(testCase);
         String threadName = Thread.currentThread().getName();
         AtomicLong invocations = new AtomicLong();
         BooleanSupplier checker = state.createChecker();
@@ -157,7 +149,7 @@ public class Runner<T> {
             long inv = invocations.getAndIncrement();
             Context context = new Context(state.getStage(), state.getTestSuite(), testCase, threadName, inv, Instant.now());
 
-            log.trace("runTest stage: {}, testSuite: {}, testCase: {}, inv: {}",
+            log.trace("runTestCase stage: {}, testSuite: {}, testCase: {}, inv: {}",
                     state.getStage(), state.getTestSuite(), testCase, inv);
 
             lifeCycle.beforeEach(context, testSuite);
@@ -178,7 +170,7 @@ public class Runner<T> {
                 sink.afterTestCase(context, rec.getElapsed(), null);
             } catch (Throwable th) {
                 Record rec = stopwatch.fail(th);
-                log.warn("runTest stage: {}, testSuite: {}, testCase: {}, inv: {} failed",
+                log.trace("runTestCase failed stage: {}, testSuite: {}, testCase: {}, inv: {} failed",
                         state.getStage(), state.getTestSuite(), testCase, inv, th);
 
                 sink.afterTestCase(context, rec.getElapsed(), rec.getError());
