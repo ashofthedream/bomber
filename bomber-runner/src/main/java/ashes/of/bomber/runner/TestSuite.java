@@ -1,8 +1,15 @@
 package ashes.of.bomber.runner;
 
 import ashes.of.bomber.core.Settings;
+import ashes.of.bomber.core.Stage;
+import ashes.of.bomber.core.State;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 
 public class TestSuite<T> {
     private static final Logger log = LogManager.getLogger();
@@ -41,5 +48,31 @@ public class TestSuite<T> {
 
     public Settings getTest() {
         return test;
+    }
+
+    public Set<String> getTestCases() {
+        return lifeCycle.testCases().keySet();
+    }
+
+    public Report run() {
+        return new TestApp(env, Collections.singletonList(this))
+                .run();
+    }
+
+    public List<State> run(TestApp app) {
+        State warmUp = new State(Stage.WarmUp, this.warmUp, name);
+        State test = new State(Stage.Test, this.test, name);
+
+        try {
+            log.info("Start testSuite: {}", name);
+
+            new Runner<>(warmUp, env, lifeCycle).run();
+            new Runner<>(test, env, lifeCycle).run();
+        } catch (Exception e) {
+            log.warn("Some shit happened testSuite: {}", name, e);
+        }
+
+        log.info("Finish testSuite: {}", name);
+        return Arrays.asList(warmUp, test);
     }
 }

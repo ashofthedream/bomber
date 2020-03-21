@@ -13,6 +13,13 @@ import java.util.concurrent.Executors;
 
 public class AsyncSink implements Sink {
 
+    private static final Executor defaultExecutor = Executors.newSingleThreadExecutor(r -> {
+        Thread thread = new Thread(r);
+        thread.setName("bomber-async-sink");
+        thread.setDaemon(true);
+        return thread;
+    });
+
     private final Sink sink;
     private final Executor ex;
 
@@ -22,7 +29,7 @@ public class AsyncSink implements Sink {
     }
 
     public AsyncSink(Sink sink) {
-        this(sink, Executors.newSingleThreadExecutor());
+        this(sink, defaultExecutor);
     }
 
 

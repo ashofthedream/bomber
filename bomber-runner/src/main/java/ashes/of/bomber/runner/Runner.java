@@ -60,9 +60,9 @@ public class Runner<T> {
             return;
         }
 
-        state.startIfNotStarted();
+        state.startSuiteIfNotStarted();
 
-        sink.beforeTestSuite(state.getStage(), state.getTestSuite(), state.getStartTime(), settings);
+        sink.beforeTestSuite(state.getStage(), state.getTestSuite(), state.getTestSuiteStartTime(), settings);
 
         CountDownLatch begin = new CountDownLatch(settings.getThreadsCount());
         CountDownLatch end = new CountDownLatch(settings.getThreadsCount());
@@ -82,16 +82,16 @@ public class Runner<T> {
 
         try {
             log.info("Await for end of stage: {}, testSuite: {}, elapsed {}ms",
-                    state.getStage(), state.getTestSuite(), state.getElapsedTime());
+                    state.getStage(), state.getTestSuite(), state.getCaseElapsedTime());
             end.await();
         } catch (InterruptedException e) {
             log.error("We'he been interrupted", e);
         }
 
         log.info("End stage: {}, testSuite: {} elapsed {}ms",
-                state.getStage(), state.getTestSuite(), state.getElapsedTime());
+                state.getStage(), state.getTestSuite(), state.getCaseElapsedTime());
 
-        sink.afterTestSuite(state.getStage(), state.getTestSuite(), state.getStartTime(), settings);
+        sink.afterTestSuite(state.getStage(), state.getTestSuite(), state.getTestSuiteStartTime(), settings);
         barrier.stageLeave(state.getStage());
     }
 
@@ -141,22 +141,26 @@ public class Runner<T> {
     }
 
 
-    private void runTestCase(String testName, T testCase, TestCaseMethod<T> test, Limiter limiter, Barrier barrier) {
+    private void runTestCase(String testCase, T testSuite, TestCaseMethod<T> test, Limiter limiter, Barrier barrier) {
+        log.debug("runTestCase stage: {}, testSuite: {}, testCase: {}",
+                state.getStage(), state.getTestSuite(), testCase);
+
+        state.startCaseIfNotStarted();
         String threadName = Thread.currentThread().getName();
         AtomicLong invocations = new AtomicLong();
         BooleanSupplier checker = state.createChecker();
-        barrier.testStart(testName);
+        barrier.testStart(testCase);
         while (checker.getAsBoolean()) {
             if (!limiter.waitForPermit())
                 throw new RuntimeException("Limiter await failed");
 
             long inv = invocations.getAndIncrement();
-            Context context = new Context(state.getStage(), state.getTestSuite(), testName, threadName, inv, Instant.now());
+            Context context = new Context(state.getStage(), state.getTestSuite(), testCase, threadName, inv, Instant.now());
 
             log.trace("runTest stage: {}, testSuite: {}, testCase: {}, inv: {}",
-                    state.getStage(), state.getTestSuite(), testName, inv);
+                    state.getStage(), state.getTestSuite(), testCase, inv);
 
-            lifeCycle.beforeEach(context, testCase);
+            lifeCycle.beforeEach(context, testSuite);
 
             Clock clock = new Clock(record -> {
                 sink.timeRecorded(context, record);
@@ -165,24 +169,25 @@ public class Runner<T> {
                     state.incError();
             });
 
-            Stopwatch stopwatch = clock.stopwatch(context.getTestCase() + "." + context.getTestSuite());
+            Stopwatch stopwatch = clock.stopwatch(context.getTestSuite() + "." + context.getTestCase());
             try {
                 // test
-                test.run(testCase, clock);
+                test.run(testSuite, clock);
 
                 Record rec = stopwatch.success();
                 sink.afterTestCase(context, rec.getElapsed(), null);
             } catch (Throwable th) {
                 Record rec = stopwatch.fail(th);
                 log.warn("runTest stage: {}, testSuite: {}, testCase: {}, inv: {} failed",
-                        state.getStage(), state.getTestSuite(), testName, inv, th);
+                        state.getStage(), state.getTestSuite(), testCase, inv, th);
 
                 sink.afterTestCase(context, rec.getElapsed(), rec.getError());
             }
 
-            lifeCycle.afterEach(context, testCase);
+            lifeCycle.afterEach(context, testSuite);
         }
 
-        barrier.testFinish(testName);
+        barrier.testFinish(testCase);
+        state.finishCase();
     }
 }

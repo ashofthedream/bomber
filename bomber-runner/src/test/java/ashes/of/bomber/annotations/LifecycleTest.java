@@ -44,7 +44,7 @@ public class LifecycleTest {
 
         @BeforeEach
         public void beforeEach() {
-            log.debug("This method will be invoked before each test invocation");
+            log.debug("This method will be invoked before each test invocation, beforeEach: {}", beforeEach.get());
             beforeEach.incrementAndGet();
         }
 
@@ -76,10 +76,9 @@ public class LifecycleTest {
 
         new TestAppBuilder()
                 .sink(new Log4jSink())
-                .addTestSuite(test)
+                .testSuite(test)
                 .build()
                 .run();
-
 
         assertEquals("beforeAll: 1 x thread",                   2, test.beforeAll.get());
         assertEquals("beforeEach: 10 Inv x Threads * Count",   40, test.beforeEach.get());
@@ -124,7 +123,7 @@ public class LifecycleTest {
 
         new TestAppBuilder()
                 .sink(new Log4jSink())
-                .addTestSuite(test)
+                .testSuite(test)
                 .build()
                 .run();
 
@@ -138,7 +137,7 @@ public class LifecycleTest {
 
         new TestAppBuilder()
                 .sink(new Log4jSink())
-                .addTestSuite(test)
+                .testSuite(test)
                 .build()
                 .run();
 

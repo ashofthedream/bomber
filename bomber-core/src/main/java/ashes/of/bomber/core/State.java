@@ -12,17 +12,16 @@ public class State {
     private final Settings settings;
     private final String testSuite;
 
-    private volatile Instant startTime = Instant.EPOCH;
+    private volatile Instant testSuiteStartTime = Instant.EPOCH;
+    private volatile Instant testCaseStartTime = Instant.EPOCH;
 
-    private final AtomicLong totalRemainInvs;
+    private final AtomicLong testCaseRemainTotalInvocationCount = new AtomicLong(0);
     private final LongAdder errorCount = new LongAdder();
 
     public State(Stage stage, Settings settings, String testSuite) {
         this.stage = stage;
         this.settings = settings;
         this.testSuite = testSuite;
-
-        this.totalRemainInvs = new AtomicLong(settings.getTotalInvocationsCount());
     }
 
     public String getTestSuite() {
@@ -37,34 +36,55 @@ public class State {
         return settings;
     }
 
-    public Instant getStartTime() {
-        return startTime;
+    public Instant getTestSuiteStartTime() {
+        return testSuiteStartTime;
     }
 
-    boolean isStated() {
-        return !startTime.equals(Instant.EPOCH);
+
+    public boolean isSuiteStated() {
+        return !testSuiteStartTime.equals(Instant.EPOCH);
     }
 
-    public void startIfNotStarted() {
-        if (!isStated()) {
-            startTime = Instant.now();
+    public void startSuiteIfNotStarted() {
+        if (!isSuiteStated()) {
+            testSuiteStartTime = Instant.now();
         }
     }
+
+    public boolean isCaseStated() {
+        return !testCaseStartTime.equals(Instant.EPOCH);
+    }
+
+    public void startCaseIfNotStarted() {
+        if (!isCaseStated()) {
+            testCaseStartTime = Instant.now();
+            testCaseRemainTotalInvocationCount.set(settings.getTotalInvocationsCount());
+        }
+    }
+
+    public void finishCase() {
+        testCaseStartTime = Instant.EPOCH;
+    }
+
 
     public void incError() {
         errorCount.increment();
     }
 
     public long getRemainInvocations() {
-        return totalRemainInvs.get();
+        return testCaseRemainTotalInvocationCount.get();
     }
 
-    public long getRemainTime() {
-        return (startTime.toEpochMilli() + settings.getTime().toMillis()) - System.currentTimeMillis();
+    public long getCaseRemainTime() {
+        return (testCaseStartTime.toEpochMilli() + settings.getTime().toMillis()) - System.currentTimeMillis();
     }
 
-    public long getElapsedTime() {
-        return System.currentTimeMillis() - startTime.toEpochMilli();
+    public long getCaseElapsedTime() {
+        return System.currentTimeMillis() - testCaseStartTime.toEpochMilli();
+    }
+
+    public long getSuiteElapsedTime() {
+        return System.currentTimeMillis() - testSuiteStartTime.toEpochMilli();
     }
 
     public long getErrorCount() {
@@ -78,8 +98,8 @@ public class State {
     }
 
     private boolean check(AtomicLong threadRemainInvs) {
-        return totalRemainInvs.decrementAndGet() >= 0 &&
+        return testCaseRemainTotalInvocationCount.decrementAndGet() >= 0 &&
                 threadRemainInvs.decrementAndGet() >= 0 &&
-                getRemainTime() >= 0;
+                getCaseRemainTime() >= 0;
     }
 }

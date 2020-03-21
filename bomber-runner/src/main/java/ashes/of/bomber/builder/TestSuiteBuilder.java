@@ -19,6 +19,7 @@ import org.apache.logging.log4j.Logger;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -221,6 +222,12 @@ public class TestSuiteBuilder<T> extends EnvironmentBuilder {
 
 
         for (Method method : cls.getDeclaredMethods()) {
+            int modifiers = method.getModifiers();
+            if (Modifier.isStatic(modifiers) || !Modifier.isPublic(modifiers)) {
+                continue;
+            }
+
+            log.debug("check cls: {} method: {}", cls.getClass(), method.getName());
             try {
                 BeforeAll beforeAll = method.getAnnotation(BeforeAll.class);
                 if (beforeAll != null)
@@ -296,18 +303,17 @@ public class TestSuiteBuilder<T> extends EnvironmentBuilder {
             return;
 
         MethodHandle mh = MethodHandles.lookup().unreflect(method);
-
         AtomicReference<TestCaseMethod<T>> ref = new AtomicReference<>();
 
-        test(name, (suite, stopwatch) -> {
+        test(name, (suite, clock) -> {
             TestCaseMethod<T> proxy = ref.get();
             if (proxy == null) {
-                log.warn("init proxy method: {}", name);
+                log.warn("init testCase: {} proxy method", name);
                 Class<?>[] types = method.getParameterTypes();
                 Object[] params = Stream.of(types)
                         .map(param -> {
                             if (param.equals(Clock.class))
-                                return stopwatch;
+                                return clock;
 
                             throw new RuntimeException("Skip test " + name + ": not allowed parameters (only Stopwatch is allowed)");
                         })
@@ -324,7 +330,7 @@ public class TestSuiteBuilder<T> extends EnvironmentBuilder {
                 ref.set(proxy);
             }
 
-            proxy.run(suite, stopwatch);
+            proxy.run(suite, clock);
         });
     }
 

@@ -15,10 +15,10 @@ public class ProgressWatcher implements Watcher {
 
     @Override
     public void watch(State state) {
-        log.info("watcher stage: {}, testCase: {}, time elapsed: {}ms, remain time: {}ms, remain iterations: {},  errors: {}",
+        log.info("watcher stage: {}, testSuite: {}, elapsed time: {}ms, remain time: {}ms, remain iterations: {},  errors: {}",
                 state.getStage(), state.getTestSuite(),
-                state.getElapsedTime(),
-                state.getRemainTime(),
+                state.getCaseElapsedTime(),
+                state.getCaseRemainTime(),
                 state.getRemainInvocations(),
                 state.getErrorCount() );
     }

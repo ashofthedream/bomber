@@ -66,7 +66,7 @@ public class TestCaseBuilderTest {
 
         new TestSuiteBuilder<AllLifecycleMethodsTest>()
                 .name("testAllLifecycleMethods")
-                .instance(test)
+                .sharedInstance(test)
                 .settings(s -> s
                         .baseline(Settings::disabled)
                         .warmUp(Settings::disabled)
@@ -121,7 +121,7 @@ public class TestCaseBuilderTest {
 
         new TestSuiteBuilder<BeforeAllAndAfterAllOnlyOnceTest>()
                 .name("beforeAllWithOnlyOnceShouldBeInvokedOnlyOnce")
-                .instance(test)
+                .sharedInstance(test)
                 .settings(b -> b
                         .baseline(Settings::disabled)
                         .warmUp(Settings::disabled)
@@ -143,12 +143,9 @@ public class TestCaseBuilderTest {
     public void afterAllWithOnlyOnceShouldBeInvokedOnlyOnce() {
         BeforeAllAndAfterAllOnlyOnceTest test = new BeforeAllAndAfterAllOnlyOnceTest();
 
-
-
-
         new TestSuiteBuilder<BeforeAllAndAfterAllOnlyOnceTest>()
                 .name("afterAllWithOnlyOnceShouldBeInvokedOnlyOnce")
-                .instance(test)
+                .sharedInstance(test)
                 .settings(b -> b
                         .baseline(Settings::disabled)
                         .warmUp(Settings::disabled)
