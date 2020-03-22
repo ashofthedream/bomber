@@ -24,19 +24,18 @@ dependencies {
 
     compile     group: 'com.google.guava',              name: 'guava',                          version: '27.0.1-jre'
 
-    compile    (group: 'org.apache.curator',            name: 'curator-recipes',                version: '4.1.0') {
-        exclude group: 'org.apache.zookeeper',          module: 'zookeeper'
+    compile('org.springframework.cloud:spring-cloud-starter-zookeeper-all:2.2.1.RELEASE') {
+        exclude group: 'org.apache.zookeeper', module: 'zookeeper'
     }
 
-    compile    (group: 'org.apache.zookeeper',          name: 'zookeeper',                      version: '3.4.13') {
-        exclude group: 'org.slf4j',                     module: 'slf4j-log4j12'
+    compile('org.apache.zookeeper:zookeeper:3.4.13') {
+        exclude group: 'org.slf4j', module: 'slf4j-log4j12'
     }
 
     compile     group: 'org.projectlombok',             name: 'lombok',                         version: '1.18.4'
 
     compile     group: 'org.springframework.boot',      name: 'spring-boot-devtools'
     compile     group: 'org.springframework.boot',      name: 'spring-boot-starter-log4j2'
-//    compile     group: 'org.springframework.boot',      name: 'spring-boot-starter-security'
     compile     group: 'org.springframework.boot',      name: 'spring-boot-starter-webflux'
     compile     group: 'org.springframework.boot',      name: 'spring-boot-starter-rsocket'
     testCompile group: 'org.springframework.boot',      name: 'spring-boot-starter-test'

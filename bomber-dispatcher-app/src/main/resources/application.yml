@@ -1,4 +1,10 @@
 server:
   port: 9000
 
+spring:
+  application:
+    name: bomber-dispatcher
 
+  cloud:
+    zookeeper:
+      connect-string: localhost:2181

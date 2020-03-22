@@ -1,8 +1,30 @@
 server:
   port: 8088
 
-zookeeper:
-  host: localhost
-  port: 2181
+spring:
+  application:
+    name: bomber-atc
+
+  cloud:
+    zookeeper:
+      connect-string: localhost:2181
+      dependencies:
+        bomber-dispatcher:
+          required: false
+
+      dependency:
+        ribbon:
+          enabled: false
+        resttemplate:
+          enabled: false
+
+    loadbalancer:
+      ribbon:
+        enabled: false
+
+
+  rsocket:
+    server:
+      port: 8090
 
 

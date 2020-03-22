@@ -8,7 +8,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 public class BomberAtcApp {
-    private static final Logger log = LogManager.getLogger();
 
     public static void main(String... args) {
         SpringApplication.run(BomberAtcApp.class, args);
