@@ -1,6 +1,5 @@
 package ashes.of.bomber.sink.histo;
 
-import ashes.of.bomber.core.stopwatch.Record;
 import org.HdrHistogram.ConcurrentHistogram;
 import org.HdrHistogram.Histogram;
 
@@ -10,10 +9,10 @@ public class HistogramAndErrors {
     public final Histogram histogram = new ConcurrentHistogram(2);
     public final LongAdder errors = new LongAdder();
 
-    public void record(Record record) {
-        if (!record.isSuccess())
+    public void record(boolean success, long elapsed) {
+        if (!success)
             errors.increment();
 
-        histogram.recordValue(record.getElapsed());
+        histogram.recordValue(elapsed);
     }
 }

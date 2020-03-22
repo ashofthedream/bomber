@@ -14,6 +14,7 @@ import com.google.common.base.Preconditions;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -131,6 +132,12 @@ public class TestAppBuilder {
         return addSuite(b);
     }
 
+    public <T, C> TestAppBuilder createSuite(BiConsumer<TestSuiteBuilder<T>, C> consumer, C context) {
+        TestSuiteBuilder<T> b = new TestSuiteBuilder<T>(this);
+        consumer.accept(b, context);
+
+        return addSuite(b);
+    }
 
     public <T> TestAppBuilder testSuiteObject(T testSuite) {
         return testSuite((Class<T>) testSuite.getClass(), () -> testSuite);

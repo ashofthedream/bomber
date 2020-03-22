@@ -6,9 +6,11 @@ import java.util.function.Consumer;
 public class Clock {
 
     private final long ts = System.nanoTime();
+    private final String prefix;
     private final Consumer<Record> timeRecorded;
 
-    public Clock(Consumer<Record> timeRecorded) {
+    public Clock(String prefix, Consumer<Record> timeRecorded) {
+        this.prefix = prefix;
         this.timeRecorded = timeRecorded;
     }
 
@@ -23,6 +25,6 @@ public class Clock {
      * @return created stopwatch
      */
     public Stopwatch stopwatch(String label) {
-        return new Stopwatch(label, timeRecorded);
+        return new Stopwatch(prefix + (label.isEmpty() ? "" : "." + label), timeRecorded);
     }
 }

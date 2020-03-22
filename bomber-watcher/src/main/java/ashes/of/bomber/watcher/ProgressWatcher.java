@@ -15,7 +15,7 @@ public class ProgressWatcher implements Watcher {
 
     @Override
     public void watch(State state) {
-        log.info("current stage: {}, testSuite: {}, testCase: {}. time elapsed: {}ms, remain: {}ms. it remain: {}, errors: {}",
+        log.info("stage: {}, testSuite: {}, testCase: {}. time elapsed: {}ms, remain: {}ms. it remain: {}, errors: {}",
                 state.getStage(), state.getTestSuite(), state.getTestCase(),
                 state.getCaseElapsedTime(),
                 state.getCaseRemainTime(),

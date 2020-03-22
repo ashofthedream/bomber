@@ -15,7 +15,7 @@ import java.util.function.Supplier;
 public class LifeCycle<T>  {
     private static final Logger log = LogManager.getLogger();
 
-    private final Map<String, TestCaseMethodWithClick<T>> testCases;
+    private final Map<String, TestCase<T>> testCases;
     private final Supplier<T> testSuite;
     private final List<LifeCycleMethod<T>> beforeAll;
     private final List<LifeCycleMethod<T>> beforeEach;
@@ -23,7 +23,7 @@ public class LifeCycle<T>  {
     private final List<LifeCycleMethod<T>> afterAll;
 
 
-    public LifeCycle(Map<String, TestCaseMethodWithClick<T>> testCases,
+    public LifeCycle(Map<String, TestCase<T>> testCases,
                      Supplier<T> testSuite,
                      List<LifeCycleMethod<T>> beforeEach,
                      List<LifeCycleMethod<T>> afterEach,
@@ -42,18 +42,18 @@ public class LifeCycle<T>  {
         return testSuite.get();
     }
 
-    public Map<String, TestCaseMethodWithClick<T>> testCases() {
+    public Map<String, TestCase<T>> testCases() {
         return testCases;
     }
 
-    public void beforeAll(State state, T testCase) {
-        beforeAll.forEach(l -> beforeAll(state, testCase, l));
+    public void beforeAll(State state, T object) {
+        beforeAll.forEach(l -> beforeAll(state, object, l));
     }
 
-    private void beforeAll(State state, T testCase, LifeCycleMethod<T> l) {
+    private void beforeAll(State state, T object, LifeCycleMethod<T> l) {
         log.trace("beforeAll stage: {}, testCase: {}", state.getStage(), state.getTestSuite());
         try {
-            l.call(testCase);
+            l.call(object);
         } catch (Throwable th) {
             log.warn("beforeAll failed. stage: {}, testCase: {}",
                     state.getStage(), state.getTestSuite(), th);
@@ -61,13 +61,13 @@ public class LifeCycle<T>  {
     }
 
 
-    public void beforeEach(Context context, T testCase) {
-        beforeEach.forEach(l -> beforeEach(context, testCase, l));
+    public void beforeEach(Context context, T object) {
+        beforeEach.forEach(l -> beforeEach(context, object, l));
     }
 
-    private void beforeEach(Context context, T testCase, LifeCycleMethod<T> l) {
+    private void beforeEach(Context context, T object, LifeCycleMethod<T> l) {
         try {
-            l.call(testCase);
+            l.call(object);
         } catch (Throwable th) {
             log.warn("beforeEach failed. stage: {}, testCase: {}, test: {}, inv: {}",
                     context.getStage(), context.getTestSuite(), context.getTestCase(), context.getInv(), th);
@@ -75,13 +75,13 @@ public class LifeCycle<T>  {
     }
 
 
-    public void afterEach(Context context, T testCase) {
-        afterEach.forEach(l -> afterEach(context, testCase, l));
+    public void afterEach(Context context, T object) {
+        afterEach.forEach(l -> afterEach(context, object, l));
     }
 
-    private void afterEach(Context context, T testCase, LifeCycleMethod<T> l) {
+    private void afterEach(Context context, T object, LifeCycleMethod<T> l) {
         try {
-            l.call(testCase);
+            l.call(object);
         } catch (Throwable th) {
             log.warn("afterEach failed. stage: {}, testCase: {}, test: {}, inv: {}",
                     context.getStage(), context.getTestSuite(), context.getTestCase(), context.getInv(), th);
@@ -89,14 +89,14 @@ public class LifeCycle<T>  {
     }
 
 
-    public void afterAll(State state, T testCase) {
+    public void afterAll(State state, T object) {
         log.trace("afterAll stage: {}, testCase: {}", state.getStage(), state.getTestSuite());
-        afterAll.forEach(l -> afterAll(state, testCase, l));
+        afterAll.forEach(l -> afterAll(state, object, l));
     }
 
-    private void afterAll(State state, T testCase, LifeCycleMethod<T> l) {
+    private void afterAll(State state, T object, LifeCycleMethod<T> l) {
         try {
-            l.call(testCase);
+            l.call(object);
         } catch (Throwable th) {
             log.warn("afterAll failed. stage: {}, testCase: {}",
                     state.getStage(), state.getTestSuite(), th);

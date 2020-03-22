@@ -16,14 +16,19 @@ public class Stopwatch {
     }
 
 
+    public long getElapsed() {
+        return System.nanoTime() - this.ts;
+    }
+
+
     public Record success() {
-        Record record = new Record(label, this.ts, System.nanoTime() - this.ts, true, null);
+        Record record = new Record(label, this.ts, getElapsed(), true, null);
         timeRecorded.accept(record);
         return record;
     }
 
     public Record fail(@Nullable Throwable th) {
-        Record record = new Record(label, this.ts, System.nanoTime() - this.ts, false, th);
+        Record record = new Record(label, this.ts, getElapsed(), false, th);
         timeRecorded.accept(record);
         return record;
     }
@@ -31,6 +36,7 @@ public class Stopwatch {
     public Record fail() {
         return fail(null);
     }
+
 
     @Override
     public String toString() {

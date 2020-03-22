@@ -77,8 +77,8 @@ public class TestCaseBuilderTest {
                                 .threadInvocationCount(10)))
                 .beforeAll(AllLifecycleMethodsTest::beforeAll)
                 .beforeEach(AllLifecycleMethodsTest::beforeEach)
-                .test("testA", AllLifecycleMethodsTest::testA)
-                .test("testB", AllLifecycleMethodsTest::testB)
+                .testCase("testA", AllLifecycleMethodsTest::testA)
+                .testCase("testB", AllLifecycleMethodsTest::testB)
                 .afterEach(AllLifecycleMethodsTest::afterEach)
                 .afterAll(AllLifecycleMethodsTest::afterAll)
                 .build()
@@ -131,7 +131,7 @@ public class TestCaseBuilderTest {
                                 .threadCount(2)
                                 .threadInvocationCount(10)))
                 .beforeAll(true, BeforeAllAndAfterAllOnlyOnceTest::beforeAll)
-                .test("test", BeforeAllAndAfterAllOnlyOnceTest::test)
+                .testCase("test", BeforeAllAndAfterAllOnlyOnceTest::test)
                 .build()
                 .run();
 
@@ -154,7 +154,7 @@ public class TestCaseBuilderTest {
                                 .time(20_000)
                                 .threadCount(2)
                                 .threadInvocationCount(10)))
-                .test("test", BeforeAllAndAfterAllOnlyOnceTest::test)
+                .testCase("test", BeforeAllAndAfterAllOnlyOnceTest::test)
                 .afterAll(true, BeforeAllAndAfterAllOnlyOnceTest::afterAll)
                 .build()
                 .run();

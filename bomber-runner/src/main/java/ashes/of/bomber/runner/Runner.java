@@ -4,14 +4,12 @@ import ashes.of.bomber.core.Context;
 import ashes.of.bomber.core.Settings;
 import ashes.of.bomber.core.State;
 import ashes.of.bomber.core.limiter.Limiter;
-import ashes.of.bomber.core.stopwatch.Record;
 import ashes.of.bomber.core.stopwatch.Stopwatch;
 import ashes.of.bomber.sink.AsyncSink;
 import ashes.of.bomber.sink.MultiSink;
 import ashes.of.bomber.sink.Sink;
 import ashes.of.bomber.squadron.Barrier;
 import ashes.of.bomber.core.stopwatch.Clock;
-import ashes.of.bomber.methods.TestCaseMethodWithClick;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -109,7 +107,7 @@ public class Runner<T> {
     private void runTestSuite(CountDownLatch startLatch, CountDownLatch endLatch, Barrier barrier) {
         log.debug("runTestCase stage: {}, testSuite: {}", state.getStage(), state.getTestSuite());
         try {
-            T testSuite = lifeCycle.testSuite();
+            T instance = lifeCycle.testSuite();
             Limiter limiter = env.getLimiter().get();
 
             startLatch.countDown();
@@ -117,10 +115,10 @@ public class Runner<T> {
             // if we can't start in 60 seconds – something works bad
             startLatch.await(60, SECONDS);
 
-            lifeCycle.beforeAll(state, testSuite);
+            lifeCycle.beforeAll(state, instance);
             lifeCycle.testCases()
-                    .forEach((name, testCase) -> runTestCase(name, testSuite, testCase, limiter, barrier));
-            lifeCycle.afterAll(state, testSuite);
+                    .forEach((name, testCase) -> runTestCase(instance, testCase, limiter, barrier));
+            lifeCycle.afterAll(state, instance);
 
         } catch (Throwable th) {
             log.warn("runTestCase stage: {}, testSuite: {} failed",
@@ -132,54 +130,58 @@ public class Runner<T> {
     }
 
 
-    private void runTestCase(String testCase, T testSuite, TestCaseMethodWithClick<T> test, Limiter limiter, Barrier barrier) {
+    private void runTestCase(T instance, TestCase<T> testCase, Limiter limiter, Barrier barrier) {
         log.debug("runTestCase stage: {}, testSuite: {}, testCase: {}",
-                state.getStage(), state.getTestSuite(), testCase);
+                state.getStage(), state.getTestSuite(), testCase.getName());
 
         String threadName = Thread.currentThread().getName();
         AtomicLong invocations = new AtomicLong();
 
-        barrier.enterCase(state.getStage(), state.getTestSuite(), testCase);
-        state.startCaseIfNotStarted(testCase);
+        barrier.enterCase(state.getStage(), state.getTestSuite(), testCase.getName());
+        state.startCaseIfNotStarted(testCase.getName());
         BooleanSupplier checker = state.createChecker();
         while (checker.getAsBoolean()) {
             if (!limiter.waitForPermit())
                 throw new RuntimeException("Limiter await failed");
 
             long inv = invocations.getAndIncrement();
-            Context context = new Context(state.getStage(), state.getTestSuite(), testCase, threadName, inv, Instant.now());
+            Context context = new Context(state.getStage(), state.getTestSuite(), testCase.getName(), threadName, inv, Instant.now());
 
             log.trace("runTestCase stage: {}, testSuite: {}, testCase: {}, inv: {}",
                     state.getStage(), state.getTestSuite(), testCase, inv);
 
-            lifeCycle.beforeEach(context, testSuite);
+            lifeCycle.beforeEach(context, instance);
 
-            Clock clock = new Clock(record -> {
+            Clock clock = new Clock(context.getTestSuite() + "." + testCase.getName(), record -> {
                 sink.timeRecorded(context, record);
 
                 if (!record.isSuccess())
                     state.incError();
             });
 
-            Stopwatch stopwatch = clock.stopwatch(context.getTestSuite() + "." + context.getTestCase());
+            Stopwatch stopwatch = clock.stopwatch("");
             try {
                 // test
-                test.run(testSuite, clock);
+                testCase.getMethod().run(instance, clock);
 
-                Record rec = stopwatch.success();
-                sink.afterTestCase(context, rec.getElapsed(), null);
+                if (!testCase.isAsync())
+                    stopwatch.success();
+
+                sink.afterTestCase(context, stopwatch.getElapsed(), null);
             } catch (Throwable th) {
-                Record rec = stopwatch.fail(th);
+                if (!testCase.isAsync())
+                    stopwatch.fail(th);
+
                 log.trace("runTestCase failed stage: {}, testSuite: {}, testCase: {}, inv: {} failed",
                         state.getStage(), state.getTestSuite(), testCase, inv, th);
 
-                sink.afterTestCase(context, rec.getElapsed(), rec.getError());
+                sink.afterTestCase(context, stopwatch.getElapsed(), th);
             }
 
-            lifeCycle.afterEach(context, testSuite);
+            lifeCycle.afterEach(context, instance);
         }
 
-        barrier.leaveCase(state.getStage(), state.getTestSuite(), testCase);
+        barrier.leaveCase(state.getStage(), state.getTestSuite(), testCase.getName());
         state.finishCase();
     }
 }

@@ -54,13 +54,13 @@ public class LifecycleTest {
             afterEach.incrementAndGet();
         }
 
-        @LoadTest
+        @LoadTestCase
         public void testA() {
             log.debug("testA");
             testA.incrementAndGet();
         }
 
-        @LoadTest
+        @LoadTestCase
         public void testB(Clock stopwatch) {
             Stopwatch lap = stopwatch.stopwatch("testB-lap-1");
             log.debug("testB");
@@ -110,7 +110,7 @@ public class LifecycleTest {
             afterAll.incrementAndGet();
         }
 
-        @LoadTest
+        @LoadTestCase
         public void test() {
             log.debug("test");
         }

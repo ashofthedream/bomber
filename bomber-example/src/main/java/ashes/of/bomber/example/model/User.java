@@ -10,12 +10,12 @@ public class User {
     @Nullable
     private String username;
 
-    public User() {
-    }
-
     public User(@Nullable Long id, @Nullable String username) {
         this.id = id;
         this.username = username;
+    }
+
+    public User() {
     }
 
     @Nullable

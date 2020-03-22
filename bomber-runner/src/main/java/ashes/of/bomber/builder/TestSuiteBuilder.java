@@ -9,7 +9,6 @@ import ashes.of.bomber.methods.TestCaseMethodWithClick;
 import ashes.of.bomber.annotations.*;
 import ashes.of.bomber.core.stopwatch.Clock;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -35,11 +34,10 @@ public class TestSuiteBuilder<T> {
     private final List<LifeCycleMethod<T>> afterEach = new ArrayList<>();
     private final List<LifeCycleMethod<T>> afterAll = new ArrayList<>();
 
-    private final Map<String, TestCaseMethodWithClick<T>> testCases = new LinkedHashMap<>();
-    private final Map<String, TestCaseMethodWithClick<T>> noop = ImmutableMap.of("noop", (test, stopwatch) -> {});
+    private final Map<String, TestCase<T>> testCases = new LinkedHashMap<>();
+    private final TestCase<T> noop = new TestCase<>("noop", false, (test, stopwatch) -> {});
 
     private Supplier<Limiter> limiter;
-
     private String name;
     private Supplier<T> testSuite;
     private SettingsBuilder settings;
@@ -104,15 +102,15 @@ public class TestSuiteBuilder<T> {
     }
 
 
-    public TestSuiteBuilder<T> instance(Supplier<T> suite) {
-        Preconditions.checkNotNull(suite, "suite is null");
-        this.testSuite = suite;
+    public TestSuiteBuilder<T> instance(Supplier<T> object) {
+        Preconditions.checkNotNull(object, "object is null");
+        this.testSuite = object;
         return this;
     }
 
-    public TestSuiteBuilder<T> sharedInstance(T suite) {
-        Preconditions.checkNotNull(suite, "suite is null");
-        return instance(() -> suite);
+    public TestSuiteBuilder<T> sharedInstance(T object) {
+        Preconditions.checkNotNull(object, "suite is null");
+        return instance(() -> object);
     }
 
 
@@ -137,15 +135,32 @@ public class TestSuiteBuilder<T> {
         return this;
     }
 
-
-    public TestSuiteBuilder<T> test(String name, TestCaseMethodNoArgs<T> test) {
-        return test(name, (tc, stopwatch) -> test.run(tc));
-    }
-
-    public TestSuiteBuilder<T> test(String name, TestCaseMethodWithClick<T> test) {
-        this.testCases.put(name, test);
+    private TestSuiteBuilder<T> testCase(String name, boolean async, TestCaseMethodWithClick<T> test) {
+        this.testCases.put(name, new TestCase<>(name, async, test));
         return this;
     }
+
+    private TestSuiteBuilder<T> testCase(String name, boolean async, TestCaseMethodNoArgs<T> test) {
+        return testCase(name, async, (tc, stopwatch) -> test.run(tc));
+    }
+
+
+    public TestSuiteBuilder<T> testCase(String name, TestCaseMethodWithClick<T> test) {
+        return testCase(name, false, test);
+    }
+
+    public TestSuiteBuilder<T> testCase(String name, TestCaseMethodNoArgs<T> test) {
+        return testCase(name, false, test);
+    }
+
+    public TestSuiteBuilder<T> asyncTestCase(String name, TestCaseMethodWithClick<T> test) {
+        return testCase(name, true, test);
+    }
+
+    public TestSuiteBuilder<T> asyncTestCase(String name, TestCaseMethodNoArgs<T> test) {
+        return testCase(name, true, test);
+    }
+
 
     /**
      * Adds method that will be invoked after each test invocation
@@ -184,18 +199,18 @@ public class TestSuiteBuilder<T> {
     public TestSuiteBuilder<T> instance(Class<T> cls, Supplier<T> supplier) {
         Baseline baseline = cls.getAnnotation(Baseline.class);
         if (baseline != null)
-            settings().baseline(makeSettings(baseline));
+            settings.baseline(makeSettings(baseline));
 
         WarmUp warmUp = cls.getAnnotation(WarmUp.class);
         if (warmUp != null)
-            settings().warmUp(makeSettings(warmUp));
+            settings.warmUp(makeSettings(warmUp));
 
 
         LoadTestSuite test = cls.getAnnotation(LoadTestSuite.class);
         if (test != null) {
-            name(!test.name().isEmpty() ? test.name() : cls.getSimpleName())
-                    .settings()
-                    .test(makeSettings(test));
+            name(!test.name().isEmpty() ? test.name() : cls.getSimpleName());
+
+            settings.test(makeSettings(test));
 
             if (test.shared()) {
                 sharedInstance(supplier.get());
@@ -234,7 +249,7 @@ public class TestSuiteBuilder<T> {
                 if (beforeEach != null)
                     buildBeforeEach(method, beforeEach);
 
-                LoadTest loadTest = method.getAnnotation(LoadTest.class);
+                LoadTestCase loadTest = method.getAnnotation(LoadTestCase.class);
                 if (loadTest != null)
                     buildTest(method, loadTest);
 
@@ -291,7 +306,7 @@ public class TestSuiteBuilder<T> {
         beforeEach(testCase -> mh.bindTo(testCase).invoke());
     }
 
-    private void buildTest(Method method, LoadTest loadTest) throws Exception {
+    private void buildTest(Method method, LoadTestCase loadTest) throws Exception {
         String value = loadTest.value();
         String name = !value.isEmpty() ? value : method.getName();
         log.debug("Found test method: {}, name: {}, disabled: {}", method.getName(), name, loadTest.disabled());
@@ -302,7 +317,7 @@ public class TestSuiteBuilder<T> {
         MethodHandle mh = MethodHandles.lookup().unreflect(method);
         AtomicReference<TestCaseMethodWithClick<T>> ref = new AtomicReference<>();
 
-        test(name, (suite, clock) -> {
+        testCase(name, loadTest.async(), (suite, clock) -> {
             TestCaseMethodWithClick<T> proxy = ref.get();
             if (proxy == null) {
                 log.warn("init testCase: {} proxy method", name);
@@ -337,7 +352,7 @@ public class TestSuiteBuilder<T> {
         afterEach(testCase -> mh.bindTo(testCase).invoke());
     }
 
-    private <T> void buildAfterAll(Method method, AfterAll afterAll) throws Exception {
+    private void buildAfterAll(Method method, AfterAll afterAll) throws Exception {
         log.debug("Found afterAll method: {}", method.getName());
         MethodHandle mh = MethodHandles.lookup().unreflect(method);
         afterAll(afterAll.onlyOnce(), testCase -> mh.bindTo(testCase).invoke());
@@ -354,9 +369,9 @@ public class TestSuiteBuilder<T> {
         Preconditions.checkNotNull(appEnv, "env is null");
 
         Environment env = new Environment(appEnv.getSinks(), appEnv.getWatchers(), limiter, appEnv.getBarrier());
-        LifeCycle<T> lifeCycle = new LifeCycle<T>(testCases, testSuite, beforeEach, afterEach, afterAll, beforeAll);
+        LifeCycle<T> lifeCycle = new LifeCycle<>(testCases, testSuite, beforeEach, afterEach, afterAll, beforeAll);
 
-        return new TestSuite<T>(name, env, lifeCycle, settings.getWarmUp(), settings.getTest());
+        return new TestSuite<>(name, env, lifeCycle, settings.getWarmUp(), settings.getTest());
     }
 }
 
