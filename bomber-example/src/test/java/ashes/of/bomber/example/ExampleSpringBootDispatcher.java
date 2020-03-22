@@ -2,7 +2,7 @@ package ashes.of.bomber.example;
 
 import ashes.of.bomber.builder.TestAppBuilder;
 import ashes.of.bomber.core.Application;
-import ashes.of.bomber.dispatcher.app.builder.DispatcherAppBuilder;
+import ashes.of.bomber.dispatcher.starter.builder.SpringBootDispatcherBuilder;
 import ashes.of.bomber.example.controllers.AccountControllerLoadTest;
 import ashes.of.bomber.example.controllers.UserControllerLoadTest;
 import ashes.of.bomber.sink.histo.HistogramSink;
@@ -20,7 +20,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 
-public class ExampleSpringBootTestApp {
+public class ExampleSpringBootDispatcher {
     private static final Logger log = LogManager.getLogger();
 
     public static void main(String... args) throws Exception {
@@ -34,7 +34,7 @@ public class ExampleSpringBootTestApp {
         BarrierBuilder barrier = members > 1 ? new ZookeeperBarrierBuilder().members(members) : new NoBarrier.Builder();
 
         Application app = new TestAppBuilder()
-                .dispatcher(new DispatcherAppBuilder())
+                .dispatcher(new SpringBootDispatcherBuilder())
                 // log all times to console via log4j and HdrHistogram
 //                .sink(new Log4jSink())
                 .sink(new HistogramTimelineSink(ChronoUnit.SECONDS, System.out))

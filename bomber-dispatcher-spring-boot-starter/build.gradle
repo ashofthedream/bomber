@@ -1,0 +1,16 @@
+group = 'ashes.of'
+version = '1.0.0-SNAPSHOT'
+
+apply plugin: 'java'
+
+
+dependencies {
+    compile project(':bomber-dispatcher')
+
+    compile     group: 'org.springframework.boot',      name: 'spring-boot-starter-webflux',    version: '2.2.5.RELEASE'
+}
+
+
+compileJava {
+    options.compilerArgs << '-parameters'
+}

@@ -23,7 +23,7 @@ dependencies {
     compile project(':bomber-runner')
     compile project(':bomber-squadron-zookeeper')
     compile project(':bomber-dispatcher')
-    compile project(':bomber-dispatcher-app')
+    compile project(':bomber-dispatcher-spring-boot-starter')
 
     compile     group: 'org.ajbrown',                   name: 'name-machine',                   version: '1.0.0'
 

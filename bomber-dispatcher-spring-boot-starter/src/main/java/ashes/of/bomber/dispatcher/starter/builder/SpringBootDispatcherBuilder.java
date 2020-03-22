@@ -1,17 +1,18 @@
-package ashes.of.bomber.dispatcher.app.builder;
+package ashes.of.bomber.dispatcher.starter.builder;
 
 import ashes.of.bomber.core.Application;
 import ashes.of.bomber.dispatcher.Dispatcher;
 import ashes.of.bomber.dispatcher.DispatcherBuilder;
-import ashes.of.bomber.dispatcher.app.DispatcherApp;
+import ashes.of.bomber.dispatcher.starter.config.DispatcherConfig;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
 
-public class DispatcherAppBuilder implements DispatcherBuilder {
+public class SpringBootDispatcherBuilder implements DispatcherBuilder {
 
     @Override
     public Dispatcher build(Application application) {
-        ConfigurableApplicationContext app = new SpringApplicationBuilder(DispatcherApp.class)
+        ConfigurableApplicationContext app = new SpringApplicationBuilder()
+                .sources(DispatcherConfig.class)
                 .initializers(context -> context.getBeanFactory().registerResolvableDependency(Application.class, application))
                 .run();
 

@@ -20,8 +20,8 @@ configurations {
 
 
 dependencies {
-    compile project(':bomber-dispatcher')
-    
+    compile project(':bomber-dispatcher-spring-boot-starter')
+
     compile     group: 'com.google.guava',              name: 'guava',                          version: '27.0.1-jre'
 
     compile    (group: 'org.apache.curator',            name: 'curator-recipes',                version: '4.1.0') {
