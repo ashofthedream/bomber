@@ -1,0 +1,21 @@
+group = 'ashes.of'
+version = '1.0.0-SNAPSHOT'
+
+
+apply plugin: 'java'
+
+configurations {
+    compile.exclude module: 'spring-boot-starter-logging'
+}
+
+dependencies {
+    compile project(':bomber-runner')
+    compile project(':bomber-squadron-zookeeper')
+
+    compile     group: 'org.springframework.boot',      name: 'spring-boot-starter-webflux',    version: '2.2.5.RELEASE'
+}
+
+
+compileJava {
+    options.compilerArgs << '-parameters'
+}

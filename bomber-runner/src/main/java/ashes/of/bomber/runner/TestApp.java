@@ -1,6 +1,6 @@
 package ashes.of.bomber.runner;
 
-import ashes.of.bomber.core.Application;
+import ashes.of.bomber.core.BomberApp;
 import ashes.of.bomber.core.Report;
 import ashes.of.bomber.core.State;
 import ashes.of.bomber.sink.Sink;
@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Collectors;
 
 
-public class TestApp implements Application {
+public class TestApp implements BomberApp {
     private static final Logger log = LogManager.getLogger();
 
     private final Environment environment;
@@ -36,11 +36,6 @@ public class TestApp implements Application {
 
     public void setState(@Nullable State state) {
         this.state = state;
-    }
-
-    @Override
-    public void await() throws InterruptedException {
-        shutdown.await();
     }
 
     @Override
@@ -98,6 +93,11 @@ public class TestApp implements Application {
         Instant finishTime = Instant.now();
         shutdown.countDown();
         return new Report(startTime, finishTime, errorsCount.sum());
+    }
+
+    @Override
+    public void await() throws InterruptedException {
+        shutdown.await();
     }
 
     @Override

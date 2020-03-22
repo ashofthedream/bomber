@@ -64,24 +64,21 @@ public class TestCaseBuilderTest {
     public void testAllLifecycleMethods() {
         AllLifecycleMethodsTest test = new AllLifecycleMethodsTest();
 
-        new TestSuiteBuilder<AllLifecycleMethodsTest>()
-                .app(app -> app.sink(new Log4jSink()))
+        TestSuiteBuilder<AllLifecycleMethodsTest> suite = new TestSuiteBuilder<AllLifecycleMethodsTest>()
                 .name("testAllLifecycleMethods")
                 .sharedInstance(test)
-                .settings(s -> s
-                        .baseline(Settings::disabled)
-                        .warmUp(Settings::disabled)
-                        .test(settings -> settings
-                                .time(20_000)
-                                .threadCount(2)
-                                .threadInvocationCount(10)))
+                .settings(this::testSettings)
                 .beforeAll(AllLifecycleMethodsTest::beforeAll)
                 .beforeEach(AllLifecycleMethodsTest::beforeEach)
                 .testCase("testA", AllLifecycleMethodsTest::testA)
                 .testCase("testB", AllLifecycleMethodsTest::testB)
                 .afterEach(AllLifecycleMethodsTest::afterEach)
-                .afterAll(AllLifecycleMethodsTest::afterAll)
-                .application()
+                .afterAll(AllLifecycleMethodsTest::afterAll);
+
+        new TestAppBuilder()
+                .sink(new Log4jSink())
+                .addSuite(suite)
+                .build()
                 .run();
 
         assertEquals("beforeAll: 1 x thread",                   2, test.beforeAll.get());
@@ -91,7 +88,6 @@ public class TestCaseBuilderTest {
         assertEquals("beforeEach: Inv x Threads * Count",      40, test.afterEach.get());
         assertEquals("afterAll: 10 x thread",                   2, test.afterAll.get());
     }
-
 
 
     public static class BeforeAllAndAfterAllOnlyOnceTest {
@@ -119,20 +115,18 @@ public class TestCaseBuilderTest {
     public void beforeAllWithOnlyOnceShouldBeInvokedOnlyOnce() {
         BeforeAllAndAfterAllOnlyOnceTest test = new BeforeAllAndAfterAllOnlyOnceTest();
 
-        new TestSuiteBuilder<BeforeAllAndAfterAllOnlyOnceTest>()
+        TestSuiteBuilder<BeforeAllAndAfterAllOnlyOnceTest> suite = new TestSuiteBuilder<BeforeAllAndAfterAllOnlyOnceTest>()
                 .app(app -> app.sink(new Log4jSink()))
                 .name("beforeAllWithOnlyOnceShouldBeInvokedOnlyOnce")
                 .sharedInstance(test)
-                .settings(b -> b
-                        .baseline(Settings::disabled)
-                        .warmUp(Settings::disabled)
-                        .test(settings -> settings
-                                .time(20_000)
-                                .threadCount(2)
-                                .threadInvocationCount(10)))
+                .settings(this::testSettings)
                 .beforeAll(true, BeforeAllAndAfterAllOnlyOnceTest::beforeAll)
-                .testCase("test", BeforeAllAndAfterAllOnlyOnceTest::test)
-                .application()
+                .testCase("test", BeforeAllAndAfterAllOnlyOnceTest::test);
+
+        new TestAppBuilder()
+                .sink(new Log4jSink())
+                .addSuite(suite)
+                .build()
                 .run();
 
         assertEquals("beforeAll: onlyOnce = true",              1, test.beforeAll.get());
@@ -143,22 +137,30 @@ public class TestCaseBuilderTest {
     public void afterAllWithOnlyOnceShouldBeInvokedOnlyOnce() {
         BeforeAllAndAfterAllOnlyOnceTest test = new BeforeAllAndAfterAllOnlyOnceTest();
 
-        new TestSuiteBuilder<BeforeAllAndAfterAllOnlyOnceTest>()
+        TestSuiteBuilder<BeforeAllAndAfterAllOnlyOnceTest> suite = new TestSuiteBuilder<BeforeAllAndAfterAllOnlyOnceTest>()
                 .app(app -> app.sink(new Log4jSink()))
                 .name("afterAllWithOnlyOnceShouldBeInvokedOnlyOnce")
                 .sharedInstance(test)
-                .settings(b -> b
-                        .baseline(Settings::disabled)
-                        .warmUp(Settings::disabled)
-                        .test(settings -> settings
-                                .time(20_000)
-                                .threadCount(2)
-                                .threadInvocationCount(10)))
+                .settings(this::testSettings)
                 .testCase("test", BeforeAllAndAfterAllOnlyOnceTest::test)
-                .afterAll(true, BeforeAllAndAfterAllOnlyOnceTest::afterAll)
-                .application()
+                .afterAll(true, BeforeAllAndAfterAllOnlyOnceTest::afterAll);
+
+        new TestAppBuilder()
+                .sink(new Log4jSink())
+                .addSuite(suite)
+                .build()
                 .run();
 
         assertEquals("afterAll: onlyOnce = true",              1, test.afterAll.get());
+    }
+
+
+    private void testSettings(SettingsBuilder builder) {
+        builder .baseline(Settings::disabled)
+                .warmUp(Settings::disabled)
+                .test(settings -> settings
+                        .time(20_000)
+                        .threadCount(2)
+                        .threadInvocationCount(10));
     }
 }

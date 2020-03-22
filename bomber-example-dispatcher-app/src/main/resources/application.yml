@@ -1,0 +1,17 @@
+server:
+  port: 9000
+
+spring:
+  application:
+    name: bomber-dispatcher
+
+  cloud:
+    zookeeper:
+      connect-string: localhost:2181
+
+
+bomber:
+  target:
+    url: http://localhost:8080
+  squadron:
+    members: 1

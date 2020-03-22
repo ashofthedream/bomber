@@ -8,6 +8,7 @@ import ashes.of.bomber.watcher.WatcherConfig;
 import java.util.List;
 import java.util.function.Supplier;
 
+
 public class Environment {
 
     private final List<Sink> sinks;

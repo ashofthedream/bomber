@@ -77,7 +77,7 @@ public class LifecycleTest {
         new TestAppBuilder()
                 .sink(new Log4jSink())
                 .testSuiteObject(test)
-                .application()
+                .build()
                 .run();
 
         assertEquals("beforeAll: 1 x thread",                   2, test.beforeAll.get());
@@ -121,10 +121,11 @@ public class LifecycleTest {
     public void beforeAllWithOnlyOnceFlagShouldBeInvokedOnlyOnce() {
         BeforeAllAndAfterAllOnlyOnceTest test = new BeforeAllAndAfterAllOnlyOnceTest();
 
+
         new TestAppBuilder()
                 .sink(new Log4jSink())
                 .testSuiteObject(test)
-                .application()
+                .build()
                 .run();
 
         assertEquals("beforeAll: onlyOnce = true",              1, test.beforeAll.get());
@@ -138,7 +139,7 @@ public class LifecycleTest {
         new TestAppBuilder()
                 .sink(new Log4jSink())
                 .testSuiteObject(test)
-                .application()
+                .build()
                 .run();
 
         assertEquals("afterAll: onlyOnce = true",              1, test.afterAll.get());

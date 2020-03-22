@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.net.URI;
@@ -46,23 +45,41 @@ public class DispatcherController {
     }
 
     @PostMapping("/start/all")
-    public ResponseEntity<?> start() {
+    public ResponseEntity<?> startAll() {
         log.debug("start all active dispatchers");
 
         discoveryClient.getInstances("bomber-dispatcher")
-                .subscribe(this::startInstance);
+                .subscribe(instance -> {
+                    URI uri = instance.getUri();
+                    webClient.post()
+                            .uri(uri + "/application/run")
+                            .retrieve()
+                            .toBodilessEntity()
+                            .subscribe(
+                                    response -> log.debug("dispatcher: {} started", uri),
+                                    throwable -> log.warn("dispatcher: {} hasn't started", uri, throwable));
+                });
 
         return ResponseEntities.ok();
     }
 
-    private void startInstance(ServiceInstance instance) {
-        URI uri = instance.getUri();
-        webClient.post()
-                .uri(uri + "/dispatcher/run")
-                .retrieve()
-                .toBodilessEntity()
-                .subscribe(
-                        response -> log.debug("dispatcher: {} started", uri),
-                        throwable -> log.warn("dispatcher: {} hasn't started", uri, throwable));
+    @PostMapping("/shutdown/all")
+    public ResponseEntity<?> shutdownAll() {
+        log.debug("shutdown all active dispatchers");
+
+        discoveryClient.getInstances("bomber-dispatcher")
+                .subscribe(instance -> {
+                    URI uri = instance.getUri();
+                    webClient.post()
+                            .uri(uri + "/application/shutdown")
+                            .retrieve()
+                            .toBodilessEntity()
+                            .subscribe(
+                                    response -> log.debug("dispatcher: {} started", uri),
+                                    throwable -> log.warn("dispatcher: {} hasn't started", uri, throwable));
+                });
+
+        return ResponseEntities.ok();
     }
+
 }

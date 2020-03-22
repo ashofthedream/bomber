@@ -1,6 +1,6 @@
 package ashes.of.bomber.builder;
 
-import ashes.of.bomber.core.Application;
+import ashes.of.bomber.core.BomberApp;
 import ashes.of.bomber.core.Settings;
 import ashes.of.bomber.core.limiter.Limiter;
 import ashes.of.bomber.methods.LifeCycleMethod;
@@ -357,11 +357,6 @@ public class TestSuiteBuilder<T> {
         log.debug("Found afterAll method: {}", method.getName());
         MethodHandle mh = MethodHandles.lookup().unreflect(method);
         afterAll(afterAll.onlyOnce(), testCase -> mh.bindTo(testCase).invoke());
-    }
-
-    public Application application() {
-        return this.app.addSuite(this)
-                .application();
     }
 
     public TestSuite<T> build(Environment appEnv) {
