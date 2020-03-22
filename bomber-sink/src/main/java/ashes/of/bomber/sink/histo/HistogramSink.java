@@ -39,7 +39,7 @@ public class HistogramSink implements Sink {
 
             out.printf("suite: %s%n", testSuite);
             m.data.forEach((label, hae) -> {
-                out.printf("label: %s, errors: %,12d%n", testSuite, label, hae.errors.sum());
+                out.printf("label: %s, errors: %,12d%n", label, hae.errors.sum());
                 hae.histogram.outputPercentileDistribution(out, 1_000_000.0);
 
                 out.println();

@@ -55,8 +55,8 @@ public class TestSuite<T> {
 
 
     public List<State> run(TestApp app) {
-        State warmUp = new State(Stage.WarmUp, this.warmUp, name);
-        State test = new State(Stage.Test, this.test, name);
+        State warmUp = new State(Stage.WarmUp, this.warmUp, name, () -> app.isShutdown());
+        State test = new State(Stage.Test, this.test, name, () -> app.isShutdown());
 
         try {
             log.info("Start testSuite: {}", name);

@@ -19,10 +19,13 @@ public class State {
     private final AtomicLong testCaseRemainTotalInvocationCount = new AtomicLong(0);
     private final LongAdder errorCount = new LongAdder();
 
-    public State(Stage stage, Settings settings, String testSuite) {
+    private final BooleanSupplier shutdown;
+
+    public State(Stage stage, Settings settings, String testSuite, BooleanSupplier shutdown) {
         this.stage = stage;
         this.settings = settings;
         this.testSuite = testSuite;
+        this.shutdown = shutdown;
     }
 
     public String getTestSuite() {
@@ -106,7 +109,7 @@ public class State {
     }
 
     private boolean check(AtomicLong threadRemainInvs) {
-        return testCaseRemainTotalInvocationCount.decrementAndGet() >= 0 &&
+        return !shutdown.getAsBoolean() && testCaseRemainTotalInvocationCount.decrementAndGet() >= 0 &&
                 threadRemainInvs.decrementAndGet() >= 0 &&
                 getCaseRemainTime() >= 0;
     }

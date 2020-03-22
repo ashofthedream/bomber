@@ -18,7 +18,7 @@ import java.time.temporal.ChronoUnit;
 
 public class ExampleTestApp {
 
-    public static void main(String... args) {
+    public static void main(String... args) throws Exception {
         int port = args.length > 0 ? Integer.parseInt(args[0]) : 8080;
         int members = args.length > 1 ? Integer.parseInt(args[1]) : 1;
 
@@ -51,7 +51,7 @@ public class ExampleTestApp {
                 // add second test suite via annotations
                 .testSuiteClass(AccountControllerLoadTest.class, new Class[]{WebClient.class}, webClient)
 
-                .build()
+                .application()
                 .run();
     }
 

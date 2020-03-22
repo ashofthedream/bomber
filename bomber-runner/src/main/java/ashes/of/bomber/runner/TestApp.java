@@ -1,5 +1,7 @@
 package ashes.of.bomber.runner;
 
+import ashes.of.bomber.core.Application;
+import ashes.of.bomber.core.Report;
 import ashes.of.bomber.core.State;
 import ashes.of.bomber.sink.Sink;
 import ashes.of.bomber.watcher.Watcher;
@@ -10,12 +12,14 @@ import org.apache.logging.log4j.Logger;
 import javax.annotation.Nullable;
 import java.time.Instant;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Collectors;
 
-public class TestApp {
+
+public class TestApp implements Application {
     private static final Logger log = LogManager.getLogger();
 
     private final Environment environment;
@@ -23,6 +27,7 @@ public class TestApp {
 
     @Nullable
     private volatile State state;
+    private volatile CountDownLatch shutdown = new CountDownLatch(1);
 
     public TestApp(Environment environment, List<TestSuite<?>> suites) {
         this.environment = environment;
@@ -33,7 +38,12 @@ public class TestApp {
         this.state = state;
     }
 
+    @Override
+    public void await() throws InterruptedException {
+        shutdown.await();
+    }
 
+    @Override
     public Report run() {
         List<String> testSuiteNames = suites.stream()
                 .map(testSuite -> String.format("%s %s", testSuite.getName(), testSuite.getTestCases()))
@@ -86,6 +96,17 @@ public class TestApp {
         watcherEx.shutdown();
 
         Instant finishTime = Instant.now();
+        shutdown.countDown();
         return new Report(startTime, finishTime, errorsCount.sum());
+    }
+
+    @Override
+    public void shutdown() {
+        log.info("shutdown");
+        shutdown.countDown();
+    }
+
+    public boolean isShutdown() {
+        return shutdown.getCount() == 0;
     }
 }

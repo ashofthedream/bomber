@@ -1,5 +1,7 @@
 include 'bomber-atc-app'
 include 'bomber-core'
+include 'bomber-dispatcher'
+include 'bomber-dispatcher-app'
 include 'bomber-example'
 include 'bomber-runner'
 include 'bomber-sink'

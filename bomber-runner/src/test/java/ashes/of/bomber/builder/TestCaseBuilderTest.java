@@ -81,7 +81,7 @@ public class TestCaseBuilderTest {
                 .testCase("testB", AllLifecycleMethodsTest::testB)
                 .afterEach(AllLifecycleMethodsTest::afterEach)
                 .afterAll(AllLifecycleMethodsTest::afterAll)
-                .build()
+                .application()
                 .run();
 
         assertEquals("beforeAll: 1 x thread",                   2, test.beforeAll.get());
@@ -132,7 +132,7 @@ public class TestCaseBuilderTest {
                                 .threadInvocationCount(10)))
                 .beforeAll(true, BeforeAllAndAfterAllOnlyOnceTest::beforeAll)
                 .testCase("test", BeforeAllAndAfterAllOnlyOnceTest::test)
-                .build()
+                .application()
                 .run();
 
         assertEquals("beforeAll: onlyOnce = true",              1, test.beforeAll.get());
@@ -156,7 +156,7 @@ public class TestCaseBuilderTest {
                                 .threadInvocationCount(10)))
                 .testCase("test", BeforeAllAndAfterAllOnlyOnceTest::test)
                 .afterAll(true, BeforeAllAndAfterAllOnlyOnceTest::afterAll)
-                .build()
+                .application()
                 .run();
 
         assertEquals("afterAll: onlyOnce = true",              1, test.afterAll.get());

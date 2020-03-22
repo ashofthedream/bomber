@@ -32,7 +32,7 @@ public class ExampleTestSuite {
                 .testCase("getUsersAsync", UserControllerLoadTest::getUserByIdAsync)
 //                .afterEach(UserControllerLoadTest::afterEach)
 //                .afterAll(UserControllerLoadTest::afterAll)
-                .build()
+                .application()
                 .run();
     }
 }

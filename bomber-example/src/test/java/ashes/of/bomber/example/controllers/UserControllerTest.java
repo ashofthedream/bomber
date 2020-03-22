@@ -1,7 +1,7 @@
 package ashes.of.bomber.example.controllers;
 
 import ashes.of.bomber.builder.TestAppBuilder;
-import ashes.of.bomber.runner.Report;
+import ashes.of.bomber.core.Report;
 import ashes.of.bomber.sink.histo.HistogramSink;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -32,7 +32,7 @@ public class UserControllerTest {
         Report report = new TestAppBuilder()
                 .sink(new HistogramSink())
                 .testSuiteClass(UserControllerLoadTest.class, new Class[]{WebClient.class}, webClient)
-                .build()
+                .application()
                 .run();
 
         assertEquals("load test has some errors", 0, report.getErrorsCount());

@@ -1,4 +1,4 @@
-package ashes.of.bomber.runner;
+package ashes.of.bomber.core;
 
 import java.time.Instant;
 

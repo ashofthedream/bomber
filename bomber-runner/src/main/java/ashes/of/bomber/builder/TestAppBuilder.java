@@ -1,6 +1,9 @@
 package ashes.of.bomber.builder;
 
+import ashes.of.bomber.core.Application;
 import ashes.of.bomber.core.limiter.Limiter;
+import ashes.of.bomber.dispatcher.Dispatcher;
+import ashes.of.bomber.dispatcher.DispatcherBuilder;
 import ashes.of.bomber.runner.Environment;
 import ashes.of.bomber.runner.TestSuite;
 import ashes.of.bomber.runner.TestApp;
@@ -28,11 +31,17 @@ public class TestAppBuilder {
     private SettingsBuilder settings = new SettingsBuilder();
     private BarrierBuilder barrier = new NoBarrier.Builder();
     private Supplier<Limiter> limiter = Limiter::alwaysPermit;
+    private DispatcherBuilder dispatcher = Dispatcher::new;
 
     /**
      * Test suites for run
      */
     private final List<TestSuiteBuilder<?>> suites = new ArrayList<>();
+
+    public TestAppBuilder dispatcher(DispatcherBuilder dispatcher) {
+        this.dispatcher = dispatcher;
+        return this;
+    }
 
 
     public TestAppBuilder settings(SettingsBuilder settings) {
@@ -169,16 +178,24 @@ public class TestAppBuilder {
     }
 
 
-    public TestApp build() {
-        Preconditions.checkArgument(!suites.isEmpty(), "No test suites found");
+    public Dispatcher dispatcher() {
+        TestApp testApp = build();
+        return dispatcher.build(testApp);
+    }
 
+    public Application application() {
+        return dispatcher().getApplication();
+    }
+
+    private TestApp build() {
+        Preconditions.checkArgument(!suites.isEmpty(), "No test suites found");
 
         Environment env = new Environment(sinks, watchers, limiter, barrier);
         List<TestSuite<?>> suites = this.suites.stream()
                 .map(b -> b.build(env))
                 .collect(Collectors.toList());
 
-
         return new TestApp(env, suites);
+
     }
 }

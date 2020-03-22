@@ -1,5 +1,6 @@
 package ashes.of.bomber.builder;
 
+import ashes.of.bomber.core.Application;
 import ashes.of.bomber.core.Settings;
 import ashes.of.bomber.core.limiter.Limiter;
 import ashes.of.bomber.methods.LifeCycleMethod;
@@ -358,9 +359,9 @@ public class TestSuiteBuilder<T> {
         afterAll(afterAll.onlyOnce(), testCase -> mh.bindTo(testCase).invoke());
     }
 
-    public TestApp build() {
+    public Application application() {
         return this.app.addSuite(this)
-                .build();
+                .application();
     }
 
     public TestSuite<T> build(Environment appEnv) {

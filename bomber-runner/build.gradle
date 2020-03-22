@@ -3,6 +3,7 @@ version = '0.1.0-SNAPSHOT'
 
 dependencies {
     compile project(':bomber-core')
+    compile project(':bomber-dispatcher')
     compile project(':bomber-sink')
     compile project(':bomber-squadron')
     compile project(':bomber-watcher')
