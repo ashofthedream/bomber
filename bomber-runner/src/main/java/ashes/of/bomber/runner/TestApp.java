@@ -65,7 +65,7 @@ public class TestApp implements BomberApp {
                 .forEach(Watcher::startUp);
 
         environment.getSinks()
-                .forEach(Sink::startUp);
+                .forEach(Sink::afterStartUp);
 
 
         LongAdder errorsCount = new LongAdder();
@@ -77,12 +77,14 @@ public class TestApp implements BomberApp {
                             errorsCount.add(state.getErrorCount());
                         });
                     });
+
+            state = null;
         } catch (Throwable th) {
             log.error("unexpected throwable", th);
         }
 
         environment.getSinks()
-                .forEach(Sink::shutDown);
+                .forEach(Sink::beforeShutDown);
 
         environment.getWatchers().stream()
                 .map(WatcherConfig::getWatcher)

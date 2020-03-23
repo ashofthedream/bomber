@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit;
 public @interface WarmUp {
 
     /**
-     * @return test time
+     * @return warm up stage time
      */
     long time() default 60;
 
@@ -37,7 +37,4 @@ public @interface WarmUp {
      * @return number of invocations per each thread.
      */
     long threadInvocations() default 1_000_000_000;
-
-
-    boolean disabled() default false;
 }

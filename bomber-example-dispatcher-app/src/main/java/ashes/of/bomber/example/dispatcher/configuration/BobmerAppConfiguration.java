@@ -4,12 +4,12 @@ import ashes.of.bomber.builder.TestAppBuilder;
 import ashes.of.bomber.core.BomberApp;
 import ashes.of.bomber.example.app.tests.AccountControllerLoadTest;
 import ashes.of.bomber.example.app.tests.UserControllerLoadTest;
-import ashes.of.bomber.sink.histo.HistogramSink;
-import ashes.of.bomber.sink.histo.HistogramTimelineSink;
+import ashes.of.bomber.sink.histogram.HistogramSink;
+import ashes.of.bomber.sink.histogram.HistogramTimelineSink;
 import ashes.of.bomber.squadron.BarrierBuilder;
 import ashes.of.bomber.squadron.NoBarrier;
 import ashes.of.bomber.squadron.zookeeper.ZookeeperBarrierBuilder;
-import ashes.of.bomber.watcher.ProgressWatcher;
+import ashes.of.bomber.watcher.Log4jWatcher;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -37,7 +37,7 @@ public class BobmerAppConfiguration {
                 .sink(new HistogramTimelineSink(ChronoUnit.SECONDS, System.out))
                 .sink(new HistogramSink())
                 .barrier(barrier)
-                .watcher(1000, new ProgressWatcher())
+                .watcher(1000, new Log4jWatcher())
 
 
                 // add example test suite via static init method

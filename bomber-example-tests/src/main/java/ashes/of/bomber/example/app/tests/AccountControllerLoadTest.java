@@ -1,8 +1,8 @@
 package ashes.of.bomber.example.app.tests;
 
 import ashes.of.bomber.annotations.*;
-import ashes.of.bomber.core.stopwatch.Clock;
-import ashes.of.bomber.core.stopwatch.Stopwatch;
+import ashes.of.bomber.stopwatch.Clock;
+import ashes.of.bomber.stopwatch.Stopwatch;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.ResponseEntity;
@@ -10,10 +10,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.Random;
 
-@Throttle(threshold = 10)
-@LoadTestSuite(name = "AccountController", time = 5)
-@WarmUp(disabled = true)
-@Baseline(disabled = true)
+@LoadTestSuite(name = "AccountController")
 public class AccountControllerLoadTest {
     private static final Logger log = LogManager.getLogger();
 
@@ -24,7 +21,7 @@ public class AccountControllerLoadTest {
         this.webClient = webClient;
     }
 
-    @BeforeAll
+    @BeforeAll(onlyOnce = true)
     public void beforeAll() {
         log.info("This method will be invoked before all test");
     }

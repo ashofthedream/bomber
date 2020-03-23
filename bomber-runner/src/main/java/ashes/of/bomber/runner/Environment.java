@@ -1,6 +1,6 @@
 package ashes.of.bomber.runner;
 
-import ashes.of.bomber.core.limiter.Limiter;
+import ashes.of.bomber.limiter.Limiter;
 import ashes.of.bomber.sink.Sink;
 import ashes.of.bomber.squadron.BarrierBuilder;
 import ashes.of.bomber.watcher.WatcherConfig;

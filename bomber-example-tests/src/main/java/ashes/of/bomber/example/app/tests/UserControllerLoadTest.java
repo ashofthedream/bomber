@@ -1,8 +1,8 @@
 package ashes.of.bomber.example.app.tests;
 
 import ashes.of.bomber.annotations.*;
-import ashes.of.bomber.core.stopwatch.Clock;
-import ashes.of.bomber.core.stopwatch.Stopwatch;
+import ashes.of.bomber.stopwatch.Clock;
+import ashes.of.bomber.stopwatch.Stopwatch;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.ResponseEntity;
@@ -10,10 +10,9 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.Random;
 
-@Throttle(threshold = 10)
-@LoadTestSuite(name = "UserController", time = 5)
-@WarmUp(disabled = true)
-@Baseline(disabled = true)
+@LoadTestSuite(name = "UserController")
+@LoadTest(time = 5)
+@Throttle(threshold = 10, shared = true)
 public class UserControllerLoadTest {
     private static final Logger log = LogManager.getLogger();
 

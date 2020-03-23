@@ -1,7 +1,7 @@
 package ashes.of.bomber.sink.datadog;
 
 import ashes.of.bomber.core.Context;
-import ashes.of.bomber.core.stopwatch.Record;
+import ashes.of.bomber.stopwatch.Record;
 import ashes.of.bomber.sink.Sink;
 import ashes.of.datadog.client.DatadogClient;
 
@@ -34,7 +34,7 @@ public class DatadogSink implements Sink {
     }
 
     @Override
-    public void afterTestCase(Context context, long elapsed, @Nullable Throwable throwable) {
+    public void afterEach(Context context, long elapsed, @Nullable Throwable throwable) {
         String error = Optional.ofNullable(throwable)
                 .map(Throwable::getMessage)
                 .orElse("");

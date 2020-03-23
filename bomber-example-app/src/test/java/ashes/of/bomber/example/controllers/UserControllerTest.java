@@ -3,7 +3,7 @@ package ashes.of.bomber.example.controllers;
 import ashes.of.bomber.builder.TestAppBuilder;
 import ashes.of.bomber.core.Report;
 import ashes.of.bomber.example.app.tests.UserControllerLoadTest;
-import ashes.of.bomber.sink.histo.HistogramSink;
+import ashes.of.bomber.sink.histogram.HistogramSink;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Ignore;

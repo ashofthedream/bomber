@@ -1,6 +1,6 @@
 package ashes.of.bomber.methods;
 
-import ashes.of.bomber.core.stopwatch.Clock;
+import ashes.of.bomber.stopwatch.Clock;
 
 /**
  * Test method with {@link Clock}

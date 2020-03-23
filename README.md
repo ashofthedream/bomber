@@ -2,8 +2,9 @@
 
 ```java
 @Throttle(threshold = 10)
-@LoadTestSuite(value = "example-test", time = 30, threads = 8)
-@WarmUp(disabled = true)
+@LoadTest(time = 30, threads = 8)
+@WarmUp(time = 30, threads = 1)
+@LoadTestSuite(value = "example-test")
 public class ExampleTest {
     private ExampleHttpClient client;
 
@@ -13,12 +14,12 @@ public class ExampleTest {
         client = new ExampleHttpClient("localhost", 8080);
     }
 
-    @BeforeLoadTest
+    @BeforeEach
     public void beforeTest() throws Exception {
         // This method will be invoked every time before each test method
     }
 
-    @AfterLoadTest
+    @AfterEach
     public void afterTest() throws Exception {
         // This method will be invoked every time after each test method
     }

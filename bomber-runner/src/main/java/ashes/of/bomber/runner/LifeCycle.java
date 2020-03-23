@@ -51,12 +51,11 @@ public class LifeCycle<T>  {
     }
 
     private void beforeAll(State state, T object, LifeCycleMethod<T> l) {
-        log.trace("beforeAll stage: {}, testCase: {}", state.getStage(), state.getTestSuite());
+        log.trace("{} | beforeAll", state);
         try {
             l.call(object);
         } catch (Throwable th) {
-            log.warn("beforeAll failed. stage: {}, testCase: {}",
-                    state.getStage(), state.getTestSuite(), th);
+            log.warn("{} | beforeAll failed", state, th);
         }
     }
 
@@ -69,8 +68,8 @@ public class LifeCycle<T>  {
         try {
             l.call(object);
         } catch (Throwable th) {
-            log.warn("beforeEach failed. stage: {}, testCase: {}, test: {}, inv: {}",
-                    context.getStage(), context.getTestSuite(), context.getTestCase(), context.getInv(), th);
+            log.warn("{} | beforeEach failed. inv: {}",
+                    context.toLogString(), context.getInv(), th);
         }
     }
 
@@ -83,14 +82,14 @@ public class LifeCycle<T>  {
         try {
             l.call(object);
         } catch (Throwable th) {
-            log.warn("afterEach failed. stage: {}, testCase: {}, test: {}, inv: {}",
-                    context.getStage(), context.getTestSuite(), context.getTestCase(), context.getInv(), th);
+            log.warn("{} | afterEach failed. inv: {}",
+                    context.toLogString(), context.getInv(), th);
         }
     }
 
 
     public void afterAll(State state, T object) {
-        log.trace("afterAll stage: {}, testCase: {}", state.getStage(), state.getTestSuite());
+        log.trace("{} | afterAll", state);
         afterAll.forEach(l -> afterAll(state, object, l));
     }
 
@@ -98,8 +97,7 @@ public class LifeCycle<T>  {
         try {
             l.call(object);
         } catch (Throwable th) {
-            log.warn("afterAll failed. stage: {}, testCase: {}",
-                    state.getStage(), state.getTestSuite(), th);
+            log.warn("{} | afterAll failed", state, th);
         }
     }
 }

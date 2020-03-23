@@ -16,16 +16,16 @@ public class TestSuite<T> {
     private final String name;
     private final Environment env;
     private final LifeCycle<T> lifeCycle;
+    private final Settings settings;
     private final Settings warmUp;
-    private final Settings test;
 
 
-    public TestSuite(String name, Environment env, LifeCycle<T> lifeCycle, Settings warmUp, Settings test) {
+    public TestSuite(String name, Environment env, LifeCycle<T> lifeCycle, Settings settings, Settings warmUp) {
         this.name = name;
         this.env = env;
         this.lifeCycle = lifeCycle;
-        this.warmUp = warmUp;
-        this.test = test;
+        this.settings = new Settings(settings);
+        this.warmUp = new Settings(warmUp);
     }
 
 
@@ -45,8 +45,8 @@ public class TestSuite<T> {
         return warmUp;
     }
 
-    public Settings getTest() {
-        return test;
+    public Settings getSettings() {
+        return settings;
     }
 
     public Set<String> getTestCases() {
@@ -56,13 +56,14 @@ public class TestSuite<T> {
 
     public List<State> run(TestApp app) {
         State warmUp = new State(Stage.WarmUp, this.warmUp, name, () -> app.isShutdown());
-        State test = new State(Stage.Test, this.test, name, () -> app.isShutdown());
+        State test = new State(Stage.Test, this.settings, name, () -> app.isShutdown());
 
         try {
             log.info("Start testSuite: {}", name);
-
-            app.setState(warmUp);
-            new Runner<>(warmUp, env, lifeCycle).run();
+            if (!warmUp.getSettings().isDisabled()) {
+                app.setState(warmUp);
+                new Runner<>(warmUp, env, lifeCycle).run();
+            }
 
             app.setState(test);
             new Runner<>(test, env, lifeCycle).run();

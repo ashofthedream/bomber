@@ -1,6 +1,8 @@
 package ashes.of.bomber.core;
 
+import javax.annotation.Nullable;
 import java.time.Instant;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.BooleanSupplier;
@@ -11,6 +13,8 @@ public class State {
     private final Stage stage;
     private final Settings settings;
     private final String testSuite;
+
+    @Nullable
     private volatile String testCase;
 
     private volatile Instant testSuiteStartTime = Instant.EPOCH;
@@ -32,6 +36,7 @@ public class State {
         return testSuite;
     }
 
+    @Nullable
     public String getTestCase() {
         return testCase;
     }
@@ -48,6 +53,9 @@ public class State {
         return testSuiteStartTime;
     }
 
+    public Instant getTestCaseStartTime() {
+        return testCaseStartTime;
+    }
 
     public boolean isSuiteStated() {
         return !testSuiteStartTime.equals(Instant.EPOCH);
@@ -73,6 +81,7 @@ public class State {
 
     public void finishCase() {
         testCaseStartTime = Instant.EPOCH;
+        testCase = null;
     }
 
 
@@ -104,13 +113,20 @@ public class State {
 
     public BooleanSupplier createChecker() {
         AtomicLong threadRemainInvocations = new AtomicLong(settings.getThreadInvocationsCount());
-
-        return () -> check(threadRemainInvocations);
+        long deadline = System.currentTimeMillis() + getCaseRemainTime();
+        return () -> check(threadRemainInvocations, deadline);
     }
 
-    private boolean check(AtomicLong threadRemainInvs) {
-        return !shutdown.getAsBoolean() && testCaseRemainTotalInvocationCount.decrementAndGet() >= 0 &&
-                threadRemainInvs.decrementAndGet() >= 0 &&
-                getCaseRemainTime() >= 0;
+    private boolean check(AtomicLong threadRemainCount, long deadline) {
+        return !shutdown.getAsBoolean() &&
+                testCaseRemainTotalInvocationCount.decrementAndGet() >= 0 &&
+                threadRemainCount.decrementAndGet() >= 0 &&
+                System.currentTimeMillis() < deadline;
+    }
+
+    @Override
+    public String toString() {
+        String testCase = this.testCase != null ? "." + this.testCase : "";
+        return String.format("(%s) %s%s", stage, testSuite, testCase);
     }
 }

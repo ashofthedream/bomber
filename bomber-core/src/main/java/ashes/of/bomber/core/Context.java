@@ -45,6 +45,11 @@ public class Context {
         return timestamp;
     }
 
+    public String toLogString() {
+        String testCase = this.testCase != null ? "." + this.testCase : "";
+        return String.format("(%s) %s%s", stage, testSuite, testCase);
+    }
+
     @Override
     public String toString() {
         return "Context{" +

@@ -1,7 +1,7 @@
 package ashes.of.bomber.sink.influx;
 
 import ashes.of.bomber.core.Context;
-import ashes.of.bomber.core.stopwatch.Record;
+import ashes.of.bomber.stopwatch.Record;
 import ashes.of.bomber.sink.Sink;
 import org.influxdb.InfluxDB;
 import org.influxdb.dto.Point;
@@ -46,7 +46,7 @@ public class InfluxDbSink implements Sink {
     }
 
     @Override
-    public void afterTestCase(Context context, long elapsed, @Nullable Throwable throwable) {
+    public void afterEach(Context context, long elapsed, @Nullable Throwable throwable) {
         String error = Optional.ofNullable(throwable).map(Throwable::getMessage).orElse("");
         influxDB.write(Point.measurement(testCollectionName)
                 .time(context.getTimestamp().toEpochMilli(), TimeUnit.MILLISECONDS)

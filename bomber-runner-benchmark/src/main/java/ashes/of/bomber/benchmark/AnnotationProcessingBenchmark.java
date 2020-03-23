@@ -1,13 +1,12 @@
 package ashes.of.bomber.benchmark;
 
-import ashes.of.bomber.annotations.Baseline;
+import ashes.of.bomber.annotations.LoadTest;
 import ashes.of.bomber.annotations.LoadTestCase;
 import ashes.of.bomber.annotations.LoadTestSuite;
-import ashes.of.bomber.annotations.WarmUp;
 import ashes.of.bomber.core.Settings;
 import ashes.of.bomber.builder.TestSuiteBuilder;
 import ashes.of.bomber.builder.TestAppBuilder;
-import ashes.of.bomber.core.stopwatch.Clock;
+import ashes.of.bomber.stopwatch.Clock;
 import org.HdrHistogram.ConcurrentHistogram;
 import org.HdrHistogram.Histogram;
 
@@ -18,9 +17,8 @@ import java.util.function.Supplier;
 
 public class AnnotationProcessingBenchmark {
 
-    @LoadTestSuite(time = 20, threadInvocations = 100_000)
-    @WarmUp(disabled = true)
-    @Baseline(disabled = true)
+    @LoadTestSuite
+    @LoadTest(time = 20, threadInvocations = 100_000)
     public static class Test {
 
         private final Histogram histogram = new ConcurrentHistogram(2);
@@ -64,13 +62,11 @@ public class AnnotationProcessingBenchmark {
         TestSuiteBuilder<Test> suite = new TestSuiteBuilder<Test>()
                 .name("performance-test")
                 .sharedInstance(test)
-                .settings(b -> b
-                        .baseline(Settings::disabled)
-                        .warmUp(Settings::disabled)
-                        .test(settings -> settings
+                    .warmUp(Settings::disabled)
+                    .settings(settings -> settings
 //                                .time(20_000)
-                                .threadCount(1)
-                                .threadInvocationCount(100_000)))
+                            .threadCount(1)
+                            .threadInvocationCount(100_000))
                 .testCase("test", Test::test);
 
         new TestAppBuilder()

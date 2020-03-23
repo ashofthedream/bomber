@@ -59,14 +59,14 @@ public class Settings {
 
 
     public Settings time(long time, TimeUnit unit) {
-        return time(unit.toMillis(time));
+        return duration(Duration.ofMillis(unit.toMillis(time)));
     }
 
-    public Settings time(long ms) {
-        return time(Duration.ofMillis(ms));
+    public Settings seconds(long seconds) {
+        return duration(Duration.ofSeconds(seconds));
     }
 
-    public Settings time(Duration time) {
+    public Settings duration(Duration time) {
         this.time = time;
         return this;
     }

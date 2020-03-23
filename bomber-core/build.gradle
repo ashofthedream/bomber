@@ -1,6 +1,9 @@
 version = '1.0.0-SNAPSHOT'
 
 dependencies {
+    compile     group: 'org.hdrhistogram',              name: 'HdrHistogram',                   version: '2.1.10'
+    runtime     group: 'org.apache.logging.log4j',      name: 'log4j-core',                     version: '2.12.1'
+
     testCompile group: 'org.openjdk.jmh',               name: 'jmh-core',                       version: '1.21'
     testCompile group: 'org.openjdk.jmh',               name: 'jmh-generator-annprocess',       version: '1.21'
 }
