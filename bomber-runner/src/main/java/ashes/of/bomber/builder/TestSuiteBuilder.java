@@ -175,15 +175,16 @@ public class TestSuiteBuilder<T> {
     }
 
 
-    public TestSuite<T> build(Environment appEnv) {
+    public TestSuite<T> build(WorkerPool pool, Environment appEnv) {
         Preconditions.checkNotNull(name,     "name is null");
         Preconditions.checkNotNull(testSuite, "testCase is null");
         Preconditions.checkNotNull(appEnv, "env is null");
 
+
         Environment env = new Environment(appEnv.getSinks(), appEnv.getWatchers(), limiter, appEnv.getBarrier());
         LifeCycle<T> lifeCycle = new LifeCycle<>(testCases, testSuite, beforeEach, afterEach, afterAll, beforeAll);
 
-        return new TestSuite<>(name, env, lifeCycle, settings, warmUp);
+        return new TestSuite<>(pool, name, env, lifeCycle, settings, warmUp);
     }
 }
 

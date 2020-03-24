@@ -13,6 +13,7 @@ import java.lang.reflect.Modifier;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
+
 public class TestAppProcessor {
     private static final Logger log = LogManager.getLogger();
 
@@ -20,6 +21,8 @@ public class TestAppProcessor {
     private final AtomicReference<Object> app = new AtomicReference<>();
 
     public TestAppBuilder process(Class<?> cls) {
+        log.debug("start process app: {} ", cls);
+
         WarmUp warmUp = cls.getAnnotation(WarmUp.class);
         if (warmUp != null)
             b.warmUp(settings(warmUp));
@@ -43,7 +46,7 @@ public class TestAppProcessor {
             if (Modifier.isStatic(modifiers) || !Modifier.isPublic(modifiers))
                 continue;
 
-            log.debug("check cls: {} method: {}", cls.getClass(), method.getName());
+            log.debug("process app: {} method: {}", cls, method.getName());
             try {
                 Provide provide = method.getAnnotation(Provide.class);
                 if (provide != null)
@@ -70,18 +73,44 @@ public class TestAppProcessor {
     }
 
     private void provide(Class<?> cls, Method method, Provide provide) throws IllegalAccessException {
-        MethodHandle mh = MethodHandles.lookup().unreflect(method);
-
         Class<?> ret = method.getReturnType();
+
+        MethodHandle mh = MethodHandles.lookup().unreflect(method);
+        AtomicReference<Object> object = new AtomicReference<>();
+
         b.provide(ret, () -> {
-            try {
-                Object app = cls.getConstructor().newInstance();
-                return ret.cast(mh.bindTo(app).invoke());
-            } catch (Throwable e) {
-                log.warn("Can't provide: {}", ret);
-                throw new RuntimeException(e);
+
+            Object res = object.get();
+            if (res == null) {
+                log.debug("init provider type: {}", ret);
+                try {
+                    Object a = getOrCreateApp(cls);
+
+                    Object result = mh.bindTo(a).invoke();
+                    object.set(result);
+
+                    return result;
+                } catch (Throwable e) {
+                    log.warn("Can't create binding: {}", ret);
+                    throw new RuntimeException(e);
+                }
             }
+
+            return res;
         });
+    }
+
+    private Object getOrCreateApp(Class<?> cls) throws Throwable {
+        Object a = app.get();
+        if (a == null) {
+            log.debug("init provider app: {}", cls);
+
+            Object created = cls.getConstructor().newInstance();
+            app.set(created);
+            return created;
+        }
+
+        return a;
     }
 
     private Settings settings(LoadTest ann) {

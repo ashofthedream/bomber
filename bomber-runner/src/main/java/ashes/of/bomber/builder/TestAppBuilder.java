@@ -6,16 +6,20 @@ import ashes.of.bomber.limiter.Limiter;
 import ashes.of.bomber.runner.Environment;
 import ashes.of.bomber.runner.TestSuite;
 import ashes.of.bomber.runner.TestApp;
+import ashes.of.bomber.runner.WorkerPool;
 import ashes.of.bomber.sink.Sink;
 import ashes.of.bomber.squadron.BarrierBuilder;
 import ashes.of.bomber.squadron.NoBarrier;
 import ashes.of.bomber.watcher.Watcher;
 import ashes.of.bomber.watcher.WatcherConfig;
 import com.google.common.base.Preconditions;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -24,6 +28,7 @@ import java.util.stream.Stream;
 
 
 public class TestAppBuilder {
+    private static final Logger log = LogManager.getLogger();
 
     private Settings warmUp = new Settings()
             .disabled();
@@ -34,6 +39,8 @@ public class TestAppBuilder {
     private final List<WatcherConfig> watchers = new ArrayList<>();
     private BarrierBuilder barrier = new NoBarrier.Builder();
     private Supplier<Limiter> limiter = Limiter::alwaysPermit;
+
+    private final ProviderBuilder provider = new ProviderBuilder();
 
     /**
      * Test suites for run
@@ -139,10 +146,14 @@ public class TestAppBuilder {
         return watchers(1000, watchers);
     }
 
-    private final Map<Class<?>, Supplier<?>> providers = new LinkedHashMap<>();
 
     public TestAppBuilder provide(Class<?> cls, Supplier<?> supplier) {
-        providers.put(cls, supplier);
+        provider.add(cls, supplier);
+        return this;
+    }
+
+    public TestAppBuilder provide(Consumer<ProviderBuilder> builder) {
+        builder.accept(provider);
         return this;
     }
 
@@ -177,18 +188,61 @@ public class TestAppBuilder {
     }
 
     public <T> TestAppBuilder testSuiteClass(Class<T> cls) {
-        Class<?>[] types = new Class[providers.size()];
-        Object[] args = new Object[providers.size()];
+        return testSuiteClass(cls, b -> b.add(provider));
+    }
 
-        AtomicInteger seq = new AtomicInteger();
-        providers.forEach((type, supplier) -> {
-            int i = seq.getAndIncrement();
-            types[i] = type;
-            Object arg = supplier.get();
-            args[i] = arg;
+    public <T> TestAppBuilder testSuiteClass(Class<T> cls, Consumer<ProviderBuilder> consumer) {
+        ProviderBuilder b = new ProviderBuilder()
+                .add(provider);
+        consumer.accept(b);
+
+        return testSuite(cls, () -> {
+            try {
+                log.debug("create test suite class");
+                ProviderBuilder.Context context = b.build();
+                Constructor<?> selected = null;
+
+                for (Constructor<?> constructor : cls.getConstructors()) {
+                    if (!isCompatibleConstructor(constructor, context))
+                        continue;
+
+                    if (selected != null)
+                        log.warn("found at least one matching constructor: {}, already found: {}, check it", constructor, selected);
+
+                    selected = constructor;
+                }
+
+                if (selected == null)
+                    throw new Exception("constructor not found");
+
+                Object testSuite = selected
+                        .newInstance(context.getArgs());
+
+                return cls.cast(testSuite);
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to create new instance of test suite", e);
+            }
         });
+    }
 
-        return testSuiteClass(cls, types, args);
+    private boolean isCompatibleConstructor(Constructor<?> constructor, ProviderBuilder.Context context) {
+        int modifiers = constructor.getModifiers();
+        if (!Modifier.isPublic(modifiers)) {
+            log.debug("private constructor: {}, skip", constructor);
+            return false;
+        }
+
+        Class<?>[] params = constructor.getParameterTypes();
+        log.debug("check constructor: {}, params: {}", constructor, params);
+        for (Class<?> param : params) {
+            Supplier<?> arg = context.getByType(param);
+            if (arg == null) {
+                log.debug("argument for param: {} not found, skip", param);
+                return false;
+            }
+        }
+
+        return true;
     }
 
     public <T> TestAppBuilder testSuiteClass(Class<T> cls, Object... args) {
@@ -218,12 +272,12 @@ public class TestAppBuilder {
 
     public BomberApp build() {
         Preconditions.checkArgument(!suites.isEmpty(), "No test suites found");
-
+        WorkerPool pool = new WorkerPool();
         Environment env = new Environment(sinks, watchers, limiter, barrier);
         List<TestSuite<?>> suites = this.suites.stream()
-                .map(b -> b.build(env))
+                .map(b -> b.build(pool, env))
                 .collect(Collectors.toList());
 
-        return new TestApp(env, suites);
+        return new TestApp(pool, env, suites);
     }
 }

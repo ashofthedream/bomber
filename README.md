@@ -29,12 +29,12 @@ public class ExampleTest {
         // This method will be invoked once in each thread after all test methods
     }
 
-    @LoadTest
+    @LoadTestCase
     public void oneSlowRequest() throws Exception {
         client.someSlowRequest();
     }
 
-    @LoadTest
+    @LoadTestCase(async = true)
     public void twoFastRequests(Clock clock) throws Exception {
         Stopwatch fast = clock.stopwatch("someFast");
         client.someFastRequest();

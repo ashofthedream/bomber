@@ -1,8 +1,6 @@
 package ashes.of.bomber.runner;
 
-import ashes.of.bomber.core.BomberApp;
-import ashes.of.bomber.core.Report;
-import ashes.of.bomber.core.State;
+import ashes.of.bomber.core.*;
 import ashes.of.bomber.sink.Sink;
 import ashes.of.bomber.watcher.Watcher;
 import ashes.of.bomber.watcher.WatcherConfig;
@@ -12,6 +10,7 @@ import org.apache.logging.log4j.Logger;
 import javax.annotation.Nullable;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -22,6 +21,9 @@ import java.util.stream.Collectors;
 public class TestApp implements BomberApp {
     private static final Logger log = LogManager.getLogger();
 
+    private static final State REST = new State(Stage.Rest, new Settings().disabled(), "", () -> false);
+
+    private final WorkerPool pool;
     private final Environment environment;
     private final List<TestSuite<?>> suites;
 
@@ -29,7 +31,8 @@ public class TestApp implements BomberApp {
     private volatile State state;
     private volatile CountDownLatch shutdown = new CountDownLatch(1);
 
-    public TestApp(Environment environment, List<TestSuite<?>> suites) {
+    public TestApp(WorkerPool pool, Environment environment, List<TestSuite<?>> suites) {
+        this.pool = pool;
         this.environment = environment;
         this.suites = suites;
     }
@@ -52,9 +55,9 @@ public class TestApp implements BomberApp {
                 .forEach(config -> {
                     Watcher watcher = config.getWatcher();
                     watcherEx.scheduleAtFixedRate(() -> {
-                        State state = this.state;
-                        if (state != null)
-                            watcher.watch(state);
+                        State state = Optional.ofNullable(this.state)
+                                .orElse(REST);
+                        watcher.watch(state);
                     }, 0, config.getPeriod(), config.getTimeUnit());
                 });
 
@@ -94,6 +97,7 @@ public class TestApp implements BomberApp {
 
         Instant finishTime = Instant.now();
         shutdown.countDown();
+        pool.shutdown();
         return new Report(startTime, finishTime, errorsCount.sum());
     }
 

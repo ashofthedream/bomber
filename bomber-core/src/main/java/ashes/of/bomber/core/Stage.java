@@ -4,11 +4,9 @@ package ashes.of.bomber.core;
 public enum Stage {
 
     /**
-     * Baseline stage doesn't run any tests, no-op method are invoked instead.
-     *
-     * This stage is used for framework warm-up
+     * This stage doesn't run any tests
      */
-    Baseline,
+    Rest,
 
     /**
      * Like a test, but used for warm-up

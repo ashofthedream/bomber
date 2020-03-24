@@ -12,6 +12,7 @@ import ashes.of.bomber.squadron.Barrier;
 import ashes.of.bomber.stopwatch.Clock;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -26,6 +27,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 public class Runner<T> {
     private static final Logger log = LogManager.getLogger();
 
+    private final WorkerPool pool;
     private final State state;
     private final Settings settings;
     private final Environment env;
@@ -35,7 +37,8 @@ public class Runner<T> {
 
     private final List<Worker> workers = new ArrayList<>();
 
-    public Runner(State state, Environment env, LifeCycle<T> lifeCycle) {
+    public Runner(WorkerPool pool, State state, Environment env, LifeCycle<T> lifeCycle) {
+        this.pool = pool;
         this.state = state;
         this.settings = state.getSettings();
         this.env = env;
@@ -50,12 +53,17 @@ public class Runner<T> {
         return state;
     }
 
+    public void run() {
+        run(state.getSettings());
+    }
+
     /**
      * Runs the test case
      */
-    public void run() {
-        Settings settings = state.getSettings();
-        log.info("{} | Start with settings: {}", state, settings);
+    public void run(Settings settings) {
+        ThreadContext.put("stage", state.getStage().name());
+        ThreadContext.put("testSuite", state.getTestCase());
+        log.info("Start with settings: {}", settings);
 
         barrier.enterSuite(state.getStage(), state.getTestSuite(), settings);
         state.startSuiteIfNotStarted();
@@ -64,70 +72,67 @@ public class Runner<T> {
         CountDownLatch begin = new CountDownLatch(settings.getThreadsCount());
         CountDownLatch end = new CountDownLatch(settings.getThreadsCount());
 
-        startWorkerThreads(begin, end, barrier);
-
-        try {
-            log.debug("{} | Await end of stage", state);
-            end.await();
-        } catch (InterruptedException e) {
-            log.error("{} | We've been interrupted", state, e);
+        for (int i = 0; i < settings.getThreadsCount(); i++) {
+            Worker worker = pool.acquire();
+            workers.add(worker);
+            worker.run(() -> runTestSuite(settings, begin, end, barrier));
         }
 
-        log.info("{} | Ended, elapsed {}ms", state, state.getCaseElapsedTime());
+        try {
+            log.debug("Await end of stage");
+            end.await();
+        } catch (InterruptedException e) {
+            log.error("We've been interrupted", e);
+        }
+
+        pool.release(workers);
+        log.info("Ended, elapsed {}ms", state.getCaseElapsedTime());
 
         barrier.leaveSuite(state.getStage(), state.getTestSuite(), settings);
         sink.afterTestSuite(state.getStage(), state.getTestSuite());
+
+        ThreadContext.clearAll();
     }
 
-    private void startWorkerThreads(CountDownLatch startLatch, CountDownLatch endLatch, Barrier barrier) {
-        for (int i = 0; i < state.getSettings().getThreadsCount(); i++)
-            startWorkerThread(() -> runTestSuite(startLatch, endLatch, barrier), i);
-    }
-
-    private void startWorkerThread(Runnable runnable, int index) {
-        Thread thread = new Thread(runnable);
-        thread.setUncaughtExceptionHandler((t, e) -> log.error("Uncaught exception in thread: {}", t.getName(), e));
-        thread.setName(String.format("%s-%s-worker-%03d", state.getStage(), state.getTestSuite(), index));
-        thread.start();
-
-        workers.add(new Worker(thread));
-    }
-
-
-    private void runTestSuite(CountDownLatch startLatch, CountDownLatch endLatch, Barrier barrier) {
-        log.debug("{} | runTestSuite", state);
+    private void runTestSuite(Settings settings, CountDownLatch startLatch, CountDownLatch endLatch, Barrier barrier) {
+        ThreadContext.put("stage", state.getStage().name());
+        ThreadContext.put("testSuite", state.getTestSuite());
+        log.debug("run test suite");
         try {
             T instance = lifeCycle.testSuite();
             Limiter limiter = env.getLimiter().get();
 
             startLatch.countDown();
 
-            // if we can't start in 60 seconds – something works bad
-            startLatch.await(60, SECONDS);
+            log.trace("await start");
+            if (!startLatch.await(60, SECONDS))
+                log.warn("after 60s of waiting, worker started without all other workers (this isn't acceptable situation)");
 
             lifeCycle.beforeAll(state, instance);
             lifeCycle.testCases()
-                    .forEach((name, testCase) -> runTestCase(instance, testCase, limiter, barrier));
+                    .forEach((name, testCase) -> runTestCase(settings, instance, testCase, limiter, barrier));
             lifeCycle.afterAll(state, instance);
 
         } catch (Throwable th) {
-            log.warn("{} | runTestSuite failed", state, th);
+            log.warn("run test suite failed", th);
         }
 
-        log.debug("{} | runTestSuite finish", state);
+        log.debug("finish test suite");
         endLatch.countDown();
+        ThreadContext.clearAll();
     }
 
 
-    private void runTestCase(T instance, TestCase<T> testCase, Limiter limiter, Barrier barrier) {
+    private void runTestCase(Settings settings, T instance, TestCase<T> testCase, Limiter limiter, Barrier barrier) {
+        ThreadContext.put("testCase", testCase.getName());
         String threadName = Thread.currentThread().getName();
         AtomicLong invocations = new AtomicLong();
 
-        log.debug("{} | runTestCase enter (testCase: {})", state, testCase.getName());
+        log.trace("run test case, enter");
         barrier.enterCase(state.getStage(), state.getTestSuite(), testCase.getName());
         state.startCaseIfNotStarted(testCase.getName());
         sink.beforeTestCase(state.getStage(), state.getTestSuite(), testCase.getName(), state.getTestCaseStartTime(), state.getSettings());
-        log.debug("{} | runTestCase", state);
+        log.debug("run test case");
 
         BooleanSupplier checker = state.createChecker();
         while (checker.getAsBoolean()) {
@@ -165,9 +170,11 @@ public class Runner<T> {
 
             lifeCycle.afterEach(context, instance);
         }
-        log.debug("{} | runTestCase leave", state);
+
+        log.trace("finish test case, leave");
         barrier.leaveCase(state.getStage(), state.getTestSuite(), testCase.getName());
         sink.afterTestCase(state.getStage(), state.getTestSuite(), testCase.getName());
         state.finishCase();
+        log.debug("finish test case");
     }
 }

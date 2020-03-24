@@ -53,6 +53,9 @@ public class HistogramTimelineSink implements Sink {
     }
 
     private void print() {
+        if (timeline.isEmpty())
+            return;
+
         Instant time = timeline.firstKey();
         Instant end = timeline.lastKey();
 

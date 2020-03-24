@@ -32,6 +32,7 @@ public class TestSuiteProcessor<T> {
     }
 
     public TestSuiteBuilder<T> process(Class<T> cls, Supplier<T> supplier) {
+        log.debug("start process suite: {}", cls);
         WarmUp warmUp = cls.getAnnotation(WarmUp.class);
         if (warmUp != null)
             b.warmUp(settings(warmUp));
@@ -71,7 +72,7 @@ public class TestSuiteProcessor<T> {
             if (Modifier.isStatic(modifiers) || !Modifier.isPublic(modifiers))
                 continue;
 
-            log.debug("check cls: {} method: {}", cls.getClass(), method.getName());
+            log.debug("process suite: {} method: {}", cls, method.getName());
             try {
                 BeforeAll beforeAll = method.getAnnotation(BeforeAll.class);
                 if (beforeAll != null)

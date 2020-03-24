@@ -13,6 +13,7 @@ import java.util.Set;
 public class TestSuite<T> {
     private static final Logger log = LogManager.getLogger();
 
+    private final WorkerPool pool;
     private final String name;
     private final Environment env;
     private final LifeCycle<T> lifeCycle;
@@ -20,7 +21,8 @@ public class TestSuite<T> {
     private final Settings warmUp;
 
 
-    public TestSuite(String name, Environment env, LifeCycle<T> lifeCycle, Settings settings, Settings warmUp) {
+    public TestSuite(WorkerPool pool, String name, Environment env, LifeCycle<T> lifeCycle, Settings settings, Settings warmUp) {
+        this.pool = pool;
         this.name = name;
         this.env = env;
         this.lifeCycle = lifeCycle;
@@ -62,11 +64,11 @@ public class TestSuite<T> {
             log.info("Start testSuite: {}", name);
             if (!warmUp.getSettings().isDisabled()) {
                 app.setState(warmUp);
-                new Runner<>(warmUp, env, lifeCycle).run();
+                new Runner<>(pool, warmUp, env, lifeCycle).run();
             }
 
             app.setState(test);
-            new Runner<>(test, env, lifeCycle).run();
+            new Runner<>(pool, test, env, lifeCycle).run();
 
             app.setState(null);
         } catch (Exception e) {

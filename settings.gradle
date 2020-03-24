@@ -1,3 +1,5 @@
+rootProject.name = 'bomber-all'
+
 include 'bomber-atc-app'
 include 'bomber-core'
 include 'bomber-dispatcher-starter'
