@@ -1,6 +1,8 @@
 package ashes.of.bomber.builder;
 
 import ashes.of.bomber.core.Settings;
+import ashes.of.bomber.delayer.Delayer;
+import ashes.of.bomber.delayer.NoDelayDelayer;
 import ashes.of.bomber.limiter.Limiter;
 import ashes.of.bomber.methods.LifeCycleMethod;
 import ashes.of.bomber.methods.TestCaseMethodNoArgs;
@@ -26,7 +28,7 @@ public class TestSuiteBuilder<T> {
     private final List<LifeCycleMethod<T>> afterAll = new ArrayList<>();
 
     private final Map<String, TestCase<T>> testCases = new LinkedHashMap<>();
-
+    private Delayer delayer = new NoDelayDelayer();
     private Supplier<Limiter> limiter = Limiter::alwaysPermit;
     private String name;
     private Supplier<T> testSuite;
@@ -38,6 +40,7 @@ public class TestSuiteBuilder<T> {
 
 
     public TestSuiteBuilder<T> warmUp(Settings settings) {
+        Objects.requireNonNull(settings, "settings is null");
         this.warmUp = new Settings(settings);
         return this;
     }
@@ -49,6 +52,7 @@ public class TestSuiteBuilder<T> {
 
 
     public TestSuiteBuilder<T> settings(Settings settings) {
+        Objects.requireNonNull(settings, "settings is null");
         this.settings = new Settings(settings);
         return this;
     }
@@ -58,6 +62,11 @@ public class TestSuiteBuilder<T> {
         return this;
     }
 
+    public TestSuiteBuilder<T> delayer(Delayer delayer) {
+        Objects.requireNonNull(delayer, "delayer is null");
+        this.delayer = delayer;
+        return this;
+    }
 
     /**
      * Adds limiter which will be shared across all workers threads
@@ -66,6 +75,7 @@ public class TestSuiteBuilder<T> {
      * @return builder
      */
     public TestSuiteBuilder<T> limiter(Limiter limiter) {
+        Objects.requireNonNull(limiter, "limiter is null");
         return limiter(() -> limiter);
     }
 
@@ -83,13 +93,13 @@ public class TestSuiteBuilder<T> {
 
 
     public TestSuiteBuilder<T> instance(Supplier<T> object) {
-        Preconditions.checkNotNull(object, "object is null");
+        Objects.requireNonNull(object, "suite is null");
         this.testSuite = object;
         return this;
     }
 
     public TestSuiteBuilder<T> sharedInstance(T object) {
-        Preconditions.checkNotNull(object, "suite is null");
+        Objects.requireNonNull(object, "suite is null");
         return instance(() -> object);
     }
 
@@ -116,11 +126,13 @@ public class TestSuiteBuilder<T> {
     }
 
     TestSuiteBuilder<T> testCase(String name, boolean async, TestCaseMethodWithClick<T> test) {
+        Objects.requireNonNull(name, "name is null");
         this.testCases.put(name, new TestCase<>(name, async, test));
         return this;
     }
 
     TestSuiteBuilder<T> testCase(String name, boolean async, TestCaseMethodNoArgs<T> test) {
+        Objects.requireNonNull(name, "name is null");
         return testCase(name, async, (tc, stopwatch) -> test.run(tc));
     }
 
@@ -175,13 +187,13 @@ public class TestSuiteBuilder<T> {
     }
 
 
-    public TestSuite<T> build(WorkerPool pool, Environment appEnv) {
-        Preconditions.checkNotNull(name,     "name is null");
-        Preconditions.checkNotNull(testSuite, "testCase is null");
-        Preconditions.checkNotNull(appEnv, "env is null");
+    public TestSuite<T> build(WorkerPool pool, Environment app) {
+        Objects.requireNonNull(name,     "name is null");
+        Objects.requireNonNull(testSuite, "testCase is null");
+        // todo it may be useful, but not today
+        // Preconditions.checkArgument(!testCases.isEmpty(), "No test cases found");
 
-
-        Environment env = new Environment(appEnv.getSinks(), appEnv.getWatchers(), limiter, appEnv.getBarrier());
+        Environment env = new Environment(app.getSinks(), app.getWatchers(), delayer, limiter, app.getBarrier());
         LifeCycle<T> lifeCycle = new LifeCycle<>(testCases, testSuite, beforeEach, afterEach, afterAll, beforeAll);
 
         return new TestSuite<>(pool, name, env, lifeCycle, settings, warmUp);

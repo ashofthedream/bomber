@@ -75,6 +75,6 @@ public class BuilderLifecycleTest {
     private void testSettings(Settings settings) {
         settings.seconds(20)
                 .threadCount(2)
-                .threadInvocationCount(10);
+                .threadIterations(10);
     }
 }

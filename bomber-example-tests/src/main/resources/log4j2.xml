@@ -12,9 +12,9 @@
     </Appenders>
 
     <Loggers>
-        <Logger name="ashes.of.bomber" level="debug"/>
+        <Logger name="ashes.of.bomber" level="info"/>
 
-        <Logger name="ashes.of.bomber.runner.Runner" level="debug" additivity="false">
+        <Logger name="ashes.of.bomber.runner.Runner" level="info" additivity="false">
             <AppenderRef ref="ConsoleWithContext" />
         </Logger>
 

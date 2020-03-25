@@ -1,6 +1,6 @@
 package ashes.of.bomber.sink.influx;
 
-import ashes.of.bomber.core.Context;
+import ashes.of.bomber.core.Iteration;
 import ashes.of.bomber.stopwatch.Record;
 import ashes.of.bomber.sink.Sink;
 import org.influxdb.InfluxDB;
@@ -27,35 +27,35 @@ public class InfluxDbSink implements Sink {
     }
 
     @Override
-    public void timeRecorded(Context context, Record record) {
+    public void timeRecorded(Iteration it, Record record) {
         String error = Optional.ofNullable(record.getError())
                 .map(Throwable::getMessage)
                 .orElse("");
 
         influxDB.write(Point.measurement(lapCollectionName)
-                .time(context.getTimestamp().toEpochMilli(), TimeUnit.MILLISECONDS)
-                .tag("stage",           context.getStage().name())
-                .tag("testCase",        context.getTestSuite())
-                .tag("test",            context.getTestCase())
-                .tag("thread",          context.getThread())
+                .time(it.getTimestamp().toEpochMilli(), TimeUnit.MILLISECONDS)
+                .tag("stage",           it.getStage().name())
+                .tag("testCase",        it.getTestSuite())
+                .tag("test",            it.getTestCase())
+                .tag("thread",          it.getThread())
                 .tag("error",           error)
                 .tag("label",           record.getLabel())
-                .addField("invocation", context.getInv())
+                .addField("iteration",  it.getNumber())
                 .addField("elapsed",    record.getElapsed())
                 .build());
     }
 
     @Override
-    public void afterEach(Context context, long elapsed, @Nullable Throwable throwable) {
+    public void afterEach(Iteration it, long elapsed, @Nullable Throwable throwable) {
         String error = Optional.ofNullable(throwable).map(Throwable::getMessage).orElse("");
         influxDB.write(Point.measurement(testCollectionName)
-                .time(context.getTimestamp().toEpochMilli(), TimeUnit.MILLISECONDS)
-                .tag("stage",           context.getStage().name())
-                .tag("testCase",        context.getTestSuite())
-                .tag("test",            context.getTestCase())
-                .tag("thread",          context.getThread())
+                .time(it.getTimestamp().toEpochMilli(), TimeUnit.MILLISECONDS)
+                .tag("stage",           it.getStage().name())
+                .tag("testCase",        it.getTestSuite())
+                .tag("test",            it.getTestCase())
+                .tag("thread",          it.getThread())
                 .tag("error",           error)
-                .addField("invocation", context.getInv())
+                .addField("iteration",  it.getNumber())
                 .addField("elapsed",    elapsed)
                 .build());
     }

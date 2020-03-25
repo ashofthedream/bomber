@@ -1,6 +1,6 @@
 package ashes.of.bomber.sink;
 
-import ashes.of.bomber.core.Context;
+import ashes.of.bomber.core.Iteration;
 import ashes.of.bomber.core.Settings;
 import ashes.of.bomber.core.Stage;
 import ashes.of.bomber.stopwatch.Record;
@@ -39,23 +39,23 @@ public class AsyncSink implements Sink {
     }
 
     @Override
-    public void beforeTestSuite(Stage stage, String testSuite, Instant startTime, Settings settings) {
-        ex.execute(() -> sink.beforeTestSuite(stage, testSuite, startTime, settings));
+    public void beforeTestSuite(Stage stage, String testSuite, Instant timestamp, Settings settings) {
+        ex.execute(() -> sink.beforeTestSuite(stage, testSuite, timestamp, settings));
     }
 
     @Override
-    public void beforeTestCase(Stage stage, String testSuite, String testCase, Instant startTime, Settings settings) {
-        ex.execute(() -> sink.beforeTestCase(stage, testSuite, testCase, startTime, settings));
+    public void beforeTestCase(Stage stage, String testSuite, String testCase, Instant timestamp, Settings settings) {
+        ex.execute(() -> sink.beforeTestCase(stage, testSuite, testCase, timestamp, settings));
     }
 
     @Override
-    public void timeRecorded(Context context, Record record) {
-        ex.execute(() -> sink.timeRecorded(context, record));
+    public void timeRecorded(Iteration it, Record record) {
+        ex.execute(() -> sink.timeRecorded(it, record));
     }
 
     @Override
-    public void afterEach(Context context, long elapsed, @Nullable Throwable throwable) {
-        ex.execute(() -> sink.afterEach(context, elapsed, throwable));
+    public void afterEach(Iteration it, long elapsed, @Nullable Throwable throwable) {
+        ex.execute(() -> sink.afterEach(it, elapsed, throwable));
     }
 
     @Override

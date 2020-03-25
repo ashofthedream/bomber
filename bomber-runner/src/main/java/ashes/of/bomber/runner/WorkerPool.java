@@ -61,10 +61,10 @@ public class WorkerPool {
 
     public Worker acquire() {
         Worker worker = available.poll();
-        Worker accuired = worker != null ? worker : createWorker();
+        Worker acquired = worker != null ? worker : createWorker();
 
-        log.debug("acquire {}", accuired.getName());
-        return accuired;
+        log.debug("acquire {}", acquired.getName());
+        return acquired;
     }
 
     public void release(Worker worker) {

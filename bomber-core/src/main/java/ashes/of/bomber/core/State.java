@@ -2,7 +2,6 @@ package ashes.of.bomber.core;
 
 import javax.annotation.Nullable;
 import java.time.Instant;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.BooleanSupplier;
@@ -20,7 +19,7 @@ public class State {
     private volatile Instant testSuiteStartTime = Instant.EPOCH;
     private volatile Instant testCaseStartTime = Instant.EPOCH;
 
-    private final AtomicLong testCaseRemainTotalInvocationCount = new AtomicLong(0);
+    private final AtomicLong totalItsRemain = new AtomicLong(0);
     private final LongAdder errorCount = new LongAdder();
 
     private final BooleanSupplier shutdown;
@@ -75,7 +74,7 @@ public class State {
         if (!isCaseStated()) {
             testCase = name;
             testCaseStartTime = Instant.now();
-            testCaseRemainTotalInvocationCount.set(settings.getTotalInvocationsCount());
+            totalItsRemain.set(settings.getTotalIterationsCount());
         }
     }
 
@@ -89,8 +88,8 @@ public class State {
         errorCount.increment();
     }
 
-    public long getRemainInvocations() {
-        return testCaseRemainTotalInvocationCount.get();
+    public long getTotalIterationsRemain() {
+        return totalItsRemain.get();
     }
 
     public long getCaseRemainTime() {
@@ -112,15 +111,15 @@ public class State {
     }
 
     public BooleanSupplier createChecker() {
-        AtomicLong threadRemainInvocations = new AtomicLong(settings.getThreadInvocationsCount());
+        AtomicLong threadItRemain = new AtomicLong(settings.getThreadIterationsCount());
         long deadline = System.currentTimeMillis() + getCaseRemainTime();
-        return () -> check(threadRemainInvocations, deadline);
+        return () -> check(threadItRemain, deadline);
     }
 
-    private boolean check(AtomicLong threadRemainCount, long deadline) {
+    private boolean check(AtomicLong threadItsRemain, long deadline) {
         return !shutdown.getAsBoolean() &&
-                testCaseRemainTotalInvocationCount.decrementAndGet() >= 0 &&
-                threadRemainCount.decrementAndGet() >= 0 &&
+                totalItsRemain.decrementAndGet() >= 0 &&
+                threadItsRemain.decrementAndGet() >= 0 &&
                 System.currentTimeMillis() < deadline;
     }
 

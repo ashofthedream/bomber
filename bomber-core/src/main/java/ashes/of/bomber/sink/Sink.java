@@ -1,6 +1,6 @@
 package ashes.of.bomber.sink;
 
-import ashes.of.bomber.core.Context;
+import ashes.of.bomber.core.Iteration;
 import ashes.of.bomber.core.Settings;
 import ashes.of.bomber.core.Stage;
 import ashes.of.bomber.stopwatch.Record;
@@ -21,10 +21,10 @@ public interface Sink {
      *
      * @param stage     stage
      * @param testSuite test suite name
-     * @param startTime stage start time
+     * @param timestamp stage start time
      * @param settings  stage settings
      */
-    default void beforeTestSuite(Stage stage, String testSuite, Instant startTime, Settings settings) {}
+    default void beforeTestSuite(Stage stage, String testSuite, Instant timestamp, Settings settings) {}
 
     /**
      * Invokes before test case run
@@ -32,27 +32,27 @@ public interface Sink {
      * @param stage     stage
      * @param testSuite test suite name
      * @param testCase  test suite name
-     * @param startTime stage start time
+     * @param timestamp stage start time
      * @param settings  stage settings
      */
-    default void beforeTestCase(Stage stage, String testSuite, String testCase, Instant startTime, Settings settings) {}
+    default void beforeTestCase(Stage stage, String testSuite, String testCase, Instant timestamp, Settings settings) {}
 
     /**
-     * Invokes when time was recored
+     * Invokes when time was recorded
      *
-     * @param context test context
+     * @param it test it
      * @param record  lap record
      */
-    default void timeRecorded(Context context, Record record) {}
+    default void timeRecorded(Iteration it, Record record) {}
 
     /**
      * Invokes after each test case invocation
      *
-     * @param context   test context
+     * @param it        test it
      * @param elapsed   elapsed time in nanoseconds
      * @param throwable thrown exception, if methods throws an exception
      */
-    default void afterEach(Context context, long elapsed, @Nullable Throwable throwable) {}
+    default void afterEach(Iteration it, long elapsed, @Nullable Throwable throwable) {}
 
     /**
      * Invokes before test case run

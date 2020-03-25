@@ -28,12 +28,12 @@ public @interface LoadTest {
     int threads() default 1;
 
     /**
-     * @return number of total invocations for all threads
+     * @return number of total iterations for all threads
      */
-    long totalInvocations() default 1_000_000_000;
+    long totalIterations() default 1_000_000_000;
 
     /**
-     * @return number of invocations per each thread.
+     * @return number of iterations per each thread.
      */
-    long threadInvocations() default 1_000_000_000;
+    long threadIterations() default 1_000_000_000;
 }

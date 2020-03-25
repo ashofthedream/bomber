@@ -1,8 +1,9 @@
 package ashes.of.bomber.runner;
 
-import ashes.of.bomber.core.Context;
+import ashes.of.bomber.core.Iteration;
 import ashes.of.bomber.core.Settings;
 import ashes.of.bomber.core.State;
+import ashes.of.bomber.delayer.Delayer;
 import ashes.of.bomber.limiter.Limiter;
 import ashes.of.bomber.stopwatch.Stopwatch;
 import ashes.of.bomber.sink.AsyncSink;
@@ -81,13 +82,18 @@ public class Runner<T> {
         try {
             log.debug("Await end of stage");
             end.await();
+
+            log.debug("all workers done, 1s cooldown");
+            Thread.sleep(1000);
+
         } catch (InterruptedException e) {
             log.error("We've been interrupted", e);
         }
 
+        log.debug("release all workers");
         pool.release(workers);
-        log.info("Ended, elapsed {}ms", state.getCaseElapsedTime());
 
+        log.info("Ended, elapsed {}ms", state.getCaseElapsedTime());
         barrier.leaveSuite(state.getStage(), state.getTestSuite(), settings);
         sink.afterTestSuite(state.getStage(), state.getTestSuite());
 
@@ -101,7 +107,7 @@ public class Runner<T> {
         try {
             T instance = lifeCycle.testSuite();
             Limiter limiter = env.getLimiter().get();
-
+            Delayer delayer = env.getDelayer();
             startLatch.countDown();
 
             log.trace("await start");
@@ -110,7 +116,7 @@ public class Runner<T> {
 
             lifeCycle.beforeAll(state, instance);
             lifeCycle.testCases()
-                    .forEach((name, testCase) -> runTestCase(settings, instance, testCase, limiter, barrier));
+                    .forEach((name, testCase) -> runTestCase(settings, instance, testCase, delayer, limiter, barrier));
             lifeCycle.afterAll(state, instance);
 
         } catch (Throwable th) {
@@ -123,10 +129,10 @@ public class Runner<T> {
     }
 
 
-    private void runTestCase(Settings settings, T instance, TestCase<T> testCase, Limiter limiter, Barrier barrier) {
+    private void runTestCase(Settings settings, T instance, TestCase<T> testCase, Delayer delayer, Limiter limiter, Barrier barrier) {
         ThreadContext.put("testCase", testCase.getName());
         String threadName = Thread.currentThread().getName();
-        AtomicLong invocations = new AtomicLong();
+        AtomicLong itSeq = new AtomicLong();
 
         log.trace("run test case, enter");
         barrier.enterCase(state.getStage(), state.getTestSuite(), testCase.getName());
@@ -136,16 +142,17 @@ public class Runner<T> {
 
         BooleanSupplier checker = state.createChecker();
         while (checker.getAsBoolean()) {
+            delayer.delay();
+
             if (!limiter.waitForPermit())
                 throw new RuntimeException("Limiter await failed");
 
-            long inv = invocations.getAndIncrement();
-            Context context = new Context(state.getStage(), state.getTestSuite(), testCase.getName(), threadName, inv, Instant.now());
+            Iteration it = new Iteration(itSeq.getAndIncrement(), state.getTestSuite(), testCase.getName(), threadName, state.getStage(), Instant.now());
 
-            lifeCycle.beforeEach(context, instance);
+            lifeCycle.beforeEach(it, instance);
 
-            Clock clock = new Clock(context.getTestSuite() + "." + testCase.getName(), record -> {
-                sink.timeRecorded(context, record);
+            Clock clock = new Clock(it.getTestSuite() + "." + testCase.getName(), record -> {
+                sink.timeRecorded(it, record);
 
                 if (!record.isSuccess())
                     state.incError();
@@ -159,16 +166,16 @@ public class Runner<T> {
                 if (!testCase.isAsync())
                     stopwatch.success();
 
-                sink.afterEach(context, stopwatch.getElapsed(), null);
+                sink.afterEach(it, stopwatch.getElapsed(), null);
             } catch (Throwable th) {
                 if (!testCase.isAsync())
                     stopwatch.fail(th);
 
-                log.trace("{} | runTestCase failed, inv: {}", state, inv, th);
-                sink.afterEach(context, stopwatch.getElapsed(), th);
+                log.trace("{} | runTestCase failed, it: {}", state, it, th);
+                sink.afterEach(it, stopwatch.getElapsed(), th);
             }
 
-            lifeCycle.afterEach(context, instance);
+            lifeCycle.afterEach(it, instance);
         }
 
         log.trace("finish test case, leave");

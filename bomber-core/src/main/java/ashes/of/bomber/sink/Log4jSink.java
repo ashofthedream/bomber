@@ -1,6 +1,6 @@
 package ashes.of.bomber.sink;
 
-import ashes.of.bomber.core.Context;
+import ashes.of.bomber.core.Iteration;
 import ashes.of.bomber.stopwatch.Record;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -22,15 +22,15 @@ public class Log4jSink implements Sink {
     }
 
     @Override
-    public void timeRecorded(Context ctx, Record record) {
+    public void timeRecorded(Iteration it, Record record) {
         Level level = record.isSuccess() ? this.level : Level.WARN;
-        log.log(level, "{} | timeRecorded: {}ms  | {}",
-                ctx.toLogString(), record.getElapsed() / 1_000_000.0, ctx.getInv(), record.getError());
+        log.log(level, "time {}: {}ms  #{}",
+                record.getLabel(), record.getElapsed() / 1_000_000.0, it.getNumber(), record.getError());
     }
 
     @Override
-    public void afterEach(Context ctx, long elapsed, @Nullable Throwable throwable) {
-//        if (throwable != null)
-//            log.error("{} | afterEach error(inv: {})", ctx.toLogString(), ctx.getInv(), throwable);
+    public void afterEach(Iteration it, long elapsed, @Nullable Throwable throwable) {
+        if (throwable != null)
+            log.error("{}.{} #{}", it.getTestSuite(), it.getTestCase(), it.getNumber(), throwable);
     }
 }

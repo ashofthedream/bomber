@@ -2,6 +2,7 @@ package ashes.of.bomber.builder;
 
 import ashes.of.bomber.annotations.*;
 import ashes.of.bomber.core.Settings;
+import ashes.of.bomber.delayer.RandomDelayer;
 import ashes.of.bomber.limiter.Limiter;
 import ashes.of.bomber.methods.TestCaseMethodWithClick;
 import ashes.of.bomber.stopwatch.Clock;
@@ -50,6 +51,10 @@ public class TestSuiteProcessor<T> {
                 b.limiter(limiter);
             }
         }
+
+        Delay delay = cls.getAnnotation(Delay.class);
+        if (delay != null)
+            b.delayer(new RandomDelayer(delay.min(), delay.max(), delay.timeUnit()));
 
         LoadTestSuite suite = cls.getAnnotation(LoadTestSuite.class);
         if (suite != null) {
@@ -105,16 +110,16 @@ public class TestSuiteProcessor<T> {
     private Settings settings(LoadTest ann) {
         return new Settings()
                 .threadCount(ann.threads())
-                .threadInvocationCount(ann.threadInvocations())
-                .totalInvocationCount(ann.totalInvocations())
+                .threadIterations(ann.threadIterations())
+                .totalIterations(ann.totalIterations())
                 .time(ann.time(), ann.timeUnit());
     }
 
     private Settings settings(WarmUp ann) {
         return new Settings()
                 .threadCount(ann.threads())
-                .threadInvocationCount(ann.threadInvocations())
-                .totalInvocationCount(ann.totalInvocations())
+                .threadIterations(ann.threadIterations())
+                .totalIterations(ann.totalIterations())
                 .time(ann.time(), ann.timeUnit());
     }
 

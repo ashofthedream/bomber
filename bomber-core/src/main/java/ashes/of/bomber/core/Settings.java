@@ -25,22 +25,22 @@ public class Settings {
     private int threadsCount = 1;
 
     /**
-     * Invocations count per each thread
+     * Iterations count per each thread
      */
-    private long threadInvocationsCount = 1_000_000_000;
+    private long threadIterationsCount = 1_000_000_000;
 
     /**
-     * Overall invocations count
+     * Total iterations count
      */
-    private long totalInvocationsCount = 1_000_000_000;
+    private long totalIterationsCount = 1_000_000_000;
 
 
     public Settings(Settings settings) {
         this.disabled = settings.isDisabled();
         this.time = settings.getTime();
         this.threadsCount = settings.getThreadsCount();
-        this.threadInvocationsCount = settings.getThreadInvocationsCount();
-        this.totalInvocationsCount = settings.getTotalInvocationsCount();
+        this.threadIterationsCount = settings.getThreadIterationsCount();
+        this.totalIterationsCount = settings.getTotalIterationsCount();
     }
 
     public Settings() {
@@ -78,14 +78,13 @@ public class Settings {
     }
 
 
-    public Settings threadInvocationCount(long count) {
-        this.threadInvocationsCount = count;
+    public Settings threadIterations(long count) {
+        this.threadIterationsCount = count;
         return this;
     }
 
-
-    public Settings totalInvocationCount(long count) {
-        this.totalInvocationsCount = count;
+    public Settings totalIterations(long count) {
+        this.totalIterationsCount = count;
         return this;
     }
 
@@ -102,12 +101,12 @@ public class Settings {
         return threadsCount;
     }
 
-    public long getThreadInvocationsCount() {
-        return threadInvocationsCount;
+    public long getThreadIterationsCount() {
+        return threadIterationsCount;
     }
 
-    public long getTotalInvocationsCount() {
-        return totalInvocationsCount;
+    public long getTotalIterationsCount() {
+        return totalIterationsCount;
     }
 
     @Override
@@ -116,8 +115,8 @@ public class Settings {
                 "disabled=" + disabled +
                 ", time=" + time +
                 ", threadsCount=" + threadsCount +
-                ", threadInvocationsCount=" + threadInvocationsCount +
-                ", totalInvocationsCount=" + totalInvocationsCount +
+                ", threadIterationsCount=" + threadIterationsCount +
+                ", totalIterationsCount=" + totalIterationsCount +
                 '}';
     }
 }

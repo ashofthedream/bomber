@@ -1,6 +1,6 @@
 package ashes.of.bomber.sink.datadog;
 
-import ashes.of.bomber.core.Context;
+import ashes.of.bomber.core.Iteration;
 import ashes.of.bomber.stopwatch.Record;
 import ashes.of.bomber.sink.Sink;
 import ashes.of.datadog.client.DatadogClient;
@@ -18,32 +18,32 @@ public class DatadogSink implements Sink {
     }
 
     @Override
-    public void timeRecorded(Context context, Record record) {
+    public void timeRecorded(Iteration it, Record record) {
         String error = Optional.ofNullable(record.getError())
                 .map(Throwable::getMessage)
                 .orElse("");
 
         client.timer("bomber_stopwatch_records")
-                .tag("stage",    context.getStage().name())
-                .tag("testCase", context.getTestSuite())
-                .tag("test",     context.getTestCase())
-                .tag("thread",   context.getThread())
+                .tag("stage",    it.getStage().name())
+                .tag("testCase", it.getTestSuite())
+                .tag("test",     it.getTestCase())
+                .tag("thread",   it.getThread())
                 .tag("error",    error)
                 .tag("label",    record.getLabel())
                 .nanos(record.getElapsed());
     }
 
     @Override
-    public void afterEach(Context context, long elapsed, @Nullable Throwable throwable) {
+    public void afterEach(Iteration it, long elapsed, @Nullable Throwable throwable) {
         String error = Optional.ofNullable(throwable)
                 .map(Throwable::getMessage)
                 .orElse("");
 
         client.timer("bomber_tests")
-                .tag("stage",    context.getStage().name())
-                .tag("testCase", context.getTestSuite())
-                .tag("test",     context.getTestCase())
-                .tag("thread",   context.getThread())
+                .tag("stage",    it.getStage().name())
+                .tag("testCase", it.getTestSuite())
+                .tag("test",     it.getTestCase())
+                .tag("thread",   it.getThread())
                 .tag("error",    error)
                 .nanos(elapsed);
     }

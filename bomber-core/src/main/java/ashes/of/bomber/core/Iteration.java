@@ -3,21 +3,21 @@ package ashes.of.bomber.core;
 import java.time.Instant;
 
 
-public class Context {
+public class Iteration {
 
+    private final long number;
     private final Stage stage;
     private final String testSuite;
     private final String testCase;
     private final String thread;
-    private final long inv;
     private final Instant timestamp;
 
-    public Context(Stage stage, String testSuite, String testCase, String thread, long inv, Instant timestamp) {
+    public Iteration(long iteration, String testSuite, String testCase, String thread, Stage stage, Instant timestamp) {
         this.stage = stage;
         this.testSuite = testSuite;
         this.testCase = testCase;
         this.thread = thread;
-        this.inv = inv;
+        this.number = iteration;
         this.timestamp = timestamp;
     }
 
@@ -37,27 +37,22 @@ public class Context {
         return thread;
     }
 
-    public long getInv() {
-        return inv;
+    public long getNumber() {
+        return number;
     }
 
     public Instant getTimestamp() {
         return timestamp;
     }
 
-    public String toLogString() {
-        String testCase = this.testCase != null ? "." + this.testCase : "";
-        return String.format("(%s) %s%s", stage, testSuite, testCase);
-    }
-
     @Override
     public String toString() {
-        return "Context{" +
-                "stage=" + stage +
-                ", testCase='" + testSuite + '\'' +
-                ", test='" + testCase + '\'' +
+        return "Iteration{" +
+                "number=" + number +
+                ", stage=" + stage +
+                ", testSuite='" + testSuite + '\'' +
+                ", testCase='" + testCase + '\'' +
                 ", thread='" + thread + '\'' +
-                ", inv=" + inv +
                 ", timestamp=" + timestamp +
                 '}';
     }

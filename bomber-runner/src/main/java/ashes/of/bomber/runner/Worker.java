@@ -12,9 +12,14 @@ public class Worker {
     }
 
     public void run(Runnable task) {
-        boolean success = queue.offer(task);
-        if (!success)
-            throw new RuntimeException("Hey, you can't run task on this worker. It's terrible situation and should be fixed");
+        // a bit of busy-wait here, todo investigate
+        for (int i = 0; i < 10000; i++) {
+            boolean success = queue.offer(task);
+            if (success)
+                return;
+        }
+
+        throw new RuntimeException("Hey, you can't run task on " + thread.getName() + ". It's terrible situation and should be fixed");
     }
 
     public String getName() {

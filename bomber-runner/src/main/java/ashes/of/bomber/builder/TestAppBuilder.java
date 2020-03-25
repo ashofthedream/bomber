@@ -2,6 +2,8 @@ package ashes.of.bomber.builder;
 
 import ashes.of.bomber.core.BomberApp;
 import ashes.of.bomber.core.Settings;
+import ashes.of.bomber.delayer.Delayer;
+import ashes.of.bomber.delayer.NoDelayDelayer;
 import ashes.of.bomber.limiter.Limiter;
 import ashes.of.bomber.runner.Environment;
 import ashes.of.bomber.runner.TestSuite;
@@ -38,6 +40,7 @@ public class TestAppBuilder {
     private final List<Sink> sinks = new ArrayList<>();
     private final List<WatcherConfig> watchers = new ArrayList<>();
     private BarrierBuilder barrier = new NoBarrier.Builder();
+    private Delayer delayer = new NoDelayDelayer();
     private Supplier<Limiter> limiter = Limiter::alwaysPermit;
 
     private final ProviderBuilder provider = new ProviderBuilder();
@@ -49,13 +52,15 @@ public class TestAppBuilder {
 
 
     public static TestAppBuilder create(Class<?> cls) {
+        Objects.requireNonNull(cls, "cls is null");
         return new TestAppProcessor()
                 .process(cls);
     }
 
 
     public TestAppBuilder warmUp(Settings settings) {
-        this.warmUp = new Settings(settings);;
+        Objects.requireNonNull(settings, "settings is null");
+        this.warmUp = new Settings(settings);
         return this;
     }
 
@@ -66,7 +71,8 @@ public class TestAppBuilder {
 
 
     public TestAppBuilder settings(Settings settings) {
-        this.settings = new Settings(settings);;
+        Objects.requireNonNull(settings, "settings is null");
+        this.settings = new Settings(settings);
         return this;
     }
 
@@ -82,6 +88,12 @@ public class TestAppBuilder {
     }
 
 
+    public TestAppBuilder delayer(Delayer delayer) {
+        Objects.requireNonNull(delayer, "delayer is null");
+        this.delayer = delayer;
+        return this;
+    }
+    
     /**
      * Adds limiter which will be shared across all workers threads
      *
@@ -89,6 +101,7 @@ public class TestAppBuilder {
      * @return builder
      */
     public TestAppBuilder limiter(Limiter limiter) {
+        Objects.requireNonNull(limiter, "limiter is null");
         return limiter(() -> limiter);
     }
 
@@ -102,10 +115,6 @@ public class TestAppBuilder {
     public TestAppBuilder limiter(Supplier<Limiter> limiter) {
         this.limiter = limiter;
         return this;
-    }
-
-    public Supplier<Limiter> limiter() {
-        return limiter;
     }
 
 
@@ -159,6 +168,7 @@ public class TestAppBuilder {
 
     private <T> TestSuiteBuilder<T> newSuiteBuilder() {
         return new TestSuiteBuilder<T>()
+                .delayer(delayer)
                 .limiter(limiter)
                 .settings(settings)
                 .warmUp(warmUp);
@@ -272,8 +282,9 @@ public class TestAppBuilder {
 
     public BomberApp build() {
         Preconditions.checkArgument(!suites.isEmpty(), "No test suites found");
+        
         WorkerPool pool = new WorkerPool();
-        Environment env = new Environment(sinks, watchers, limiter, barrier);
+        Environment env = new Environment(sinks, watchers, delayer, limiter, barrier);
         List<TestSuite<?>> suites = this.suites.stream()
                 .map(b -> b.build(pool, env))
                 .collect(Collectors.toList());

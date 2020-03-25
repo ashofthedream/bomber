@@ -18,7 +18,7 @@ import java.util.function.Supplier;
 public class AnnotationProcessingBenchmark {
 
     @LoadTestSuite
-    @LoadTest(time = 20, threadInvocations = 100_000)
+    @LoadTest(time = 20, threadIterations = 100_000)
     public static class Test {
 
         private final Histogram histogram = new ConcurrentHistogram(2);
@@ -66,7 +66,7 @@ public class AnnotationProcessingBenchmark {
                     .settings(settings -> settings
 //                                .time(20_000)
                             .threadCount(1)
-                            .threadInvocationCount(100_000))
+                            .threadIterations(100_000))
                 .testCase("test", Test::test);
 
         new TestAppBuilder()

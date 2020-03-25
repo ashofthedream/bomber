@@ -21,8 +21,8 @@ public class Log4jWatcher implements Watcher {
             return;
         }
 
-        long totalInv = state.getSettings().getTotalInvocationsCount();
-        long currentInv = totalInv - state.getRemainInvocations();
+        long totalInv = state.getSettings().getTotalIterationsCount();
+        long currentInv = totalInv - state.getTotalIterationsRemain();
 
         double totalSecs = state.getSettings().getTime().getSeconds();
         double elapsedSecs = (state.getCaseElapsedTime() / 100) / 10.0;

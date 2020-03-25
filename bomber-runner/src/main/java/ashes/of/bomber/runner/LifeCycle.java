@@ -1,9 +1,8 @@
 package ashes.of.bomber.runner;
 
-import ashes.of.bomber.core.Context;
+import ashes.of.bomber.core.Iteration;
 import ashes.of.bomber.core.State;
 import ashes.of.bomber.methods.LifeCycleMethod;
-import ashes.of.bomber.methods.TestCaseMethodWithClick;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -51,45 +50,43 @@ public class LifeCycle<T>  {
     }
 
     private void beforeAll(State state, T object, LifeCycleMethod<T> l) {
-        log.trace("{} | beforeAll", state);
+        log.trace("beforeAll");
         try {
             l.call(object);
         } catch (Throwable th) {
-            log.warn("{} | beforeAll failed", state, th);
+            log.warn("beforeAll failed", th);
         }
     }
 
 
-    public void beforeEach(Context context, T object) {
-        beforeEach.forEach(l -> beforeEach(context, object, l));
+    public void beforeEach(Iteration it, T object) {
+        beforeEach.forEach(l -> beforeEach(it, object, l));
     }
 
-    private void beforeEach(Context context, T object, LifeCycleMethod<T> l) {
+    private void beforeEach(Iteration it, T object, LifeCycleMethod<T> l) {
         try {
             l.call(object);
         } catch (Throwable th) {
-            log.warn("{} | beforeEach failed. inv: {}",
-                    context.toLogString(), context.getInv(), th);
+            log.warn("beforeEach failed. #{}", it.getNumber(), th);
         }
     }
 
 
-    public void afterEach(Context context, T object) {
-        afterEach.forEach(l -> afterEach(context, object, l));
+    public void afterEach(Iteration it, T object) {
+        afterEach.forEach(l -> afterEach(it, object, l));
     }
 
-    private void afterEach(Context context, T object, LifeCycleMethod<T> l) {
+    private void afterEach(Iteration it, T object, LifeCycleMethod<T> l) {
         try {
             l.call(object);
         } catch (Throwable th) {
-            log.warn("{} | afterEach failed. inv: {}",
-                    context.toLogString(), context.getInv(), th);
+            log.warn("afterEach failed. #{}", it.getNumber(), th);
         }
     }
 
 
     public void afterAll(State state, T object) {
-        log.trace("{} | afterAll", state);
+        log.trace("afterAll");
         afterAll.forEach(l -> afterAll(state, object, l));
     }
 
@@ -97,7 +94,7 @@ public class LifeCycle<T>  {
         try {
             l.call(object);
         } catch (Throwable th) {
-            log.warn("{} | afterAll failed", state, th);
+            log.warn("afterAll failed", th);
         }
     }
 }

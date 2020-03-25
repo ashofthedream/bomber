@@ -9,7 +9,7 @@ import org.apache.logging.log4j.Logger;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @LoadTestSuite(name = "lifecycleAll")
-@LoadTest(time = 20, threadInvocations = 10, threads = 2)
+@LoadTest(time = 20, threadIterations = 10, threads = 2)
 public class AllLifecycleMethodsTest {
     private static final Logger log = LogManager.getLogger();
 

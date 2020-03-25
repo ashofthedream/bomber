@@ -2,6 +2,7 @@ package ashes.of.bomber.builder;
 
 import ashes.of.bomber.annotations.*;
 import ashes.of.bomber.core.Settings;
+import ashes.of.bomber.delayer.RandomDelayer;
 import ashes.of.bomber.limiter.Limiter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -40,6 +41,10 @@ public class TestAppProcessor {
                 b.limiter(limiter);
             }
         }
+
+        Delay delay = cls.getAnnotation(Delay.class);
+        if (delay != null)
+            b.delayer(new RandomDelayer(delay.min(), delay.max(), delay.timeUnit()));
 
         for (Method method : cls.getDeclaredMethods()) {
             int modifiers = method.getModifiers();
@@ -116,16 +121,16 @@ public class TestAppProcessor {
     private Settings settings(LoadTest ann) {
         return new Settings()
                 .threadCount(ann.threads())
-                .threadInvocationCount(ann.threadInvocations())
-                .totalInvocationCount(ann.totalInvocations())
+                .threadIterations(ann.threadIterations())
+                .totalIterations(ann.totalIterations())
                 .time(ann.time(), ann.timeUnit());
     }
 
     private Settings settings(WarmUp ann) {
         return new Settings()
                 .threadCount(ann.threads())
-                .threadInvocationCount(ann.threadInvocations())
-                .totalInvocationCount(ann.totalInvocations())
+                .threadIterations(ann.threadIterations())
+                .totalIterations(ann.totalIterations())
                 .time(ann.time(), ann.timeUnit());
     }
 }
