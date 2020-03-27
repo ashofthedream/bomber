@@ -89,8 +89,8 @@ public class HistogramTimelineSink implements Sink {
     }
 
     @Override
-    public void timeRecorded(Iteration it, Record record) {
-        Instant ts = it.getTimestamp().truncatedTo(resolution);
+    public void timeRecorded(Record record) {
+        Instant ts = record.getIteration().getTimestamp().truncatedTo(resolution);
         timeline.computeIfAbsent(ts, Measurements::new).add(record);
     }
 

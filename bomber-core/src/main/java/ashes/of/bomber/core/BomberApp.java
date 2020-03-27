@@ -1,5 +1,6 @@
 package ashes.of.bomber.core;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public interface BomberApp {
@@ -13,4 +14,6 @@ public interface BomberApp {
     void await() throws InterruptedException;
 
     void shutdown();
+
+    List<TestSuiteModel> getTestSuites();
 }

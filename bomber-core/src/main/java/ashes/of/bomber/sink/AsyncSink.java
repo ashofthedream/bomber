@@ -49,8 +49,8 @@ public class AsyncSink implements Sink {
     }
 
     @Override
-    public void timeRecorded(Iteration it, Record record) {
-        ex.execute(() -> sink.timeRecorded(it, record));
+    public void timeRecorded(Record record) {
+        ex.execute(() -> sink.timeRecorded(record));
     }
 
     @Override

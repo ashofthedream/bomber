@@ -10,7 +10,7 @@ import ashes.of.bomber.sink.AsyncSink;
 import ashes.of.bomber.sink.MultiSink;
 import ashes.of.bomber.sink.Sink;
 import ashes.of.bomber.squadron.Barrier;
-import ashes.of.bomber.stopwatch.Clock;
+import ashes.of.bomber.stopwatch.Tools;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
@@ -147,32 +147,32 @@ public class Runner<T> {
             if (!limiter.waitForPermit())
                 throw new RuntimeException("Limiter await failed");
 
-            Iteration it = new Iteration(itSeq.getAndIncrement(), state.getTestSuite(), testCase.getName(), threadName, state.getStage(), Instant.now());
+            Iteration it = new Iteration(itSeq.getAndIncrement(), state.getStage(), threadName, Instant.now(), state.getTestSuite(), testCase.getName());
 
             lifeCycle.beforeEach(it, instance);
 
-            Clock clock = new Clock(it.getTestSuite() + "." + testCase.getName(), record -> {
-                sink.timeRecorded(it, record);
+            Tools tools = new Tools(it, record -> {
+                sink.timeRecorded(record);
 
                 if (!record.isSuccess())
                     state.incError();
             });
 
-            Stopwatch stopwatch = clock.stopwatch("");
+            Stopwatch stopwatch = tools.stopwatch("");
             try {
                 // test
-                testCase.getMethod().run(instance, clock);
+                testCase.getMethod().run(instance, tools);
 
                 if (!testCase.isAsync())
                     stopwatch.success();
 
-                sink.afterEach(it, stopwatch.getElapsed(), null);
+                sink.afterEach(it, stopwatch.elapsed(), null);
             } catch (Throwable th) {
                 if (!testCase.isAsync())
                     stopwatch.fail(th);
 
+                sink.afterEach(it, stopwatch.elapsed(), th);
                 log.trace("{} | runTestCase failed, it: {}", state, it, th);
-                sink.afterEach(it, stopwatch.getElapsed(), th);
             }
 
             lifeCycle.afterEach(it, instance);

@@ -1,5 +1,6 @@
 package ashes.of.bomber.atc.auth;
 
+import ashes.of.bomber.atc.config.properties.SecurityProperties;
 import ashes.of.bomber.atc.model.User;
 import com.google.common.collect.ImmutableList;
 import org.apache.curator.shaded.com.google.common.collect.ImmutableMap;
@@ -22,10 +23,15 @@ import java.util.Objects;
 public class InMemoryAuthenticationManager implements ReactiveAuthenticationManager {
     private static final Logger log = LogManager.getLogger();
 
-    private final Map<String, User> users = ImmutableMap.<String, User>builder()
-            .put("admin", new User("admin", "admin"))
-            .build();
+    private final SecurityProperties properties;
+    private final Map<String, User> users;
 
+    public InMemoryAuthenticationManager(SecurityProperties properties) {
+        this.properties = properties;
+        this.users = ImmutableMap.<String, User>builder()
+                .put(properties.getUser(), new User(properties.getUser(), properties.getPassword()))
+                .build();
+    }
 
     @Override
     public Mono<Authentication> authenticate(Authentication auth) {

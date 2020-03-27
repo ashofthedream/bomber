@@ -27,7 +27,8 @@ public class InfluxDbSink implements Sink {
     }
 
     @Override
-    public void timeRecorded(Iteration it, Record record) {
+    public void timeRecorded(Record record) {
+        Iteration it = record.getIteration();
         String error = Optional.ofNullable(record.getError())
                 .map(Throwable::getMessage)
                 .orElse("");

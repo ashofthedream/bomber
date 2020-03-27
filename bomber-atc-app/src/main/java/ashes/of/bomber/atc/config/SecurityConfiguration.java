@@ -1,7 +1,7 @@
 package ashes.of.bomber.atc.config;
 
 import ashes.of.bomber.atc.auth.InMemoryAuthenticationManager;
-import ashes.of.bomber.atc.dto.LoginRequest;
+import ashes.of.bomber.atc.dto.requests.LoginRequest;
 import ashes.of.bomber.atc.dto.ResponseEntities;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -44,7 +44,7 @@ public class SecurityConfiguration {
         filter.setAuthenticationSuccessHandler(this::onAuthenticationSuccess);
         filter.setSecurityContextRepository(new WebSessionServerSecurityContextRepository());
         filter.setRequiresAuthenticationMatcher(
-                ServerWebExchangeMatchers.pathMatchers(HttpMethod.POST, "/manager/login")
+                ServerWebExchangeMatchers.pathMatchers(HttpMethod.POST, "/atc/login")
         );
 
         return filter;
@@ -111,7 +111,7 @@ public class SecurityConfiguration {
                 .csrf().disable()
 
                 .authorizeExchange()
-                .pathMatchers("/manager/login").permitAll()
+                .pathMatchers("/atc/login").permitAll()
                 .anyExchange().permitAll()
 
                 .and()

@@ -1,6 +1,13 @@
 package ashes.of.bomber.dispatcher.starter.controllers;
 
 import ashes.of.bomber.core.BomberApp;
+import ashes.of.bomber.core.Settings;
+import ashes.of.bomber.core.TestCaseModel;
+import ashes.of.bomber.core.TestSuiteModel;
+import ashes.of.bomber.dispatcher.dto.DispatchedAppDto;
+import ashes.of.bomber.dispatcher.dto.SettingsDto;
+import ashes.of.bomber.dispatcher.dto.TestCaseDto;
+import ashes.of.bomber.dispatcher.dto.TestSuiteDto;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.ResponseEntity;
@@ -8,6 +15,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/application")
@@ -18,6 +28,16 @@ public class ApplicationController {
 
     public ApplicationController(BomberApp app) {
         this.app = app;
+    }
+
+    @GetMapping
+    public ResponseEntity<DispatchedAppDto> info() {
+        List<TestSuiteModel> testSuites = app.getTestSuites();
+        DispatchedAppDto dto = DispatchedAppDto.builder()
+                .testSuites(testSuites(testSuites))
+                .build();
+
+        return ResponseEntity.ok(dto);
     }
 
     @PostMapping("/run")
@@ -41,5 +61,42 @@ public class ApplicationController {
         log.info("getState");
 
         return ResponseEntity.ok().build();
+    }
+
+    private List<TestSuiteDto> testSuites(List<TestSuiteModel> testSuites) {
+        return testSuites.stream()
+                .map(this::testSuite)
+                .collect(Collectors.toList());
+    }
+
+    private TestSuiteDto testSuite(TestSuiteModel suite) {
+        return TestSuiteDto.builder()
+                .loadTestSettings(settings(suite.getSettings()))
+                .warmUpSettings(settings(suite.getWarmUp()))
+                .name(suite.getName())
+                .testCases(testCases(suite))
+                .build();
+    }
+
+    private List<TestCaseDto> testCases(TestSuiteModel suite) {
+        return suite.getTestCases().stream()
+                .map(this::testCase)
+                .collect(Collectors.toList());
+    }
+
+    private TestCaseDto testCase(TestCaseModel testCase) {
+        return TestCaseDto.builder()
+                .name(testCase.getName())
+                .build();
+    }
+
+    private SettingsDto settings(Settings settings) {
+        return SettingsDto.builder()
+                .disabled(settings.isDisabled())
+                .duration(settings.getTime().toMillis())
+                .threadsCount(settings.getThreadsCount())
+                .threadIterationsCount(settings.getThreadIterationsCount())
+                .totalIterationsCount(settings.getTotalIterationsCount())
+                .build();
     }
 }

@@ -40,10 +40,9 @@ public interface Sink {
     /**
      * Invokes when time was recorded
      *
-     * @param it test it
      * @param record  lap record
      */
-    default void timeRecorded(Iteration it, Record record) {}
+    default void timeRecorded(Record record) {}
 
     /**
      * Invokes after each test case invocation
@@ -60,7 +59,6 @@ public interface Sink {
      * @param stage     stage
      * @param testSuite test suite name
      * @param testCase  test suite name
-     * @param settings  stage settings
      */
     default void afterTestCase(Stage stage, String testSuite, String testCase) {}
 
@@ -69,7 +67,6 @@ public interface Sink {
      *
      * @param stage     stage
      * @param testSuite test suite name
-     * @param settings  stage settings
      */
     default void afterTestSuite(Stage stage, String testSuite) {}
 

@@ -33,8 +33,8 @@ public class MultiSink implements Sink {
     }
 
     @Override
-    public void timeRecorded(Iteration it, Record record) {
-        sinks.forEach(sink -> sink.timeRecorded(it, record));
+    public void timeRecorded(Record record) {
+        sinks.forEach(sink -> sink.timeRecorded(record));
     }
 
     @Override

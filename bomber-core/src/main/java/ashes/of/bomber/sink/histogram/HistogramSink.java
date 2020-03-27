@@ -1,6 +1,5 @@
 package ashes.of.bomber.sink.histogram;
 
-import ashes.of.bomber.core.Iteration;
 import ashes.of.bomber.stopwatch.Record;
 import ashes.of.bomber.sink.Sink;
 
@@ -21,9 +20,9 @@ public class HistogramSink implements Sink {
         this(System.out);
     }
 
-    public void timeRecorded(Iteration it, Record record) {
+    public void timeRecorded(Record record) {
         measurements
-                .computeIfAbsent(it.getTestSuite(), name -> new Measurements(it.getTimestamp()))
+                .computeIfAbsent(record.getIteration().getTestSuite(), name -> new Measurements(record.getIteration().getTimestamp()))
                 .add(record);
     }
 

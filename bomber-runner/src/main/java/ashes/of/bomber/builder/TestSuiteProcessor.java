@@ -4,8 +4,8 @@ import ashes.of.bomber.annotations.*;
 import ashes.of.bomber.core.Settings;
 import ashes.of.bomber.delayer.RandomDelayer;
 import ashes.of.bomber.limiter.Limiter;
-import ashes.of.bomber.methods.TestCaseMethodWithClick;
-import ashes.of.bomber.stopwatch.Clock;
+import ashes.of.bomber.methods.TestCaseMethodWithTools;
+import ashes.of.bomber.stopwatch.Tools;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -145,25 +145,25 @@ public class TestSuiteProcessor<T> {
             return;
 
         MethodHandle mh = MethodHandles.lookup().unreflect(method);
-        AtomicReference<TestCaseMethodWithClick<T>> ref = new AtomicReference<>();
+        AtomicReference<TestCaseMethodWithTools<T>> ref = new AtomicReference<>();
         AtomicBoolean skip = new AtomicBoolean();
 
-        b.testCase(name, loadTest.async(), (suite, clock) -> {
+        b.testCase(name, loadTest.async(), (suite, tools) -> {
             if (skip.get())
                 return;
 
-            TestCaseMethodWithClick<T> proxy = ref.get();
+            TestCaseMethodWithTools<T> proxy = ref.get();
             if (proxy == null) {
                 log.debug("init testCase: {} proxy method", name);
                 Class<?>[] types = method.getParameterTypes();
                 Object[] params = Stream.of(types)
                         .map(param -> {
-                            if (param.equals(Clock.class))
-                                return clock;
+                            if (param.equals(Tools.class))
+                                return tools;
 
                             skip.set(true);
-                            log.warn("Skip test {}: not allowed parameters (only Stopwatch is allowed)", name);
-                            throw new RuntimeException("Skip test " + name + ": not allowed parameters (only Stopwatch is allowed)");
+                            log.warn("Skip test {}: not allowed parameters (only {} is allowed)", name, Tools.class.getName());
+                            throw new RuntimeException("Skip test " + name + ": not allowed parameters (only " + Tools.class.getName() + " is allowed)");
                         })
                         .toArray();
 
@@ -172,13 +172,13 @@ public class TestSuiteProcessor<T> {
                 MethodHandle bind = mh.bindTo(suite);
 
                 proxy = types.length == 0 ?
-                        (tc, cl) -> bind.invoke() :
-                        (tc, cl) -> bind.invokeWithArguments(cl) ;
+                        (tc, t) -> bind.invoke() :
+                        (tc, t) -> bind.invokeWithArguments(t) ;
 
                 ref.set(proxy);
             }
 
-            proxy.run(suite, clock);
+            proxy.run(suite, tools);
         });
     }
 

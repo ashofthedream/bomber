@@ -1,4 +1,4 @@
-package ashes.of.bomber.atc.dto;
+package ashes.of.bomber.atc.dto.requests;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;

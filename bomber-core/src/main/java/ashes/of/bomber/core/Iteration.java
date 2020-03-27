@@ -12,13 +12,17 @@ public class Iteration {
     private final String thread;
     private final Instant timestamp;
 
-    public Iteration(long iteration, String testSuite, String testCase, String thread, Stage stage, Instant timestamp) {
+    public Iteration(long number, Stage stage, String thread, Instant timestamp, String testSuite, String testCase) {
+        this.number = number;
         this.stage = stage;
         this.testSuite = testSuite;
         this.testCase = testCase;
         this.thread = thread;
-        this.number = iteration;
         this.timestamp = timestamp;
+    }
+
+    public long getNumber() {
+        return number;
     }
 
     public Stage getStage() {
@@ -35,10 +39,6 @@ public class Iteration {
 
     public String getThread() {
         return thread;
-    }
-
-    public long getNumber() {
-        return number;
     }
 
     public Instant getTimestamp() {

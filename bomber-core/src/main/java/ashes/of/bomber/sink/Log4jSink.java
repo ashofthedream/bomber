@@ -22,10 +22,10 @@ public class Log4jSink implements Sink {
     }
 
     @Override
-    public void timeRecorded(Iteration it, Record record) {
+    public void timeRecorded(Record record) {
         Level level = record.isSuccess() ? this.level : Level.WARN;
         log.log(level, "time {}: {}ms  #{}",
-                record.getLabel(), record.getElapsed() / 1_000_000.0, it.getNumber(), record.getError());
+                record.getLabel(), record.getElapsed() / 1_000_000.0, record.getIteration().getNumber(), record.getError());
     }
 
     @Override

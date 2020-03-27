@@ -6,6 +6,7 @@ apply plugin: 'java'
 
 dependencies {
     compile project(':bomber-runner')
+    compile project(':bomber-dispatcher-dto')
 
     compile     group: 'org.springframework.boot',      name: 'spring-boot-starter-webflux',    version: '2.2.5.RELEASE'
 
@@ -16,6 +17,9 @@ dependencies {
     compile('org.apache.zookeeper:zookeeper:3.4.13') {
         exclude group: 'org.slf4j', module: 'slf4j-log4j12'
     }
+
+    compileOnly         group: 'org.projectlombok',     name: 'lombok',                         version: '1.18.8'
+    annotationProcessor group: 'org.projectlombok',     name: 'lombok',                         version: '1.18.8'
 }
 
 

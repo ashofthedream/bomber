@@ -28,3 +28,7 @@ spring:
       port: 8090
 
 
+atc:
+  security:
+    user: admin
+    password: admin

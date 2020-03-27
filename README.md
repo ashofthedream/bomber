@@ -35,12 +35,12 @@ public class ExampleTest {
     }
 
     @LoadTestCase(async = true)
-    public void twoFastRequests(Clock clock) throws Exception {
-        Stopwatch fast = clock.stopwatch("someFast");
+    public void twoFastRequests(Tools tools) throws Exception {
+        Stopwatch fast = tools.stopwatch("someFast");
         client.someFastRequest();
         sw.success();
 
-        Stopwatch async = clock.stopwatch("async");
+        Stopwatch async = tools.stopwatch("async");
         for (int i = 0; i < 3; i++) {            
             client.asyncRequest()
                     .whenComplete((result, throwable) -> {

@@ -1,0 +1,8 @@
+version = '1.0.0-SNAPSHOT'
+
+
+dependencies {
+    compileOnly         group: 'org.projectlombok',     name: 'lombok',                         version: '1.18.8'
+    annotationProcessor group: 'org.projectlombok',     name: 'lombok',                         version: '1.18.8'
+
+}

@@ -5,10 +5,9 @@ import ashes.of.bomber.delayer.Delayer;
 import ashes.of.bomber.delayer.NoDelayDelayer;
 import ashes.of.bomber.limiter.Limiter;
 import ashes.of.bomber.methods.LifeCycleMethod;
-import ashes.of.bomber.methods.TestCaseMethodNoArgs;
+import ashes.of.bomber.methods.TestCaseMethodWithoutTools;
 import ashes.of.bomber.runner.*;
-import ashes.of.bomber.methods.TestCaseMethodWithClick;
-import com.google.common.base.Preconditions;
+import ashes.of.bomber.methods.TestCaseMethodWithTools;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -125,30 +124,30 @@ public class TestSuiteBuilder<T> {
         return this;
     }
 
-    TestSuiteBuilder<T> testCase(String name, boolean async, TestCaseMethodWithClick<T> test) {
+    TestSuiteBuilder<T> testCase(String name, boolean async, TestCaseMethodWithTools<T> test) {
         Objects.requireNonNull(name, "name is null");
         this.testCases.put(name, new TestCase<>(name, async, test));
         return this;
     }
 
-    TestSuiteBuilder<T> testCase(String name, boolean async, TestCaseMethodNoArgs<T> test) {
+    TestSuiteBuilder<T> testCase(String name, boolean async, TestCaseMethodWithoutTools<T> test) {
         Objects.requireNonNull(name, "name is null");
-        return testCase(name, async, (tc, stopwatch) -> test.run(tc));
+        return testCase(name, async, (tc, tools) -> test.run(tc));
     }
 
-    public TestSuiteBuilder<T> testCase(String name, TestCaseMethodWithClick<T> test) {
+    public TestSuiteBuilder<T> testCase(String name, TestCaseMethodWithTools<T> test) {
         return testCase(name, false, test);
     }
 
-    public TestSuiteBuilder<T> testCase(String name, TestCaseMethodNoArgs<T> test) {
+    public TestSuiteBuilder<T> testCase(String name, TestCaseMethodWithoutTools<T> test) {
         return testCase(name, false, test);
     }
 
-    public TestSuiteBuilder<T> asyncTestCase(String name, TestCaseMethodWithClick<T> test) {
+    public TestSuiteBuilder<T> asyncTestCase(String name, TestCaseMethodWithTools<T> test) {
         return testCase(name, true, test);
     }
 
-    public TestSuiteBuilder<T> asyncTestCase(String name, TestCaseMethodNoArgs<T> test) {
+    public TestSuiteBuilder<T> asyncTestCase(String name, TestCaseMethodWithoutTools<T> test) {
         return testCase(name, true, test);
     }
 

@@ -1,6 +1,6 @@
 package ashes.of.bomber.atc.controllers;
 
-import ashes.of.bomber.atc.dto.LoginRequest;
+import ashes.of.bomber.atc.dto.requests.LoginRequest;
 import ashes.of.bomber.atc.utils.HttpUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

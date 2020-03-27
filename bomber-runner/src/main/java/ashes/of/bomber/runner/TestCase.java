@@ -1,13 +1,13 @@
 package ashes.of.bomber.runner;
 
-import ashes.of.bomber.methods.TestCaseMethodWithClick;
+import ashes.of.bomber.methods.TestCaseMethodWithTools;
 
 public class TestCase<T> {
     private final String name;
     private final boolean async;
-    private final TestCaseMethodWithClick<T> method;
+    private final TestCaseMethodWithTools<T> method;
 
-    public TestCase(String name, boolean async, TestCaseMethodWithClick<T> method) {
+    public TestCase(String name, boolean async, TestCaseMethodWithTools<T> method) {
         this.name = name;
         this.async = async;
         this.method = method;
@@ -21,7 +21,7 @@ public class TestCase<T> {
         return async;
     }
 
-    public TestCaseMethodWithClick<T> getMethod() {
+    public TestCaseMethodWithTools<T> getMethod() {
         return method;
     }
 }

@@ -97,6 +97,7 @@ public class TestApp implements BomberApp {
 
         Instant finishTime = Instant.now();
         shutdown.countDown();
+        shutdown = new CountDownLatch(1);
         pool.shutdown();
         return new Report(startTime, finishTime, errorsCount.sum());
     }
@@ -110,6 +111,21 @@ public class TestApp implements BomberApp {
     public void shutdown() {
         log.info("shutdown");
         shutdown.countDown();
+    }
+
+    @Override
+    public List<TestSuiteModel> getTestSuites() {
+        return suites.stream()
+                .map(this::toTestSuite)
+                .collect(Collectors.toList());
+    }
+
+    private TestSuiteModel toTestSuite(TestSuite<?> suite) {
+        List<TestCaseModel> testCases = suite.getTestCases().stream()
+                .map(name -> new TestCaseModel(name))
+                .collect(Collectors.toList());
+
+        return new TestSuiteModel(suite.getName(), testCases, suite.getSettings(), suite.getWarmUp());
     }
 
     public boolean isShutdown() {

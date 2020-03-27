@@ -1,7 +1,7 @@
 package ashes.of.bomber.tests;
 
 import ashes.of.bomber.annotations.*;
-import ashes.of.bomber.stopwatch.Clock;
+import ashes.of.bomber.stopwatch.Tools;
 import ashes.of.bomber.stopwatch.Stopwatch;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -52,8 +52,8 @@ public class AllLifecycleMethodsTest {
     }
 
     @LoadTestCase
-    public void testB(Clock clock) {
-        Stopwatch stopwatch = clock.stopwatch("testB-stopwatch-1");
+    public void testB(Tools tools) {
+        Stopwatch stopwatch = tools.stopwatch("testB-stopwatch-1");
         log.trace("testB");
         stopwatch.success();
         testB.incrementAndGet();

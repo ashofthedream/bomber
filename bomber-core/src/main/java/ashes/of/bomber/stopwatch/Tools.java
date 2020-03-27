@@ -1,21 +1,27 @@
 package ashes.of.bomber.stopwatch;
 
+import ashes.of.bomber.core.Iteration;
+
 import java.util.function.Consumer;
 
 
-public class Clock {
+public class Tools {
 
-    private final long ts = System.nanoTime();
-    private final String prefix;
+    private final long timestamp = System.nanoTime();
+    private final Iteration it;
     private final Consumer<Record> timeRecorded;
 
-    public Clock(String prefix, Consumer<Record> timeRecorded) {
-        this.prefix = prefix;
+    public Tools(Iteration it, Consumer<Record> timeRecorded) {
+        this.it = it;
         this.timeRecorded = timeRecorded;
     }
 
     public long elapsed() {
-        return System.nanoTime() - this.ts;
+        return System.nanoTime() - this.timestamp;
+    }
+
+    public Iteration iteration() {
+        return it;
     }
 
     /**
@@ -25,6 +31,6 @@ public class Clock {
      * @return created stopwatch
      */
     public Stopwatch stopwatch(String label) {
-        return new Stopwatch(prefix + (label.isEmpty() ? "" : "." + label), timeRecorded);
+        return new Stopwatch(it, label, timeRecorded);
     }
 }

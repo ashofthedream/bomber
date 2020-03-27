@@ -1,7 +1,7 @@
 package ashes.of.bomber.example.app.tests;
 
 import ashes.of.bomber.annotations.*;
-import ashes.of.bomber.stopwatch.Clock;
+import ashes.of.bomber.stopwatch.Tools;
 import ashes.of.bomber.stopwatch.Stopwatch;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -41,8 +41,8 @@ public class AccountControllerLoadTest {
     }
 
     @LoadTestCase(async = true)
-    public void getAccountByIdAsync(Clock clock) {
-        Stopwatch stopwatch = clock.stopwatch("getAccounts");
+    public void getAccountByIdAsync(Tools tools) {
+        Stopwatch stopwatch = tools.stopwatch("getAccounts");
         webClient.get()
                 .uri("/accounts/{id}", 1 + random.nextInt(1000))
                 .exchange()

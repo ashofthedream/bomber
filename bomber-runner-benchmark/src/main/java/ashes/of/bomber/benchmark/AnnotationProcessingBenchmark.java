@@ -6,7 +6,7 @@ import ashes.of.bomber.annotations.LoadTestSuite;
 import ashes.of.bomber.core.Settings;
 import ashes.of.bomber.builder.TestSuiteBuilder;
 import ashes.of.bomber.builder.TestAppBuilder;
-import ashes.of.bomber.stopwatch.Clock;
+import ashes.of.bomber.stopwatch.Tools;
 import org.HdrHistogram.ConcurrentHistogram;
 import org.HdrHistogram.Histogram;
 
@@ -24,8 +24,8 @@ public class AnnotationProcessingBenchmark {
         private final Histogram histogram = new ConcurrentHistogram(2);
 
         @LoadTestCase
-        public void test(Clock clock) {
-            histogram.recordValue(clock.elapsed());
+        public void test(Tools tools) {
+            histogram.recordValue(tools.elapsed());
         }
     }
 

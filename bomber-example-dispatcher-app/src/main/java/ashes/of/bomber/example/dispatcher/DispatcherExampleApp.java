@@ -1,6 +1,5 @@
 package ashes.of.bomber.example.dispatcher;
 
-import ashes.of.bomber.core.BomberApp;
 import ashes.of.bomber.dispatcher.starter.config.DispatcherConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -29,8 +28,8 @@ public class DispatcherExampleApp {
     public void init() {
         log.info("BomberApp will be started via http after 5s");
         // run app via http
-        Executors.newSingleThreadScheduledExecutor()
-                .schedule(this::startBomberAppViaHttp, 5, TimeUnit.SECONDS);
+//        Executors.newSingleThreadScheduledExecutor()
+//                .schedule(this::startBomberAppViaHttp, 5, TimeUnit.SECONDS);
     }
 
     private void startBomberAppViaHttp() {
