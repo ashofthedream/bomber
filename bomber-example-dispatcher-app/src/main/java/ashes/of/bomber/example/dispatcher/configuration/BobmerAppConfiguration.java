@@ -2,8 +2,7 @@ package ashes.of.bomber.example.dispatcher.configuration;
 
 import ashes.of.bomber.builder.TestAppBuilder;
 import ashes.of.bomber.core.BomberApp;
-import ashes.of.bomber.example.app.tests.AccountControllerLoadTest;
-import ashes.of.bomber.example.app.tests.UserControllerLoadTest;
+import ashes.of.bomber.example.app.ExampleAnnotatedTestApp;
 import ashes.of.bomber.sink.histogram.HistogramSink;
 import ashes.of.bomber.sink.histogram.HistogramTimelineSink;
 import ashes.of.bomber.squadron.BarrierBuilder;
@@ -31,21 +30,13 @@ public class BobmerAppConfiguration {
         BarrierBuilder barrier = members > 1 ? new ZookeeperBarrierBuilder()
                 .members(members) : new NoBarrier.Builder();
 
-        return new TestAppBuilder()
+        return TestAppBuilder.create(ExampleAnnotatedTestApp.class)
                 // log all times to console via log4j and HdrHistogram
 //                .sink(new Log4jSink())
                 .sink(new HistogramTimelineSink(ChronoUnit.SECONDS, System.out))
                 .sink(new HistogramSink())
                 .barrier(barrier)
                 .watcher(1000, new Log4jWatcher())
-
-
-                // add example test suite via static init method
-                .testSuiteClass(UserControllerLoadTest.class, new Class[]{WebClient.class}, testClient)
-
-                // add second test suite via annotations
-                .testSuiteClass(AccountControllerLoadTest.class, new Class[]{WebClient.class}, testClient)
-
                 .build();
     }
 }

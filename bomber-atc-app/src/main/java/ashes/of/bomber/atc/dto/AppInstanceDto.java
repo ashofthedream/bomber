@@ -1,6 +1,6 @@
 package ashes.of.bomber.atc.dto;
 
-import ashes.of.bomber.dispatcher.dto.DispatchedAppDto;
+import ashes.of.bomber.dispatcher.dto.ApplicationDto;
 import lombok.Builder;
 import lombok.Data;
 
@@ -11,5 +11,5 @@ import java.net.URI;
 public class AppInstanceDto {
     private String id;
     private URI uri;
-    private DispatchedAppDto app;
+    private ApplicationDto app;
 }

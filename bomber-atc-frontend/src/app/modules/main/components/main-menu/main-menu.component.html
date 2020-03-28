@@ -1,0 +1,42 @@
+<ul nz-menu nzMode="inline">
+  <li class="large" nz-menu-item nz-tooltip nzPlacement="right" nzTitle="Dashboard" routerLink="/dashboard" >
+    <i nz-icon type="bomber" nzTheme="fill"></i>
+    Bomber
+  </li>
+
+  <li nz-submenu nzTitle="Instances" nzIcon="fire" nzOpen="true">
+    <ul>
+      <li nz-menu-item routerLink="/instances/active">
+        <i nz-icon type="fire" nzTheme="fill"></i>
+        <span>Active</span>
+      </li>
+    </ul>
+  </li>
+
+  <li nz-submenu nzTitle="Test Runs" nzIcon="rocket" nzOpen="true">
+    <ul>
+      <li nz-menu-item routerLink="/test-runs/active">
+        <i nz-icon type="rocket" nzTheme="fill"></i>
+        <span>Active</span>
+      </li>
+
+      <li nz-menu-item routerLink="/test-runs/all">
+        <i nz-icon type="rocket"></i>
+        <span>All</span>
+      </li>
+    </ul>
+  </li>
+
+  <li nz-submenu nzTitle="Settings" nzIcon="setting" nzOpen="true">
+    <ul>
+      <li nz-menu-item routerLink="/settings/account">
+        <i nz-icon type="user"></i>
+        Account
+      </li>
+      <li nz-menu-item routerLink="/settings/logout">
+        <i nz-icon type="logout"></i>
+        Log out
+      </li>
+    </ul>
+  </li>
+</ul>

@@ -1,0 +1,33 @@
+<h1>Dashboard</h1>
+
+<div nz-row>
+    <div nz-col [nzSpan]="8">
+        <nz-card class="card" nzTitle="Latest Test Runs" [nzExtra]="testRunsActions">
+            <ng-template #testRunsActions>
+                <a routerLink="/test-runs/all">More</a>
+            </ng-template>
+
+            <p>No Test Runs yet</p>
+        </nz-card>
+    </div>
+
+    <div nz-col [nzSpan]="8">
+        <nz-card class="card" nzTitle="Active Instances" [nzExtra]="instanceActions">
+            <ng-template #instanceActions>
+                <a routerLink="/instances/active">More</a>
+            </ng-template>
+
+            <p *ngIf="!instances.length">
+                No Active Instances
+            </p>
+
+            <p *ngFor="let instance of instances">
+                <strong>{{instance.app.name}}</strong><br/>
+                {{instance.id}}<br/>
+                <a>{{instance.uri}}</a>
+            </p>
+        </nz-card>
+    </div>
+</div>
+
+

@@ -5,6 +5,9 @@ import java.util.concurrent.CompletableFuture;
 
 public interface BomberApp {
 
+    String getName();
+    List<TestSuiteModel> getTestSuites();
+
     Report run();
 
     default CompletableFuture<Report> runAsync() {
@@ -15,5 +18,4 @@ public interface BomberApp {
 
     void shutdown();
 
-    List<TestSuiteModel> getTestSuites();
 }

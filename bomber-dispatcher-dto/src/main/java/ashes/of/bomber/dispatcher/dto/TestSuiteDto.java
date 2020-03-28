@@ -13,7 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 public class TestSuiteDto {
     private String name;
-    private SettingsDto loadTestSettings;
-    private SettingsDto warmUpSettings;
+    private SettingsDto loadTest;
+    private SettingsDto warmUp;
     private List<TestCaseDto> testCases;
 }

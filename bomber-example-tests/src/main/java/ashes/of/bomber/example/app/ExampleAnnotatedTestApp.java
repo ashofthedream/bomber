@@ -4,7 +4,6 @@ import ashes.of.bomber.annotations.*;
 import ashes.of.bomber.builder.TestAppBuilder;
 import ashes.of.bomber.example.app.tests.AccountControllerLoadTest;
 import ashes.of.bomber.example.app.tests.UserControllerLoadTest;
-import ashes.of.bomber.sink.Log4jSink;
 import ashes.of.bomber.sink.histogram.HistogramSink;
 import ashes.of.bomber.sink.histogram.HistogramTimelineSink;
 import ashes.of.bomber.squadron.BarrierBuilder;

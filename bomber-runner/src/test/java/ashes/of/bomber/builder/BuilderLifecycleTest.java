@@ -31,6 +31,7 @@ public class BuilderLifecycleTest {
                 .afterAll(AllLifecycleMethodsTest::afterAll);
 
         new TestAppBuilder()
+                .name("testAllLifecycleMethods")
 //                .sink(new Log4jSink())
                 .addSuite(suite)
                 .build()
@@ -59,6 +60,7 @@ public class BuilderLifecycleTest {
                 .afterAll(true, BeforeAllAndAfterAllOnlyOnceTest::afterAll);
 
         new TestAppBuilder()
+                .name("beforeAndAfterAllOnlyOnce")
 //                .sink(new Log4jSink())
                 .addSuite(suite)
                 .build()

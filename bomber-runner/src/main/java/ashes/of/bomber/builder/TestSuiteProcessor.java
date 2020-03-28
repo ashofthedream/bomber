@@ -6,6 +6,7 @@ import ashes.of.bomber.delayer.RandomDelayer;
 import ashes.of.bomber.limiter.Limiter;
 import ashes.of.bomber.methods.TestCaseMethodWithTools;
 import ashes.of.bomber.stopwatch.Tools;
+import com.google.common.base.Strings;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -58,7 +59,7 @@ public class TestSuiteProcessor<T> {
 
         LoadTestSuite suite = cls.getAnnotation(LoadTestSuite.class);
         if (suite != null) {
-           b. name(!suite.name().isEmpty() ? suite.name() : cls.getSimpleName());
+            b. name(!Strings.isNullOrEmpty(suite.name()) ? suite.name() : cls.getSimpleName());
 
             if (suite.shared()) {
                 b.sharedInstance(supplier.get());

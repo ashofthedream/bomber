@@ -1,0 +1,13 @@
+<p>
+    <strong>{{title}}: </strong>
+    <span *ngIf="!settings.disabled; else disabled">
+        Threads: {{settings.threadsCount}},
+        Thread iterations: {{settings.threadIterationsCount}},
+        Total iterations: {{settings.totalIterationsCount}},
+        Time: {{settings.duration}}ms
+    </span>
+</p>
+
+<ng-template #disabled>
+    <span>Disabled</span>
+</ng-template>

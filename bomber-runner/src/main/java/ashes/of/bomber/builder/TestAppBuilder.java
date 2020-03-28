@@ -32,6 +32,8 @@ import java.util.stream.Stream;
 public class TestAppBuilder {
     private static final Logger log = LogManager.getLogger();
 
+    private String name;
+
     private Settings warmUp = new Settings()
             .disabled();
 
@@ -55,6 +57,12 @@ public class TestAppBuilder {
         Objects.requireNonNull(cls, "cls is null");
         return new TestAppProcessor()
                 .process(cls);
+    }
+
+    public TestAppBuilder name(String name) {
+        Objects.requireNonNull(name, "name is null");
+        this.name = name;
+        return this;
     }
 
 
@@ -281,14 +289,15 @@ public class TestAppBuilder {
     }
 
     public BomberApp build() {
+        Objects.requireNonNull(name,     "name is null");
         Preconditions.checkArgument(!suites.isEmpty(), "No test suites found");
-        
+
         WorkerPool pool = new WorkerPool();
         Environment env = new Environment(sinks, watchers, delayer, limiter, barrier);
         List<TestSuite<?>> suites = this.suites.stream()
                 .map(b -> b.build(pool, env))
                 .collect(Collectors.toList());
 
-        return new TestApp(pool, env, suites);
+        return new TestApp(name, pool, env, suites);
     }
 }

@@ -6,6 +6,7 @@ import ashes.of.bomber.watcher.Watcher;
 import ashes.of.bomber.watcher.WatcherConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 
 import javax.annotation.Nullable;
 import java.time.Instant;
@@ -23,6 +24,7 @@ public class TestApp implements BomberApp {
 
     private static final State REST = new State(Stage.Rest, new Settings().disabled(), "", () -> false);
 
+    private final String name;
     private final WorkerPool pool;
     private final Environment environment;
     private final List<TestSuite<?>> suites;
@@ -31,7 +33,8 @@ public class TestApp implements BomberApp {
     private volatile State state;
     private volatile CountDownLatch shutdown = new CountDownLatch(1);
 
-    public TestApp(WorkerPool pool, Environment environment, List<TestSuite<?>> suites) {
+    public TestApp(String name, WorkerPool pool, Environment environment, List<TestSuite<?>> suites) {
+        this.name = name;
         this.pool = pool;
         this.environment = environment;
         this.suites = suites;
@@ -43,6 +46,7 @@ public class TestApp implements BomberApp {
 
     @Override
     public Report run() {
+        ThreadContext.put("bomberApp", name);
         List<String> testSuiteNames = suites.stream()
                 .map(testSuite -> String.format("%s %s", testSuite.getName(), testSuite.getTestCases()))
                 .collect(Collectors.toList());
@@ -99,6 +103,8 @@ public class TestApp implements BomberApp {
         shutdown.countDown();
         shutdown = new CountDownLatch(1);
         pool.shutdown();
+
+        ThreadContext.clearAll();
         return new Report(startTime, finishTime, errorsCount.sum());
     }
 
@@ -111,6 +117,11 @@ public class TestApp implements BomberApp {
     public void shutdown() {
         log.info("shutdown");
         shutdown.countDown();
+    }
+
+    @Override
+    public String getName() {
+        return name;
     }
 
     @Override

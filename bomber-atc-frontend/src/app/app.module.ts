@@ -5,12 +5,13 @@ import {AppRoutingModule} from './app-routing.module';
 import {AppComponent} from './app.component';
 import {en_US, NgZorroAntdModule, NZ_I18N} from 'ng-zorro-antd';
 import {FormsModule} from '@angular/forms';
-import {HttpClientModule} from '@angular/common/http';
+import {HTTP_INTERCEPTORS, HttpClientModule} from '@angular/common/http';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {registerLocaleData} from '@angular/common';
 import en from '@angular/common/locales/en';
-import {LayoutModule} from "./modules/layout.module";
-import {DashboardModule} from "./modules/dashboard/dashboard.module";
+import {MainModule} from "./modules/main.module";
+import {LibsModule} from "./modules/libs/libs.module";
+import {RequestLogHttpInterceptor} from "./modules/libs/interceptors/request-log.interceptor";
 
 registerLocaleData(en);
 
@@ -19,8 +20,8 @@ registerLocaleData(en);
     AppComponent
   ],
   imports: [
-    LayoutModule,
-    DashboardModule,
+    LibsModule,
+    MainModule,
     BrowserModule,
     AppRoutingModule,
     NgZorroAntdModule,
@@ -28,7 +29,10 @@ registerLocaleData(en);
     HttpClientModule,
     BrowserAnimationsModule
   ],
-  providers: [{provide: NZ_I18N, useValue: en_US}],
+  providers: [
+      {provide: NZ_I18N, useValue: en_US},
+      {provide: HTTP_INTERCEPTORS, useClass: RequestLogHttpInterceptor, multi: true}
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule {

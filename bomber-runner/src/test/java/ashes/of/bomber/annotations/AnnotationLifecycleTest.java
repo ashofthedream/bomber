@@ -18,6 +18,7 @@ public class AnnotationLifecycleTest {
         AllLifecycleMethodsTest test = new AllLifecycleMethodsTest();
 
         new TestAppBuilder()
+                .name("testAllLifecycleMethods")
 //                .sink(new Log4jSink())
                 .testSuiteObject(test)
                 .build()
@@ -37,6 +38,7 @@ public class AnnotationLifecycleTest {
         BeforeAllAndAfterAllOnlyOnceTest test = new BeforeAllAndAfterAllOnlyOnceTest();
 
         new TestAppBuilder()
+                .name("beforeAndAfterAllOnlyOnce")
 //                .sink(new Log4jSink())
                 .testSuiteObject(test)
                 .build()

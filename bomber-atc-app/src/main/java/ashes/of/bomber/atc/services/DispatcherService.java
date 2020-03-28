@@ -1,7 +1,7 @@
 package ashes.of.bomber.atc.services;
 
 import ashes.of.bomber.atc.dto.AppInstanceDto;
-import ashes.of.bomber.dispatcher.dto.DispatchedAppDto;
+import ashes.of.bomber.dispatcher.dto.ApplicationDto;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.cloud.client.ServiceInstance;
@@ -24,7 +24,7 @@ public class DispatcherService {
         return webClient.get()
                 .uri(uri + "/application")
                 .retrieve()
-                .bodyToMono(DispatchedAppDto.class)
+                .bodyToMono(ApplicationDto.class)
                 .map(app -> AppInstanceDto.builder()
                         .app(app)
                         .id(instance.getInstanceId())

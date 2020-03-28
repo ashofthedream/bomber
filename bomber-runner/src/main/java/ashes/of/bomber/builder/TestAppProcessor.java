@@ -4,6 +4,7 @@ import ashes.of.bomber.annotations.*;
 import ashes.of.bomber.core.Settings;
 import ashes.of.bomber.delayer.RandomDelayer;
 import ashes.of.bomber.limiter.Limiter;
+import com.google.common.base.Strings;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -68,6 +69,9 @@ public class TestAppProcessor {
 
         if (app.testSuites().length < 1)
             throw new RuntimeException("Test application class should contains at least one test suite");
+
+
+        b. name(!Strings.isNullOrEmpty(app.name()) ? app.name() : cls.getSimpleName());
 
         for (Class<?> testSuiteClass : app.testSuites()) {
             log.debug("add testSuiteClass: {}", testSuiteClass);

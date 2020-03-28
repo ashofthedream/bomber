@@ -4,7 +4,7 @@ import ashes.of.bomber.core.BomberApp;
 import ashes.of.bomber.core.Settings;
 import ashes.of.bomber.core.TestCaseModel;
 import ashes.of.bomber.core.TestSuiteModel;
-import ashes.of.bomber.dispatcher.dto.DispatchedAppDto;
+import ashes.of.bomber.dispatcher.dto.ApplicationDto;
 import ashes.of.bomber.dispatcher.dto.SettingsDto;
 import ashes.of.bomber.dispatcher.dto.TestCaseDto;
 import ashes.of.bomber.dispatcher.dto.TestSuiteDto;
@@ -31,9 +31,10 @@ public class ApplicationController {
     }
 
     @GetMapping
-    public ResponseEntity<DispatchedAppDto> info() {
+    public ResponseEntity<ApplicationDto> info() {
         List<TestSuiteModel> testSuites = app.getTestSuites();
-        DispatchedAppDto dto = DispatchedAppDto.builder()
+        ApplicationDto dto = ApplicationDto.builder()
+                .name(app.getName())
                 .testSuites(testSuites(testSuites))
                 .build();
 
@@ -71,8 +72,8 @@ public class ApplicationController {
 
     private TestSuiteDto testSuite(TestSuiteModel suite) {
         return TestSuiteDto.builder()
-                .loadTestSettings(settings(suite.getSettings()))
-                .warmUpSettings(settings(suite.getWarmUp()))
+                .loadTest(settings(suite.getSettings()))
+                .warmUp(settings(suite.getWarmUp()))
                 .name(suite.getName())
                 .testCases(testCases(suite))
                 .build();

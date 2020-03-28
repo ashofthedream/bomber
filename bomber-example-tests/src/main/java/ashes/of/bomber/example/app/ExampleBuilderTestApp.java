@@ -35,6 +35,7 @@ public class ExampleBuilderTestApp {
         BarrierBuilder barrier = members > 1 ? new ZookeeperBarrierBuilder().members(members) : new NoBarrier.Builder();
 
         new TestAppBuilder()
+                .name("example")
                 .settings(settings -> settings.threadCount(2).seconds(5))
                 .limiter(() -> Limiter.withRate(1, 1000))
                 // log all times to console via log4j and HdrHistogram

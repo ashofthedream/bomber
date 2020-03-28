@@ -1,20 +1,11 @@
 <nz-layout class="layout">
-  <nz-header>
-    <app-header></app-header>
-  </nz-header>
+  <nz-sider nzWidth="250" nzTheme="light">
+    <div style="width: 250px">
+      <atc-main-menu></atc-main-menu>
+    </div>
+  </nz-sider>
 
-  <nz-layout>
-    <nz-sider nzWidth="250">
-      <app-main-menu></app-main-menu>
-    </nz-sider>
-
-    <nz-content class="content">
-      <router-outlet></router-outlet>
-    </nz-content>
-
-  </nz-layout>
-
-  <nz-footer class="footer">
-    <app-footer></app-footer>
-  </nz-footer>
+  <nz-content class="content">
+    <router-outlet></router-outlet>
+  </nz-content>
 </nz-layout>

@@ -9,5 +9,11 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface LoadTestApp {
+
+    /**
+     * @return test app name
+     */
+    String name() default "";
+
     Class<?>[] testSuites() default {};
 }
