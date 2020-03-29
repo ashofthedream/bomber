@@ -1,5 +1,5 @@
 {
-  "/dispatchers": {
+  "/atc": {
     "target": "http://localhost:8088",
     "secure": false,
     "changeOrigin": true

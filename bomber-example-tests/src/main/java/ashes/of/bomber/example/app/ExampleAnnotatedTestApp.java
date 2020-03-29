@@ -53,6 +53,6 @@ public class ExampleAnnotatedTestApp {
                 .watcher(1000, new Log4jWatcher())
                 .barrier(barrier)
                 .build()
-                .run();
+                .start();
     }
 }

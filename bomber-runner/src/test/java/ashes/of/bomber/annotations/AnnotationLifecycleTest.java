@@ -22,7 +22,7 @@ public class AnnotationLifecycleTest {
 //                .sink(new Log4jSink())
                 .testSuiteObject(test)
                 .build()
-                .run();
+                .start();
 
         assertEquals("beforeAll: 1 x thread",                   2, test.beforeAll.get());
         assertEquals("beforeEach: 10 Inv x Threads * Count",   40, test.beforeEach.get());
@@ -42,7 +42,7 @@ public class AnnotationLifecycleTest {
 //                .sink(new Log4jSink())
                 .testSuiteObject(test)
                 .build()
-                .run();
+                .start();
 
         assertEquals("beforeAll: onlyOnce = true",              1, test.beforeAll.get());
         assertEquals("afterAll: onlyOnce = true",               1, test.afterAll.get());

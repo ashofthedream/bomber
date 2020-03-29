@@ -20,7 +20,7 @@ configurations {
 
 
 dependencies {
-    compile project(':bomber-dispatcher-dto')
+    compile project(':bomber-carrier-dto')
     compile     group: 'com.google.guava',              name: 'guava',                          version: '27.0.1-jre'
 
     compile('org.springframework.cloud:spring-cloud-starter-loadbalancer') {

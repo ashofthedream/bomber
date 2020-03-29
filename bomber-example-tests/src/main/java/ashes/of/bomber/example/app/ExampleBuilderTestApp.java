@@ -50,7 +50,7 @@ public class ExampleBuilderTestApp {
                 .createSuite(ExampleBuilderTestApp::createUserControllerSuite, webClient)
                 .createSuite(ExampleBuilderTestApp::createAccountControllerSuite, webClient)
                 .build()
-                .run();
+                .start();
     }
 
     private static void createUserControllerSuite(TestSuiteBuilder<UserControllerLoadTest> builder, WebClient webClient) {

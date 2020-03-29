@@ -31,7 +31,7 @@ public class TestApp implements BomberApp {
 
     @Nullable
     private volatile State state;
-    private volatile CountDownLatch shutdown = new CountDownLatch(1);
+    private volatile CountDownLatch endLatch = new CountDownLatch(1);
 
     public TestApp(String name, WorkerPool pool, Environment environment, List<TestSuite<?>> suites) {
         this.name = name;
@@ -40,12 +40,18 @@ public class TestApp implements BomberApp {
         this.suites = suites;
     }
 
+    @Override
+    @Nullable
+    public State getState() {
+        return state;
+    }
+
     public void setState(@Nullable State state) {
         this.state = state;
     }
 
     @Override
-    public Report run() {
+    public Report start() {
         ThreadContext.put("bomberApp", name);
         List<String> testSuiteNames = suites.stream()
                 .map(testSuite -> String.format("%s %s", testSuite.getName(), testSuite.getTestCases()))
@@ -100,8 +106,8 @@ public class TestApp implements BomberApp {
         watcherEx.shutdown();
 
         Instant finishTime = Instant.now();
-        shutdown.countDown();
-        shutdown = new CountDownLatch(1);
+        endLatch.countDown();
+        endLatch = new CountDownLatch(1);
         pool.shutdown();
 
         ThreadContext.clearAll();
@@ -110,13 +116,13 @@ public class TestApp implements BomberApp {
 
     @Override
     public void await() throws InterruptedException {
-        shutdown.await();
+        endLatch.await();
     }
 
     @Override
-    public void shutdown() {
-        log.info("shutdown");
-        shutdown.countDown();
+    public void stop() {
+        log.info("stop");
+        endLatch.countDown();
     }
 
     @Override
@@ -139,7 +145,7 @@ public class TestApp implements BomberApp {
         return new TestSuiteModel(suite.getName(), testCases, suite.getSettings(), suite.getWarmUp());
     }
 
-    public boolean isShutdown() {
-        return shutdown.getCount() == 0;
+    public boolean isStop() {
+        return endLatch.getCount() == 0;
     }
 }

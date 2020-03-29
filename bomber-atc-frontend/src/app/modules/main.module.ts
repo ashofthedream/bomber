@@ -8,13 +8,13 @@ import en from '@angular/common/locales/en';
 import {MainMenuComponent} from "./main/components/main-menu/main-menu.component";
 import {DashboardPageComponent} from "./main/components/dashboard-page/dashboard-page.component";
 import {AccountSettingsPageComponent} from "./main/components/account-settings-page/account-settings-page.component";
-import {ActiveInstancesPageComponent} from "./main/components/active-instances-page/active-instances-page.component";
+import {ActiveCarriersPageComponent} from "./main/components/active-instances-page/active-carriers-page.component";
 import {LibsModule} from "./libs/libs.module";
 import {AppRoutingModule} from "../app-routing.module";
 import {ReactiveFormsModule} from "@angular/forms";
 import {SettingsLabelComponent} from "./main/components/settings-label/settings-label.component";
-import {AllTestRunsPageComponent} from "./main/components/all-test-runs-page/all-test-runs-page.component";
-import {ActiveTestRunPageComponent} from "./main/components/active-test-run-page/active-test-run-page.component";
+import {AllFlightsPageComponent} from "./main/components/all-flights-page/all-flights-page.component";
+import {ActiveFlightPageComponent} from "./main/components/active-flight-page/active-flight-page.component";
 
 
 registerLocaleData(en);
@@ -23,9 +23,9 @@ registerLocaleData(en);
 @NgModule({
   declarations: [
     AccountSettingsPageComponent,
-    ActiveInstancesPageComponent,
-    ActiveTestRunPageComponent,
-    AllTestRunsPageComponent,
+    ActiveCarriersPageComponent,
+    ActiveFlightPageComponent,
+    AllFlightsPageComponent,
     DashboardPageComponent,
     MainMenuComponent,
     SettingsLabelComponent,
@@ -42,9 +42,9 @@ registerLocaleData(en);
   ],
   exports: [
     AccountSettingsPageComponent,
-    ActiveInstancesPageComponent,
-    ActiveTestRunPageComponent,
-    AllTestRunsPageComponent,
+    ActiveCarriersPageComponent,
+    ActiveFlightPageComponent,
+    AllFlightsPageComponent,
     DashboardPageComponent,
     MainMenuComponent
   ],

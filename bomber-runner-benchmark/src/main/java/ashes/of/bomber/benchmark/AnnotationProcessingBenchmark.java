@@ -73,7 +73,7 @@ public class AnnotationProcessingBenchmark {
 //                .app(app -> app.sink(new Log4jSink()))
                 .addSuite(suite)
                 .build()
-                .run();
+                .start();
 
         return test.histogram;
     }
@@ -85,7 +85,7 @@ public class AnnotationProcessingBenchmark {
 //                .app(app -> app.sink(new Log4jSink()))
                 .testSuiteObject(test)
                 .build()
-                .run();
+                .start();
 
         return test.histogram;
     }

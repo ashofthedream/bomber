@@ -9,7 +9,7 @@ spring:
     zookeeper:
       connect-string: localhost:2181
       dependencies:
-        bomber-dispatcher:
+        bomber-carrier:
           required: false
 
       dependency:

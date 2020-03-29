@@ -1,7 +1,8 @@
 import {Injectable} from "@angular/core";
 import {RestService} from "../../libs/services/rest.service";
 import {Observable} from "rxjs";
-import {Instance} from "../model/instance";
+import {Carrier} from "../model/carrier";
+import {Application} from "../model/application";
 
 @Injectable({
   providedIn: 'root'
@@ -11,15 +12,24 @@ export class ApplicationService {
   constructor(private readonly rest: RestService) {
   }
 
-  public getActiveApplications(): Observable<Instance[]> {
-    return this.rest.get('dispatchers/active');
+  public getActiveCarriers(): Observable<Carrier[]> {
+    return this.rest.get('carriers/active');
   }
 
-  public startApp(instance: Instance): Observable<any> {
-    return this.rest.post(`dispatchers/start/${instance.id}`);
+  startAll(): Observable<any> {
+    return this.rest.post(`carriers/applications/start`);
   }
 
-  public shutdownApp(instance: Instance): Observable<any> {
-    return this.rest.post(`dispatchers/shutdown/${instance.id}`);
+  public startApp(instance: Carrier, app: Application): Observable<any> {
+    return this.rest.post(`carriers/${instance.id}/applications/${app.name}/start`);
+  }
+
+
+  stopAllApps(): Observable<any> {
+    return this.rest.post(`carriers/applications/stop`);
+  }
+
+  public stopApp(instance: Carrier, app: Application): Observable<any> {
+    return this.rest.post(`carriers/${instance.id}/applications/${app.name}/stop`);
   }
 }

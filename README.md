@@ -56,7 +56,7 @@ public class ExampleTest {
 
     public static void main(String... args) {
         Report report = new TestAppBuilder()
-
+                .name("ExampleApp")
                 // add data sinks
                 .sink(new Log4jSink())
                 .sink(new HistogramSink())
@@ -65,7 +65,7 @@ public class ExampleTest {
                 // add example test suite via annotations
                 .testSuiteClass(ExampleTest.class)
                 .build()
-                .run();
+                .start();
     }
 }
 ```

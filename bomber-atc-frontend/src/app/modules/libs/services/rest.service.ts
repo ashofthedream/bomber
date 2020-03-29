@@ -13,7 +13,7 @@ export class RestService {
 
   public build(): HttpRequestBuilder {
     return new HttpRequestBuilder(this.http, this.notification)
-        .baseUrl('')
+        .baseUrl('/atc')
         .withCredentials();
   }
 

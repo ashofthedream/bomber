@@ -1,7 +1,7 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {interval, Subscription, timer} from "rxjs";
+import {Subscription, timer} from "rxjs";
 import {ApplicationService} from "../../services/application.service";
-import {Instance} from "../../model/instance";
+import {Carrier} from "../../model/carrier";
 
 @Component({
   selector: 'atc-dashboard-page',
@@ -11,7 +11,7 @@ import {Instance} from "../../model/instance";
 export class DashboardPageComponent implements OnInit, OnDestroy {
 
   private activeAppsSub: Subscription;
-  instances: Instance[] = [];
+  carriers: Carrier[] = [];
 
   constructor(private readonly service: ApplicationService) {
   }
@@ -19,8 +19,8 @@ export class DashboardPageComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.activeAppsSub = timer(0, 3000)
         .subscribe(() => {
-          this.service.getActiveApplications()
-              .subscribe(instances => this.instances = instances);
+          this.service.getActiveCarriers()
+              .subscribe(carriers => this.carriers = carriers);
         });
   }
 

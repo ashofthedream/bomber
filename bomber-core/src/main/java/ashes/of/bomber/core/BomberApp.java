@@ -5,17 +5,19 @@ import java.util.concurrent.CompletableFuture;
 
 public interface BomberApp {
 
+    State getState();
+
     String getName();
     List<TestSuiteModel> getTestSuites();
 
-    Report run();
+    Report start();
 
-    default CompletableFuture<Report> runAsync() {
-        return CompletableFuture.supplyAsync(this::run);
+    default CompletableFuture<Report> startAsync() {
+        return CompletableFuture.supplyAsync(this::start);
     }
 
     void await() throws InterruptedException;
 
-    void shutdown();
+    void stop();
 
 }

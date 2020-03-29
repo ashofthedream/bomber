@@ -36,7 +36,7 @@ public class UserControllerTest {
                 .sink(new HistogramSink())
                 .testSuiteClass(UserControllerLoadTest.class, new Class[]{WebClient.class}, webClient)
                 .build()
-                .run();
+                .start();
 
         assertEquals("load test has some errors", 0, report.getErrorsCount());
     }

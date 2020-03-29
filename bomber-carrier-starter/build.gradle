@@ -1,0 +1,28 @@
+group = 'ashes.of'
+version = '1.0.0-SNAPSHOT'
+
+apply plugin: 'java'
+
+
+dependencies {
+    compile project(':bomber-runner')
+    compile project(':bomber-carrier-dto')
+
+    compile     group: 'org.springframework.boot',      name: 'spring-boot-starter-webflux',    version: '2.2.5.RELEASE'
+
+    compile('org.springframework.cloud:spring-cloud-starter-zookeeper-all:2.2.1.RELEASE') {
+        exclude group: 'org.apache.zookeeper', module: 'zookeeper'
+    }
+
+    compile('org.apache.zookeeper:zookeeper:3.4.13') {
+        exclude group: 'org.slf4j', module: 'slf4j-log4j12'
+    }
+
+    compileOnly         group: 'org.projectlombok',     name: 'lombok',                         version: '1.18.8'
+    annotationProcessor group: 'org.projectlombok',     name: 'lombok',                         version: '1.18.8'
+}
+
+
+compileJava {
+    options.compilerArgs << '-parameters'
+}

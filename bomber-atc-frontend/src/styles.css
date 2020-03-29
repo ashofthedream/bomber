@@ -1,1 +1,28 @@
 /* You can add global styles to this file, and also import other style files */
+
+/* Top Bar */
+.top-bar {
+    margin-bottom: 10pt
+}
+
+/* Bottom Bar */
+.bottom-bar {
+    margin-top: 10pt;
+}
+
+
+.left-side {
+    text-align: left;
+}
+
+.left-side button {
+    margin-right: 10px;
+}
+
+.right-side {
+    text-align: right;
+}
+
+.right-side button {
+    margin-left: 10px;
+}
