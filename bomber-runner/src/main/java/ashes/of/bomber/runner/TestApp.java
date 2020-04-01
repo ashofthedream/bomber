@@ -15,14 +15,13 @@ import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Collectors;
 
 
 public class TestApp implements BomberApp {
     private static final Logger log = LogManager.getLogger();
 
-    private static final State REST = new State(Stage.Rest, new Settings().disabled(), "", () -> false);
+    private static final State REST = new State(Stage.Idle, new Settings().disabled(), "", () -> false);
 
     private final String name;
     private final WorkerPool pool;
@@ -41,9 +40,9 @@ public class TestApp implements BomberApp {
     }
 
     @Override
-    @Nullable
     public State getState() {
-        return state;
+        return Optional.ofNullable(state)
+                .orElse(REST);
     }
 
     public void setState(@Nullable State state) {
@@ -64,11 +63,7 @@ public class TestApp implements BomberApp {
         environment.getWatchers()
                 .forEach(config -> {
                     Watcher watcher = config.getWatcher();
-                    watcherEx.scheduleAtFixedRate(() -> {
-                        State state = Optional.ofNullable(this.state)
-                                .orElse(REST);
-                        watcher.watch(state);
-                    }, 0, config.getPeriod(), config.getTimeUnit());
+                    watcherEx.scheduleAtFixedRate(() -> watcher.watch(this), 0, config.getPeriod(), config.getTimeUnit());
                 });
 
         Instant startTime = Instant.now();
@@ -78,26 +73,18 @@ public class TestApp implements BomberApp {
                 .forEach(Watcher::startUp);
 
         environment.getSinks()
-                .forEach(Sink::afterStartUp);
+                .forEach(Sink::startUp);
 
 
-        LongAdder errorsCount = new LongAdder();
         try {
-            suites.stream()
-                    .map(suite -> suite.run(this))
-                    .forEach(states -> {
-                        states.forEach(state -> {
-                            errorsCount.add(state.getErrorCount());
-                        });
-                    });
-
+            suites.forEach(suite -> suite.run(this));
             state = null;
         } catch (Throwable th) {
             log.error("unexpected throwable", th);
         }
 
         environment.getSinks()
-                .forEach(Sink::beforeShutDown);
+                .forEach(Sink::shutDown);
 
         environment.getWatchers().stream()
                 .map(WatcherConfig::getWatcher)
@@ -111,7 +98,7 @@ public class TestApp implements BomberApp {
         pool.shutdown();
 
         ThreadContext.clearAll();
-        return new Report(startTime, finishTime, errorsCount.sum());
+        return new Report(startTime, finishTime);
     }
 
     @Override

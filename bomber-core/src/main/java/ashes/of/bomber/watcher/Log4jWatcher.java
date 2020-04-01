@@ -1,5 +1,6 @@
 package ashes.of.bomber.watcher;
 
+import ashes.of.bomber.core.BomberApp;
 import ashes.of.bomber.core.Stage;
 import ashes.of.bomber.core.State;
 import org.apache.logging.log4j.LogManager;
@@ -11,12 +12,13 @@ public class Log4jWatcher implements Watcher {
     private static final Logger log = LogManager.getLogger(new StringFormatterMessageFactory());
 
     @Override
-    public void watch(State state) {
+    public void watch(BomberApp app) {
+        State state = app.getState();
         ThreadContext.put("stage", state.getStage().name());
         ThreadContext.put("testSuite", state.getTestSuite());
         ThreadContext.put("testCase", state.getTestCase());
 
-        if (state.getStage() == Stage.Rest || state.getTestCase() == null) {
+        if (state.getStage() == Stage.Idle || state.getTestCase() == null) {
             log.info("waiting...");
             return;
         }

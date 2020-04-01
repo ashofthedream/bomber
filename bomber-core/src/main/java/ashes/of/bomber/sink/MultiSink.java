@@ -18,8 +18,8 @@ public class MultiSink implements Sink {
     }
 
     @Override
-    public void afterStartUp() {
-        sinks.forEach(Sink::afterStartUp);
+    public void startUp() {
+        sinks.forEach(Sink::startUp);
     }
 
     @Override
@@ -53,7 +53,7 @@ public class MultiSink implements Sink {
     }
 
     @Override
-    public void beforeShutDown() {
-        sinks.forEach(Sink::beforeShutDown);
+    public void shutDown() {
+        sinks.forEach(Sink::shutDown);
     }
 }

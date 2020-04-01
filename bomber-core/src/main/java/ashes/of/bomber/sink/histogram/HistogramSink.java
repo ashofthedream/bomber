@@ -27,7 +27,7 @@ public class HistogramSink implements Sink {
     }
 
     @Override
-    public void beforeShutDown() {
+    public void shutDown() {
         print();
 
         measurements.clear();

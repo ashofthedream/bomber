@@ -1,0 +1,19 @@
+<nz-card nzTitle="Active Carriers" [nzExtra]="actions">
+    <ng-template #actions>
+        <a routerLink="/carriers/active">More</a>
+    </ng-template>
+
+    <div *ngIf="carriers | async; let list">
+        <p *ngFor="let carrier of list">
+            <strong>{{carrier.app.name}}</strong><br/>
+            {{carrier.id}}<br/>
+            <a>{{carrier.uri}}</a>
+        </p>
+
+        <p *ngIf="!list.length">
+            No carriers
+        </p>
+    </div>
+
+
+</nz-card>

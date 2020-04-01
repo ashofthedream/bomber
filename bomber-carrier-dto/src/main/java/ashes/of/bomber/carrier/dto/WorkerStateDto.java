@@ -5,14 +5,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Builder
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ApplicationDto {
+public class WorkerStateDto {
     private String name;
-    private ApplicationStateDto state;
-    private List<TestSuiteDto> testSuites;
+    private long iteration;
 }

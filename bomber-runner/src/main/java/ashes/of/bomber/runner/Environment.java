@@ -14,11 +14,11 @@ public class Environment {
 
     private final List<Sink> sinks;
     private final List<WatcherConfig> watchers;
-    private final Delayer delayer;
+    private final Supplier<Delayer> delayer;
     private final Supplier<Limiter> limiter;
     private final BarrierBuilder barrier;
 
-    public Environment(List<Sink> sinks, List<WatcherConfig> watchers, Delayer delayer, Supplier<Limiter> limiter, BarrierBuilder barrier) {
+    public Environment(List<Sink> sinks, List<WatcherConfig> watchers, Supplier<Delayer> delayer, Supplier<Limiter> limiter, BarrierBuilder barrier) {
         this.sinks = sinks;
         this.watchers = watchers;
         this.delayer = delayer;
@@ -34,7 +34,7 @@ public class Environment {
         return watchers;
     }
 
-    public Delayer getDelayer() {
+    public Supplier<Delayer> getDelayer() {
         return delayer;
     }
 

@@ -293,7 +293,7 @@ public class TestAppBuilder {
         Preconditions.checkArgument(!suites.isEmpty(), "No test suites found");
 
         WorkerPool pool = new WorkerPool();
-        Environment env = new Environment(sinks, watchers, delayer, limiter, barrier);
+        Environment env = new Environment(sinks, watchers, () -> delayer, limiter, barrier);
         List<TestSuite<?>> suites = this.suites.stream()
                 .map(b -> b.build(pool, env))
                 .collect(Collectors.toList());

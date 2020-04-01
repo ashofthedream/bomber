@@ -15,7 +15,7 @@ public class LifeCycle<T>  {
     private static final Logger log = LogManager.getLogger();
 
     private final Map<String, TestCase<T>> testCases;
-    private final Supplier<T> testSuite;
+    private final Supplier<T> instance;
     private final List<LifeCycleMethod<T>> beforeAll;
     private final List<LifeCycleMethod<T>> beforeEach;
     private final List<LifeCycleMethod<T>> afterEach;
@@ -23,13 +23,13 @@ public class LifeCycle<T>  {
 
 
     public LifeCycle(Map<String, TestCase<T>> testCases,
-                     Supplier<T> testSuite,
+                     Supplier<T> instance,
                      List<LifeCycleMethod<T>> beforeEach,
                      List<LifeCycleMethod<T>> afterEach,
                      List<LifeCycleMethod<T>> afterAll,
                      List<LifeCycleMethod<T>> beforeAll) {
         this.testCases = testCases;
-        this.testSuite = testSuite;
+        this.instance = instance;
         this.beforeAll = beforeAll;
         this.beforeEach = beforeEach;
         this.afterEach = afterEach;
@@ -37,19 +37,19 @@ public class LifeCycle<T>  {
     }
 
 
-    public T testSuite() {
-        return testSuite.get();
+    public T instance() {
+        return instance.get();
     }
 
     public Map<String, TestCase<T>> testCases() {
         return testCases;
     }
 
-    public void beforeAll(State state, T object) {
-        beforeAll.forEach(l -> beforeAll(state, object, l));
+    public void beforeAll(T object) {
+        beforeAll.forEach(l -> beforeAll(object, l));
     }
 
-    private void beforeAll(State state, T object, LifeCycleMethod<T> l) {
+    private void beforeAll(T object, LifeCycleMethod<T> l) {
         log.trace("beforeAll");
         try {
             l.call(object);
@@ -63,7 +63,7 @@ public class LifeCycle<T>  {
         beforeEach.forEach(l -> beforeEach(it, object, l));
     }
 
-    private void beforeEach(Iteration it, T object, LifeCycleMethod<T> l) {
+    public void beforeEach(Iteration it, T object, LifeCycleMethod<T> l) {
         try {
             l.call(object);
         } catch (Throwable th) {
@@ -84,13 +84,12 @@ public class LifeCycle<T>  {
         }
     }
 
-
-    public void afterAll(State state, T object) {
+    public void afterAll(T object) {
         log.trace("afterAll");
-        afterAll.forEach(l -> afterAll(state, object, l));
+        afterAll.forEach(l -> afterAll(object, l));
     }
 
-    private void afterAll(State state, T object, LifeCycleMethod<T> l) {
+    private void afterAll(T object, LifeCycleMethod<T> l) {
         try {
             l.call(object);
         } catch (Throwable th) {

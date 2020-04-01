@@ -1,0 +1,47 @@
+<div class="top-bar">
+    <nz-page-header [nzGhost]="false">
+        <nz-page-header-title>Active Carriers</nz-page-header-title>
+        <nz-page-header-extra>
+            <button nz-button nzType="danger" (click)="startAll()">Start All</button>
+            <button nz-button nzType="default" (click)="stopAll()">Stop All</button>
+        </nz-page-header-extra>
+    </nz-page-header>
+</div>
+
+<div>
+    <nz-table [nzData]="carriers" nzSize="small">
+        <thead>
+        <tr>
+            <th></th>
+            <th>Carrier</th>
+            <th>Application</th>
+            <th>Test Suites</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let carrier of carriers">
+            <td></td>
+            <td>
+                {{carrier.id}}<br/>
+                <a>{{carrier.uri}}</a>
+            </td>
+            <td>
+                <nz-badge nzStatus="default"></nz-badge>
+                <strong>{{carrier.app.name}}</strong>
+            </td>
+            <td>
+                <p *ngFor="let testSuite of carrier.app.testSuites">
+                    <strong>{{testSuite.name}}</strong> — <span *ngFor="let testCase of testSuite.testCases">{{testCase.name}} </span>
+                </p>
+            </td>
+            <td>
+                <a (click)="start(carrier)">Start</a>
+                <nz-divider nzType="vertical"></nz-divider>
+                <a (click)="stop(carrier)">Stop</a>
+                <nz-divider nzType="vertical"></nz-divider>
+            </td>
+        </tr>
+        </tbody>
+    </nz-table>
+</div>

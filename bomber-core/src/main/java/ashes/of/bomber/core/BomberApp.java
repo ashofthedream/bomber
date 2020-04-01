@@ -8,6 +8,7 @@ public interface BomberApp {
     State getState();
 
     String getName();
+
     List<TestSuiteModel> getTestSuites();
 
     Report start();
@@ -19,5 +20,4 @@ public interface BomberApp {
     void await() throws InterruptedException;
 
     void stop();
-
 }

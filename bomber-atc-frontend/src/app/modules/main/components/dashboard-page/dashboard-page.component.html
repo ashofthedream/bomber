@@ -4,33 +4,13 @@
     </nz-page-header>
 </div>
 
-<div nz-row>
+<div nz-row nzGutter="20">
     <div nz-col [nzSpan]="8">
-        <nz-card class="card" nzTitle="Latest Flights" [nzExtra]="testRunsActions">
-            <ng-template #testRunsActions>
-                <a routerLink="/flights/all">More</a>
-            </ng-template>
-
-            <p>No flights yet</p>
-        </nz-card>
+        <flights-latest-card></flights-latest-card>
     </div>
 
     <div nz-col [nzSpan]="8">
-        <nz-card class="card" nzTitle="Active Carriers" [nzExtra]="carrierActions">
-            <ng-template #carrierActions>
-                <a routerLink="/carriers/active">More</a>
-            </ng-template>
-
-            <p *ngIf="!carriers.length">
-                No carriers
-            </p>
-
-            <p *ngFor="let carrier of carriers">
-                <strong>{{carrier.app.name}}</strong><br/>
-                {{carrier.id}}<br/>
-                <a>{{carrier.uri}}</a>
-            </p>
-        </nz-card>
+        <carriers-active-card></carriers-active-card>
     </div>
 </div>
 

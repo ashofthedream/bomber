@@ -16,8 +16,8 @@ export class RequestLogHttpInterceptor implements HttpInterceptor {
                     const response = event as HttpResponse<any>;
                     console.log(`${request.method} ${request.url}  >>  ${response.status}`, request.body, response.body);
                   }
-                },
-                e => console.log(`${request.method} ${request.url}  >> `, e)
+                }
+                // e => console.log(`${request.method} ${request.url}  >> `, e)
             ));
   }
 }

@@ -1,0 +1,8 @@
+version: "3.7"
+services:
+  boomber-zookeeper:
+    image: "zookeeper:3.4.14"
+    ports:
+      - "2181:2181"
+      - "2888:2888"
+      - "3888:3888"

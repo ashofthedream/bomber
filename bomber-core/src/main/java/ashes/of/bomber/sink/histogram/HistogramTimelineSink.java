@@ -95,7 +95,7 @@ public class HistogramTimelineSink implements Sink {
     }
 
     @Override
-    public void beforeShutDown() {
+    public void shutDown() {
         print();
 
         timeline.clear();

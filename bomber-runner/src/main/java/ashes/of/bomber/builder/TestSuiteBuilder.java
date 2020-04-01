@@ -192,7 +192,7 @@ public class TestSuiteBuilder<T> {
         // todo it may be useful, but not today
         // Preconditions.checkArgument(!testCases.isEmpty(), "No test cases found");
 
-        Environment env = new Environment(app.getSinks(), app.getWatchers(), delayer, limiter, app.getBarrier());
+        Environment env = new Environment(app.getSinks(), app.getWatchers(), () -> delayer, limiter, app.getBarrier());
         LifeCycle<T> lifeCycle = new LifeCycle<>(testCases, testSuite, beforeEach, afterEach, afterAll, beforeAll);
 
         return new TestSuite<>(pool, name, env, lifeCycle, settings, warmUp);

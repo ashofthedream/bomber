@@ -1,10 +1,10 @@
 import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router';
 import {DashboardPageComponent} from "./modules/main/components/dashboard-page/dashboard-page.component";
-import {AccountSettingsPageComponent} from "./modules/main/components/account-settings-page/account-settings-page.component";
-import {ActiveCarriersPageComponent} from "./modules/main/components/active-instances-page/active-carriers-page.component";
-import {AllFlightsPageComponent} from "./modules/main/components/all-flights-page/all-flights-page.component";
-import {ActiveFlightPageComponent} from "./modules/main/components/active-flight-page/active-flight-page.component";
+import {AccountSettingsPageComponent} from "./modules/main/settings/components/account-settings-page/account-settings-page.component";
+import {ActiveCarriersPageComponent} from "./modules/main/carriers/components/active-carriers-page/active-carriers-page.component";
+import {AllFlightsPageComponent} from "./modules/main/flight/components/all-flights-page/all-flights-page.component";
+import {ActiveFlightPageComponent} from "./modules/main/flight/components/active-flight-page/active-flight-page.component";
 
 
 const routes: Routes = [

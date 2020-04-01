@@ -34,8 +34,8 @@ public class AsyncSink implements Sink {
 
 
     @Override
-    public void afterStartUp() {
-        ex.execute(sink::afterStartUp);
+    public void startUp() {
+        ex.execute(sink::startUp);
     }
 
     @Override
@@ -69,7 +69,7 @@ public class AsyncSink implements Sink {
     }
 
     @Override
-    public void beforeShutDown() {
-        ex.execute(sink::beforeShutDown);
+    public void shutDown() {
+        ex.execute(sink::shutDown);
     }
 }

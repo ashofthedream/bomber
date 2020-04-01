@@ -1,9 +1,9 @@
 import {Component, OnInit} from '@angular/core';
-import {Carrier} from "../../model/carrier";
-import {ApplicationService} from "../../services/application.service";
+import {Carrier} from "../../../model/carrier";
+import {ApplicationService} from "../../../services/application.service";
 
 @Component({
-  selector: 'carrier-active-page',
+  selector: 'carriers-active-page',
   templateUrl: './active-carriers-page.component.html'
 })
 export class ActiveCarriersPageComponent implements OnInit {

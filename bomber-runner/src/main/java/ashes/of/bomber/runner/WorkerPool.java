@@ -3,6 +3,7 @@ package ashes.of.bomber.runner;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -72,7 +73,7 @@ public class WorkerPool {
         available.add(worker);
     }
 
-    public void release(List<Worker> workers) {
+    public void release(Collection<Worker> workers) {
         workers.forEach(this::release);
     }
 

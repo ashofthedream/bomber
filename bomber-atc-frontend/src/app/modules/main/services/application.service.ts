@@ -1,8 +1,9 @@
 import {Injectable} from "@angular/core";
 import {RestService} from "../../libs/services/rest.service";
-import {Observable} from "rxjs";
+import {empty, Observable, of} from "rxjs";
 import {Carrier} from "../model/carrier";
 import {Application} from "../model/application";
+import {catchError} from "rxjs/operators";
 
 @Injectable({
   providedIn: 'root'
@@ -13,7 +14,10 @@ export class ApplicationService {
   }
 
   public getActiveCarriers(): Observable<Carrier[]> {
-    return this.rest.get('carriers/active');
+    return this.rest.get('carriers/active')
+        .pipe(
+            catchError((err, caught) => of([]))
+        );
   }
 
   startAll(): Observable<any> {

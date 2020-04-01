@@ -6,7 +6,7 @@ public enum Stage {
     /**
      * This stage doesn't run any tests
      */
-    Rest,
+    Idle,
 
     /**
      * Like a test, but used for warm-up

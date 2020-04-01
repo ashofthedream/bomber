@@ -1,20 +1,20 @@
 package ashes.of.bomber.watcher;
 
-import ashes.of.bomber.core.State;
+import ashes.of.bomber.core.BomberApp;
 
 public interface Watcher {
 
     default void startUp() {}
 
-    default void testSuiteStart(State state) {}
+    default void testSuiteStart(BomberApp app) {}
 
-    default void testCaseStart(State state) {}
+    default void testCaseStart(BomberApp app) {}
 
-    void watch(State state);
+    void watch(BomberApp app);
 
-    default void testCaseEnd(State state) {}
+    default void testCaseEnd(BomberApp app) {}
 
-    default void testSuiteEnd(State state) {}
+    default void testSuiteEnd(BomberApp app) {}
 
     default void shutDown() {}
 }

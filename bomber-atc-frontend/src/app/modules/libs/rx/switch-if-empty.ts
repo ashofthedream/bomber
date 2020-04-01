@@ -21,7 +21,7 @@ export function testSwitchIfEmpty() {
 
   const e = empty();
 
-  of('some string')
+  e
       .pipe(
           flatMap(key => e),
           switchIfEmpty(b)

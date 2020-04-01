@@ -6,8 +6,6 @@ import ashes.of.bomber.core.State;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Set;
 
 public class TestSuite<T> {
@@ -56,19 +54,20 @@ public class TestSuite<T> {
     }
 
 
-    public List<State> run(TestApp app) {
-        State warmUp = new State(Stage.WarmUp, this.warmUp, name, () -> app.isStop());
-        State test = new State(Stage.Test, this.settings, name, () -> app.isStop());
+    public void run(TestApp app) {
+        Runner<T> runner = new Runner<>(pool, env, lifeCycle);
+        State warmUp = new State(Stage.WarmUp, this.warmUp, name, app::isStop);
+        State test = new State(Stage.Test, this.settings, name, app::isStop);
 
         try {
             log.info("Start testSuite: {}", name);
             if (!warmUp.getSettings().isDisabled()) {
                 app.setState(warmUp);
-                new Runner<>(pool, warmUp, env, lifeCycle).run();
+                runner.run(warmUp);
             }
 
             app.setState(test);
-            new Runner<>(pool, test, env, lifeCycle).run();
+            runner.run(test);
 
             app.setState(null);
         } catch (Exception e) {
@@ -76,6 +75,5 @@ public class TestSuite<T> {
         }
 
         log.info("Finish testSuite: {}", name);
-        return Arrays.asList(warmUp, test);
     }
 }

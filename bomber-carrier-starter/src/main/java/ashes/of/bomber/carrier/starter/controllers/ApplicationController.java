@@ -1,19 +1,13 @@
 package ashes.of.bomber.carrier.starter.controllers;
 
-import ashes.of.bomber.core.BomberApp;
-import ashes.of.bomber.core.Settings;
-import ashes.of.bomber.core.TestCaseModel;
-import ashes.of.bomber.core.TestSuiteModel;
-import ashes.of.bomber.carrier.dto.ApplicationDto;
-import ashes.of.bomber.carrier.dto.SettingsDto;
-import ashes.of.bomber.carrier.dto.TestCaseDto;
-import ashes.of.bomber.carrier.dto.TestSuiteDto;
+import ashes.of.bomber.carrier.dto.*;
+import ashes.of.bomber.core.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -31,10 +25,11 @@ public class ApplicationController {
 
     @GetMapping
     public ResponseEntity<ApplicationDto> getApplications() {
-        List<TestSuiteModel> testSuites = app.getTestSuites();
+        log.debug("get applications");
         ApplicationDto dto = ApplicationDto.builder()
                 .name(app.getName())
-                .testSuites(testSuites(testSuites))
+                .state(state(app.getState()))
+                .testSuites(testSuites(app.getTestSuites()))
                 .build();
 
         return ResponseEntity.ok(dto);
@@ -43,7 +38,7 @@ public class ApplicationController {
     @PostMapping("/start")
     public ResponseEntity<?> startAllApp() {
         log.info("start all applications");
-        this.app.startAsync();
+        app.startAsync();
 
         return ResponseEntity.ok().build();
     }
@@ -51,14 +46,7 @@ public class ApplicationController {
     @PostMapping("/stop")
     public ResponseEntity<?> stopAllApp() {
         log.info("stop application");
-        this.app.stop();
-
-        return ResponseEntity.ok().build();
-    }
-
-    @GetMapping("/state")
-    public ResponseEntity<?> getState() {
-        log.info("getState");
+        app.stop();
 
         return ResponseEntity.ok().build();
     }
@@ -97,6 +85,21 @@ public class ApplicationController {
                 .threadsCount(settings.getThreadsCount())
                 .threadIterationsCount(settings.getThreadIterationsCount())
                 .totalIterationsCount(settings.getTotalIterationsCount())
+                .build();
+    }
+
+    private ApplicationStateDto state(State state) {
+        return ApplicationStateDto.builder()
+                .stage(state.getStage().name())
+                .settings(settings(state.getSettings()))
+                .testSuite(state.getTestSuite())
+                .testCase(state.getTestCase())
+                .testSuiteStart(state.getTestSuiteStartTime().toEpochMilli())
+                .testCaseStart(state.getTestCaseStartTime().toEpochMilli())
+                .elapsedTime(state.getCaseElapsedTime())
+                .remainTime(state.getCaseRemainTime())
+                .errorsCount(state.getErrorCount())
+                .workers(Collections.emptyList())
                 .build();
     }
 }

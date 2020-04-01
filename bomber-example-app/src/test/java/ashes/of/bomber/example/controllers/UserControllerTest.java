@@ -3,7 +3,9 @@ package ashes.of.bomber.example.controllers;
 import ashes.of.bomber.builder.TestAppBuilder;
 import ashes.of.bomber.core.Report;
 import ashes.of.bomber.example.app.tests.UserControllerLoadTest;
+import ashes.of.bomber.sink.Sink;
 import ashes.of.bomber.sink.histogram.HistogramSink;
+import ashes.of.bomber.stopwatch.Record;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Ignore;
@@ -14,6 +16,8 @@ import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.util.concurrent.atomic.LongAdder;
+
 import static org.junit.Assert.assertEquals;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
@@ -21,6 +25,23 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 public class UserControllerTest {
     private static final Logger log = LogManager.getLogger();
+
+    private static class ErrorCounter implements Sink {
+
+        private final LongAdder iterations = new LongAdder();
+        private final LongAdder errors = new LongAdder();
+
+        @Override
+        public void timeRecorded(Record record) {
+            iterations.increment();
+            if (record.getError() != null)
+                errors.increment();
+        }
+
+        public long getErrorsCount() {
+            return errors.sum();
+        }
+    }
 
     @LocalServerPort
     private int port;
@@ -32,12 +53,14 @@ public class UserControllerTest {
                 .baseUrl("http://localhost:" + port)
                 .build();
 
+        ErrorCounter errorCounter = new ErrorCounter();
         Report report = new TestAppBuilder()
                 .sink(new HistogramSink())
+                .sink(errorCounter)
                 .testSuiteClass(UserControllerLoadTest.class, new Class[]{WebClient.class}, webClient)
                 .build()
                 .start();
 
-        assertEquals("load test has some errors", 0, report.getErrorsCount());
+        assertEquals("load test has some errors", 0, errorCounter.getErrorsCount());
     }
 }

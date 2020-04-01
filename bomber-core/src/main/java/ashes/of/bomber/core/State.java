@@ -19,7 +19,7 @@ public class State {
     private volatile Instant testSuiteStartTime = Instant.EPOCH;
     private volatile Instant testCaseStartTime = Instant.EPOCH;
 
-    private final AtomicLong totalItsRemain = new AtomicLong(0);
+    private final AtomicLong remainItCount = new AtomicLong(0);
     private final LongAdder errorCount = new LongAdder();
 
     private final BooleanSupplier shutdown;
@@ -74,7 +74,7 @@ public class State {
         if (!isCaseStated()) {
             testCase = name;
             testCaseStartTime = Instant.now();
-            totalItsRemain.set(settings.getTotalIterationsCount());
+            remainItCount.set(settings.getTotalIterationsCount());
         }
     }
 
@@ -89,7 +89,7 @@ public class State {
     }
 
     public long getTotalIterationsRemain() {
-        return totalItsRemain.get();
+        return remainItCount.get();
     }
 
     public long getCaseRemainTime() {
@@ -111,21 +111,13 @@ public class State {
     }
 
     public BooleanSupplier createChecker() {
-        AtomicLong threadItRemain = new AtomicLong(settings.getThreadIterationsCount());
         long deadline = System.currentTimeMillis() + getCaseRemainTime();
-        return () -> check(threadItRemain, deadline);
+        return () -> check(deadline);
     }
 
-    private boolean check(AtomicLong threadItsRemain, long deadline) {
+    private boolean check(long deadline) {
         return !shutdown.getAsBoolean() &&
-                totalItsRemain.decrementAndGet() >= 0 &&
-                threadItsRemain.decrementAndGet() >= 0 &&
+                remainItCount.decrementAndGet() >= 0 &&
                 System.currentTimeMillis() < deadline;
-    }
-
-    @Override
-    public String toString() {
-        String testCase = this.testCase != null ? "." + this.testCase : "";
-        return String.format("(%s) %s%s", stage, testSuite, testCase);
     }
 }

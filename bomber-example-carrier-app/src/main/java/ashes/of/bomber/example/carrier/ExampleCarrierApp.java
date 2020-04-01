@@ -37,7 +37,7 @@ public class ExampleCarrierApp {
 
         log.info("try to start BomberApp via http");
         client.post()
-                .uri("/application/run")
+                .uri("/applications/start")
                 .retrieve()
                 .toBodilessEntity()
                 .subscribe(
