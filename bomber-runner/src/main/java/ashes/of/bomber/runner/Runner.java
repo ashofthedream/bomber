@@ -2,7 +2,6 @@ package ashes.of.bomber.runner;
 
 import ashes.of.bomber.core.Settings;
 import ashes.of.bomber.core.Stage;
-import ashes.of.bomber.core.State;
 import ashes.of.bomber.sink.AsyncSink;
 import ashes.of.bomber.sink.MultiSink;
 import ashes.of.bomber.sink.Sink;

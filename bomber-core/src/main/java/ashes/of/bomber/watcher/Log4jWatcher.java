@@ -2,7 +2,7 @@ package ashes.of.bomber.watcher;
 
 import ashes.of.bomber.core.BomberApp;
 import ashes.of.bomber.core.Stage;
-import ashes.of.bomber.core.State;
+import ashes.of.bomber.core.StateModel;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
@@ -13,7 +13,7 @@ public class Log4jWatcher implements Watcher {
 
     @Override
     public void watch(BomberApp app) {
-        State state = app.getState();
+        StateModel state = app.getState();
         ThreadContext.put("stage", state.getStage().name());
         ThreadContext.put("testSuite", state.getTestSuite());
         ThreadContext.put("testCase", state.getTestCase());
@@ -24,7 +24,7 @@ public class Log4jWatcher implements Watcher {
         }
 
         long totalInv = state.getSettings().getTotalIterationsCount();
-        long currentInv = totalInv - state.getTotalIterationsRemain();
+        long currentInv = totalInv - state.getRemainIterationsCount();
 
         double totalSecs = state.getSettings().getTime().getSeconds();
         double elapsedSecs = (state.getCaseElapsedTime() / 100) / 10.0;

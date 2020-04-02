@@ -2,7 +2,6 @@ package ashes.of.bomber.runner;
 
 import ashes.of.bomber.core.Iteration;
 import ashes.of.bomber.core.Settings;
-import ashes.of.bomber.core.State;
 import ashes.of.bomber.delayer.Delayer;
 import ashes.of.bomber.limiter.Limiter;
 import ashes.of.bomber.sink.Sink;
@@ -38,6 +37,10 @@ public class Worker {
     public Worker(BlockingQueue<Runnable> queue, Thread thread) {
         this.queue = queue;
         this.thread = thread;
+    }
+
+    public WorkerState getState() {
+        return state;
     }
 
     public <T> void run(State state, Settings settings, CountDownLatch begin, CountDownLatch end, Barrier barrier, Environment env, Sink sink, LifeCycle<T> lifeCycle) {

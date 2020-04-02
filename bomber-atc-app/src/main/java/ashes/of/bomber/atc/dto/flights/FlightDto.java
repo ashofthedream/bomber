@@ -1,16 +1,17 @@
-package ashes.of.bomber.carrier.dto;
+package ashes.of.bomber.atc.dto.flights;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Map;
+
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class TestFlightDto {
+public class FlightDto {
     private long id;
-    private long startedAt;
-    private ApplicationDto app;
+    private Map<String, FlightDataDto> data;
 }

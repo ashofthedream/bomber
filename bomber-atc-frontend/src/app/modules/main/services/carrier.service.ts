@@ -8,7 +8,7 @@ import {catchError} from "rxjs/operators";
 @Injectable({
   providedIn: 'root'
 })
-export class ApplicationService {
+export class CarrierService {
 
   constructor(private readonly rest: RestService) {
   }
@@ -18,22 +18,5 @@ export class ApplicationService {
         .pipe(
             catchError((err, caught) => of([]))
         );
-  }
-
-  startAll(): Observable<any> {
-    return this.rest.post(`carriers/applications/start`);
-  }
-
-  public startApp(instance: Carrier, app: Application): Observable<any> {
-    return this.rest.post(`carriers/${instance.id}/applications/${app.name}/start`);
-  }
-
-
-  stopAllApps(): Observable<any> {
-    return this.rest.post(`carriers/applications/stop`);
-  }
-
-  public stopApp(instance: Carrier, app: Application): Observable<any> {
-    return this.rest.post(`carriers/${instance.id}/applications/${app.name}/stop`);
   }
 }

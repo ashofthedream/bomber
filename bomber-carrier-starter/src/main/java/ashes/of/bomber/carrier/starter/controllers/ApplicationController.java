@@ -1,13 +1,13 @@
 package ashes.of.bomber.carrier.starter.controllers;
 
 import ashes.of.bomber.carrier.dto.*;
+import ashes.of.bomber.carrier.dto.requests.StartFlightRequest;
 import ashes.of.bomber.core.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -36,15 +36,17 @@ public class ApplicationController {
     }
 
     @PostMapping("/start")
-    public ResponseEntity<?> startAllApp() {
+    public ResponseEntity<FlightStartedDto> start(@RequestBody StartFlightRequest start) {
         log.info("start all applications");
-        app.startAsync();
+        app.startAsync(start.getId());
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(FlightStartedDto.builder()
+                .id(start.getId())
+                .build());
     }
 
     @PostMapping("/stop")
-    public ResponseEntity<?> stopAllApp() {
+    public ResponseEntity<?> stop() {
         log.info("stop application");
         app.stop();
 
@@ -88,7 +90,7 @@ public class ApplicationController {
                 .build();
     }
 
-    private ApplicationStateDto state(State state) {
+    private ApplicationStateDto state(StateModel state) {
         return ApplicationStateDto.builder()
                 .stage(state.getStage().name())
                 .settings(settings(state.getSettings()))
@@ -98,8 +100,20 @@ public class ApplicationController {
                 .testCaseStart(state.getTestCaseStartTime().toEpochMilli())
                 .elapsedTime(state.getCaseElapsedTime())
                 .remainTime(state.getCaseRemainTime())
+                .remainTotalIterations(state.getRemainIterationsCount())
                 .errorsCount(state.getErrorCount())
-                .workers(Collections.emptyList())
+                .workers(state.getWorkersState().stream()
+                        .map(this::workerState)
+                        .collect(Collectors.toList()))
+                .build();
+    }
+
+    private WorkerStateDto workerState(WorkerStateModel state) {
+        return WorkerStateDto.builder()
+                .name(state.getWorker())
+                .iterationsCount(state.getCurrentIterationCount())
+                .remainIterationsCount(state.getRemainIterationsCount())
+                .errorsCount(state.getErrorsCount())
                 .build();
     }
 }

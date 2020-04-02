@@ -24,7 +24,7 @@ import java.time.temporal.ChronoUnit;
         UserControllerLoadTest.class,
         AccountControllerLoadTest.class
 })
-@LoadTest(threads = 2, time = 10)
+@LoadTest(threads = 2, time = 300)
 @Throttle(time = 1)
 public class ExampleAnnotatedTestApp {
     private static final Logger log = LogManager.getLogger();

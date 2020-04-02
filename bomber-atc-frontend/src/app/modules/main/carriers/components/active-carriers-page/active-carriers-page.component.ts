@@ -1,6 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {Carrier} from "../../../model/carrier";
-import {ApplicationService} from "../../../services/application.service";
+import {CarrierService} from "../../../services/carrier.service";
+import {FlightService} from "../../../services/flight.service";
 
 @Component({
   selector: 'carriers-active-page',
@@ -9,32 +10,33 @@ import {ApplicationService} from "../../../services/application.service";
 export class ActiveCarriersPageComponent implements OnInit {
   carriers: Carrier[] = [];
 
-  constructor(private readonly service: ApplicationService) {
+  constructor(private readonly carrierService: CarrierService,
+              private readonly flightService: FlightService) {
   }
 
   ngOnInit(): void {
-    this.service.getActiveCarriers()
+    this.carrierService.getActiveCarriers()
         .subscribe(instances => this.carriers = instances);
   }
 
   startAll() {
-    this.service.startAll()
+    this.flightService.startAll()
         .subscribe();
   }
 
   start(carrier: Carrier) {
-    this.service.startApp(carrier, carrier.app)
+    this.flightService.start(carrier, carrier.app)
         .subscribe();
   }
 
 
   stopAll() {
-    this.service.stopAllApps()
+    this.flightService.stopAll()
         .subscribe();
   }
 
   stop(carrier: Carrier) {
-    this.service.stopApp(carrier, carrier.app)
+    this.flightService.stop(carrier, carrier.app)
         .subscribe();
   }
 }

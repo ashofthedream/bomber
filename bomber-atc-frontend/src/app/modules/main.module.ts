@@ -17,6 +17,7 @@ import {AllFlightsPageComponent} from "./main/flight/components/all-flights-page
 import {ActiveFlightPageComponent} from "./main/flight/components/active-flight-page/active-flight-page.component";
 import {ActiveCarriersCardComponent} from "./main/carriers/components/active-carriers-card/active-carriers-card.component";
 import {LatestFlightsCardComponent} from "./main/flight/components/latest-flights-card/latest-flights-card.component";
+import {ApplicationLabelComponent} from "./main/carriers/components/application-label/application-label.component";
 
 
 registerLocaleData(en);
@@ -24,6 +25,7 @@ registerLocaleData(en);
 
 @NgModule({
   declarations: [
+    ApplicationLabelComponent,
     AccountSettingsPageComponent,
     ActiveCarriersCardComponent,
     ActiveCarriersPageComponent,

@@ -27,8 +27,7 @@
                 <a>{{carrier.uri}}</a>
             </td>
             <td>
-                <nz-badge nzStatus="default"></nz-badge>
-                <strong>{{carrier.app.name}}</strong>
+                <carriers-app-label [app]="carrier.app"></carriers-app-label>
             </td>
             <td>
                 <p *ngFor="let testSuite of carrier.app.testSuites">

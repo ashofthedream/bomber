@@ -5,10 +5,8 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.SynchronousQueue;
+import java.util.Set;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class WorkerPool {
@@ -18,6 +16,7 @@ public class WorkerPool {
 
     private final List<Worker> workers = new CopyOnWriteArrayList<>();
     private final BlockingQueue<Worker> available = new LinkedBlockingQueue<>();
+    private final Set<Worker> acquired = new CopyOnWriteArraySet<>();
 
     public WorkerPool(int count) {
         for (int i = 0; i < count; i++)
@@ -61,16 +60,19 @@ public class WorkerPool {
     }
 
     public Worker acquire() {
-        Worker worker = available.poll();
-        Worker acquired = worker != null ? worker : createWorker();
+        Worker available = this.available.poll();
+        Worker worker = available != null ? available : createWorker();
 
-        log.debug("acquire {}", acquired.getName());
-        return acquired;
+        log.debug("acquire {}", worker.getName());
+        acquired.add(worker);
+
+        return worker;
     }
 
     public void release(Worker worker) {
         log.debug("release {}", worker.getName());
         available.add(worker);
+        acquired.remove(worker);
     }
 
     public void release(Collection<Worker> workers) {
@@ -81,5 +83,9 @@ public class WorkerPool {
         available.clear();
         workers.forEach(Worker::stop);
         workers.clear();
+    }
+
+    public Set<Worker> getAcquired() {
+        return acquired;
     }
 }

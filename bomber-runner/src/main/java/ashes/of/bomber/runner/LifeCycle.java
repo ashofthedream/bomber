@@ -1,7 +1,6 @@
 package ashes.of.bomber.runner;
 
 import ashes.of.bomber.core.Iteration;
-import ashes.of.bomber.core.State;
 import ashes.of.bomber.methods.LifeCycleMethod;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

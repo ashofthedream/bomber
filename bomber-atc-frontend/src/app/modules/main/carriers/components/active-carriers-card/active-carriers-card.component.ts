@@ -1,8 +1,8 @@
 import {Component, OnInit} from '@angular/core';
 import {Carrier} from "../../../model/carrier";
-import {ApplicationService} from "../../../services/application.service";
-import {Observable, of, Subscription, timer} from "rxjs";
-import {flatMap, tap} from "rxjs/operators";
+import {CarrierService} from "../../../services/carrier.service";
+import {Observable, timer} from "rxjs";
+import {flatMap} from "rxjs/operators";
 
 @Component({
   selector: 'carriers-active-card',
@@ -11,7 +11,7 @@ import {flatMap, tap} from "rxjs/operators";
 export class ActiveCarriersCardComponent implements OnInit {
   carriers: Observable<Carrier[]>;
 
-  constructor(private readonly service: ApplicationService) {
+  constructor(private readonly service: CarrierService) {
   }
 
   ngOnInit() {

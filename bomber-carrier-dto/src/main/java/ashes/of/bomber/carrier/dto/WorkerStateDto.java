@@ -11,5 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class WorkerStateDto {
     private String name;
-    private long iteration;
+    private long iterationsCount;
+    private long remainIterationsCount;
+    private long errorsCount;
 }

@@ -1,12 +1,11 @@
 package ashes.of.bomber.atc.controllers;
 
-import ashes.of.bomber.atc.dto.TestFlightsDto;
 import ashes.of.bomber.atc.services.CarrierService;
 import ashes.of.bomber.atc.dto.CarrierDto;
 import ashes.of.bomber.atc.dto.ResponseEntities;
+import ashes.of.bomber.atc.services.FlightService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
@@ -19,51 +18,23 @@ import java.util.List;
 public class CarrierController {
     private static final Logger log = LogManager.getLogger();
 
-    private final ReactiveDiscoveryClient discoveryClient;
     private final CarrierService carrierService;
 
-    public CarrierController(ReactiveDiscoveryClient discoveryClient, CarrierService carrierService) {
-        this.discoveryClient = discoveryClient;
+    public CarrierController(CarrierService carrierService) {
         this.carrierService = carrierService;
     }
 
 
     /**
-     * @return all active carrier instances with all application
+     * @return all active carriers with all application
      */
     @GetMapping("/active")
-    public Mono<List<CarrierDto>> getActiveCarriers() {
+    public Mono<List<CarrierDto>> getActive() {
         log.debug("get active carriers");
 
-        return discoveryClient.getInstances("bomber-carrier")
+        return carrierService.getCarriers()
                 .flatMap(carrierService::status)
                 .collectList();
-    }
-
-
-    @PostMapping("/applications/start")
-    public Mono<TestFlightsDto> startAll() {
-        log.debug("start all applications on all active carriers");
-
-        return discoveryClient.getInstances("bomber-carrier")
-                .flatMap(carrierService::start)
-                .collectList()
-                .map(flights -> TestFlightsDto.builder()
-                        .flights(flights)
-                        .build());
-    }
-
-    @PostMapping("/{carrierId}/applications/{appId}/start")
-    public Mono<TestFlightsDto> startApplicationOnCarrierById(@PathVariable("carrierId") String carrierId, @PathVariable("appId") String appId) {
-        log.debug("start application: {} on carrier: {}", appId, carrierId);
-
-        return discoveryClient.getInstances("bomber-carrier")
-                .filter(instance -> instance.getInstanceId().equals(carrierId))
-                .flatMap(carrierService::start)
-                .collectList()
-                .map(flights -> TestFlightsDto.builder()
-                        .flights(flights)
-                        .build());
     }
 
 
@@ -71,7 +42,7 @@ public class CarrierController {
     public ResponseEntity<?> stopAllApplications() {
         log.debug("stop all applications on all active carriers");
 
-        discoveryClient.getInstances("bomber-carrier")
+        carrierService.getCarriers()
                 .subscribe(carrierService::stop);
 
         return ResponseEntities.ok();
@@ -81,8 +52,7 @@ public class CarrierController {
     public ResponseEntity<?> stopApplicationOnCarrierById(@PathVariable("carrierId") String carrierId, @PathVariable("appId") String appId) {
         log.debug("stop application: {} on carrier: {}", appId, carrierId);
 
-        discoveryClient.getInstances("bomber-carrier")
-                .filter(instance -> instance.getInstanceId().equals(carrierId))
+        carrierService.getCarrier(carrierId)
                 .subscribe(carrierService::stop);
 
         return ResponseEntities.ok();

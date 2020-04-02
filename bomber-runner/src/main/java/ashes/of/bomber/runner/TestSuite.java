@@ -2,7 +2,6 @@ package ashes.of.bomber.runner;
 
 import ashes.of.bomber.core.Settings;
 import ashes.of.bomber.core.Stage;
-import ashes.of.bomber.core.State;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

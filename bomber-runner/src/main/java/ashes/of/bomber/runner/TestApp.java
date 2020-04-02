@@ -10,6 +10,7 @@ import org.apache.logging.log4j.ThreadContext;
 
 import javax.annotation.Nullable;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
@@ -28,6 +29,7 @@ public class TestApp implements BomberApp {
     private final Environment environment;
     private final List<TestSuite<?>> suites;
 
+    private volatile long flightId;
     @Nullable
     private volatile State state;
     private volatile CountDownLatch endLatch = new CountDownLatch(1);
@@ -40,9 +42,23 @@ public class TestApp implements BomberApp {
     }
 
     @Override
-    public State getState() {
-        return Optional.ofNullable(state)
+    public StateModel getState() {
+        State state = Optional.ofNullable(this.state)
                 .orElse(REST);
+
+        List<WorkerStateModel> workerStates = pool.getAcquired().stream()
+                .map(worker -> {
+                    WorkerState ws = worker.getState();
+                    return new WorkerStateModel(worker.getName(), ws.currentItNumber(), ws.getRemainIterationsCount(), ws.getErrorsCount());
+                })
+                .collect(Collectors.toList());
+
+        Settings settings = state.getSettings();
+        long remain = state.getTotalIterationsRemain();
+        return new StateModel(state.getStage(), settings, state.getTestSuite(), state.getTestCase(),
+                settings.getThreadIterationsCount() - remain, state.getTotalIterationsRemain(), state.getErrorCount(),
+                Instant.EPOCH, Instant.EPOCH, state.getCaseElapsedTime(),
+                state.getCaseRemainTime(), workerStates);
     }
 
     public void setState(@Nullable State state) {
@@ -50,13 +66,15 @@ public class TestApp implements BomberApp {
     }
 
     @Override
-    public Report start() {
+    public Report start(long flightId) {
         ThreadContext.put("bomberApp", name);
+        ThreadContext.put("flightId", String.valueOf(flightId));
+
         List<String> testSuiteNames = suites.stream()
                 .map(testSuite -> String.format("%s %s", testSuite.getName(), testSuite.getTestCases()))
                 .collect(Collectors.toList());
 
-        log.info("run test app with {} suites: {}", suites.size(), testSuiteNames);
+        log.info("start flight: {} of  test app with {} suites: {}", flightId, suites.size(), testSuiteNames);
 
         ScheduledExecutorService watcherEx = Executors.newSingleThreadScheduledExecutor();
 

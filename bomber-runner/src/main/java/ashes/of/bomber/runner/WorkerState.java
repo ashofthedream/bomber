@@ -2,7 +2,6 @@ package ashes.of.bomber.runner;
 
 import ashes.of.bomber.core.Settings;
 import ashes.of.bomber.core.Stage;
-import ashes.of.bomber.core.State;
 
 import java.time.Instant;
 import java.util.concurrent.atomic.AtomicLong;
@@ -26,6 +25,19 @@ public class WorkerState {
     public long nextItNumber() {
         return itNumberSeq.getAndIncrement();
     }
+
+    public long currentItNumber() {
+        return itNumberSeq.get();
+    }
+
+    public long getErrorsCount() {
+        return errorCount.sum();
+    }
+
+    public long getRemainIterationsCount() {
+        return remainItCount.get();
+    }
+
 
     public String getTestSuite() {
         return state.getTestSuite();

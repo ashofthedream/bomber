@@ -1,4 +1,7 @@
-package ashes.of.bomber.core;
+package ashes.of.bomber.runner;
+
+import ashes.of.bomber.core.Settings;
+import ashes.of.bomber.core.Stage;
 
 import javax.annotation.Nullable;
 import java.time.Instant;
