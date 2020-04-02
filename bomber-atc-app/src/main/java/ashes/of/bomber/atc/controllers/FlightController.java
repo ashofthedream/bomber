@@ -5,9 +5,9 @@ import ashes.of.bomber.atc.dto.flights.FlightDataDto;
 import ashes.of.bomber.atc.dto.flights.FlightRecordDto;
 import ashes.of.bomber.atc.dto.flights.FlightsStartedDto;
 import ashes.of.bomber.atc.model.Flight;
+import ashes.of.bomber.atc.model.FlightRecord;
 import ashes.of.bomber.atc.services.CarrierService;
 import ashes.of.bomber.atc.services.FlightService;
-import ashes.of.bomber.carrier.dto.FlightStartedDto;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -102,7 +102,7 @@ public class FlightController {
     }
 
     @Nullable
-    private FlightRecordDto toFlightRecord(@Nullable Flight.FlightRecord record) {
+    private FlightRecordDto toFlightRecord(@Nullable FlightRecord record) {
         if (record == null)
             return null;
 

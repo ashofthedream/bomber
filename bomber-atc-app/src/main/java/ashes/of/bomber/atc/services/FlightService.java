@@ -1,8 +1,7 @@
 package ashes.of.bomber.atc.services;
 
 import ashes.of.bomber.atc.model.Flight;
-import ashes.of.bomber.carrier.dto.ApplicationStateDto;
-import ashes.of.bomber.carrier.dto.FlightStartedDto;
+import ashes.of.bomber.atc.model.FlightData;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -37,7 +36,7 @@ public class FlightService {
         carrierService.getCarriers()
                 .flatMap(carrierService::status)
                 .subscribe(carrier -> {
-                    Flight.FlightData data = flight.getData(carrier.getId());
+                    FlightData data = flight.getData(carrier.getId());
                     data.add(carrier.getApp().getState());
                 });
     }

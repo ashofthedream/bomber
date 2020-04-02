@@ -10,12 +10,12 @@ import org.apache.logging.log4j.ThreadContext;
 
 import javax.annotation.Nullable;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 
@@ -26,19 +26,35 @@ public class TestApp implements BomberApp {
 
     private final String name;
     private final WorkerPool pool;
-    private final Environment environment;
+    private final Environment env;
     private final List<TestSuite<?>> suites;
 
     private volatile long flightId;
+
     @Nullable
     private volatile State state;
     private volatile CountDownLatch endLatch = new CountDownLatch(1);
 
-    public TestApp(String name, WorkerPool pool, Environment environment, List<TestSuite<?>> suites) {
+    public TestApp(String name, WorkerPool pool, Environment env, List<TestSuite<?>> suites) {
         this.name = name;
         this.pool = pool;
-        this.environment = environment;
+        this.env = env;
         this.suites = suites;
+    }
+
+    @Override
+    public long getFlightId() {
+        return flightId;
+    }
+
+    @Override
+    public void add(Sink sink) {
+        env.getSinks().add(sink);
+    }
+
+    @Override
+    public void add(long ms, Watcher watcher) {
+        env.getWatchers().add(new WatcherConfig(ms, TimeUnit.MILLISECONDS, watcher));
     }
 
     @Override
@@ -78,7 +94,7 @@ public class TestApp implements BomberApp {
 
         ScheduledExecutorService watcherEx = Executors.newSingleThreadScheduledExecutor();
 
-        environment.getWatchers()
+        env.getWatchers()
                 .forEach(config -> {
                     Watcher watcher = config.getWatcher();
                     watcherEx.scheduleAtFixedRate(() -> watcher.watch(this), 0, config.getPeriod(), config.getTimeUnit());
@@ -86,11 +102,11 @@ public class TestApp implements BomberApp {
 
         Instant startTime = Instant.now();
 
-        environment.getWatchers().stream()
+        env.getWatchers().stream()
                 .map(WatcherConfig::getWatcher)
                 .forEach(Watcher::startUp);
 
-        environment.getSinks()
+        env.getSinks()
                 .forEach(Sink::startUp);
 
 
@@ -101,10 +117,10 @@ public class TestApp implements BomberApp {
             log.error("unexpected throwable", th);
         }
 
-        environment.getSinks()
+        env.getSinks()
                 .forEach(Sink::shutDown);
 
-        environment.getWatchers().stream()
+        env.getWatchers().stream()
                 .map(WatcherConfig::getWatcher)
                 .forEach(Watcher::shutDown);
 

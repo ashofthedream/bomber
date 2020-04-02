@@ -25,9 +25,9 @@
                 <tr *ngFor="let record of data.records">
                     <td>{{data.carrierId}}</td>
                     <td>{{record.type}}</td>
-                    <td>{{record.state.stage}}</td>
-                    <td>{{record.state.testSuite}}</td>
-                    <td>{{record.state.testCase}}</td>
+                    <td>{{record.state?.stage}}</td>
+                    <td>{{record.testSuite}}</td>
+                    <td>{{record.testCase}}</td>
                     <td>
                         <p *ngIf="record.type == 'TEST_CASE_PROGRESS'">
                             <strong>Iterations:</strong> {{currentIterations(record.state)}} of {{record.state.settings.totalIterationsCount}}

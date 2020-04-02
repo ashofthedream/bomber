@@ -22,10 +22,10 @@ import java.net.URI;
 public class CarrierService {
     private static final Logger log = LogManager.getLogger();
 
-    private final ReactiveDiscoveryClient discoveryClient;
-
     private final WebClient webClient = WebClient.builder()
             .build();
+
+    private final ReactiveDiscoveryClient discoveryClient;
 
     public CarrierService(ReactiveDiscoveryClient discoveryClient) {
         this.discoveryClient = discoveryClient;
