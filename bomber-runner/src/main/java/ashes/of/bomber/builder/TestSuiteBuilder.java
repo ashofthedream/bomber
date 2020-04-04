@@ -5,12 +5,12 @@ import ashes.of.bomber.delayer.Delayer;
 import ashes.of.bomber.delayer.NoDelayDelayer;
 import ashes.of.bomber.limiter.Limiter;
 import ashes.of.bomber.methods.LifeCycleMethod;
+import ashes.of.bomber.methods.LifeCycleHolder;
 import ashes.of.bomber.methods.TestCaseMethodWithoutTools;
 import ashes.of.bomber.runner.*;
 import ashes.of.bomber.methods.TestCaseMethodWithTools;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -21,16 +21,18 @@ public class TestSuiteBuilder<T> {
     private Settings warmUp = new Settings()
             .disabled();
 
-    private final List<LifeCycleMethod<T>> beforeAll = new ArrayList<>();
-    private final List<LifeCycleMethod<T>> beforeEach = new ArrayList<>();
-    private final List<LifeCycleMethod<T>> afterEach = new ArrayList<>();
-    private final List<LifeCycleMethod<T>> afterAll = new ArrayList<>();
-
+    private final List<LifeCycleHolder<T>> beforeSuite = new ArrayList<>();
+    private final List<LifeCycleHolder<T>> beforeCase = new ArrayList<>();
+    private final List<LifeCycleHolder<T>> beforeEach = new ArrayList<>();
     private final Map<String, TestCase<T>> testCases = new LinkedHashMap<>();
+    private final List<LifeCycleHolder<T>> afterEach = new ArrayList<>();
+    private final List<LifeCycleHolder<T>> afterCase = new ArrayList<>();
+    private final List<LifeCycleHolder<T>> afterSuite = new ArrayList<>();
+
     private Delayer delayer = new NoDelayDelayer();
     private Supplier<Limiter> limiter = Limiter::alwaysPermit;
     private String name;
-    private Supplier<T> testSuite;
+    private Supplier<T> instance;
 
     public TestSuiteBuilder<T> name(String name) {
         this.name = name;
@@ -93,7 +95,7 @@ public class TestSuiteBuilder<T> {
 
     public TestSuiteBuilder<T> instance(Supplier<T> object) {
         Objects.requireNonNull(object, "suite is null");
-        this.testSuite = object;
+        this.instance = object;
         return this;
     }
 
@@ -103,15 +105,24 @@ public class TestSuiteBuilder<T> {
     }
 
 
-    public TestSuiteBuilder<T> beforeAll(boolean onlyOnce, LifeCycleMethod<T> before) {
-        beforeAll.add(onlyOnce ? onlyOnce(before) : before);
+    public TestSuiteBuilder<T> beforeSuite(boolean onlyOnce, LifeCycleMethod<T> before) {
+        beforeSuite.add(new LifeCycleHolder<>(onlyOnce, before));
         return this;
     }
 
-    public TestSuiteBuilder<T> beforeAll(LifeCycleMethod<T> before) {
-        return beforeAll(false, before);
+    public TestSuiteBuilder<T> beforeSuite(LifeCycleMethod<T> before) {
+        return beforeSuite(false, before);
     }
 
+    
+    public TestSuiteBuilder<T> beforeCase(boolean onlyOnce, LifeCycleMethod<T> before) {
+        beforeCase.add(new LifeCycleHolder<>(onlyOnce, before));
+        return this;
+    }
+
+    public TestSuiteBuilder<T> beforeCase(LifeCycleMethod<T> before) {
+        return beforeCase(false, before);
+    }
 
     /**
      * Adds method that will be invoked before each test invocation
@@ -120,13 +131,13 @@ public class TestSuiteBuilder<T> {
      * @return builder
      */
     public TestSuiteBuilder<T> beforeEach(LifeCycleMethod<T> before) {
-        beforeEach.add(before);
+        beforeEach.add(new LifeCycleHolder<>(false, before));
         return this;
     }
 
     TestSuiteBuilder<T> testCase(String name, boolean async, TestCaseMethodWithTools<T> test) {
         Objects.requireNonNull(name, "name is null");
-        this.testCases.put(name, new TestCase<>(name, async, test));
+        this.testCases.put(name, new TestCase<>(name, async, test, () -> warmUp, () -> settings));
         return this;
     }
 
@@ -159,43 +170,38 @@ public class TestSuiteBuilder<T> {
      * @return builder
      */
     public TestSuiteBuilder<T> afterEach(LifeCycleMethod<T> after) {
-        afterEach.add(after);
+        afterEach.add(new LifeCycleHolder<>(false, after));
         return this;
     }
 
-
-    public TestSuiteBuilder<T> afterAll(boolean onlyOnce, LifeCycleMethod<T> after) {
-        afterAll.add(onlyOnce ? onlyOnce(after) : after);
+    public TestSuiteBuilder<T> afterCase(boolean onlyOnce, LifeCycleMethod<T> after) {
+        afterCase.add(new LifeCycleHolder<>(onlyOnce, after));
         return this;
     }
 
-    public TestSuiteBuilder<T> afterAll(LifeCycleMethod<T> after) {
-        return afterAll(false, after);
+    public TestSuiteBuilder<T> afterCase(LifeCycleMethod<T> after) {
+        return afterCase(false, after);
+    }
+    
+    public TestSuiteBuilder<T> afterSuite(boolean onlyOnce, LifeCycleMethod<T> after) {
+        afterSuite.add(new LifeCycleHolder<>(onlyOnce, after));
+        return this;
+    }
+
+    public TestSuiteBuilder<T> afterSuite(LifeCycleMethod<T> after) {
+        return afterSuite(false, after);
     }
 
 
-    private LifeCycleMethod<T> onlyOnce(LifeCycleMethod<T> method) {
-        AtomicBoolean onlyOnceCheck = new AtomicBoolean();
-        return tc -> {
-            // first thread initializes the content, all other - wait for initialization
-            synchronized (onlyOnceCheck) {
-                if (onlyOnceCheck.compareAndSet(false, true))
-                    method.call(tc);
-            }
-        };
-    }
-
-
-    public TestSuite<T> build(WorkerPool pool, Environment app) {
+    public TestSuite<T> build(Environment app) {
         Objects.requireNonNull(name,     "name is null");
-        Objects.requireNonNull(testSuite, "testCase is null");
+        Objects.requireNonNull(instance, "instance is null");
         // todo it may be useful, but not today
         // Preconditions.checkArgument(!testCases.isEmpty(), "No test cases found");
 
         Environment env = new Environment(app.getSinks(), app.getWatchers(), () -> delayer, limiter, app.getBarrier());
-        LifeCycle<T> lifeCycle = new LifeCycle<>(testCases, testSuite, beforeEach, afterEach, afterAll, beforeAll);
 
-        return new TestSuite<>(pool, name, env, lifeCycle, settings, warmUp);
+        return new TestSuite<>(name, env, instance, beforeSuite, beforeCase, beforeEach, testCases, afterEach, afterCase, afterSuite, settings, warmUp);
     }
 }
 

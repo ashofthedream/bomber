@@ -57,23 +57,23 @@ public class ExampleBuilderTestApp {
         builder.name("UserController")
                 .limiter(Limiter.withRate(10, 1000))
                 .instance(() -> new UserControllerLoadTest(webClient))
-                .beforeAll(UserControllerLoadTest::beforeAll)
+                .beforeSuite(UserControllerLoadTest::beforeAll)
 //                .beforeEach(UserControllerLoadTest::beforeEach)
                 .testCase("getUsersBlock", UserControllerLoadTest::getUserByIdSync)
                 .asyncTestCase("getUsersAsync", UserControllerLoadTest::getUserByIdAsync)
 //                .afterEach(UserControllerLoadTest::afterEach)
-                .afterAll(UserControllerLoadTest::afterAll);
+                .afterSuite(UserControllerLoadTest::afterAll);
     }
 
     private static void createAccountControllerSuite(TestSuiteBuilder<AccountControllerLoadTest> builder, WebClient webClient) {
         builder.name("AccountController")
 
                 .instance(() -> new AccountControllerLoadTest(webClient))
-                .beforeAll(AccountControllerLoadTest::beforeAll)
+                .beforeSuite(AccountControllerLoadTest::beforeAll)
 //                .beforeEach(UserControllerLoadTest::beforeEach)
                 .testCase("getUsersBlock", AccountControllerLoadTest::getAccountByIdSync)
                 .asyncTestCase("getUsersAsync", AccountControllerLoadTest::getAccountByIdAsync)
 //                .afterEach(UserControllerLoadTest::afterEach)
-                .afterAll(AccountControllerLoadTest::afterAll);
+                .afterSuite(AccountControllerLoadTest::afterAll);
     }
 }

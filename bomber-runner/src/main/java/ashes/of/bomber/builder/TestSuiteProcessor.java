@@ -78,12 +78,16 @@ public class TestSuiteProcessor<T> {
             if (Modifier.isStatic(modifiers) || !Modifier.isPublic(modifiers))
                 continue;
 
-            log.debug("process suite: {} method: {}", cls, method.getName());
+            log.trace("process suite: {} method: {}", cls, method.getName());
             try {
-                BeforeAll beforeAll = method.getAnnotation(BeforeAll.class);
-                if (beforeAll != null)
-                    buildBeforeAll(method, beforeAll);
-
+                BeforeTestSuite beforeSuite = method.getAnnotation(BeforeTestSuite.class);
+                if (beforeSuite != null)
+                    buildBeforeSuite(method, beforeSuite);
+                
+                BeforeTestCase beforeCase = method.getAnnotation(BeforeTestCase.class);
+                if (beforeCase != null)
+                    buildBeforeCase(method, beforeCase);
+                
                 BeforeEach beforeEach = method.getAnnotation(BeforeEach.class);
                 if (beforeEach != null)
                     buildBeforeEach(method, beforeEach);
@@ -96,9 +100,13 @@ public class TestSuiteProcessor<T> {
                 if (afterEach != null)
                     buildAfterEach(method, afterEach);
 
-                AfterAll afterAll = method.getAnnotation(AfterAll.class);
-                if (afterAll != null)
-                    buildAfterAll(method, afterAll);
+                AfterTestCase afterCase = method.getAnnotation(AfterTestCase.class);
+                if (afterCase != null)
+                    buildAfterCase(method, afterCase);
+                
+                AfterTestSuite afterSuite = method.getAnnotation(AfterTestSuite.class);
+                if (afterSuite != null)
+                    buildAfterSuite(method, afterSuite);
 
             } catch (Exception e) {
                 log.warn("Can't mh method: {}", method.getName(), e);
@@ -125,22 +133,28 @@ public class TestSuiteProcessor<T> {
     }
 
 
-    private void buildBeforeAll(Method method, BeforeAll beforeAll) throws Exception {
-        log.trace("Found beforeAll method: {}", method.getName());
+    private void buildBeforeSuite(Method method, BeforeTestSuite beforeAll) throws Exception {
+        log.debug("Found @BeforeTestSuite method: {}", method.getName());
         MethodHandle mh = MethodHandles.lookup().unreflect(method);
-        b.beforeAll(beforeAll.onlyOnce(), testCase -> mh.bindTo(testCase).invoke());
+        b.beforeSuite(beforeAll.onlyOnce(), instance -> mh.bindTo(instance).invoke());
     }
 
-    private void buildBeforeEach(Method method, BeforeEach beforeEach) throws Exception {
-        log.trace("Found beforeEach method: {}", method.getName());
+    private void buildBeforeCase(Method method, BeforeTestCase beforeAll) throws Exception {
+        log.debug("Found @BeforeTestCase method: {}", method.getName());
         MethodHandle mh = MethodHandles.lookup().unreflect(method);
-        b.beforeEach(testCase -> mh.bindTo(testCase).invoke());
+        b.beforeCase(beforeAll.onlyOnce(), instance -> mh.bindTo(instance).invoke());
+    }
+    
+    private void buildBeforeEach(Method method, BeforeEach beforeEach) throws Exception {
+        log.debug("Found #BeforeEach method: {}", method.getName());
+        MethodHandle mh = MethodHandles.lookup().unreflect(method);
+        b.beforeEach(instance -> mh.bindTo(instance).invoke());
     }
 
     private void buildTestCase(Method method, LoadTestCase loadTest) throws Exception {
         String value = loadTest.value();
         String name = !value.isEmpty() ? value : method.getName();
-        log.trace("Found test method: {}, name: {}, disabled: {}", method.getName(), name, loadTest.disabled());
+        log.debug("Found @LoadTestCase method: {}, name: {}, disabled: {}", method.getName(), name, loadTest.disabled());
 
         if (loadTest.disabled())
             return;
@@ -184,14 +198,20 @@ public class TestSuiteProcessor<T> {
     }
 
     private void buildAfterEach(Method method, AfterEach afterEach) throws Exception {
-        log.debug("Found afterEach method: {}", method.getName());
+        log.debug("Found @AfterEach method: {}", method.getName());
         MethodHandle mh = MethodHandles.lookup().unreflect(method);
-        b.afterEach(suite -> mh.bindTo(suite).invoke());
+        b.afterEach(instance -> mh.bindTo(instance).invoke());
     }
 
-    private void buildAfterAll(Method method, AfterAll afterAll) throws Exception {
-        log.debug("Found afterAll method: {}", method.getName());
+    private void buildAfterCase(Method method, AfterTestCase afterAll) throws Exception {
+        log.debug("Found @AfterTestCase method: {}", method.getName());
         MethodHandle mh = MethodHandles.lookup().unreflect(method);
-        b.afterAll(afterAll.onlyOnce(), suite -> mh.bindTo(suite).invoke());
+        b.afterCase(afterAll.onlyOnce(), instance -> mh.bindTo(instance).invoke());
+    }
+
+    private void buildAfterSuite(Method method, AfterTestSuite afterAll) throws Exception {
+        log.debug("Found @AfterTestSuite method: {}", method.getName());
+        MethodHandle mh = MethodHandles.lookup().unreflect(method);
+        b.afterSuite(afterAll.onlyOnce(), instance -> mh.bindTo(instance).invoke());
     }
 }

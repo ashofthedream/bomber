@@ -38,7 +38,7 @@ public class ApplicationController {
     @PostMapping("/start")
     public ResponseEntity<FlightStartedDto> start(@RequestBody StartFlightRequest start) {
         log.info("start all applications");
-        app.startAsync(start.getId());
+        app.startAsync(app.createDefaultPlan(start.getId()));
 
         return ResponseEntity.ok(FlightStartedDto.builder()
                 .id(start.getId())

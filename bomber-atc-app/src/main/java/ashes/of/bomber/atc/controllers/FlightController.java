@@ -48,7 +48,7 @@ public class FlightController {
         return flightService.getActive()
                 .map(this::toFlight);
     }
-
+// start with flight plan
     @PostMapping("/start")
     public Mono<FlightsStartedDto> start() {
         log.debug("start all flights on all active carriers");

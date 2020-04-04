@@ -23,8 +23,8 @@ public class MultiSink implements Sink {
     }
 
     @Override
-    public void beforeTestSuite(Stage stage, String testSuite, Instant timestamp, Settings settings) {
-        sinks.forEach(sink -> sink.beforeTestSuite(stage, testSuite, timestamp, settings));
+    public void beforeTestSuite(String testSuite, Instant timestamp) {
+        sinks.forEach(sink -> sink.beforeTestSuite(testSuite, timestamp));
     }
 
     @Override
@@ -48,8 +48,8 @@ public class MultiSink implements Sink {
     }
 
     @Override
-    public void afterTestSuite(Stage stage, String testSuite) {
-        sinks.forEach(sink -> sink.afterTestSuite(stage, testSuite));
+    public void afterTestSuite(String testSuite) {
+        sinks.forEach(sink -> sink.afterTestSuite(testSuite));
     }
 
     @Override

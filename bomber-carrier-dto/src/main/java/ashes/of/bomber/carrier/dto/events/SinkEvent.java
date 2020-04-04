@@ -17,6 +17,8 @@ public class SinkEvent {
     private long flightId;
     private String carrierId;
 
+    private String stage;
+
     @Nullable
     private String testSuite;
 

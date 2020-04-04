@@ -8,39 +8,48 @@
     </nz-page-header>
 </div>
 
-<div>
-    <nz-table [nzData]="carriers" nzSize="small">
-        <thead>
-        <tr>
-            <th></th>
-            <th>Carrier</th>
-            <th>Application</th>
-            <th>Test Suites</th>
-            <th>Actions</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr *ngFor="let carrier of carriers">
-            <td></td>
-            <td>
-                {{carrier.id}}<br/>
-                <a>{{carrier.uri}}</a>
-            </td>
-            <td>
-                <carriers-app-label [app]="carrier.app"></carriers-app-label>
-            </td>
-            <td>
-                <p *ngFor="let testSuite of carrier.app.testSuites">
-                    <strong>{{testSuite.name}}</strong> — <span *ngFor="let testCase of testSuite.testCases">{{testCase.name}} </span>
+<div nz-row [nzGutter]="20">
+    <div nz-col nzSpan="6">
+        <nz-card nzTitle="Applications">
+            <nz-tree [nzData]="tree" (nzClick)="select($event.node.origin)" nzCheckable></nz-tree>
+
+            <div *ngIf="selected">
+                <strong>{{selected.title}}</strong>
+                <p *ngFor="let carrier of selected.carriers">
+                    {{carrier.id}}
                 </p>
-            </td>
-            <td>
-                <a (click)="start(carrier)">Start</a>
-                <nz-divider nzType="vertical"></nz-divider>
-                <a (click)="stop(carrier)">Stop</a>
-                <nz-divider nzType="vertical"></nz-divider>
-            </td>
-        </tr>
-        </tbody>
-    </nz-table>
+            </div>
+        </nz-card>
+    </div>
+    <div nz-col nzSpan="18">
+        <nz-table [nzData]="carriers" nzSize="small" [nzShowPagination]="false">
+            <thead>
+            <tr>
+                <th></th>
+                <th>Carrier</th>
+                <th>Application</th>
+                <th>Test Suites</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let carrier of carriers">
+                <td [nzShowCheckbox]="true" [(nzChecked)]="carrier.selected"></td>
+                <td>
+                    {{carrier.id}}<br/>
+                    <a>{{carrier.uri}}</a>
+                </td>
+                <td>
+                    <carriers-app-label [app]="carrier.app"></carriers-app-label>
+                </td>
+                <td>
+                    <p *ngFor="let testSuite of carrier.app.testSuites">
+                        <strong>{{testSuite.name}}</strong> — <span *ngFor="let testCase of testSuite.testCases">{{testCase.name}} </span>
+                    </p>
+                </td>
+            </tr>
+            </tbody>
+        </nz-table>
+    </div>
 </div>
+
+

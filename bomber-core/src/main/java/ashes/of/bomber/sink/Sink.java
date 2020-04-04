@@ -19,12 +19,10 @@ public interface Sink {
     /**
      * Invokes before all test cases in suite
      *
-     * @param stage     stage
      * @param testSuite test suite name
      * @param timestamp stage start time
-     * @param settings  stage settings
      */
-    default void beforeTestSuite(Stage stage, String testSuite, Instant timestamp, Settings settings) {}
+    default void beforeTestSuite(String testSuite, Instant timestamp) {}
 
     /**
      * Invokes before test case run
@@ -65,10 +63,9 @@ public interface Sink {
     /**
      * Invokes after all tests in test suite
      *
-     * @param stage     stage
      * @param testSuite test suite name
      */
-    default void afterTestSuite(Stage stage, String testSuite) {}
+    default void afterTestSuite(String testSuite) {}
 
     /**
      * Invokes then app

@@ -4,7 +4,7 @@ package ashes.of.bomber.methods;
 public interface LifeCycleMethod<T> {
 
     /**
-     * One of lifecycle (BeforeAll, BeforeEach, AfterEach, AfterAll) method
+     * One of lifecycle method
      */
-    void call(T object) throws Throwable;
+    void call(T instance) throws Throwable;
 }

@@ -11,7 +11,7 @@ import org.apache.logging.log4j.ThreadContext;
 import javax.annotation.Nullable;
 import java.time.Instant;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -22,29 +22,28 @@ import java.util.stream.Collectors;
 public class TestApp implements BomberApp {
     private static final Logger log = LogManager.getLogger();
 
-    private static final State REST = new State(Stage.Idle, new Settings().disabled(), "", () -> false);
+    private static final State IDLE = new State(() -> true);
 
     private final String name;
     private final WorkerPool pool;
     private final Environment env;
-    private final List<TestSuite<?>> suites;
+    private final List<TestSuite<?>> testSuites;
 
-    private volatile long flightId;
+    private volatile Plan plan;
 
-    @Nullable
     private volatile State state;
     private volatile CountDownLatch endLatch = new CountDownLatch(1);
 
-    public TestApp(String name, WorkerPool pool, Environment env, List<TestSuite<?>> suites) {
+    public TestApp(String name, WorkerPool pool, Environment env, List<TestSuite<?>> testSuites) {
         this.name = name;
         this.pool = pool;
         this.env = env;
-        this.suites = suites;
+        this.testSuites = testSuites;
     }
 
     @Override
-    public long getFlightId() {
-        return flightId;
+    public Plan getPlan() {
+        return plan;
     }
 
     @Override
@@ -59,8 +58,7 @@ public class TestApp implements BomberApp {
 
     @Override
     public StateModel getState() {
-        State state = Optional.ofNullable(this.state)
-                .orElse(REST);
+        State state = this.state;
 
         List<WorkerStateModel> workerStates = pool.getAcquired().stream()
                 .map(worker -> {
@@ -82,15 +80,16 @@ public class TestApp implements BomberApp {
     }
 
     @Override
-    public Report start(long flightId) {
+    public Report start(Plan plan) {
+        this.plan = plan;
         ThreadContext.put("bomberApp", name);
-        ThreadContext.put("flightId", String.valueOf(flightId));
+        ThreadContext.put("flightId", String.valueOf(plan.getId()));
 
-        List<String> testSuiteNames = suites.stream()
+        List<String> testSuiteNames = plan.getTestSuites().stream()
                 .map(testSuite -> String.format("%s %s", testSuite.getName(), testSuite.getTestCases()))
                 .collect(Collectors.toList());
 
-        log.info("start flight: {} of  test app with {} suites: {}", flightId, suites.size(), testSuiteNames);
+        log.info("start flight: {} of test app with {} suites: {}", plan.getId(), plan.getTestSuites().size(), testSuiteNames);
 
         ScheduledExecutorService watcherEx = Executors.newSingleThreadScheduledExecutor();
 
@@ -111,8 +110,21 @@ public class TestApp implements BomberApp {
 
 
         try {
-            suites.forEach(suite -> suite.run(this));
-            state = null;
+            Runner runner = new Runner(pool, env.getSinks());
+
+            Map<String, TestSuite> suitesByName = testSuites.stream()
+                    .collect(Collectors.toMap(TestSuite::getName, suite -> suite));
+
+            plan.getTestSuites()
+                    .forEach(planned -> {
+                        TestSuite testSuite = suitesByName.get(planned.getName());
+
+                        State state = new State(this::isStop);
+                        this.state = state;
+                        runner.startTestCase(testSuite.getEnv(), state, testSuite, planned.getTestCases());
+                    });
+
+            state = IDLE;
         } catch (Throwable th) {
             log.error("unexpected throwable", th);
         }
@@ -132,7 +144,7 @@ public class TestApp implements BomberApp {
         pool.shutdown();
 
         ThreadContext.clearAll();
-        return new Report(startTime, finishTime);
+        return new Report(plan, startTime, finishTime);
     }
 
     @Override
@@ -153,7 +165,7 @@ public class TestApp implements BomberApp {
 
     @Override
     public List<TestSuiteModel> getTestSuites() {
-        return suites.stream()
+        return testSuites.stream()
                 .map(this::toTestSuite)
                 .collect(Collectors.toList());
     }

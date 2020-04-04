@@ -21,12 +21,12 @@ public class AccountControllerLoadTest {
         this.webClient = webClient;
     }
 
-    @BeforeAll(onlyOnce = true)
+    @BeforeTestSuite(onlyOnce = true)
     public void beforeAll() {
         log.info("This method will be invoked before all test");
     }
 
-    @AfterAll
+    @AfterTestSuite
     public void afterAll() {
         log.info("This method will be invoked after all test");
     }

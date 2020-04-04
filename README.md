@@ -8,38 +8,29 @@
 public class ExampleTest {
     private ExampleHttpClient client;
 
-    @BeforeAll
-    public void beforeAll() throws Exception {
+    @BeforeTestSuite
+    public void beforeSuite() throws Exception {
         // This method will be invoked once in each thread before all test methods
         client = new ExampleHttpClient("localhost", 8080);
     }
 
+    @BeforeTestCase
+    public void beforeCase() throws Exception {
+        // This method will be invoked every time before each test case
+    }
+
     @BeforeEach
     public void beforeTest() throws Exception {
-        // This method will be invoked every time before each test method
-    }
-
-    @AfterEach
-    public void afterTest() throws Exception {
-        // This method will be invoked every time after each test method
-    }
-
-    @AfterAll
-    public void afterAll() {
-        // This method will be invoked once in each thread after all test methods
+        // This method will be invoked every time before each test case iteration
     }
 
     @LoadTestCase
-    public void oneSlowRequest() throws Exception {
+    public void firstSyncTestCase() throws Exception {
         client.someSlowRequest();
     }
 
     @LoadTestCase(async = true)
-    public void twoFastRequests(Tools tools) throws Exception {
-        Stopwatch fast = tools.stopwatch("someFast");
-        client.someFastRequest();
-        sw.success();
-
+    public void secondAsyncTestCase(Tools tools) throws Exception {
         Stopwatch async = tools.stopwatch("async");
         for (int i = 0; i < 3; i++) {            
             client.asyncRequest()
@@ -53,6 +44,20 @@ public class ExampleTest {
         }
     }
 
+    @AfterEach
+    public void afterTest() throws Exception {
+        // This method will be invoked every time after each test case iteration
+    }
+
+    @AfterTestCase
+    public void afterCase() {
+        // This method will be invoked once in each thread after each test case
+    }
+
+    @AfterTestSuite
+    public void afterSuite() {
+        // This method will be invoked once in each thread after all test methods
+    }
 
     public static void main(String... args) {
         Report report = new TestAppBuilder()

@@ -39,8 +39,8 @@ public class AsyncSink implements Sink {
     }
 
     @Override
-    public void beforeTestSuite(Stage stage, String testSuite, Instant timestamp, Settings settings) {
-        ex.execute(() -> sink.beforeTestSuite(stage, testSuite, timestamp, settings));
+    public void beforeTestSuite(String testSuite, Instant timestamp) {
+        ex.execute(() -> sink.beforeTestSuite(testSuite, timestamp));
     }
 
     @Override
@@ -64,8 +64,8 @@ public class AsyncSink implements Sink {
     }
 
     @Override
-    public void afterTestSuite(Stage stage, String testSuite) {
-        ex.execute(() -> sink.afterTestSuite(stage, testSuite));
+    public void afterTestSuite(String testSuite) {
+        ex.execute(() -> sink.afterTestSuite(testSuite));
     }
 
     @Override

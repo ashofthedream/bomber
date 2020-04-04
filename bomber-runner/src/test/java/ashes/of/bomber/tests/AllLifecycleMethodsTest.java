@@ -1,61 +1,94 @@
 package ashes.of.bomber.tests;
 
 import ashes.of.bomber.annotations.*;
-import ashes.of.bomber.stopwatch.Tools;
 import ashes.of.bomber.stopwatch.Stopwatch;
+import ashes.of.bomber.stopwatch.Tools;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import java.util.concurrent.atomic.AtomicInteger;
 
 @LoadTestSuite(name = "lifecycleAll")
 @LoadTest(time = 20, threadIterations = 10, threads = 2)
 public class AllLifecycleMethodsTest {
     private static final Logger log = LogManager.getLogger();
 
-    public final AtomicInteger beforeAll = new AtomicInteger();
-    public final AtomicInteger beforeEach = new AtomicInteger();
-    public final AtomicInteger testA = new AtomicInteger();
-    public final AtomicInteger testB = new AtomicInteger();
-    public final AtomicInteger afterEach = new AtomicInteger();
-    public final AtomicInteger afterAll = new AtomicInteger();
+    public final Counters counters;
 
-
-    @BeforeAll
-    public void beforeAll() {
-        log.info("This method will be invoked before all the tests in each thread");
-        beforeAll.incrementAndGet();
+    public AllLifecycleMethodsTest(Counters counters) {
+        this.counters = counters;
+        this.counters.init.incrementAndGet();
     }
 
-    @AfterAll
-    public void afterAll() {
-        log.debug("This method will be invoked after all the tests in each thread");
-        afterAll.incrementAndGet();
+    @BeforeTestSuite
+    public void beforeSuite() {
+        log.info("beforeSuite should be invoked before all the tests in each thread");
+        counters.beforeSuite.incrementAndGet();
+    }
+
+    @BeforeTestSuite(onlyOnce = true)
+    public void beforeSuiteOnlyOnce() {
+        log.info("beforeSuiteOnlyOnce should be invoked before all the tests only once");
+        counters.beforeSuiteOnce.incrementAndGet();
+    }
+
+    @BeforeTestCase
+    public void beforeCase() {
+        log.info("beforeCase should be invoked once before test case in each thread");
+        counters.beforeCase.incrementAndGet();
+    }
+
+    @BeforeTestCase(onlyOnce = true)
+    public void beforeCaseOnlyOnce() {
+        log.info("beforeCaseOnlyOnce should be invoked before test case only once");
+        counters.beforeCaseOnce.incrementAndGet();
     }
 
     @BeforeEach
     public void beforeEach() {
-        log.trace("This method will be invoked before each test invocation");
-        beforeEach.incrementAndGet();
-    }
-
-    @AfterEach
-    public void afterEach() {
-        log.trace("This method will be invoked after each test invocation");
-        afterEach.incrementAndGet();
+        log.trace("beforeEach should be invoked before each test invocation");
+        counters.beforeEach.incrementAndGet();
     }
 
     @LoadTestCase
     public void testA() {
         log.trace("testA");
-        testA.incrementAndGet();
+        counters.testA.incrementAndGet();
     }
 
-    @LoadTestCase
+    @LoadTestCase(async = true)
     public void testB(Tools tools) {
-        Stopwatch stopwatch = tools.stopwatch("testB-stopwatch-1");
         log.trace("testB");
+        Stopwatch stopwatch = tools.stopwatch("testB");
         stopwatch.success();
-        testB.incrementAndGet();
+        counters.testB.incrementAndGet();
+    }
+
+    @AfterEach
+    public void afterEach() {
+        log.trace("afterEach should be invoked after each test invocation");
+        counters.afterEach.incrementAndGet();
+    }
+
+    @AfterTestCase
+    public void afterCase() {
+        log.info("afterCase should be invoked after all test case in each thread");
+        counters.afterCase.incrementAndGet();
+    }
+
+    @AfterTestCase(onlyOnce = true)
+    public void afterCaseOnlyOnce() {
+        log.info("afterCaseOnlyOnce should be invoked after test case only once");
+        counters.afterCaseOnce.incrementAndGet();
+    }
+
+    @AfterTestSuite
+    public void afterSuite() {
+        log.info("afterSuite should be invoked after all the tests in each thread");
+        counters.afterSuite.incrementAndGet();
+    }
+
+    @AfterTestSuite(onlyOnce = true)
+    public void afterSuiteOnlyOnce() {
+        log.info("afterSuiteOnlyOnce should be invoked after all the tests only once");
+        counters.afterSuiteOnce.incrementAndGet();
     }
 }

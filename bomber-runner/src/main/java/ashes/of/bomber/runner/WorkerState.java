@@ -17,9 +17,9 @@ public class WorkerState {
     private final AtomicLong remainItCount = new AtomicLong();
     private final LongAdder errorCount = new LongAdder();
 
-    public WorkerState(Settings settings, State state) {
-        this.settings = settings;
+    public WorkerState(State state, Settings settings) {
         this.state = state;
+        this.settings = settings;
     }
 
     public long nextItNumber() {
@@ -51,9 +51,9 @@ public class WorkerState {
         return state.getTestCaseStartTime();
     }
 
-    public void startCaseIfNotStarted(String name) {
+    public void startCaseIfNotStarted(String name, Stage stage, Settings settings) {
         remainItCount.set(settings.getThreadIterationsCount());
-        state.startCaseIfNotStarted(name);
+        state.startCaseIfNotStarted(name, stage, settings);
     }
 
     public void finishCase() {

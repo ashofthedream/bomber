@@ -23,12 +23,12 @@ public class UserControllerLoadTest {
         this.webClient = webClient;
     }
 
-    @BeforeAll
+    @BeforeTestSuite
     public void beforeAll() {
         log.info("This method will be invoked before all test");
     }
 
-    @AfterAll
+    @AfterTestSuite
     public void afterAll() {
         log.info("This method will be invoked after all test");
     }

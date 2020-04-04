@@ -8,7 +8,7 @@ import java.lang.annotation.*;
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
-public @interface AfterAll {
+public @interface AfterTestSuite {
 
     /**
      * Indicates that this method should be invoked only once for all the threads

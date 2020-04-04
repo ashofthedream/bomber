@@ -24,7 +24,7 @@ public class WorkerPool {
     }
 
     public WorkerPool() {
-        this(1);
+        this(0);
     }
 
     private static void uncaughtExceptionHandler(Thread t, Throwable e) {

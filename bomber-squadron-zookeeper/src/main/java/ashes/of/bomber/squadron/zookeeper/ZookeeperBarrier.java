@@ -1,6 +1,5 @@
 package ashes.of.bomber.squadron.zookeeper;
 
-import ashes.of.bomber.core.Settings;
 import ashes.of.bomber.squadron.Barrier;
 import ashes.of.bomber.core.Stage;
 import org.apache.curator.framework.CuratorFramework;
@@ -30,19 +29,6 @@ public class ZookeeperBarrier implements Barrier {
         this.cf = cf;
         this.members = members;
         this.awaitTime = awaitTime;
-    }
-
-    @Override
-    public void enterSuite(Stage stage, String testSuite, Settings settings) {
-//        byte[] data = String.format("{\"testSuite\": \"%s\"}", testSuite).getBytes();
-//        try {
-//            log.trace("enterSuite testSuite: {}", testSuite);
-//            PersistentNode node = new PersistentNode(cf, CreateMode.EPHEMERAL, false, "/bomber/barriers/" + testSuite, data);
-//            node.start();
-//            this.node = node;
-//        } catch (Exception e) {
-//            log.error("Can't init", e);
-//        }
     }
 
     @Override

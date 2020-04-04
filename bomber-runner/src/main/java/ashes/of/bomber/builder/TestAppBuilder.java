@@ -216,7 +216,7 @@ public class TestAppBuilder {
 
         return testSuite(cls, () -> {
             try {
-                log.debug("create test suite class");
+                log.warn("create test suite instance: {}", cls);
                 ProviderBuilder.Context context = b.build();
                 Constructor<?> selected = null;
 
@@ -295,7 +295,7 @@ public class TestAppBuilder {
         WorkerPool pool = new WorkerPool();
         Environment env = new Environment(sinks, watchers, () -> delayer, limiter, barrier);
         List<TestSuite<?>> suites = this.suites.stream()
-                .map(b -> b.build(pool, env))
+                .map(b -> b.build(env))
                 .collect(Collectors.toList());
 
         return new TestApp(name, pool, env, suites);

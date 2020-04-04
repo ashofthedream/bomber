@@ -12,9 +12,11 @@ import java.util.function.BooleanSupplier;
 
 public class State {
 
-    private final Stage stage;
-    private final Settings settings;
-    private final String testSuite;
+    private volatile Stage stage = Stage.Idle;
+    private volatile Settings settings;
+
+    @Nullable
+    private volatile String testSuite;
 
     @Nullable
     private volatile String testCase;
@@ -27,13 +29,11 @@ public class State {
 
     private final BooleanSupplier shutdown;
 
-    public State(Stage stage, Settings settings, String testSuite, BooleanSupplier shutdown) {
-        this.stage = stage;
-        this.settings = settings;
-        this.testSuite = testSuite;
+    public State(BooleanSupplier shutdown) {
         this.shutdown = shutdown;
     }
 
+    @Nullable
     public String getTestSuite() {
         return testSuite;
     }
@@ -63,27 +63,37 @@ public class State {
         return !testSuiteStartTime.equals(Instant.EPOCH);
     }
 
-    public void startSuiteIfNotStarted() {
+    public void startSuiteIfNotStarted(String name) {
         if (!isSuiteStated()) {
+            testSuite = name;
             testSuiteStartTime = Instant.now();
         }
+    }
+
+    public void finishSuite() {
+        testSuite = "";
+        finishCase();
     }
 
     public boolean isCaseStated() {
         return !testCaseStartTime.equals(Instant.EPOCH);
     }
 
-    public void startCaseIfNotStarted(String name) {
+    public void startCaseIfNotStarted(String testCase, Stage stage, Settings settings) {
         if (!isCaseStated()) {
-            testCase = name;
-            testCaseStartTime = Instant.now();
-            remainItCount.set(settings.getTotalIterationsCount());
+            this.testCase = testCase;
+            this.stage = stage;
+            this.settings = settings;
+            this.testCaseStartTime = Instant.now();
+            this.remainItCount.set(settings.getTotalIterationsCount());
         }
     }
 
     public void finishCase() {
+        testCase = "";
+        stage = Stage.Idle;
+        settings = new Settings().disabled();
         testCaseStartTime = Instant.EPOCH;
-        testCase = null;
     }
 
 

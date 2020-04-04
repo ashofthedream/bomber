@@ -2,6 +2,7 @@ package ashes.of.bomber.runner;
 
 import ashes.of.bomber.core.Iteration;
 import ashes.of.bomber.core.Settings;
+import ashes.of.bomber.core.Stage;
 import ashes.of.bomber.delayer.Delayer;
 import ashes.of.bomber.limiter.Limiter;
 import ashes.of.bomber.sink.Sink;
@@ -12,6 +13,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 
+import javax.annotation.Nullable;
 import java.time.Instant;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
@@ -26,13 +28,9 @@ public class Worker {
     private final Thread thread;
 
     private volatile WorkerState state;
-    private volatile Settings settings;
-    private volatile CountDownLatch startLatch;
-    private volatile CountDownLatch endLatch;
-    private volatile Barrier barrier;
-    private volatile Environment env;
-    private volatile Sink sink;
 
+    @Nullable
+    private volatile Object instance;
 
     public Worker(BlockingQueue<Runnable> queue, Thread thread) {
         this.queue = queue;
@@ -41,29 +39,6 @@ public class Worker {
 
     public WorkerState getState() {
         return state;
-    }
-
-    public <T> void run(State state, Settings settings, CountDownLatch begin, CountDownLatch end, Barrier barrier, Environment env, Sink sink, LifeCycle<T> lifeCycle) {
-        this.state = new WorkerState(settings, state);
-        this.settings = settings;
-        this.startLatch = begin;
-        this.endLatch = end;
-        this.barrier = barrier;
-        this.env = env;
-        this.sink = sink;
-
-        run(() -> runTestSuite(lifeCycle));
-    }
-
-    private void run(Runnable task) {
-        // a bit of busy-wait here, todo investigate
-        for (int i = 0; i < 10000; i++) {
-            boolean success = queue.offer(task);
-            if (success)
-                return;
-        }
-
-        throw new RuntimeException("Hey, you can't run task on " + thread.getName() + ". It's terrible situation and should be fixed");
     }
 
     public String getName() {
@@ -79,47 +54,53 @@ public class Worker {
     }
 
 
-    private <T> void runTestSuite(LifeCycle<T> lifeCycle) {
-        ThreadContext.put("stage", state.getStage().name());
-        ThreadContext.put("testSuite", state.getTestSuite());
-        log.debug("run test suite");
-        try {
-            T instance = lifeCycle.instance();
-
-            startLatch.countDown();
-
-            log.trace("await start");
-            if (!startLatch.await(60, SECONDS))
-                log.warn("after 60s of waiting, worker started without all other workers (this isn't acceptable situation)");
-
-            lifeCycle.beforeAll(instance);
-            lifeCycle.testCases()
-                    .forEach((name, testCase) -> runTestCase(instance, testCase, lifeCycle));
-            lifeCycle.afterAll(instance);
-
-        } catch (Throwable th) {
-            log.warn("run test suite failed", th);
+    private void run(Runnable task) {
+        // a bit of busy-wait here, todo investigate
+        for (int i = 0; i < 10000; i++) {
+            boolean success = queue.offer(task);
+            if (success)
+                return;
         }
 
-        log.debug("finish test suite");
-        endLatch.countDown();
-        ThreadContext.clearAll();
+        throw new RuntimeException("Hey, you can't run task on " + thread.getName() + ". It's terrible situation and should be fixed");
     }
 
+    public void runTestCase(TestSuite<Object> testSuite, TestCase<Object> testCase, Stage stage, Settings settings, State state,
+                                CountDownLatch startLatch, CountDownLatch endLatch, Environment env, Sink sink, Barrier barrier) {
+        this.state = new WorkerState(state, settings);
+        run(() -> runTestCase(testSuite, testCase, stage, settings, this.state, startLatch, endLatch, env, sink, barrier));
+    }
 
-    private <T> void runTestCase(T instance, TestCase<T> testCase, LifeCycle<T> lifeCycle) {
+    private void runTestCase(TestSuite<Object> testSuite, TestCase<Object> testCase, Stage stage, Settings settings, WorkerState state,
+                                 CountDownLatch startLatch, CountDownLatch endLatch,
+                                 Environment env, Sink sink, Barrier barrier) {
+
+        ThreadContext.put("testSuite", testSuite.getName());
+        ThreadContext.put("testCase", testCase.getName());
+        ThreadContext.put("stage", stage.name());
+
         Limiter limiter = env.getLimiter().get();
         Delayer delayer = env.getDelayer().get();
 
-        ThreadContext.put("testCase", testCase.getName());
+        startLatch.countDown();
+        try {
+            log.trace("Await start testCase: {}", testCase.getName());
+            if (!startLatch.await(60, SECONDS))
+                log.warn("After 60s of waiting, worker started without all other workers (this isn't acceptable situation)");
+
+        } catch (Throwable th) {
+            log.warn("Run testCase: {} failed", testCase.getName(), th);
+        }
+
         String threadName = Thread.currentThread().getName();
 
+        testSuite.beforeCase(instance);
 
-        log.trace("run test case, enter");
-        barrier.enterCase(state.getStage(), state.getTestSuite(), testCase.getName());
-        state.startCaseIfNotStarted(testCase.getName());
-        sink.beforeTestCase(state.getStage(), state.getTestSuite(), testCase.getName(), state.getTestCaseStartTime(), settings);
-        log.debug("run test case");
+        log.trace("Try start testCase: {} -> barrier enter", testCase.getName());
+        barrier.enterCase(stage, testSuite.getName(), testCase.getName());
+        state.startCaseIfNotStarted(testCase.getName(), stage, settings);
+        sink.beforeTestCase(stage, testSuite.getName(), testCase.getName(), state.getTestCaseStartTime(), settings);
+        log.debug("Start testCase: {}", testCase.getName());
 
         BooleanSupplier checker = state.createChecker();
         while (checker.getAsBoolean()) {
@@ -128,9 +109,9 @@ public class Worker {
             if (!limiter.waitForPermit())
                 throw new RuntimeException("Limiter await failed");
 
-            Iteration it = new Iteration(state.nextItNumber(), state.getStage(), threadName, Instant.now(), state.getTestSuite(), testCase.getName());
+            Iteration it = new Iteration(state.nextItNumber(), stage, threadName, Instant.now(), testSuite.getName(), testCase.getName());
 
-            lifeCycle.beforeEach(it, instance);
+            testSuite.beforeEach(it, instance);
 
             Tools tools = new Tools(it, record -> {
                 sink.timeRecorded(record);
@@ -142,7 +123,7 @@ public class Worker {
             Stopwatch stopwatch = tools.stopwatch("");
             try {
                 // test
-                testCase.getMethod().run(instance, tools);
+                testCase.run(instance, tools);
 
                 if (!testCase.isAsync())
                     stopwatch.success();
@@ -153,17 +134,39 @@ public class Worker {
                     stopwatch.fail(th);
 
                 sink.afterEach(it, stopwatch.elapsed(), th);
-                log.trace("{} | runTestCase failed, it: {}", state, it, th);
+                log.trace("Call testCase: {} failed, it: {}", testCase.getName(), it, th);
             }
 
-            lifeCycle.afterEach(it, instance);
+            testSuite.afterEach(it, instance);
         }
 
-        log.trace("finish test case, leave");
-        barrier.leaveCase(state.getStage(), state.getTestSuite(), testCase.getName());
-        sink.afterTestCase(state.getStage(), state.getTestSuite(), testCase.getName());
+        log.trace("Try finish testCase: {} -> barrier leave", testCase.getName());
+        barrier.leaveCase(stage, testSuite.getName(), testCase.getName());
+        sink.afterTestCase(stage, testSuite.getName(), testCase.getName());
         state.finishCase();
-        log.debug("finish test case");
+        testSuite.afterCase(instance);
+        log.debug("Finish testCase: {}", testCase.getName());
+
+        endLatch.countDown();
+        ThreadContext.clearAll();
     }
 
+    public void runBeforeSuite(TestSuite<Object> testSuite, CountDownLatch latch) {
+        run(() -> {
+            if (this.instance != null)
+                log.error("Worker contains instance, this is looks like bug");
+
+            this.instance = testSuite.instance();
+            testSuite.beforeSuite(instance);
+            latch.countDown();
+        });
+    }
+
+    public void runAfterSuite(TestSuite<Object> testSuite, CountDownLatch latch) {
+        run(() -> {
+            testSuite.afterSuite(instance);
+            this.instance = null;
+            latch.countDown();
+        });
+    }
 }
