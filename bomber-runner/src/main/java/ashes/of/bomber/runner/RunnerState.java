@@ -2,23 +2,22 @@ package ashes.of.bomber.runner;
 
 import ashes.of.bomber.core.Settings;
 import ashes.of.bomber.core.Stage;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import javax.annotation.Nullable;
 import java.time.Instant;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.BooleanSupplier;
 
 
-public class State {
+public class RunnerState {
+    private static final Logger log = LogManager.getLogger();
 
     private volatile Stage stage = Stage.Idle;
-    private volatile Settings settings;
+    private volatile Settings settings = new Settings();
 
-    @Nullable
     private volatile String testSuite;
-
-    @Nullable
     private volatile String testCase;
 
     private volatile Instant testSuiteStartTime = Instant.EPOCH;
@@ -29,16 +28,14 @@ public class State {
 
     private final BooleanSupplier shutdown;
 
-    public State(BooleanSupplier shutdown) {
+    public RunnerState(BooleanSupplier shutdown) {
         this.shutdown = shutdown;
     }
 
-    @Nullable
     public String getTestSuite() {
         return testSuite;
     }
 
-    @Nullable
     public String getTestCase() {
         return testCase;
     }
@@ -49,6 +46,10 @@ public class State {
 
     public Settings getSettings() {
         return settings;
+    }
+
+    public void setSettings(Settings settings) {
+        this.settings = settings;
     }
 
     public Instant getTestSuiteStartTime() {
@@ -133,4 +134,5 @@ public class State {
                 remainItCount.decrementAndGet() >= 0 &&
                 System.currentTimeMillis() < deadline;
     }
+
 }

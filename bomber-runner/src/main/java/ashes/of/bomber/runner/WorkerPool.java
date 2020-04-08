@@ -80,6 +80,7 @@ public class WorkerPool {
     }
 
     public void shutdown() {
+        log.info("Shutdown WorkerPool, {} workers ({} available) will receive a stop signal", workers.size(), available.size());
         available.clear();
         workers.forEach(Worker::stop);
         workers.clear();

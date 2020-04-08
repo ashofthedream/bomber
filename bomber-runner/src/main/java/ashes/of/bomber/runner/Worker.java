@@ -65,9 +65,9 @@ public class Worker {
         throw new RuntimeException("Hey, you can't run task on " + thread.getName() + ". It's terrible situation and should be fixed");
     }
 
-    public void runTestCase(TestSuite<Object> testSuite, TestCase<Object> testCase, Stage stage, Settings settings, State state,
+    public void runTestCase(TestSuite<Object> testSuite, TestCase<Object> testCase, Stage stage, Settings settings, RunnerState state,
                                 CountDownLatch startLatch, CountDownLatch endLatch, Environment env, Sink sink, Barrier barrier) {
-        this.state = new WorkerState(state, settings);
+        this.state = new WorkerState(state);
         run(() -> runTestCase(testSuite, testCase, stage, settings, this.state, startLatch, endLatch, env, sink, barrier));
     }
 
@@ -98,10 +98,11 @@ public class Worker {
 
         log.trace("Try start testCase: {} -> barrier enter", testCase.getName());
         barrier.enterCase(stage, testSuite.getName(), testCase.getName());
-        state.startCaseIfNotStarted(testCase.getName(), stage, settings);
+
         sink.beforeTestCase(stage, testSuite.getName(), testCase.getName(), state.getTestCaseStartTime(), settings);
         log.debug("Start testCase: {}", testCase.getName());
 
+        state.startCaseIfNotStarted(testCase.getName(), stage, settings);
         BooleanSupplier checker = state.createChecker();
         while (checker.getAsBoolean()) {
             delayer.delay();
@@ -115,6 +116,7 @@ public class Worker {
 
             Tools tools = new Tools(it, record -> {
                 sink.timeRecorded(record);
+                state.addCaughtCount(1);
 
                 if (!record.isSuccess())
                     state.incError();
@@ -128,6 +130,8 @@ public class Worker {
                 if (!testCase.isAsync())
                     stopwatch.success();
 
+                long expected = tools.getStopwatchCount() - (testCase.isAsync() ? 1 : 0);
+                state.addExpectedCount(expected);
                 sink.afterEach(it, stopwatch.elapsed(), null);
             } catch (Throwable th) {
                 if (!testCase.isAsync())
@@ -138,6 +142,27 @@ public class Worker {
             }
 
             testSuite.afterEach(it, instance);
+        }
+
+        log.debug("Test case finished, total its: {}, expected records: {}, caught records: {}, errors; {}",
+                state.getCurrentIterationsCount(), state.getExpectedRecordsCount(), state.getCaughtRecordsCount(), state.getErrorsCount());
+
+        try {
+            int awaitCount = 10;
+            long expectedCount = state.getExpectedRecordsCount();
+            while (expectedCount > state.getCaughtRecordsCount() && awaitCount-- > 0) {
+                log.debug("Oh, wait a second... caught records: {} is less than expected: {}",
+                        state.getCaughtRecordsCount(), expectedCount);
+
+                Thread.sleep(1000);
+            }
+
+            if (expectedCount != state.getCaughtRecordsCount()) {
+                log.info("No more time to wait, not all records were fetched {} of {}. Results may be invalid.",
+                        state.getCaughtRecordsCount(), expectedCount);
+            }
+        } catch (Exception e) {
+            log.warn("Something is wrong", e);
         }
 
         log.trace("Try finish testCase: {} -> barrier leave", testCase.getName());

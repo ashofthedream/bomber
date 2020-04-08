@@ -35,14 +35,14 @@ public class Runner {
     /**
      * Runs the test case
      */
-    public void startTestCase(Environment env, State state, TestSuite<Object> testSuite, List<String> testCases) {
+    public void startTestCase(Environment env, RunnerState state, TestSuite<Object> testSuite, List<String> testCases) {
         ThreadContext.put("stage", Idle.name());
         ThreadContext.put("testSuite", testSuite.getName());
 
         log.info("Start test suite: {} with warm up: {} and test settings: {}",
                 testSuite.getName(), testSuite.getWarmUp(), testSuite.getSettings());
 
-        log.trace("reset before & after test suite lifecycle methods");
+        log.trace("Reset before & after test suite lifecycle methods");
         testSuite.resetBeforeAndAfterSuite();
 
         state.startSuiteIfNotStarted(testSuite.getName());
@@ -50,7 +50,10 @@ public class Runner {
 
         int threads = testCases.stream()
                 .map(testSuite::getTestCase)
-                .mapToInt(testCase -> Math.max(testCase.getWarmUp().getThreadsCount(), testSuite.getSettings().getThreadsCount()))
+                .mapToInt(testCase -> Math.max(
+                        testCase.getWarmUp().getThreadsCount(),
+                        testCase.getLoadTest().getThreadsCount()
+                ))
                 .max()
                 .orElse(0);
 
@@ -66,7 +69,7 @@ public class Runner {
             testCases.stream()
                     .map(testSuite::getTestCase)
                     .forEach(testCase -> {
-                        log.trace("reset before & after test case lifecycle methods");
+                        log.trace("Reset before & after test case lifecycle methods");
                         testSuite.resetBeforeAndAfterCase();
 
                         ThreadContext.put("testCase", testCase.getName());
@@ -94,7 +97,6 @@ public class Runner {
 
         sink.afterTestSuite(testSuite.getName());
         state.finishSuite();
-
         ThreadContext.clearAll();
     }
 
@@ -118,7 +120,7 @@ public class Runner {
         afterSuiteLatch.await();
     }
 
-    public void startTestCase(Environment env, State state, TestSuite<Object> testSuite, TestCase<Object> testCase, Stage stage, Settings settings) {
+    public void startTestCase(Environment env, RunnerState state, TestSuite<Object> testSuite, TestCase<Object> testCase, Stage stage, Settings settings) {
         ThreadContext.put("stage", stage.name());
         log.info("Start stage: {}", stage);
         state.startCaseIfNotStarted(testCase.getName(), stage, settings);

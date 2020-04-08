@@ -1,5 +1,17 @@
 version = '1.0.0-SNAPSHOT'
 
+repositories {
+    maven {
+        name = "GitHubPackages"
+        url = uri("https://maven.pkg.github.com/ashofthedream/datadog-client")
+        credentials {
+            // Don't be naughty, this is a public read-only token.
+            username = 'ashofthedream'
+            password = 'c1f5be30e124727be92c36ae50979e4a494083e4'
+        }
+    }
+}
+
 
 dependencies {
     compile project(':bomber-core')

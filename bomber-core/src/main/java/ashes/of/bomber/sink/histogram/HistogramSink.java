@@ -2,6 +2,7 @@ package ashes.of.bomber.sink.histogram;
 
 import ashes.of.bomber.stopwatch.Record;
 import ashes.of.bomber.sink.Sink;
+import org.HdrHistogram.Histogram;
 
 import java.io.PrintStream;
 import java.util.Map;
@@ -39,7 +40,8 @@ public class HistogramSink implements Sink {
             out.printf("suite: %s%n", testSuite);
             m.data.forEach((label, hae) -> {
                 out.printf("label: %s, errors: %,12d%n", label, hae.errors.sum());
-                hae.histogram.outputPercentileDistribution(out, 1_000_000.0);
+                Histogram h = new Histogram(hae.histogram);
+                h.outputPercentileDistribution(out, 1_000_000.0);
 
                 out.println();
                 out.println();

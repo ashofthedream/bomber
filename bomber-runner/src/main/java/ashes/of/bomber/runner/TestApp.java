@@ -8,21 +8,17 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 
-import javax.annotation.Nullable;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 
 public class TestApp implements BomberApp {
     private static final Logger log = LogManager.getLogger();
 
-    private static final State IDLE = new State(() -> true);
+    private static final RunnerState IDLE = new RunnerState(() -> true);
 
     private final String name;
     private final WorkerPool pool;
@@ -31,7 +27,7 @@ public class TestApp implements BomberApp {
 
     private volatile Plan plan;
 
-    private volatile State state;
+    private volatile RunnerState state = IDLE;
     private volatile CountDownLatch endLatch = new CountDownLatch(1);
 
     public TestApp(String name, WorkerPool pool, Environment env, List<TestSuite<?>> testSuites) {
@@ -58,12 +54,14 @@ public class TestApp implements BomberApp {
 
     @Override
     public StateModel getState() {
-        State state = this.state;
+        RunnerState state = this.state;
 
         List<WorkerStateModel> workerStates = pool.getAcquired().stream()
                 .map(worker -> {
                     WorkerState ws = worker.getState();
-                    return new WorkerStateModel(worker.getName(), ws.currentItNumber(), ws.getRemainIterationsCount(), ws.getErrorsCount());
+                    return new WorkerStateModel(worker.getName(),
+                            ws.getCurrentIterationsCount(), ws.getRemainIterationsCount(), ws.getErrorsCount(),
+                            ws.getExpectedRecordsCount(), ws.getCaughtRecordsCount());
                 })
                 .collect(Collectors.toList());
 
@@ -73,10 +71,6 @@ public class TestApp implements BomberApp {
                 settings.getThreadIterationsCount() - remain, state.getTotalIterationsRemain(), state.getErrorCount(),
                 Instant.EPOCH, Instant.EPOCH, state.getCaseElapsedTime(),
                 state.getCaseRemainTime(), workerStates);
-    }
-
-    public void setState(@Nullable State state) {
-        this.state = state;
     }
 
     @Override
@@ -93,11 +87,13 @@ public class TestApp implements BomberApp {
 
         ScheduledExecutorService watcherEx = Executors.newSingleThreadScheduledExecutor();
 
-        env.getWatchers()
-                .forEach(config -> {
+        List<ScheduledFuture<?>> wfs = env.getWatchers()
+                .stream()
+                .map(config -> {
                     Watcher watcher = config.getWatcher();
-                    watcherEx.scheduleAtFixedRate(() -> watcher.watch(this), 0, config.getPeriod(), config.getTimeUnit());
-                });
+                    return watcherEx.scheduleAtFixedRate(() -> watcher.watch(this), 0, config.getPeriod(), config.getTimeUnit());
+                })
+                .collect(Collectors.toList());
 
         Instant startTime = Instant.now();
 
@@ -110,25 +106,29 @@ public class TestApp implements BomberApp {
 
 
         try {
+            log.debug("init runner");
             Runner runner = new Runner(pool, env.getSinks());
 
-            Map<String, TestSuite> suitesByName = testSuites.stream()
+            Map<String, TestSuite<?>> suitesByName = testSuites.stream()
                     .collect(Collectors.toMap(TestSuite::getName, suite -> suite));
 
             plan.getTestSuites()
                     .forEach(planned -> {
-                        TestSuite testSuite = suitesByName.get(planned.getName());
+                        log.debug("try to run testSuite: {}", planned.getName());
+                        TestSuite<Object> testSuite = (TestSuite<Object>) suitesByName.get(planned.getName());
 
-                        State state = new State(this::isStop);
+                        RunnerState state = new RunnerState(this::isStop);
                         this.state = state;
                         runner.startTestCase(testSuite.getEnv(), state, testSuite, planned.getTestCases());
                     });
 
+            log.debug("All test suites finished, state -> Idle ");
             state = IDLE;
         } catch (Throwable th) {
-            log.error("unexpected throwable", th);
+            log.error("Unexpected throwable", th);
         }
 
+        log.debug("Shutdown for each sink and watcher");
         env.getSinks()
                 .forEach(Sink::shutDown);
 
@@ -136,14 +136,17 @@ public class TestApp implements BomberApp {
                 .map(WatcherConfig::getWatcher)
                 .forEach(Watcher::shutDown);
 
+        log.debug("Shutdown wat each sink and watcher");
         watcherEx.shutdown();
 
         Instant finishTime = Instant.now();
         endLatch.countDown();
         endLatch = new CountDownLatch(1);
+
         pool.shutdown();
 
         ThreadContext.clearAll();
+        log.info("Flight is over, report is ready");
         return new Report(plan, startTime, finishTime);
     }
 

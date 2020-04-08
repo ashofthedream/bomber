@@ -102,12 +102,16 @@ public class HistogramTimelineSink implements Sink {
     }
 
     private void print() {
-        if (timeline.isEmpty())
+        if (timeline.isEmpty()) {
+            log.warn("Nothing to print, timeline is empty");
             return;
+        }
 
         Instant time = timeline.firstKey();
         Instant end = timeline.lastKey();
 
+        out.printf("count: %s, start: %s, end: %s%n", timeline.size(), time, end);
+        out.printf("%-14s %-50s %11s %11s %11s %11s %11s %11s %11s %10s %10s%n", "time", "label", "median", "75.00", "90.00", "95.00", "99.00", "99.90", "max", "count", "errors");
         while (!time.isAfter(end)) {
             Measurements measurements = timeline.get(time);
             print(time, measurements);

@@ -4,6 +4,8 @@ import ashes.of.bomber.core.Iteration;
 import ashes.of.bomber.core.Settings;
 import ashes.of.bomber.core.Stage;
 import ashes.of.bomber.stopwatch.Record;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nullable;
 import java.time.Instant;
@@ -12,11 +14,13 @@ import java.util.concurrent.Executors;
 
 
 public class AsyncSink implements Sink {
+    private static final Logger log = LogManager.getLogger();
 
-    private static final Executor defaultExecutor = Executors.newSingleThreadExecutor(r -> {
+    private static final Executor defaultExecutor = Executors.newFixedThreadPool(1, r -> {
         Thread thread = new Thread(r);
         thread.setName("bomber-async-sink");
         thread.setDaemon(true);
+        thread.setUncaughtExceptionHandler((t, e) -> log.warn("Uncaught exception in thread: {}", t.getName(), e));
         return thread;
     });
 
@@ -26,6 +30,12 @@ public class AsyncSink implements Sink {
     public AsyncSink(Sink sink, Executor ex) {
         this.sink = sink;
         this.ex = ex;
+
+//        Executors.newScheduledThreadPool(1).scheduleAtFixedRate(() -> {
+//            ThreadPoolExecutor tpe = (ThreadPoolExecutor)ex;
+//
+////            log.warn("QS:  " + tpe.getQueue().size() + " TC: " + tpe.getTaskCount());
+//        }, 1, 1, TimeUnit.SECONDS);
     }
 
     public AsyncSink(Sink sink) {

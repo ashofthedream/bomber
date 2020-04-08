@@ -17,6 +17,7 @@ import ashes.of.bomber.watcher.WatcherConfig;
 import com.google.common.base.Preconditions;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.util.TriConsumer;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
@@ -194,11 +195,18 @@ public class TestAppBuilder {
         return addSuite(b);
     }
 
-    public <T, C> TestAppBuilder createSuite(BiConsumer<TestSuiteBuilder<T>, C> consumer, C context) {
-        TestSuiteBuilder<T> b = newSuiteBuilder();
-        consumer.accept(b, context);
+    public <T, A> TestAppBuilder createSuite(BiConsumer<TestSuiteBuilder<T>, A> consumer, A a) {
+        TestSuiteBuilder<T> builder = newSuiteBuilder();
+        consumer.accept(builder, a);
 
-        return addSuite(b);
+        return addSuite(builder);
+    }
+
+    public <T, A, B> TestAppBuilder createSuite(TriConsumer<TestSuiteBuilder<T>, A, B> consumer, A a, B b) {
+        TestSuiteBuilder<T> builder = newSuiteBuilder();
+        consumer.accept(builder, a, b);
+
+        return addSuite(builder);
     }
 
     public <T> TestAppBuilder testSuiteObject(T testSuite) {

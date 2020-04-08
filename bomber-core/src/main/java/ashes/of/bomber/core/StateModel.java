@@ -19,6 +19,7 @@ public class StateModel {
     private final long caseRemainTime;
     private final List<WorkerStateModel> workersState;
 
+
     public StateModel(Stage stage, Settings settings, String testSuite, String testCase,
                       long iterationsCount, long remainIterationsCount, long errorCount,
                       Instant testSuiteStartTime, Instant testCaseStartTime,
