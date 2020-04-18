@@ -1,8 +1,8 @@
 package ashes.of.bomber.example.app.tests;
 
 import ashes.of.bomber.annotations.*;
-import ashes.of.bomber.stopwatch.Tools;
-import ashes.of.bomber.stopwatch.Stopwatch;
+import ashes.of.bomber.tools.Stopwatch;
+import ashes.of.bomber.tools.Tools;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.ResponseEntity;

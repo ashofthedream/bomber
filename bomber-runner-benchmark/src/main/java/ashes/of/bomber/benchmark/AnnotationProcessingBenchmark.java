@@ -6,7 +6,7 @@ import ashes.of.bomber.annotations.LoadTestSuite;
 import ashes.of.bomber.core.Settings;
 import ashes.of.bomber.builder.TestSuiteBuilder;
 import ashes.of.bomber.builder.TestAppBuilder;
-import ashes.of.bomber.stopwatch.Tools;
+import ashes.of.bomber.tools.Tools;
 import org.HdrHistogram.ConcurrentHistogram;
 import org.HdrHistogram.Histogram;
 
@@ -18,7 +18,7 @@ import java.util.function.Supplier;
 public class AnnotationProcessingBenchmark {
 
     @LoadTestSuite
-    @LoadTest(time = 20, threadIterations = 100_000)
+    @LoadTest(time = 20, threadIterations = 1_000_000)
     public static class Test {
 
         private final Histogram histogram = new ConcurrentHistogram(2);
@@ -50,26 +50,27 @@ public class AnnotationProcessingBenchmark {
                 });
 
         System.out.println();
-        System.out.printf("%16s %16s %16s %16s %16s %16s %16s%n", "median", "95.00", "99.00", "99.90", "99.99", "max", "count");
+        System.out.printf("%16s %16s %16s %16s %16s %16s %16s %16s%n", "median", "95.00", "99.00", "99.90", "99.99", "max", "rate", "count");
         list.stream()
                 .skip(0)
                 .forEach(AnnotationProcessingBenchmark::print);
     }
 
-    private static Histogram buildAndRun() {
+    private static Histogram createWithBuilder() {
         Test test = new Test();
 
         TestSuiteBuilder<Test> suite = new TestSuiteBuilder<Test>()
-                .name("performance-test")
+                .name("create-with-builder")
                 .sharedInstance(test)
                     .warmUp(Settings::disabled)
                     .settings(settings -> settings
 //                                .time(20_000)
                             .threadCount(1)
-                            .threadIterations(100_000))
+                            .threadIterations(1_000_000))
                 .testCase("test", Test::test);
 
         new TestAppBuilder()
+                .name("build-and-run")
 //                .app(app -> app.sink(new Log4jSink()))
                 .addSuite(suite)
                 .build()
@@ -78,10 +79,11 @@ public class AnnotationProcessingBenchmark {
         return test.histogram;
     }
 
-    private static Histogram runAnnotated() {
+    private static Histogram createWithAnnotations() {
         Test test = new Test();
 
         new TestAppBuilder()
+                .name("create-with-annotations")
 //                .app(app -> app.sink(new Log4jSink()))
                 .testSuiteObject(test)
                 .build()
@@ -91,13 +93,15 @@ public class AnnotationProcessingBenchmark {
     }
 
     private static void print(Histogram h) {
-        System.out.printf("%16.3f %16.3f %16.3f %16.3f %16.3f %16.3f %,16d %n",
+        long p9999 = h.getValueAtPercentile(0.9999);
+        System.out.printf("%16.3f %16.3f %16.3f %16.3f %16.3f %16.3f %16.3f %,16d %n",
                 us(h.getValueAtPercentile(0.5000)),
                 us(h.getValueAtPercentile(0.9500)),
                 us(h.getValueAtPercentile(0.9900)),
                 us(h.getValueAtPercentile(0.9990)),
-                us(h.getValueAtPercentile(0.9999)),
+                us(p9999),
                 us(h.getMaxValue()),
+                1_000_000_000.0 / p9999,
                 h.getTotalCount());
     }
 
@@ -112,13 +116,13 @@ public class AnnotationProcessingBenchmark {
     public static void main(String... args) {
         int count = 10;
         System.out.println("run with builder");
-        run(count, AnnotationProcessingBenchmark::buildAndRun);
+        run(count, AnnotationProcessingBenchmark::createWithBuilder);
 
         System.out.println();
         System.out.println();
         System.out.println();
 
         System.out.println("run with annotations");
-        run(count, AnnotationProcessingBenchmark::runAnnotated);
+        run(count, AnnotationProcessingBenchmark::createWithAnnotations);
     }
 }

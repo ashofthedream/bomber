@@ -16,6 +16,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.temporal.ChronoUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 
 /**
@@ -24,7 +25,7 @@ import java.time.temporal.ChronoUnit;
 public class ExampleBuilderTestApp {
     private static final Logger log = LogManager.getLogger();
 
-    public static void main(String... args) {
+    public static void main(String... args) throws InterruptedException {
         String url = args.length > 0 ? args[0] : "http://localhost:8080";
         int members = args.length > 1 ? Integer.parseInt(args[1]) : 1;
 
@@ -36,15 +37,14 @@ public class ExampleBuilderTestApp {
 
         new TestAppBuilder()
                 .name("example")
-                .settings(settings -> settings.threadCount(2).seconds(5))
-                .limiter(() -> Limiter.withRate(1, 1000))
+                .settings(settings -> settings.threadCount(2).seconds(10))
+                .limiter(() -> Limiter.withRate(10, 1))
                 // log all times to console via log4j and HdrHistogram
 //                .sink(new Log4jSink())
                 .sink(new HistogramTimelineSink(ChronoUnit.SECONDS, System.out))
                 .sink(new HistogramSink())
                 .watcher(1000, new Log4jWatcher())
                 .barrier(barrier)
-
 
                 // add example test suite via static init method
                 .createSuite(ExampleBuilderTestApp::createUserControllerSuite, webClient)
@@ -55,7 +55,7 @@ public class ExampleBuilderTestApp {
 
     private static void createUserControllerSuite(TestSuiteBuilder<UserControllerLoadTest> builder, WebClient webClient) {
         builder.name("UserController")
-                .limiter(Limiter.withRate(10, 1000))
+//                .limiter(Limiter.withRate(10, 1000))
                 .instance(() -> new UserControllerLoadTest(webClient))
                 .beforeSuite(UserControllerLoadTest::beforeAll)
 //                .beforeEach(UserControllerLoadTest::beforeEach)
@@ -67,7 +67,6 @@ public class ExampleBuilderTestApp {
 
     private static void createAccountControllerSuite(TestSuiteBuilder<AccountControllerLoadTest> builder, WebClient webClient) {
         builder.name("AccountController")
-
                 .instance(() -> new AccountControllerLoadTest(webClient))
                 .beforeSuite(AccountControllerLoadTest::beforeAll)
 //                .beforeEach(UserControllerLoadTest::beforeEach)

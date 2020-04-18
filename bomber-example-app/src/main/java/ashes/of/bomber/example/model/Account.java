@@ -7,6 +7,8 @@ public class Account {
     @Nullable
     private Long id;
 
+    private User user;
+
     private BigDecimal amount = BigDecimal.ZERO;
 
     public Account(@Nullable Long id, BigDecimal amount) {
@@ -24,6 +26,10 @@ public class Account {
 
     public void setId(@Nullable Long id) {
         this.id = id;
+    }
+
+    public User getUser() {
+        return user;
     }
 
     public BigDecimal getAmount() {

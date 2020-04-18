@@ -1,11 +1,11 @@
 package ashes.of.bomber.example.controllers;
 
 import ashes.of.bomber.builder.TestAppBuilder;
-import ashes.of.bomber.core.Report;
+import ashes.of.bomber.flight.FlightReport;
 import ashes.of.bomber.example.app.tests.UserControllerLoadTest;
 import ashes.of.bomber.sink.Sink;
 import ashes.of.bomber.sink.histogram.HistogramSink;
-import ashes.of.bomber.stopwatch.Record;
+import ashes.of.bomber.tools.Record;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Ignore;
@@ -54,7 +54,7 @@ public class UserControllerTest {
                 .build();
 
         ErrorCounter errorCounter = new ErrorCounter();
-        Report report = new TestAppBuilder()
+        FlightReport report = new TestAppBuilder()
                 .sink(new HistogramSink())
                 .sink(errorCounter)
                 .testSuiteClass(UserControllerLoadTest.class, new Class[]{WebClient.class}, webClient)

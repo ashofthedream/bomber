@@ -92,7 +92,7 @@ public class CarrierSink implements Sink {
         return SinkEvent.builder()
                 .type(type)
                 .timestamp(timestamp.toEpochMilli())
-                .flightId(app.getPlan().getId())
+                .flightId(app.getFlightPlan().getId())
                 .carrierId(registration.getServiceInstance().getId())
                 .stage(stage != null ? stage.name() : null)
                 .testSuite(testSuite)

@@ -2,6 +2,7 @@ package ashes.of.bomber.runner;
 
 import ashes.of.bomber.core.Settings;
 import ashes.of.bomber.core.Stage;
+import ashes.of.bomber.flight.TestCasePlan;
 import ashes.of.bomber.sink.AsyncSink;
 import ashes.of.bomber.sink.MultiSink;
 import ashes.of.bomber.sink.Sink;
@@ -35,7 +36,7 @@ public class Runner {
     /**
      * Runs the test case
      */
-    public void startTestCase(Environment env, RunnerState state, TestSuite<Object> testSuite, List<String> testCases) {
+    public void startTestCase(Environment env, RunnerState state, TestSuite<Object> testSuite, List<TestCasePlan> testCases) {
         ThreadContext.put("stage", Idle.name());
         ThreadContext.put("testSuite", testSuite.getName());
 
@@ -49,6 +50,7 @@ public class Runner {
         sink.beforeTestSuite(testSuite.getName(), Instant.now());
 
         int threads = testCases.stream()
+                .map(TestCasePlan::getName)
                 .map(testSuite::getTestCase)
                 .mapToInt(testCase -> Math.max(
                         testCase.getWarmUp().getThreadsCount(),
@@ -67,6 +69,7 @@ public class Runner {
             awaitBeforeSuite(testSuite);
 
             testCases.stream()
+                    .map(TestCasePlan::getName)
                     .map(testSuite::getTestCase)
                     .forEach(testCase -> {
                         log.trace("Reset before & after test case lifecycle methods");

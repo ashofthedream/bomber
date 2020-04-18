@@ -3,7 +3,7 @@ package ashes.of.bomber.sink;
 import ashes.of.bomber.core.Iteration;
 import ashes.of.bomber.core.Settings;
 import ashes.of.bomber.core.Stage;
-import ashes.of.bomber.stopwatch.Record;
+import ashes.of.bomber.tools.Record;
 
 import javax.annotation.Nullable;
 import java.time.Instant;

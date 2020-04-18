@@ -45,7 +45,6 @@ public class Flight {
     }
 
     public void event(SinkEvent event) {
-
         FlightData data = getData(event.getCarrierId());
 
         FlightRecord record = new FlightRecord(event.getType().name(), event.getTimestamp(), null);

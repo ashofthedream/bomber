@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit;
 public class LimiterBenchmark {
 
     private final Limiter oneAnswer = new OneAnswerLimiter(true);
-    private final Limiter rateAlwaysPass = new RateLimiter(100_000, Duration.ofMillis(10));
+    private final Limiter rateAlwaysPass = new RateLimiter(100_000, Duration.ofMillis(1));
     private final Limiter rateOnlyOnePass = new RateLimiter(1, Duration.ofHours(24));
 
     @Benchmark

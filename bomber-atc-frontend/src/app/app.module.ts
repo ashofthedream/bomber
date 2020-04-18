@@ -10,8 +10,10 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {registerLocaleData} from '@angular/common';
 import en from '@angular/common/locales/en';
 import {MainModule} from "./modules/main.module";
-import {LibsModule} from "./modules/libs/libs.module";
-import {RequestLogHttpInterceptor} from "./modules/libs/interceptors/request-log.interceptor";
+import {SharedModule} from "./modules/shared/shared.module";
+import {RequestLogHttpInterceptor} from "./modules/shared/interceptors/request-log.interceptor";
+import {CarrierModule} from "./modules/carrier/carrier.module";
+import {AuthRequiredInterceptor} from "./modules/shared/interceptors/auth-required.interceptor";
 
 registerLocaleData(en);
 
@@ -20,7 +22,8 @@ registerLocaleData(en);
     AppComponent
   ],
   imports: [
-    LibsModule,
+    CarrierModule,
+    SharedModule,
     MainModule,
     BrowserModule,
     AppRoutingModule,
@@ -31,7 +34,8 @@ registerLocaleData(en);
   ],
   providers: [
       {provide: NZ_I18N, useValue: en_US},
-      {provide: HTTP_INTERCEPTORS, useClass: RequestLogHttpInterceptor, multi: true}
+      {provide: HTTP_INTERCEPTORS, useClass: RequestLogHttpInterceptor, multi: true},
+      {provide: HTTP_INTERCEPTORS, useClass: AuthRequiredInterceptor, multi: true}
   ],
   bootstrap: [AppComponent]
 })

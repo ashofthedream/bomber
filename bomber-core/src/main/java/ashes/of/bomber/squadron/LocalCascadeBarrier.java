@@ -34,7 +34,7 @@ public class LocalCascadeBarrier implements Barrier {
             try {
                 enter.await();
             } catch (Exception e) {
-                log.error("Can't enter testSuite: {}, testCase: {}", testSuite, testCase, e);
+                log.error("Can't enter stage: {}, testSuite: {}, testCase: {}", stage, testSuite, testCase, e);
             }
         }
 
@@ -42,7 +42,7 @@ public class LocalCascadeBarrier implements Barrier {
             try {
                 leave.await();
             } catch (Exception e) {
-                log.error("Can't leave testSuite: {}, testCase: {}", testSuite, testCase, e);
+                log.error("Can't leave stage: {}, testSuite: {}, testCase: {}", stage, testSuite, testCase, e);
             }
         }
     }

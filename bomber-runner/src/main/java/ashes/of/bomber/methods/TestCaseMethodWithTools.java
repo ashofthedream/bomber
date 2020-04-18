@@ -1,6 +1,6 @@
 package ashes.of.bomber.methods;
 
-import ashes.of.bomber.stopwatch.Tools;
+import ashes.of.bomber.tools.Tools;
 
 /**
  * Test method with {@link Tools}

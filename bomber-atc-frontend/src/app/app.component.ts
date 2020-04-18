@@ -1,4 +1,5 @@
 import {Component} from '@angular/core';
+import {AuthService} from "./modules/shared/services/auth.service";
 
 
 @Component({
@@ -8,5 +9,11 @@ import {Component} from '@angular/core';
 })
 export class AppComponent {
 
+  constructor(private readonly authService: AuthService) {
+  }
+
+  isAuthenticated(): boolean {
+    return this.authService.isAuthenticated();
+  }
 }
 

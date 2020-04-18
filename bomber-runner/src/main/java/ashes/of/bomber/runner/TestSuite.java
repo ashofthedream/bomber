@@ -7,9 +7,7 @@ import ashes.of.bomber.methods.LifeCycleMethod;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -174,7 +172,7 @@ public class TestSuite<T> {
         return settings;
     }
 
-    public Set<String> getTestCases() {
-        return testCases.keySet();
+    public Collection<TestCase<T>> getTestCases() {
+        return testCases.values();
     }
 }

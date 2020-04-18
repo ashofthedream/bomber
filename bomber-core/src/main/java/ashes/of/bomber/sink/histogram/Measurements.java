@@ -1,6 +1,6 @@
 package ashes.of.bomber.sink.histogram;
 
-import ashes.of.bomber.stopwatch.Record;
+import ashes.of.bomber.tools.Record;
 
 import java.time.Instant;
 import java.util.Map;

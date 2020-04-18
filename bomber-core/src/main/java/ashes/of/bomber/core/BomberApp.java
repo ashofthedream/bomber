@@ -1,5 +1,9 @@
 package ashes.of.bomber.core;
 
+import ashes.of.bomber.flight.FlightReport;
+import ashes.of.bomber.flight.FlightPlan;
+import ashes.of.bomber.flight.TestCasePlan;
+import ashes.of.bomber.flight.TestSuitePlan;
 import ashes.of.bomber.sink.Sink;
 import ashes.of.bomber.watcher.Watcher;
 
@@ -10,7 +14,7 @@ import java.util.stream.Collectors;
 
 public interface BomberApp {
 
-    Plan getPlan();
+    FlightPlan getFlightPlan();
 
     void add(Sink sink);
 
@@ -27,32 +31,32 @@ public interface BomberApp {
     List<TestSuiteModel> getTestSuites();
 
     @Deprecated
-    default Plan createDefaultPlan(long id) {
-        List<SuitePlan> suites = getTestSuites().stream()
+    default FlightPlan createDefaultPlan(long id) {
+        List<TestSuitePlan> suites = getTestSuites().stream()
                 .map(testSuite -> {
-                    List<String> cases = testSuite.getTestCases().stream()
-                            .map(TestCaseModel::getName)
+                    List<TestCasePlan> cases = testSuite.getTestCases().stream()
+                            .map(testCase -> new TestCasePlan(testCase.getName()))
                             .collect(Collectors.toList());
 
-                    return new SuitePlan(testSuite.getName(), cases);
+                    return new TestSuitePlan(testSuite.getName(), cases);
                 })
                 .collect(Collectors.toList());
 
 
-        return new Plan(id, suites);
+        return new FlightPlan(id, suites);
     }
 
-    default Report start() {
+    default FlightReport start() {
         return start(createDefaultPlan(System.currentTimeMillis()));
     }
 
-    default CompletableFuture<Report> startAsync() {
+    default CompletableFuture<FlightReport> startAsync() {
         return CompletableFuture.supplyAsync(this::start);
     }
 
-    Report start(Plan plan);
+    FlightReport start(FlightPlan plan);
 
-    default CompletableFuture<Report> startAsync(Plan plan) {
+    default CompletableFuture<FlightReport> startAsync(FlightPlan plan) {
         return CompletableFuture.supplyAsync(() -> start(plan));
     }
 

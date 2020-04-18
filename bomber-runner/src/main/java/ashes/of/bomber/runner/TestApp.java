@@ -1,6 +1,8 @@
 package ashes.of.bomber.runner;
 
 import ashes.of.bomber.core.*;
+import ashes.of.bomber.flight.FlightReport;
+import ashes.of.bomber.flight.FlightPlan;
 import ashes.of.bomber.sink.Sink;
 import ashes.of.bomber.watcher.Watcher;
 import ashes.of.bomber.watcher.WatcherConfig;
@@ -25,7 +27,7 @@ public class TestApp implements BomberApp {
     private final Environment env;
     private final List<TestSuite<?>> testSuites;
 
-    private volatile Plan plan;
+    private volatile FlightPlan plan;
 
     private volatile RunnerState state = IDLE;
     private volatile CountDownLatch endLatch = new CountDownLatch(1);
@@ -38,7 +40,7 @@ public class TestApp implements BomberApp {
     }
 
     @Override
-    public Plan getPlan() {
+    public FlightPlan getFlightPlan() {
         return plan;
     }
 
@@ -74,7 +76,7 @@ public class TestApp implements BomberApp {
     }
 
     @Override
-    public Report start(Plan plan) {
+    public FlightReport start(FlightPlan plan) {
         this.plan = plan;
         ThreadContext.put("bomberApp", name);
         ThreadContext.put("flightId", String.valueOf(plan.getId()));
@@ -147,7 +149,7 @@ public class TestApp implements BomberApp {
 
         ThreadContext.clearAll();
         log.info("Flight is over, report is ready");
-        return new Report(plan, startTime, finishTime);
+        return new FlightReport(plan, startTime, finishTime);
     }
 
     @Override
@@ -175,7 +177,7 @@ public class TestApp implements BomberApp {
 
     private TestSuiteModel toTestSuite(TestSuite<?> suite) {
         List<TestCaseModel> testCases = suite.getTestCases().stream()
-                .map(name -> new TestCaseModel(name))
+                .map(testCase -> new TestCaseModel(testCase.getName(), testCase.isAsync()))
                 .collect(Collectors.toList());
 
         return new TestSuiteModel(suite.getName(), testCases, suite.getSettings(), suite.getWarmUp());

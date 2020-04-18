@@ -1,7 +1,6 @@
 package ashes.of.bomber.sink.histogram;
 
-import ashes.of.bomber.core.Iteration;
-import ashes.of.bomber.stopwatch.Record;
+import ashes.of.bomber.tools.Record;
 import ashes.of.bomber.sink.Sink;
 import org.HdrHistogram.Histogram;
 import org.apache.logging.log4j.LogManager;

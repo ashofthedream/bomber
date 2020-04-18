@@ -12,13 +12,13 @@
     </Appenders>
 
     <Loggers>
-        <Logger name="ashes.of.bomber" level="info"/>
+        <Logger name="ashes.of.bomber" level="debug"/>
 
-        <Logger name="ashes.of.bomber.runner.Runner" level="info" additivity="false">
+        <Logger name="ashes.of.bomber.runner.Runner" level="debug" additivity="false">
             <AppenderRef ref="ConsoleWithContext" />
         </Logger>
 
-        <Logger name="ashes.of.bomber.watcher.Log4jWatcher" level="debug" additivity="false">
+        <Logger name="ashes.of.bomber.watcher" level="debug" additivity="false">
             <AppenderRef ref="ConsoleWithContext" />
         </Logger>
 

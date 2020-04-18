@@ -7,8 +7,8 @@ import ashes.of.bomber.delayer.Delayer;
 import ashes.of.bomber.limiter.Limiter;
 import ashes.of.bomber.sink.Sink;
 import ashes.of.bomber.squadron.Barrier;
-import ashes.of.bomber.stopwatch.Stopwatch;
-import ashes.of.bomber.stopwatch.Tools;
+import ashes.of.bomber.tools.Stopwatch;
+import ashes.of.bomber.tools.Tools;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
@@ -138,7 +138,7 @@ public class Worker {
                     stopwatch.fail(th);
 
                 sink.afterEach(it, stopwatch.elapsed(), th);
-                log.trace("Call testCase: {} failed, it: {}", testCase.getName(), it, th);
+                log.warn("Call testCase: {} failed, it: {}", testCase.getName(), it, th);
             }
 
             testSuite.afterEach(it, instance);

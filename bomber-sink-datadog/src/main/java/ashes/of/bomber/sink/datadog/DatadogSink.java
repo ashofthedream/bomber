@@ -1,7 +1,7 @@
 package ashes.of.bomber.sink.datadog;
 
 import ashes.of.bomber.core.Iteration;
-import ashes.of.bomber.stopwatch.Record;
+import ashes.of.bomber.tools.Record;
 import ashes.of.bomber.sink.Sink;
 import ashes.of.datadog.client.DatadogClient;
 

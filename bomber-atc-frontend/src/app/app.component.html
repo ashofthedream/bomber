@@ -1,11 +1,17 @@
-<nz-layout class="layout">
-  <nz-sider nzWidth="250" nzTheme="light">
-    <div style="width: 250px">
-      <atc-main-menu></atc-main-menu>
-    </div>
-  </nz-sider>
+<ng-container *ngIf="isAuthenticated(); else router">
+  <nz-layout class="layout">
+    <nz-sider nzWidth="250" nzTheme="light">
+      <div style="width: 250px">
+        <atc-main-menu></atc-main-menu>
+      </div>
+    </nz-sider>
 
-  <nz-content class="content">
-    <router-outlet></router-outlet>
-  </nz-content>
-</nz-layout>
+    <nz-content class="content">
+      <router-outlet></router-outlet>
+    </nz-content>
+  </nz-layout>
+</ng-container>
+
+<ng-template #router>
+  <router-outlet></router-outlet>
+</ng-template>

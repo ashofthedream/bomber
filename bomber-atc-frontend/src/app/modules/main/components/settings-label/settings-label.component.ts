@@ -1,5 +1,5 @@
 import {Component, Input} from '@angular/core';
-import {Settings} from "../../model/settings";
+import {Settings} from "../../models/settings";
 
 @Component({
   selector: 'atc-settings-label',

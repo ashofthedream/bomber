@@ -2,7 +2,7 @@ package ashes.of.bomber.runner;
 
 import ashes.of.bomber.core.Settings;
 import ashes.of.bomber.methods.TestCaseMethodWithTools;
-import ashes.of.bomber.stopwatch.Tools;
+import ashes.of.bomber.tools.Tools;
 
 import java.util.function.Supplier;
 

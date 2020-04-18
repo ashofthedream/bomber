@@ -5,7 +5,7 @@ import ashes.of.bomber.core.Settings;
 import ashes.of.bomber.delayer.RandomDelayer;
 import ashes.of.bomber.limiter.Limiter;
 import ashes.of.bomber.methods.TestCaseMethodWithTools;
-import ashes.of.bomber.stopwatch.Tools;
+import ashes.of.bomber.tools.Tools;
 import com.google.common.base.Strings;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
