@@ -1,4 +1,3 @@
-group = 'ashes.of'
 version = '1.0.0-SNAPSHOT'
 
 
@@ -9,7 +8,6 @@ buildscript {
 }
 
 
-apply plugin: 'java'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 
@@ -22,7 +20,7 @@ configurations {
 
 dependencies {
     compile project(':bomber-carrier-dto')
-    compile     group: 'com.google.guava',              name: 'guava',                          version: '27.0.1-jre'
+
 
     compile('org.springframework.cloud:spring-cloud-starter-loadbalancer') {
         exclude group: 'org.springframework.cloud', module: 'spring-cloud-starter-netflix-ribbon'
@@ -37,18 +35,10 @@ dependencies {
         exclude group: 'org.slf4j', module: 'slf4j-log4j12'
     }
 
-    compileOnly         group: 'org.projectlombok',     name: 'lombok',                         version: '1.18.8'
-    annotationProcessor group: 'org.projectlombok',     name: 'lombok',                         version: '1.18.8'
-
     compile     group: 'org.springframework.boot',      name: 'spring-boot-devtools'
     compile     group: 'org.springframework.boot',      name: 'spring-boot-starter-log4j2'
     compile     group: 'org.springframework.boot',      name: 'spring-boot-starter-security'
     compile     group: 'org.springframework.boot',      name: 'spring-boot-starter-webflux'
     compile     group: 'org.springframework.boot',      name: 'spring-boot-starter-rsocket'
     testCompile group: 'org.springframework.boot',      name: 'spring-boot-starter-test'
-}
-
-
-compileJava {
-    options.compilerArgs << '-parameters --enable-preview'
 }

@@ -1,4 +1,3 @@
-group = 'ashes.of'
 version = '1.0.0-SNAPSHOT'
 
 
@@ -9,7 +8,6 @@ buildscript {
 }
 
 
-apply plugin: 'java'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 
@@ -24,16 +22,10 @@ dependencies {
     compile project(':bomber-squadron-zookeeper')
     compile project(':bomber-example-tests')
 
-    compile     group: 'com.google.guava',              name: 'guava',                          version: '27.0.1-jre'
-    compile     group: 'org.projectlombok',             name: 'lombok',                         version: '1.18.4'
     compile     group: 'org.springframework.boot',      name: 'spring-boot-devtools'
     compile     group: 'org.springframework.boot',      name: 'spring-boot-starter-log4j2'
     compile     group: 'org.springframework.boot',      name: 'spring-boot-starter-webflux'
     compile     group: 'org.springframework.boot',      name: 'spring-boot-starter-rsocket'
+
     testCompile group: 'org.springframework.boot',      name: 'spring-boot-starter-test'
-}
-
-
-compileJava {
-    options.compilerArgs << '-parameters'
 }

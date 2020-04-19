@@ -1,4 +1,3 @@
-group = 'ashes.of'
 version = '1.0.0-SNAPSHOT'
 
 
@@ -9,7 +8,6 @@ buildscript {
 }
 
 
-apply plugin: 'java'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 
@@ -28,9 +26,4 @@ dependencies {
 
     testCompile project(':bomber-example-tests')
     testCompile group: 'org.springframework.boot',      name: 'spring-boot-starter-test'
-}
-
-
-compileJava {
-    options.compilerArgs << '-parameters'
 }

@@ -1,7 +1,4 @@
-group = 'ashes.of'
 version = '1.0.0-SNAPSHOT'
-
-apply plugin: 'java'
 
 
 dependencies {
@@ -18,12 +15,4 @@ dependencies {
     compile('org.apache.zookeeper:zookeeper:3.5.7') {
         exclude group: 'org.slf4j', module: 'slf4j-log4j12'
     }
-
-    compileOnly         group: 'org.projectlombok',     name: 'lombok',                         version: '1.18.8'
-    annotationProcessor group: 'org.projectlombok',     name: 'lombok',                         version: '1.18.8'
-}
-
-
-compileJava {
-    options.compilerArgs << '-parameters'
 }
