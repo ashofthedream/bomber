@@ -1,14 +1,14 @@
-import {HttpClient, HttpErrorResponse, HttpHeaders, HttpParams} from '@angular/common/http';
-import {NzNotificationService} from 'ng-zorro-antd';
+import {HttpClient, HttpHeaders, HttpParams} from '@angular/common/http';
 import {Observable} from 'rxjs';
 import {tap} from 'rxjs/operators';
 import {Injectable} from "@angular/core";
+import {NzNotificationService} from "ng-zorro-antd";
 
 @Injectable({
   providedIn: 'root'
 })
 export class RestService {
-  protected constructor(private readonly http: HttpClient, private readonly  notification: NzNotificationService) {
+  protected constructor(private readonly http: HttpClient, private readonly notification: NzNotificationService) {
   }
 
   public build(): HttpRequestBuilder {

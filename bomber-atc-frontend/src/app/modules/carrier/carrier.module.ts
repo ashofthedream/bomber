@@ -1,5 +1,13 @@
 import {NgModule} from '@angular/core';
-import {en_US, NgZorroAntdModule, NZ_I18N} from 'ng-zorro-antd';
+import {
+  en_US,
+  NgZorroAntdModule,
+  NZ_I18N,
+  NzBadgeModule,
+  NzButtonModule,
+  NzCardModule, NzGridModule, NzPageHeaderModule,
+  NzTableModule, NzTreeModule
+} from 'ng-zorro-antd';
 import {CommonModule, registerLocaleData} from '@angular/common';
 import en from '@angular/common/locales/en';
 import {ActiveCarriersCardComponent} from "./components/active-carriers-card/active-carriers-card.component";
@@ -19,7 +27,14 @@ registerLocaleData(en);
   ],
   imports: [
     CommonModule,
-    NgZorroAntdModule,
+
+    NzBadgeModule,
+    NzButtonModule,
+    NzCardModule,
+    NzGridModule,
+    NzTableModule,
+    NzTreeModule,
+    NzPageHeaderModule,
     CarrierRoutingModule
   ],
   exports: [

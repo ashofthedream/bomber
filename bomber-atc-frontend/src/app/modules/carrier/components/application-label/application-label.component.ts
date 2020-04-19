@@ -1,7 +1,7 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, Input} from '@angular/core';
 import {Application} from "../../../main/models/application";
-import {NzBadgeStatusType} from "ng-zorro-antd/badge/nz-badge.component";
 import {Stage} from "../../../main/models/application-state";
+import {NzBadgeStatusType} from "ng-zorro-antd/badge/types";
 
 @Component({
   selector: 'carriers-app-label',

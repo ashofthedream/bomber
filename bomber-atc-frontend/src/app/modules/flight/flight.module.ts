@@ -1,5 +1,13 @@
 import {NgModule} from '@angular/core';
-import {en_US, NgZorroAntdModule, NZ_I18N} from 'ng-zorro-antd';
+import {
+  en_US,
+  NgZorroAntdModule,
+  NZ_I18N, NzCardModule,
+  NzEmptyModule,
+  NzPageHeaderModule,
+  NzProgressModule,
+  NzTableModule
+} from 'ng-zorro-antd';
 import {CommonModule, registerLocaleData} from '@angular/common';
 import en from '@angular/common/locales/en';
 import {FlightRoutingModule} from "./flight-routing.module";
@@ -19,7 +27,11 @@ registerLocaleData(en);
   ],
   imports: [
     CommonModule,
-    NgZorroAntdModule,
+    NzCardModule,
+    NzEmptyModule,
+    NzPageHeaderModule,
+    NzTableModule,
+    NzProgressModule,
     FlightRoutingModule
   ],
   exports: [
