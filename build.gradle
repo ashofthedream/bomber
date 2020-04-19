@@ -16,9 +16,14 @@ allprojects {
     }
 
 
-    compileJava {
-        options.compilerArgs << '-parameters'
-//        options.compilerArgs << '--enable-preview'
+    tasks.withType(JavaCompile) {
+        options.compilerArgs.add('-parameters')
+        options.compilerArgs.add('--enable-preview')
+    }
+
+
+    test {
+        jvmArgs('--enable-preview')
     }
 
 
