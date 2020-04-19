@@ -10,11 +10,12 @@ dependencies {
 
     compile     group: 'org.springframework.boot',      name: 'spring-boot-starter-webflux',    version: '2.2.6.RELEASE'
 
-    compile('org.springframework.cloud:spring-cloud-starter-zookeeper-all:2.2.1.RELEASE') {
+    compile('org.springframework.cloud:spring-cloud-starter-zookeeper-discovery:2.2.1.RELEASE') {
         exclude group: 'org.apache.zookeeper', module: 'zookeeper'
+//        exclude group: 'org.springframework.cloud', module: 'spring-cloud-starter-netflix-ribbon'
     }
 
-    compile('org.apache.zookeeper:zookeeper:3.4.13') {
+    compile('org.apache.zookeeper:zookeeper:3.5.7') {
         exclude group: 'org.slf4j', module: 'slf4j-log4j12'
     }
 

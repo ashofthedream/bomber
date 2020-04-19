@@ -16,6 +16,7 @@ apply plugin: 'io.spring.dependency-management'
 
 configurations {
     compile.exclude module: 'spring-boot-starter-logging'
+    compile.exclude module: 'slf4j-log4j12'
 }
 
 
@@ -27,12 +28,12 @@ dependencies {
         exclude group: 'org.springframework.cloud', module: 'spring-cloud-starter-netflix-ribbon'
     }
 
-    compile('org.springframework.cloud:spring-cloud-starter-zookeeper-all:2.2.1.RELEASE') {
+    compile('org.springframework.cloud:spring-cloud-starter-zookeeper-discovery:2.2.1.RELEASE') {
         exclude group: 'org.apache.zookeeper', module: 'zookeeper'
         exclude group: 'org.springframework.cloud', module: 'spring-cloud-starter-netflix-ribbon'
     }
 
-    compile('org.apache.zookeeper:zookeeper:3.4.13') {
+    compile('org.apache.zookeeper:zookeeper:3.5.7') {
         exclude group: 'org.slf4j', module: 'slf4j-log4j12'
     }
 
@@ -49,5 +50,5 @@ dependencies {
 
 
 compileJava {
-    options.compilerArgs << '-parameters'
+    options.compilerArgs << '-parameters --enable-preview'
 }

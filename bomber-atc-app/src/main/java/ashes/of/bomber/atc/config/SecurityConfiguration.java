@@ -2,10 +2,12 @@ package ashes.of.bomber.atc.config;
 
 import ashes.of.bomber.atc.config.properties.SecurityProperties;
 import ashes.of.bomber.atc.dto.ResponseEntities;
-import ashes.of.bomber.atc.dto.UserDto;
+import ashes.of.bomber.atc.records.UserRecord;
 import ashes.of.bomber.atc.dto.requests.LoginRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpMethod;
@@ -42,6 +44,7 @@ import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 @EnableWebFluxSecurity
 public class SecurityConfiguration {
+    private static final Logger log = LogManager.getLogger();
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -81,8 +84,7 @@ public class SecurityConfiguration {
 
     private Mono<Void> onAuthenticationSuccess(WebFilterExchange exchange, Authentication authentication) {
         User principal = (User) authentication.getPrincipal();
-        UserDto dto = new UserDto();
-        dto.setUsername(principal.getUsername());
+        UserRecord dto = new UserRecord(principal.getUsername());
         return sendResponse(exchange, ResponseEntities.ok(dto));
     }
 
@@ -104,6 +106,7 @@ public class SecurityConfiguration {
             response.getHeaders().add("Content-Type", "application/json");
             return response.writeWith(body);
         } catch (JsonProcessingException e) {
+            log.error("Can't send response", e);
             response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
             return response.setComplete();
         }
@@ -122,7 +125,7 @@ public class SecurityConfiguration {
     @Bean
     public MapReactiveUserDetailsService userDetailsService(PasswordEncoder passwordEncoder, SecurityProperties properties) {
         UserDetails user = User
-                .withUsername(properties.getUser())
+                .withUsername(properties.getUsername())
                 .password(passwordEncoder.encode(properties.getPassword()))
                 .roles("ADMIN")
                 .build();
@@ -153,7 +156,7 @@ public class SecurityConfiguration {
 
                 .addFilterAt(authFilter, SecurityWebFiltersOrder.AUTHENTICATION)
                 .logout()
-                .logoutUrl("/logout")
+                .logoutUrl("/atc/logout")
                 .logoutSuccessHandler(this::onLogoutSuccess)
 
                 .and()

@@ -2,7 +2,6 @@ package ashes.of.bomber.example.controllers;
 
 import ashes.of.bomber.example.model.User;
 import ashes.of.bomber.example.services.MockService;
-import com.sun.org.glassfish.external.statistics.Stats;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
@@ -12,9 +11,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
@@ -86,6 +82,4 @@ public class UserController {
 
         return ResponseEntity.ok(mockService.getAllUsers());
     }
-
-
 }

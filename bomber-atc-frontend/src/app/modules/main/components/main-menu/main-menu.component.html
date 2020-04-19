@@ -1,12 +1,12 @@
 <ul nz-menu nzMode="inline">
-  <li class="large" nz-menu-item nz-tooltip nzTooltipPlacement="right" nzTooltipTitle="Dashboard" routerLink="/dashboard" >
+  <li nz-menu-item nz-tooltip nzTooltipPlacement="right" nzTooltipTitle="Dashboard" routerLink="/dashboard" nzMatchRouter class="large" >
     <i nz-icon nzType="bomber" nzTheme="fill"></i>
     Bomber
   </li>
 
   <li nz-submenu nzTitle="Carriers" nzIcon="fire" nzOpen="true">
     <ul>
-      <li nz-menu-item routerLink="/carriers/active">
+      <li nz-menu-item routerLink="/carriers/active" nzMatchRouter>
         <i nz-icon nzType="fire" nzTheme="fill"></i>
         <span>Active</span>
       </li>
@@ -15,12 +15,12 @@
 
   <li nz-submenu nzTitle="Test Flights" nzIcon="rocket" nzOpen="true">
     <ul>
-      <li nz-menu-item routerLink="/flights/active">
+      <li nz-menu-item routerLink="/flights/active" nzMatchRouter>
         <i nz-icon nzType="rocket" nzTheme="fill"></i>
         <span>Active</span>
       </li>
 
-      <li nz-menu-item routerLink="/flights/all">
+      <li nz-menu-item routerLink="/flights/all" nzMatchRouter>
         <i nz-icon nzType="rocket"></i>
         <span>All</span>
       </li>
@@ -29,11 +29,11 @@
 
   <li nz-submenu nzTitle="Settings" nzIcon="setting" nzOpen="true">
     <ul>
-      <li nz-menu-item routerLink="/settings/account">
+      <li nz-menu-item routerLink="/settings/account" nzMatchRouter>
         <i nz-icon nzType="user"></i>
         Account
       </li>
-      <li nz-menu-item routerLink="/settings/logout">
+      <li nz-menu-item (click)="logout()">
         <i nz-icon nzType="logout"></i>
         Log out
       </li>

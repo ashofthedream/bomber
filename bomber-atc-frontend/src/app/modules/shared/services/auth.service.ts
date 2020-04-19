@@ -4,6 +4,7 @@ import {Observable, of} from "rxjs";
 import {User} from "../models/user";
 import {Login} from "../models/login";
 import {tap} from "rxjs/operators";
+import {LocalStorageService} from "./local-storage.service";
 
 @Injectable({
   providedIn: 'root'
@@ -12,8 +13,9 @@ export class AuthService {
 
   private user: User;
 
-  constructor(private readonly rest: RestService) {
-    this.user = this.loadUser();
+  constructor(private readonly rest: RestService, private readonly storage: LocalStorageService) {
+    this.user = this.storage.loadUser();
+
   }
 
   authenticated(): Observable<boolean> {
@@ -24,37 +26,39 @@ export class AuthService {
     return !!this.user;
   }
 
-  cleanAuth() {
+  clearAuth() {
     this.user = null;
+    this.storage.clearUser();
+  }
+
+  getUser(): Observable<User> {
+    return this.rest
+        .build()
+        .get('users/current')
+        .pipe(
+            tap((user: User) => this.updateUser(user))
+        )
   }
 
   login(login: Login): Observable<User> {
     return this.rest
         .build()
         .body(login)
-        .post('/login')
+        .post('login')
         .pipe(
-            tap((user: User) => {
-              this.user = user;
-              this.saveUser(user);
-            })
+            tap((user: User) => this.updateUser(user))
         )
   }
 
+  private updateUser(user: User) {
+    this.user = user;
+    this.storage.saveUser(user);
+  }
+
   logout(): Observable<boolean> {
+    this.clearAuth();
     return this.rest
         .build()
-        .post('/logout');
-  }
-
-  private saveUser(user: User) {
-    console.log('saveUser: ', user)
-    localStorage.setItem('bomber.user', JSON.stringify(user));
-  }
-
-  private loadUser(): User {
-    const user = JSON.parse(localStorage.getItem('bomber.user'));
-    console.log('loadUser: ', user)
-    return user;
+        .post('logout');
   }
 }

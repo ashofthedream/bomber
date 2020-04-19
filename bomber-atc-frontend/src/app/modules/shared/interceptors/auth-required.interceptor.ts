@@ -16,7 +16,7 @@ export class AuthRequiredInterceptor implements HttpInterceptor {
         .pipe(
             catchError(err => {
               if (err instanceof HttpErrorResponse && err.status === 401) {
-                this.service.cleanAuth();
+                this.service.clearAuth();
                 this.router.navigate(['/login'])
               }
 

@@ -3,7 +3,6 @@ package ashes.of.bomber.atc.controllers;
 import ashes.of.bomber.atc.services.CarrierService;
 import ashes.of.bomber.atc.dto.CarrierDto;
 import ashes.of.bomber.atc.dto.ResponseEntities;
-import ashes.of.bomber.atc.services.FlightService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.ResponseEntity;

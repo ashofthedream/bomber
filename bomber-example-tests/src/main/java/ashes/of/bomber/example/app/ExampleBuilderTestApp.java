@@ -16,7 +16,6 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.temporal.ChronoUnit;
-import java.util.concurrent.atomic.AtomicLong;
 
 
 /**
@@ -25,7 +24,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public class ExampleBuilderTestApp {
     private static final Logger log = LogManager.getLogger();
 
-    public static void main(String... args) throws InterruptedException {
+    public static void main(String... args) {
         String url = args.length > 0 ? args[0] : "http://localhost:8080";
         int members = args.length > 1 ? Integer.parseInt(args[1]) : 1;
 

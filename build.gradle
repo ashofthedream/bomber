@@ -9,8 +9,10 @@ allprojects {
     apply plugin: 'maven'
     apply plugin: 'maven-publish'
 
-    sourceCompatibility = 1.8
-    targetCompatibility = 1.8
+
+    java {
+        targetCompatibility = JavaVersion.VERSION_14
+    }
 
 
     buildscript {
