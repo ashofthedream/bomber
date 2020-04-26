@@ -1,15 +1,13 @@
-<div class="top-bar">
-    <nz-page-header [nzGhost]="false">
-        <nz-page-header-title>Dashboard</nz-page-header-title>
-    </nz-page-header>
-</div>
+<nz-page-header [nzGhost]="false">
+    <nz-page-header-title>Dashboard</nz-page-header-title>
+</nz-page-header>
 
-<div nz-row nzGutter="20">
-    <div nz-col [nzSpan]="8">
+<div nz-row nzGutter="20" class="lower-block">
+    <div nz-col nzSpan="8">
         <flights-latest-card></flights-latest-card>
     </div>
 
-    <div nz-col [nzSpan]="8">
+    <div nz-col nzSpan="8">
         <carriers-active-card></carriers-active-card>
     </div>
 </div>

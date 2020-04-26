@@ -5,6 +5,7 @@ import {FlightService} from "../../../flight/services/flight.service";
 import {NzTreeNodeOptions} from "ng-zorro-antd";
 import {TestSuite} from "../../../main/models/test-suite";
 import {TestCase} from "../../../main/models/test-case";
+import {interval} from "rxjs";
 
 
 @Component({
@@ -30,6 +31,19 @@ export class ActiveCarriersPageComponent implements OnInit {
 
           this.tree = this.merge(this.tree, nodes);
         });
+
+    interval(3000)
+        .subscribe(value => {
+          this.showChecked(this.tree);
+        })
+  }
+
+  private showChecked(tree: AppTreeNode[]) {
+    tree.filter(n => n.checked)
+        .forEach(n => {
+          console.log("checked: {}", n.key)
+          this.showChecked(n.children);
+        })
   }
 
   private merge(left: AppTreeNode[], right: AppTreeNode[]): AppTreeNode[] {

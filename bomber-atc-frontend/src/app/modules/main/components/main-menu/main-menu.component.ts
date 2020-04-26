@@ -1,8 +1,7 @@
-import {Component} from '@angular/core';
-import {AuthService} from "../../../shared/services/auth.service";
-import {Router} from "@angular/router";
-import {from} from "rxjs";
-import {flatMap} from "rxjs/operators";
+import { Component } from '@angular/core';
+import { Store } from "@ngrx/store";
+import { AtcState } from "../../../shared/store/state/atc.state";
+import { Logout } from "../../../auth/store/actions/auth.actions";
 
 @Component({
   selector: 'atc-main-menu',
@@ -11,14 +10,10 @@ import {flatMap} from "rxjs/operators";
 })
 export class MainMenuComponent {
 
-  constructor(private readonly service: AuthService, private readonly router: Router) {
+  constructor(private readonly store: Store<AtcState>) {
   }
 
   logout() {
-    this.service.logout()
-        .pipe(
-            flatMap(() => from(this.router.navigate(['/login'])))
-        )
-        .subscribe();
+    this.store.dispatch(new Logout());
   }
 }

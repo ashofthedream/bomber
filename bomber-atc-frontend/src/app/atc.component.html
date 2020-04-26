@@ -1,9 +1,7 @@
-<ng-container *ngIf="isAuthenticated(); else router">
+<ng-container *ngIf="authenticated | async; else router">
   <nz-layout class="layout">
-    <nz-sider nzWidth="250" nzTheme="light">
-      <div style="width: 250px">
+    <nz-sider nzWidth="250px" nzTheme="light">
         <atc-main-menu></atc-main-menu>
-      </div>
     </nz-sider>
 
     <nz-content class="content">

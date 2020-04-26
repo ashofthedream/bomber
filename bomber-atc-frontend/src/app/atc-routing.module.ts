@@ -2,7 +2,7 @@ import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router';
 import {DashboardPageComponent} from "./modules/main/components/dashboard-page/dashboard-page.component";
 import {AccountSettingsPageComponent} from "./modules/main/settings/components/account-settings-page/account-settings-page.component";
-import {AuthGuard} from "./modules/shared/guards/auth.guard";
+import {AuthGuard} from "./modules/auth/guards/auth.guard";
 import {LoginPageComponent} from "./modules/main/components/login-page/login-page.component";
 
 
@@ -20,5 +20,5 @@ const routes: Routes = [
   })],
   exports: [RouterModule]
 })
-export class AppRoutingModule {
+export class AtcRoutingModule {
 }

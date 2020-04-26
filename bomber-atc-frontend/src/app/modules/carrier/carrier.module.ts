@@ -14,6 +14,7 @@ import {ActiveCarriersCardComponent} from "./components/active-carriers-card/act
 import {ActiveCarriersPageComponent} from "./components/active-carriers-page/active-carriers-page.component";
 import {ApplicationLabelComponent} from "./components/application-label/application-label.component";
 import {CarrierRoutingModule} from "./carrier-routing.module";
+import {RouterModule} from "@angular/router";
 
 
 registerLocaleData(en);
@@ -27,6 +28,7 @@ registerLocaleData(en);
   ],
   imports: [
     CommonModule,
+    RouterModule,
 
     NzBadgeModule,
     NzButtonModule,

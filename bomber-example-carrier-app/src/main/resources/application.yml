@@ -15,3 +15,17 @@ bomber:
     url: http://localhost:8080
   squadron:
     members: 1
+
+---
+spring:
+  profiles: bomber-9001
+
+server:
+  port: 9001
+
+---
+spring:
+  profiles: bomber-9002
+
+server:
+  port: 9002

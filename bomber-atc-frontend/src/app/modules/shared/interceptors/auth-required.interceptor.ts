@@ -1,14 +1,15 @@
-import {Injectable} from "@angular/core";
-import {HttpErrorResponse, HttpEvent, HttpHandler, HttpInterceptor, HttpRequest} from "@angular/common/http";
-import {Observable, throwError} from "rxjs";
-import {catchError, tap} from "rxjs/operators";
-import {Router} from "@angular/router";
-import {AuthService} from "../services/auth.service";
+import { Injectable } from "@angular/core";
+import { HttpErrorResponse, HttpEvent, HttpHandler, HttpInterceptor, HttpRequest } from "@angular/common/http";
+import { Observable, throwError } from "rxjs";
+import { catchError } from "rxjs/operators";
+import { Store } from "@ngrx/store";
+import { AtcState } from "../store/state/atc.state";
+import { LogoutSuccess } from "../../auth/store/actions/auth.actions";
 
 @Injectable()
 export class AuthRequiredInterceptor implements HttpInterceptor {
 
-  constructor(private readonly service: AuthService, private readonly router: Router) {
+  constructor(private readonly store: Store<AtcState>) {
   }
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
@@ -16,8 +17,7 @@ export class AuthRequiredInterceptor implements HttpInterceptor {
         .pipe(
             catchError(err => {
               if (err instanceof HttpErrorResponse && err.status === 401) {
-                this.service.clearAuth();
-                this.router.navigate(['/login'])
+                this.store.dispatch(new LogoutSuccess());
               }
 
               return throwError(err);

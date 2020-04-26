@@ -1,6 +1,6 @@
 import {async, TestBed} from '@angular/core/testing';
 import {RouterTestingModule} from '@angular/router/testing';
-import {AppComponent} from './app.component';
+import {AtcComponent} from './atc.component';
 
 
 describe('AppComponent', () => {
@@ -10,13 +10,13 @@ describe('AppComponent', () => {
         RouterTestingModule
       ],
       declarations: [
-        AppComponent
+        AtcComponent
       ],
     }).compileComponents();
   }));
 
   it('should create the app', () => {
-    const fixture = TestBed.createComponent(AppComponent);
+    const fixture = TestBed.createComponent(AtcComponent);
     const app = fixture.debugElement.componentInstance;
     expect(app).toBeTruthy();
   });

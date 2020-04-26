@@ -1,9 +1,7 @@
-<div class="top-bar">
-    <nz-page-header [nzGhost]="false">
-        <nz-page-header-title>Active Flight <span *ngIf="flight">#{{flight.id}}</span>
-        </nz-page-header-title>
-    </nz-page-header>
-</div>
+<nz-page-header [nzGhost]="false">
+    <nz-page-header-title>Active Flight <span *ngIf="flight">#{{flight.id}}</span>
+    </nz-page-header-title>
+</nz-page-header>
 
 
 <ng-container *ngIf="flight; else empty">

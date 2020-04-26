@@ -53,10 +53,8 @@ export class HttpRequestBuilder {
 
   _baseUrl: string;
   _body: any;
-
-  options: HttpOptions = {};
-
-  notification: Notification;
+  _options: HttpOptions = {};
+  _notification: Notification;
 
   constructor(private http: HttpClient, private notificationService: NzNotificationService) {
   }
@@ -73,13 +71,13 @@ export class HttpRequestBuilder {
 
   notify(title: string, content: string = ''): HttpRequestBuilder {
     if (title)
-      this.notification = {title, content};
+      this._notification = {title, content};
 
     return this;
   }
 
   withCredentials(): HttpRequestBuilder {
-    this.options.withCredentials = true;
+    this._options.withCredentials = true;
     return this;
   }
 
@@ -89,30 +87,30 @@ export class HttpRequestBuilder {
 
 
   param(name: string, value: any): HttpRequestBuilder {
-    if (!this.options.params)
-      this.options.params = new HttpParams();
+    if (!this._options.params)
+      this._options.params = new HttpParams();
 
-    this.options.params.append(name, value);
+    this._options.params.append(name, value);
 
     return this;
   }
 
   get(url: string): Observable<any> {
-    return this.http.get(`${this._baseUrl}/${url}`, this.options)
+    return this.http.get(`${this._baseUrl}/${url}`, this._options)
         .pipe(
             tap(this.showNotificationIfNeeded)
         )
   }
 
   post(url: string): Observable<any> {
-    return this.http.post(`${this._baseUrl}/${url}`, this._body, this.options)
+    return this.http.post(`${this._baseUrl}/${url}`, this._body, this._options)
         .pipe(
             tap(this.showNotificationIfNeeded)
         )
   }
 
   private showNotificationIfNeeded = () => {
-    const notification = this.notification;
+    const notification = this._notification;
     if (notification)
       this.notificationService.success(notification.title, notification.content)
   };

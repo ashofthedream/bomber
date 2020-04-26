@@ -4,7 +4,7 @@ import {
   en_US,
   NgZorroAntdModule,
   NZ_I18N,
-  NzButtonModule,
+  NzButtonModule, NzCardModule,
   NzFormModule,
   NzGridModule, NzIconModule, NzInputGroupComponent, NzInputModule, NzMentionModule, NzMenuModule,
   NzPageHeaderModule, NzToolTipModule
@@ -17,7 +17,7 @@ import {MainMenuComponent} from "./components/main-menu/main-menu.component";
 import {DashboardPageComponent} from "./components/dashboard-page/dashboard-page.component";
 import {AccountSettingsPageComponent} from "./settings/components/account-settings-page/account-settings-page.component";
 import {SharedModule} from "../shared/shared.module";
-import {AppRoutingModule} from "../../app-routing.module";
+import {AtcRoutingModule} from "../../atc-routing.module";
 import {ReactiveFormsModule} from "@angular/forms";
 import {SettingsLabelComponent} from "./components/settings-label/settings-label.component";
 import {CarrierModule} from "../carrier/carrier.module";
@@ -53,8 +53,9 @@ registerLocaleData(en);
     NzInputModule,
     CarrierModule,
     FlightModule,
-    AppRoutingModule,
-    SharedModule
+    AtcRoutingModule,
+    SharedModule,
+    NzCardModule
   ],
   exports: [
     AccountSettingsPageComponent,

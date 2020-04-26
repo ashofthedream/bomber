@@ -3,7 +3,7 @@
         <a routerLink="/carriers/active">More</a>
     </ng-template>
 
-    <div *ngIf="carriers | async; let list">
+    <div *ngIf="carriers | async; let list;">
         <p *ngFor="let carrier of list">
             <carriers-app-label [app]="carrier.app"></carriers-app-label>
             {{carrier.id}}<br/>
@@ -14,6 +14,5 @@
             No carriers
         </p>
     </div>
-
 
 </nz-card>
