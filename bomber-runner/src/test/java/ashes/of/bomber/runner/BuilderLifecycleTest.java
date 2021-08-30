@@ -7,14 +7,13 @@ import ashes.of.bomber.tests.AllLifecycleMethodsTest;
 import ashes.of.bomber.tests.Counters;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
 
 
 public class BuilderLifecycleTest extends LifecycleTest {
     private static final Logger log = LogManager.getLogger();
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         counters = new Counters();
 

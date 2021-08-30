@@ -1,6 +1,9 @@
 package ashes.of.bomber.example.app;
 
-import ashes.of.bomber.annotations.*;
+import ashes.of.bomber.annotations.LoadTest;
+import ashes.of.bomber.annotations.LoadTestApp;
+import ashes.of.bomber.annotations.Provide;
+import ashes.of.bomber.annotations.Throttle;
 import ashes.of.bomber.builder.TestAppBuilder;
 import ashes.of.bomber.example.app.tests.AccountControllerLoadTest;
 import ashes.of.bomber.example.app.tests.UserControllerLoadTest;

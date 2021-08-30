@@ -2,7 +2,7 @@ version = '1.0.0-SNAPSHOT'
 
 
 dependencies {
-    compile project(':bomber-core')
+    implementation project(':bomber-core')
 
-    compile group: 'org.influxdb',                  name: 'influxdb-java',                  version: '2.14'
+    implementation 'org.influxdb:influxdb-java:2.14'
 }

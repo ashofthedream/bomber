@@ -2,9 +2,11 @@ version = '1.0.0-SNAPSHOT'
 
 
 dependencies {
-    compile project(':bomber-runner')
+    implementation project(':bomber-core')
+    implementation project(':bomber-runner')
 
-    compile group: 'org.openjdk.jmh',               name: 'jmh-core',                       version: '1.21'
-    compile group: 'org.openjdk.jmh',               name: 'jmh-generator-annprocess',       version: '1.21'
+    implementation 'org.hdrhistogram:HdrHistogram:2.1.10'
+    implementation 'org.openjdk.jmh:jmh-core:1.21'
+    implementation 'org.openjdk.jmh:jmh-generator-annprocess:1.21'
 }
 

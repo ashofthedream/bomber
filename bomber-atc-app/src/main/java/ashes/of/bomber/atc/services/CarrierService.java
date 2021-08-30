@@ -54,9 +54,8 @@ public class CarrierService {
 
     public Mono<FlightStartedDto> start(Carrier carrier, Flight flight) {
         URI uri = carrier.getInstance().getUri();
-        StartFlightRequest request = StartFlightRequest.builder()
-                .id(flight.getId())
-                .build();
+        StartFlightRequest request = new StartFlightRequest()
+                .setId(flight.getId());
 
         return webClient.post()
                 .uri(uri + "/applications/start")
@@ -81,10 +80,9 @@ public class CarrierService {
 
 
     private CarrierDto toCarrier(Carrier carrier, ApplicationDto app) {
-        return CarrierDto.builder()
-                .app(app)
-                .id(carrier.getId())
-                .uri(carrier.getInstance().getUri())
-                .build();
+        return new CarrierDto()
+                .setApp(app)
+                .setId(carrier.getId())
+                .setUri(carrier.getInstance().getUri());
     }
 }

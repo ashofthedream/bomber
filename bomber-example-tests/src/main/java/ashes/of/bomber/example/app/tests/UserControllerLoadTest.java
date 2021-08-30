@@ -1,6 +1,11 @@
 package ashes.of.bomber.example.app.tests;
 
-import ashes.of.bomber.annotations.*;
+import ashes.of.bomber.annotations.AfterTestSuite;
+import ashes.of.bomber.annotations.BeforeTestSuite;
+import ashes.of.bomber.annotations.LoadTest;
+import ashes.of.bomber.annotations.LoadTestCase;
+import ashes.of.bomber.annotations.LoadTestSuite;
+import ashes.of.bomber.annotations.Throttle;
 import ashes.of.bomber.tools.Stopwatch;
 import ashes.of.bomber.tools.Tools;
 import org.apache.logging.log4j.LogManager;

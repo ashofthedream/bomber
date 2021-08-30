@@ -1,7 +1,7 @@
 version = '1.0.0-SNAPSHOT'
 
 dependencies {
-    compile project(':bomber-core')
+    implementation project(':bomber-core')
 
-    compile group: 'ashes.of',                      name: 'datadog-client',                 version: '1.2.0'
+    implementation 'ashes.of:datadog-client:1.2.0'
 }

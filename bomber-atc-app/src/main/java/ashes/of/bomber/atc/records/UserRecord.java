@@ -1,9 +1,21 @@
 package ashes.of.bomber.atc.records;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
+public class UserRecord {
+    private String username;
 
-import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.ANY;
+    public UserRecord(String username) {
+        this.username = username;
+    }
 
-@JsonAutoDetect(fieldVisibility = ANY)
-public record UserRecord(String username) {
+    public UserRecord() {
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public UserRecord setUsername(String username) {
+        this.username = username;
+        return this;
+    }
 }

@@ -1,6 +1,11 @@
 package ashes.of.bomber.builder;
 
-import ashes.of.bomber.annotations.*;
+import ashes.of.bomber.annotations.Delay;
+import ashes.of.bomber.annotations.LoadTest;
+import ashes.of.bomber.annotations.LoadTestApp;
+import ashes.of.bomber.annotations.Provide;
+import ashes.of.bomber.annotations.Throttle;
+import ashes.of.bomber.annotations.WarmUp;
 import ashes.of.bomber.core.Settings;
 import ashes.of.bomber.delayer.RandomDelayer;
 import ashes.of.bomber.limiter.Limiter;

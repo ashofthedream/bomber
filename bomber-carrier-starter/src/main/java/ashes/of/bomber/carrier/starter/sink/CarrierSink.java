@@ -18,7 +18,12 @@ import javax.annotation.Nullable;
 import java.net.URI;
 import java.time.Instant;
 
-import static ashes.of.bomber.carrier.dto.events.SinkEventType.*;
+import static ashes.of.bomber.carrier.dto.events.SinkEventType.TEST_APP_FINISH;
+import static ashes.of.bomber.carrier.dto.events.SinkEventType.TEST_APP_START;
+import static ashes.of.bomber.carrier.dto.events.SinkEventType.TEST_CASE_FINISH;
+import static ashes.of.bomber.carrier.dto.events.SinkEventType.TEST_CASE_START;
+import static ashes.of.bomber.carrier.dto.events.SinkEventType.TEST_SUITE_FINISH;
+import static ashes.of.bomber.carrier.dto.events.SinkEventType.TEST_SUITE_START;
 
 @Component
 public class CarrierSink implements Sink {
@@ -89,14 +94,14 @@ public class CarrierSink implements Sink {
     }
 
     private SinkEvent event(SinkEventType type, Instant timestamp, @Nullable Stage stage, @Nullable String testSuite, @Nullable String testCase) {
-        return SinkEvent.builder()
-                .type(type)
-                .timestamp(timestamp.toEpochMilli())
-                .flightId(app.getFlightPlan().getId())
-                .carrierId(registration.getServiceInstance().getId())
-                .stage(stage != null ? stage.name() : null)
-                .testSuite(testSuite)
-                .testCase(testCase)
-                .build();
+        return new SinkEvent()
+                .setType(type)
+                .setTimestamp(timestamp.toEpochMilli())
+                .setFlightId(app.getFlightPlan().getId())
+                .setCarrierId(registration.getServiceInstance().getId())
+                .setStage(stage != null ? stage.name() : null)
+                .setTestSuite(testSuite)
+                .setTestCase(testCase);
+
     }
 }

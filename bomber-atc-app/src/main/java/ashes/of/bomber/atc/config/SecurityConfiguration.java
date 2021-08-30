@@ -74,7 +74,7 @@ public class SecurityConfiguration {
                     try {
                         LoginRequest req = objectMapper.readValue(is, LoginRequest.class);
 
-                        return new UsernamePasswordAuthenticationToken(req.username(), req.password());
+                        return new UsernamePasswordAuthenticationToken(req.getUsername(), req.getPassword());
                     } catch (IOException e) {
                         throw new UncheckedIOException(e);
                     }

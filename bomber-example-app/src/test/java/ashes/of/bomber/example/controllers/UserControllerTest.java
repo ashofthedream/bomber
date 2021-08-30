@@ -8,20 +8,18 @@ import ashes.of.bomber.sink.histogram.HistogramSink;
 import ashes.of.bomber.tools.Record;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.concurrent.atomic.LongAdder;
 
-import static org.junit.Assert.assertEquals;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
+import static org.springframework.test.util.AssertionErrors.assertEquals;
 
-@RunWith(SpringRunner.class)
+//@RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 public class UserControllerTest {
     private static final Logger log = LogManager.getLogger();
@@ -46,7 +44,7 @@ public class UserControllerTest {
     @LocalServerPort
     private int port;
 
-    @Ignore("because example app may return errors")
+    @Disabled("because example app may return errors")
     @Test
     public void testApp() {
         WebClient webClient = WebClient.builder()

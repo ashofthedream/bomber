@@ -1,6 +1,17 @@
 package ashes.of.bomber.builder;
 
-import ashes.of.bomber.annotations.*;
+import ashes.of.bomber.annotations.AfterEachCall;
+import ashes.of.bomber.annotations.AfterTestCase;
+import ashes.of.bomber.annotations.AfterTestSuite;
+import ashes.of.bomber.annotations.BeforeEachCall;
+import ashes.of.bomber.annotations.BeforeTestCase;
+import ashes.of.bomber.annotations.BeforeTestSuite;
+import ashes.of.bomber.annotations.Delay;
+import ashes.of.bomber.annotations.LoadTest;
+import ashes.of.bomber.annotations.LoadTestCase;
+import ashes.of.bomber.annotations.LoadTestSuite;
+import ashes.of.bomber.annotations.Throttle;
+import ashes.of.bomber.annotations.WarmUp;
 import ashes.of.bomber.core.Settings;
 import ashes.of.bomber.delayer.RandomDelayer;
 import ashes.of.bomber.limiter.Limiter;
@@ -88,7 +99,7 @@ public class TestSuiteProcessor<T> {
                 if (beforeCase != null)
                     buildBeforeCase(method, beforeCase);
                 
-                BeforeEach beforeEach = method.getAnnotation(BeforeEach.class);
+                BeforeEachCall beforeEach = method.getAnnotation(BeforeEachCall.class);
                 if (beforeEach != null)
                     buildBeforeEach(method, beforeEach);
 
@@ -96,7 +107,7 @@ public class TestSuiteProcessor<T> {
                 if (testCase != null)
                     buildTestCase(method, testCase);
 
-                AfterEach afterEach = method.getAnnotation(AfterEach.class);
+                AfterEachCall afterEach = method.getAnnotation(AfterEachCall.class);
                 if (afterEach != null)
                     buildAfterEach(method, afterEach);
 
@@ -145,7 +156,7 @@ public class TestSuiteProcessor<T> {
         b.beforeCase(beforeAll.onlyOnce(), instance -> mh.bindTo(instance).invoke());
     }
     
-    private void buildBeforeEach(Method method, BeforeEach beforeEach) throws Exception {
+    private void buildBeforeEach(Method method, BeforeEachCall beforeEach) throws Exception {
         log.debug("Found #BeforeEach method: {}", method.getName());
         MethodHandle mh = MethodHandles.lookup().unreflect(method);
         b.beforeEach(instance -> mh.bindTo(instance).invoke());
@@ -197,7 +208,7 @@ public class TestSuiteProcessor<T> {
         });
     }
 
-    private void buildAfterEach(Method method, AfterEach afterEach) throws Exception {
+    private void buildAfterEach(Method method, AfterEachCall afterEach) throws Exception {
         log.debug("Found @AfterEach method: {}", method.getName());
         MethodHandle mh = MethodHandles.lookup().unreflect(method);
         b.afterEach(instance -> mh.bindTo(instance).invoke());

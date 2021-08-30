@@ -1,14 +1,14 @@
 package ashes.of.bomber.carrier.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-@Data
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
 public class FlightStartedDto {
     private long id;
+
+    public long getId() {
+        return id;
+    }
+
+    public FlightStartedDto setId(long id) {
+        this.id = id;
+        return this;
+    }
 }

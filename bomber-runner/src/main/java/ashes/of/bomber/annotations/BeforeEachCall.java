@@ -7,15 +7,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Marks method that will be invoked once in each thread before all test case starts
+ * Indicates method that will be invoked every time before each test method invocation
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
-public @interface BeforeTestCase {
-
-    /**
-     * Indicates that this method should be invoked only once for all the threads
-     */
-    boolean onlyOnce() default false;
+public @interface BeforeEachCall {
 }

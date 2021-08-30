@@ -1,12 +1,27 @@
 package ashes.of.bomber.carrier.starter.controllers;
 
-import ashes.of.bomber.carrier.dto.*;
+import ashes.of.bomber.carrier.dto.ApplicationDto;
+import ashes.of.bomber.carrier.dto.ApplicationStateDto;
+import ashes.of.bomber.carrier.dto.FlightStartedDto;
+import ashes.of.bomber.carrier.dto.SettingsDto;
+import ashes.of.bomber.carrier.dto.TestCaseDto;
+import ashes.of.bomber.carrier.dto.TestSuiteDto;
+import ashes.of.bomber.carrier.dto.WorkerStateDto;
 import ashes.of.bomber.carrier.dto.requests.StartFlightRequest;
-import ashes.of.bomber.core.*;
+import ashes.of.bomber.core.BomberApp;
+import ashes.of.bomber.core.Settings;
+import ashes.of.bomber.core.StateModel;
+import ashes.of.bomber.core.TestCaseModel;
+import ashes.of.bomber.core.TestSuiteModel;
+import ashes.of.bomber.core.WorkerStateModel;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -26,11 +41,10 @@ public class ApplicationController {
     @GetMapping
     public ResponseEntity<ApplicationDto> getApplications() {
         log.debug("get applications");
-        ApplicationDto dto = ApplicationDto.builder()
-                .name(app.getName())
-                .state(state(app.getState()))
-                .testSuites(testSuites(app.getTestSuites()))
-                .build();
+        ApplicationDto dto = new ApplicationDto()
+                .setName(app.getName())
+                .setState(state(app.getState()))
+                .setTestSuites(testSuites(app.getTestSuites()));
 
         return ResponseEntity.ok(dto);
     }
@@ -40,9 +54,8 @@ public class ApplicationController {
         log.info("start all applications");
         app.startAsync(app.createDefaultPlan(start.getId()));
 
-        return ResponseEntity.ok(FlightStartedDto.builder()
-                .id(start.getId())
-                .build());
+        return ResponseEntity.ok(new FlightStartedDto()
+                .setId(start.getId()));
     }
 
     @PostMapping("/stop")
@@ -60,12 +73,11 @@ public class ApplicationController {
     }
 
     private TestSuiteDto testSuite(TestSuiteModel suite) {
-        return TestSuiteDto.builder()
-                .loadTest(settings(suite.getSettings()))
-                .warmUp(settings(suite.getWarmUp()))
-                .name(suite.getName())
-                .testCases(testCases(suite))
-                .build();
+        return new TestSuiteDto()
+                .setLoadTest(settings(suite.getSettings()))
+                .setWarmUp(settings(suite.getWarmUp()))
+                .setName(suite.getName())
+                .setTestCases(testCases(suite));
     }
 
     private List<TestCaseDto> testCases(TestSuiteModel suite) {
@@ -75,45 +87,41 @@ public class ApplicationController {
     }
 
     private TestCaseDto testCase(TestCaseModel testCase) {
-        return TestCaseDto.builder()
-                .name(testCase.getName())
-                .build();
+        return new TestCaseDto()
+                .setName(testCase.getName());
     }
 
     private SettingsDto settings(Settings settings) {
-        return SettingsDto.builder()
-                .disabled(settings.isDisabled())
-                .duration(settings.getTime().toMillis())
-                .threadsCount(settings.getThreadsCount())
-                .threadIterationsCount(settings.getThreadIterationsCount())
-                .totalIterationsCount(settings.getTotalIterationsCount())
-                .build();
+        return new SettingsDto()
+                .setDisabled(settings.isDisabled())
+                .setDuration(settings.getTime().toMillis())
+                .setThreadsCount(settings.getThreadsCount())
+                .setThreadIterationsCount(settings.getThreadIterationsCount())
+                .setTotalIterationsCount(settings.getTotalIterationsCount());
     }
 
     private ApplicationStateDto state(StateModel state) {
-        return ApplicationStateDto.builder()
-                .stage(state.getStage().name())
-                .settings(settings(state.getSettings()))
-                .testSuite(state.getTestSuite())
-                .testCase(state.getTestCase())
-                .testSuiteStart(state.getTestSuiteStartTime().toEpochMilli())
-                .testCaseStart(state.getTestCaseStartTime().toEpochMilli())
-                .elapsedTime(state.getCaseElapsedTime())
-                .remainTime(state.getCaseRemainTime())
-                .remainTotalIterations(state.getRemainIterationsCount())
-                .errorsCount(state.getErrorCount())
-                .workers(state.getWorkersState().stream()
+        return new ApplicationStateDto()
+                .setStage(state.getStage().name())
+                .setSettings(settings(state.getSettings()))
+                .setTestSuite(state.getTestSuite())
+                .setTestCase(state.getTestCase())
+                .setTestSuiteStart(state.getTestSuiteStartTime().toEpochMilli())
+                .setTestCaseStart(state.getTestCaseStartTime().toEpochMilli())
+                .setElapsedTime(state.getCaseElapsedTime())
+                .setRemainTime(state.getCaseRemainTime())
+                .setRemainTotalIterations(state.getRemainIterationsCount())
+                .setErrorsCount(state.getErrorCount())
+                .setWorkers(state.getWorkersState().stream()
                         .map(this::workerState)
-                        .collect(Collectors.toList()))
-                .build();
+                        .collect(Collectors.toList()));
     }
 
     private WorkerStateDto workerState(WorkerStateModel state) {
-        return WorkerStateDto.builder()
-                .name(state.getWorker())
-                .iterationsCount(state.getCurrentIterationCount())
-                .remainIterationsCount(state.getRemainIterationsCount())
-                .errorsCount(state.getErrorsCount())
-                .build();
+        return new WorkerStateDto()
+                .setName(state.getWorker())
+                .setIterationsCount(state.getCurrentIterationCount())
+                .setRemainIterationsCount(state.getRemainIterationsCount())
+                .setErrorsCount(state.getErrorsCount());
     }
 }

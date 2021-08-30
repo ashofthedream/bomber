@@ -63,6 +63,4 @@ public interface BomberApp {
     void await() throws InterruptedException;
 
     void stop();
-
-
 }

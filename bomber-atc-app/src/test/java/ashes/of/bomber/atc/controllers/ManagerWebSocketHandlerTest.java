@@ -4,9 +4,8 @@ import ashes.of.bomber.atc.dto.requests.LoginRequest;
 import ashes.of.bomber.atc.utils.HttpUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.core.io.buffer.DefaultDataBuffer;
@@ -14,7 +13,6 @@ import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -31,7 +29,7 @@ import java.time.Duration;
 
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
-@RunWith(SpringRunner.class)
+//@RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 public class ManagerWebSocketHandlerTest {
     private static final Logger log = LogManager.getLogger();
@@ -39,7 +37,7 @@ public class ManagerWebSocketHandlerTest {
     @LocalServerPort
     private int port;
 
-    @Ignore
+    @Disabled
     @Test
     public void testWebSocket() {
         WebClient webClient = WebClient.builder()

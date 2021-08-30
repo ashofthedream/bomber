@@ -2,17 +2,18 @@ version = '1.0.0-SNAPSHOT'
 
 
 dependencies {
-    compile project(':bomber-runner')
-    compile project(':bomber-carrier-dto')
+    implementation project(':bomber-core')
+    implementation project(':bomber-runner')
+    implementation project(':bomber-carrier-dto')
 
-    compile     group: 'org.springframework.boot',      name: 'spring-boot-starter-webflux',    version: '2.2.6.RELEASE'
+    implementation 'org.springframework.boot:spring-boot-starter-webflux:2.5.4'
 
-    compile('org.springframework.cloud:spring-cloud-starter-zookeeper-discovery:2.2.1.RELEASE') {
+    implementation('org.springframework.cloud:spring-cloud-starter-zookeeper-discovery:2.2.5.RELEASE') {
         exclude group: 'org.apache.zookeeper', module: 'zookeeper'
 //        exclude group: 'org.springframework.cloud', module: 'spring-cloud-starter-netflix-ribbon'
     }
 
-    compile('org.apache.zookeeper:zookeeper:3.5.7') {
+    implementation('org.apache.zookeeper:zookeeper:3.5.7') {
         exclude group: 'org.slf4j', module: 'slf4j-log4j12'
     }
 }

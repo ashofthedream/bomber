@@ -4,13 +4,19 @@ import ashes.of.bomber.core.Settings;
 import ashes.of.bomber.delayer.Delayer;
 import ashes.of.bomber.delayer.NoDelayDelayer;
 import ashes.of.bomber.limiter.Limiter;
-import ashes.of.bomber.methods.LifeCycleMethod;
 import ashes.of.bomber.methods.LifeCycleHolder;
-import ashes.of.bomber.methods.TestCaseMethodWithoutTools;
-import ashes.of.bomber.runner.*;
+import ashes.of.bomber.methods.LifeCycleMethod;
 import ashes.of.bomber.methods.TestCaseMethodWithTools;
+import ashes.of.bomber.methods.TestCaseMethodWithoutTools;
+import ashes.of.bomber.runner.Environment;
+import ashes.of.bomber.runner.TestCase;
+import ashes.of.bomber.runner.TestSuite;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 

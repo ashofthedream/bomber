@@ -1,7 +1,7 @@
 package ashes.of.bomber.atc.controllers;
 
-import ashes.of.bomber.atc.dto.flights.FlightDto;
 import ashes.of.bomber.atc.dto.flights.FlightDataDto;
+import ashes.of.bomber.atc.dto.flights.FlightDto;
 import ashes.of.bomber.atc.dto.flights.FlightRecordDto;
 import ashes.of.bomber.atc.dto.flights.FlightsStartedDto;
 import ashes.of.bomber.atc.model.Flight;
@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.Nullable;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,7 +47,8 @@ public class FlightController {
         return flightService.getActive()
                 .map(this::toFlight);
     }
-// start with flight plan
+
+    // start with flight plan
     @PostMapping("/start")
     public Mono<FlightsStartedDto> start() {
         log.debug("start all flights on all active carriers");
@@ -57,9 +57,8 @@ public class FlightController {
         return carrierService.getCarriers()
                 .flatMap(carrier -> carrierService.start(carrier, flight))
                 .collectList()
-                .map(flights -> FlightsStartedDto.builder()
-                        .flights(flights)
-                        .build());
+                .map(flights -> new FlightsStartedDto()
+                        .setFlights(flights));
     }
 
     @PostMapping("/{carrierId}/applications/{appId}/start")
@@ -69,9 +68,8 @@ public class FlightController {
         Flight flight = flightService.startFlight();
         return carrierService.getCarrier(carrierId)
                 .flatMap(carrier -> carrierService.start(carrier, flight))
-                .map(started -> FlightsStartedDto.builder()
-                        .flights(Collections.singletonList(started))
-                        .build());
+                .map(started -> new FlightsStartedDto()
+                        .setFlights(List.of(started)));
     }
 
 
@@ -86,19 +84,17 @@ public class FlightController {
 
             FlightRecordDto actual = toFlightRecord(data.getActual());
 
-            FlightDataDto dto = FlightDataDto.builder()
-                    .carrierId(carrierId)
-                    .records(records)
-                    .actual(actual)
-                    .build();
+            FlightDataDto dto = new FlightDataDto()
+                    .setCarrierId(carrierId)
+                    .setRecords(records)
+                    .setActual(actual);
 
             all.put(carrierId, dto);
         });
 
-        return FlightDto.builder()
-                .id(flight.getId())
-                .data(all)
-                .build();
+        return new FlightDto()
+                .setId(flight.getId())
+                .setData(all);
     }
 
     @Nullable
@@ -106,12 +102,11 @@ public class FlightController {
         if (record == null)
             return null;
 
-        return FlightRecordDto.builder()
-                .timestamp(record.getTimestamp())
-                .type(record.getType())
-                .testSuite(record.getTestSuite())
-                .testCase(record.getTestCase())
-                .state(record.getState())
-                .build();
+        return new FlightRecordDto()
+                .setTimestamp(record.getTimestamp())
+                .setType(record.getType())
+                .setTestSuite(record.getTestSuite())
+                .setTestCase(record.getTestCase())
+                .setState(record.getState());
     }
 }

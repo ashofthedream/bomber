@@ -1,18 +1,37 @@
 package ashes.of.bomber.carrier.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-@Builder
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class ApplicationDto {
     private String name;
     private ApplicationStateDto state;
     private List<TestSuiteDto> testSuites;
+
+    public String getName() {
+        return name;
+    }
+
+    public ApplicationDto setName(String name) {
+        this.name = name;
+        return this;
+    }
+
+    public ApplicationStateDto getState() {
+        return state;
+    }
+
+    public ApplicationDto setState(ApplicationStateDto state) {
+        this.state = state;
+        return this;
+    }
+
+    public List<TestSuiteDto> getTestSuites() {
+        return testSuites;
+    }
+
+    public ApplicationDto setTestSuites(List<TestSuiteDto> testSuites) {
+        this.testSuites = testSuites;
+        return this;
+    }
 }
