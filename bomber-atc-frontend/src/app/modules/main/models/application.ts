@@ -1,7 +1,7 @@
-import {TestSuite} from "./test-suite";
-import {ApplicationState} from "./application-state";
+import { ApplicationState } from './application-state';
+import { TestSuite } from './test-suite';
 
-export class Application {
+export interface Application {
   name: string;
   state: ApplicationState;
   testSuites: TestSuite[];

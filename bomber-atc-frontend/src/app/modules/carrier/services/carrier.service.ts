@@ -1,8 +1,8 @@
-import { Injectable } from "@angular/core";
-import { RestService } from "../../shared/services/rest.service";
-import { Observable, of } from "rxjs";
-import { Carrier } from "../models/carrier";
-import { catchError } from "rxjs/operators";
+import { Injectable } from '@angular/core';
+import { Observable, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+import { RestService } from '../../shared/services/rest.service';
+import { Carrier } from '../models/carrier';
 
 @Injectable({
   providedIn: 'root'

@@ -1,13 +1,13 @@
-import { Injectable } from "@angular/core";
-import { Actions, Effect, ofType } from "@ngrx/effects";
-import { CarrierService } from "../../services/carrier.service";
-import { AtcState } from "../../../shared/store/state/atc.state";
-import { Store } from "@ngrx/store";
-import { CarrierAction, GetActiveCarriers, GetActiveCarriersSuccess } from "../actions/carrier.actions";
-import { filter, map, switchMap, tap } from "rxjs/operators";
-import { Observable, timer } from "rxjs";
-import { AuthService } from "../../../auth/services/auth.service";
-import { isAuthenticated } from "../../../auth/store/selectors/auth.selectors";
+import { Injectable } from '@angular/core';
+import { Actions, Effect, ofType } from '@ngrx/effects';
+import { CarrierService } from '../services/carrier.service';
+import { AtcState } from '../../shared/store/atc.state';
+import { Store } from '@ngrx/store';
+import { CarrierAction, GetActiveCarriers, GetActiveCarriersSuccess } from './carrier.actions';
+import { filter, map, switchMap, tap } from 'rxjs/operators';
+import { Observable, timer } from 'rxjs';
+import { AuthService } from '../../auth/services/auth.service';
+import { isAuthenticated } from '../../auth/store/auth.selectors';
 
 @Injectable()
 export class CarrierEffects {
@@ -25,7 +25,7 @@ export class CarrierEffects {
             switchMap(n => this.store.select(isAuthenticated)),
             filter(auth => auth),
             map(n => new GetActiveCarriers())
-        )
+        );
   }
 
   @Effect()
@@ -33,7 +33,7 @@ export class CarrierEffects {
     return this.actions
         .pipe(
             tap(action => console.log(action)),
-            ofType<GetActiveCarriers>(CarrierAction.GetActiveCarriers),
+            ofType(CarrierAction.GetActiveCarriers),
             switchMap(() => this.carrierService.getActiveCarriers()),
             map(carriers => new GetActiveCarriersSuccess(carriers))
         );

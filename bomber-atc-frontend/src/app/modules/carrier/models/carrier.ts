@@ -1,9 +1,9 @@
-import {Application} from "../../main/models/application";
+import { Application } from '../../main/models/application';
 
 export class Carrier {
   id: string;
   uri: string;
   app: Application;
 
-  selected: boolean = true;
+  selected = true;
 }

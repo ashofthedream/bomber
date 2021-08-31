@@ -1,3 +1,4 @@
+import { Injectable } from '@angular/core';
 import {
   ActivatedRouteSnapshot,
   CanActivate,
@@ -5,13 +6,12 @@ import {
   Router,
   RouterStateSnapshot,
   UrlTree
-} from "@angular/router";
-import { Injectable } from "@angular/core";
-import { Observable } from "rxjs";
-import { AtcState } from "../../shared/store/state/atc.state";
-import { Store } from "@ngrx/store";
-import { map } from "rxjs/operators";
-import { isAuthenticated } from "../store/selectors/auth.selectors";
+} from '@angular/router';
+import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { AtcState } from '../../shared/store/atc.state';
+import { isAuthenticated } from '../store/auth.selectors';
 
 @Injectable({
   providedIn: 'root'

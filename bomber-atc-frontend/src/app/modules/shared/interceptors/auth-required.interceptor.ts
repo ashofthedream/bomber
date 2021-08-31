@@ -1,10 +1,10 @@
-import { Injectable } from "@angular/core";
-import { HttpErrorResponse, HttpEvent, HttpHandler, HttpInterceptor, HttpRequest } from "@angular/common/http";
-import { Observable, throwError } from "rxjs";
-import { catchError } from "rxjs/operators";
-import { Store } from "@ngrx/store";
-import { AtcState } from "../store/state/atc.state";
-import { LogoutSuccess } from "../../auth/store/actions/auth.actions";
+import { HttpErrorResponse, HttpEvent, HttpHandler, HttpInterceptor, HttpRequest } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { Store } from '@ngrx/store';
+import { Observable, throwError } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+import { LogoutSuccess } from '../../auth/store/auth.actions';
+import { AtcState } from '../store/atc.state';
 
 @Injectable()
 export class AuthRequiredInterceptor implements HttpInterceptor {

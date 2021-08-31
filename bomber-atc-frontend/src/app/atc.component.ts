@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Store } from "@ngrx/store";
-import { AtcState } from "./modules/shared/store/state/atc.state";
-import { GetUser } from "./modules/shared/store/actions/user.actions";
-import { isAuthenticated } from "./modules/auth/store/selectors/auth.selectors";
+import { AtcState } from "./modules/shared/store/atc.state";
+import { GetUser } from "./modules/shared/store/user.actions";
+import { isAuthenticated } from "./modules/auth/store/auth.selectors";
 
 
 @Component({

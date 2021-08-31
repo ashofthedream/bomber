@@ -1,13 +1,13 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {Subscription, timer} from "rxjs";
-import {flatMap} from "rxjs/operators";
-import {FlightService} from "../../services/flight.service";
-import {Flight} from "../../models/flight";
-import {FlightData} from "../../models/flight-data";
-import {ApplicationState} from "../../../main/models/application-state";
+import {Subscription, timer} from 'rxjs';
+import {flatMap} from 'rxjs/operators';
+import {FlightService} from '../../services/flight.service';
+import {Flight} from '../../models/flight';
+import {FlightData} from '../../models/flight-data';
+import {ApplicationState} from '../../../main/models/application-state';
 
 @Component({
-  selector: 'flights-active-page',
+  selector: 'atc-flights-active-page',
   templateUrl: './active-flight-page.component.html'
 })
 export class ActiveFlightPageComponent implements OnInit, OnDestroy {
@@ -29,13 +29,15 @@ export class ActiveFlightPageComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this.flightSub)
+    if (this.flightSub) {
       this.flightSub.unsubscribe();
+    }
   }
 
   flightData(): FlightData[] {
-    if (this.flight)
+    if (this.flight) {
       return Object.values(this.flight.data);
+    }
 
     return [];
   }

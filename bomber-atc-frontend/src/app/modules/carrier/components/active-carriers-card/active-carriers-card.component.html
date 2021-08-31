@@ -5,7 +5,7 @@
 
     <div *ngIf="carriers | async; let list;">
         <p *ngFor="let carrier of list">
-            <carriers-app-label [app]="carrier.app"></carriers-app-label>
+            <atc-carriers-app-label [app]="carrier.app"></atc-carriers-app-label>
             {{carrier.id}}<br/>
             <a>{{carrier.uri}}</a>
         </p>

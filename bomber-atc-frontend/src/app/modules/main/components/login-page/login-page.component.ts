@@ -1,10 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from "@angular/forms";
-import { AuthService } from "../../../auth/services/auth.service";
-import { Router } from "@angular/router";
-import { Store } from "@ngrx/store";
-import { AtcState } from "../../../shared/store/state/atc.state";
-import { Login } from "../../../auth/store/actions/auth.actions";
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
+import { Store } from '@ngrx/store';
+import { AuthService } from '../../../auth/services/auth.service';
+import { Login } from '../../../auth/store/auth.actions';
+import { AtcState } from '../../../shared/store/atc.state';
 
 @Component({
   selector: 'atc-login-page',
@@ -35,7 +35,8 @@ export class LoginPageComponent implements OnInit {
       control.updateValueAndValidity();
     }
 
-    if (this.form.valid)
-      this.store.dispatch(new Login(this.form.value))
+    if (this.form.valid) {
+      this.store.dispatch(new Login(this.form.value));
+    }
   }
 }

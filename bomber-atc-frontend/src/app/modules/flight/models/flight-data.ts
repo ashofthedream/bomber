@@ -1,6 +1,6 @@
-import {FlightRecord} from "./flight-record";
+import { FlightRecord } from './flight-record';
 
-export class FlightData {
+export interface FlightData {
   carrierId: string;
   records: FlightRecord[];
   actual: FlightRecord;

@@ -1,14 +1,14 @@
-import {empty, Observable, ObservableInput, OperatorFunction} from "rxjs";
-import {flatMap, isEmpty} from "rxjs/operators";
-import {of} from "rxjs/internal/observable/of";
+import { empty, Observable, ObservableInput, OperatorFunction } from 'rxjs';
+import { of } from 'rxjs/internal/observable/of';
+import { flatMap, isEmpty } from 'rxjs/operators';
 
 export function switchIfEmpty<T, R>(ifEmpty: ObservableInput<R>): OperatorFunction<T, T | R> {
   return (source: Observable<T | R>) => {
     return source.pipe(
         isEmpty(),
         flatMap(e => e ? ifEmpty : source)
-    ) as Observable<T | R>
-  }
+    ) as Observable<T | R>;
+  };
 }
 
 

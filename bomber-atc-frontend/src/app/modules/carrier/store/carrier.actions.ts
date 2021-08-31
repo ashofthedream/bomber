@@ -1,5 +1,5 @@
-import { Action } from "@ngrx/store";
-import { Carrier } from "../../models/carrier";
+import { Action } from '@ngrx/store';
+import { Carrier } from '../models/carrier';
 
 export enum CarrierAction {
   GetActiveCarriers = '[Carrier] Get Active Carriers',

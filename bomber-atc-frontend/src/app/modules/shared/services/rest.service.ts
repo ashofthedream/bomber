@@ -1,8 +1,8 @@
 import {HttpClient, HttpHeaders, HttpParams} from '@angular/common/http';
 import {Observable} from 'rxjs';
 import {tap} from 'rxjs/operators';
-import {Injectable} from "@angular/core";
-import {NzNotificationService} from "ng-zorro-antd";
+import {Injectable} from '@angular/core';
+import { NzNotificationService } from 'ng-zorro-antd/notification';
 
 @Injectable({
   providedIn: 'root'
@@ -70,8 +70,9 @@ export class HttpRequestBuilder {
   }
 
   notify(title: string, content: string = ''): HttpRequestBuilder {
-    if (title)
+    if (title) {
       this._notification = {title, content};
+    }
 
     return this;
   }
@@ -87,8 +88,9 @@ export class HttpRequestBuilder {
 
 
   param(name: string, value: any): HttpRequestBuilder {
-    if (!this._options.params)
+    if (!this._options.params) {
       this._options.params = new HttpParams();
+    }
 
     this._options.params.append(name, value);
 
@@ -99,19 +101,20 @@ export class HttpRequestBuilder {
     return this.http.get(`${this._baseUrl}/${url}`, this._options)
         .pipe(
             tap(this.showNotificationIfNeeded)
-        )
+        );
   }
 
   post(url: string): Observable<any> {
     return this.http.post(`${this._baseUrl}/${url}`, this._body, this._options)
         .pipe(
             tap(this.showNotificationIfNeeded)
-        )
+        );
   }
 
   private showNotificationIfNeeded = () => {
     const notification = this._notification;
-    if (notification)
-      this.notificationService.success(notification.title, notification.content)
-  };
+    if (notification) {
+      this.notificationService.success(notification.title, notification.content);
+    }
+  }
 }

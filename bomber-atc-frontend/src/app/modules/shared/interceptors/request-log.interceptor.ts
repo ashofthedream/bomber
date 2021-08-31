@@ -1,7 +1,7 @@
-import { Injectable } from "@angular/core";
-import { HttpEvent, HttpHandler, HttpInterceptor, HttpRequest, HttpResponse } from "@angular/common/http";
-import { Observable } from "rxjs";
-import { tap } from "rxjs/internal/operators/tap";
+import { HttpEvent, HttpHandler, HttpInterceptor, HttpRequest, HttpResponse } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { tap } from 'rxjs/internal/operators/tap';
 
 
 @Injectable()

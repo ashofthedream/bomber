@@ -1,10 +1,10 @@
 import { Component } from '@angular/core';
-import { Store } from "@ngrx/store";
-import { AtcState } from "../../../shared/store/state/atc.state";
-import { activeCarriers } from "../../store/selectors/carrier.selector";
+import { Store } from '@ngrx/store';
+import { AtcState } from '../../../shared/store/atc.state';
+import { activeCarriers } from '../../store/carrier.selectors';
 
 @Component({
-  selector: 'carriers-active-card',
+  selector: 'atc-carriers-active-card',
   templateUrl: './active-carriers-card.component.html'
 })
 export class ActiveCarriersCardComponent {

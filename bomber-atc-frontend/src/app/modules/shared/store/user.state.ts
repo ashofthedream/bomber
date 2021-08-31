@@ -1,4 +1,4 @@
-import { User } from "../../models/user";
+import { User } from '../models/user';
 
 export interface UserState {
   user: User;
@@ -6,4 +6,4 @@ export interface UserState {
 
 export const initialUserState: UserState = {
   user: null,
-}
+};

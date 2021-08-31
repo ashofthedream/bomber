@@ -1,6 +1,6 @@
-import {FlightData} from "./flight-data";
+import { FlightData } from './flight-data';
 
-export class Flight {
+export interface Flight {
   id: number;
-  data: Map<string, FlightData>
+  data: Map<string, FlightData>;
 }

@@ -1,4 +1,4 @@
-import { Carrier } from "../../models/carrier";
+import { Carrier } from '../models/carrier';
 
 export interface CarrierState {
   active: Carrier[];
@@ -6,4 +6,4 @@ export interface CarrierState {
 
 export const initialCarrierState: CarrierState = {
   active: []
-}
+};

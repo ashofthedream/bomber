@@ -1,9 +1,9 @@
-import {Injectable} from "@angular/core";
-import {Observable} from "rxjs";
-import {Carrier} from "../../carrier/models/carrier";
-import {Application} from "../../main/models/application";
-import {RestService} from "../../shared/services/rest.service";
-import {Flight} from "../models/flight";
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { Carrier } from '../../carrier/models/carrier';
+import { Application } from '../../main/models/application';
+import { RestService } from '../../shared/services/rest.service';
+import { Flight } from '../models/flight';
 
 @Injectable({
   providedIn: 'root'

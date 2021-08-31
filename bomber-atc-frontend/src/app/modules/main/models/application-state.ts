@@ -1,7 +1,7 @@
-import {WorkerState} from "./worker-state";
-import {Settings} from "./settings";
+import {WorkerState} from './worker-state';
+import {Settings} from './settings';
 
-export class ApplicationState {
+export interface ApplicationState {
   stage: Stage;
   settings: Settings;
   testSuite: string;

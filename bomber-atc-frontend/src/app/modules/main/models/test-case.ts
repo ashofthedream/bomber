@@ -1,3 +1,3 @@
-export class TestCase {
+export interface TestCase {
   name: string;
 }

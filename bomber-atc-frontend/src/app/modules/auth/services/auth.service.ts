@@ -1,11 +1,11 @@
-import { Injectable } from "@angular/core";
-import { RestService } from "../../shared/services/rest.service";
-import { empty, Observable } from "rxjs";
-import { User } from "../../shared/models/user";
-import { LoginRequest } from "../model/login.request";
-import { catchError } from "rxjs/operators";
-import { Router } from "@angular/router";
-import { UserService } from "../../shared/services/user.service";
+import { Injectable } from '@angular/core';
+import { Router } from '@angular/router';
+import { empty, Observable } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+import { User } from '../../shared/models/user';
+import { RestService } from '../../shared/services/rest.service';
+import { UserService } from '../../shared/services/user.service';
+import { LoginRequest } from '../model/login.request';
 
 @Injectable({
   providedIn: 'root'
@@ -26,9 +26,9 @@ export class AuthService {
         .pipe(
             catchError((err, caught) => {
               console.log('not working bro', err);
-              return empty()
+              return empty();
             })
-        )
+        );
   }
 
   loginSuccessful(user: User) {

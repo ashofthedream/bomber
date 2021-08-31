@@ -1,7 +1,7 @@
-import {TestCase} from "./test-case";
-import {Settings} from "./settings";
+import { Settings } from './settings';
+import { TestCase } from './test-case';
 
-export class TestSuite {
+export interface TestSuite {
   name: string;
   loadTest: Settings;
   warmUp: Settings;

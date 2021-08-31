@@ -1,8 +1,8 @@
-import { Injectable } from "@angular/core";
-import { LocalStorageService } from "./local-storage.service";
-import { Observable } from "rxjs";
-import { User } from "../models/user";
-import { switchIfEmpty } from "../rx/switch-if-empty";
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { User } from '../models/user';
+import { switchIfEmpty } from '../rx/switch-if-empty';
+import { LocalStorageService } from './local-storage.service';
 
 @Injectable({
   providedIn: 'root'
@@ -18,7 +18,7 @@ export class UserService {
   }
 
   saveUser(user: User) {
-    this.storage.save('bomber.atc.user', user)
+    this.storage.save('bomber.atc.user', user);
   }
 
   removeUser() {

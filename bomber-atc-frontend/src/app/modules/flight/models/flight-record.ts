@@ -1,6 +1,6 @@
-import {ApplicationState} from "../../main/models/application-state";
+import { ApplicationState } from '../../main/models/application-state';
 
-export class FlightRecord {
+export interface FlightRecord {
   timestamp: number;
   type: string;
   testSuite: string;

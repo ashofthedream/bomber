@@ -1,4 +1,4 @@
-export class Settings {
+export interface Settings {
   disabled: boolean;
   duration: number;
   threadsCount: number;

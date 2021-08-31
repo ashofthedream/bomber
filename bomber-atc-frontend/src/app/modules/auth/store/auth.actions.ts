@@ -1,6 +1,6 @@
-import { Action } from "@ngrx/store";
-import { User } from "../../../shared/models/user";
-import { LoginRequest } from "../../model/login.request";
+import { Action } from '@ngrx/store';
+import { User } from '../../shared/models/user';
+import { LoginRequest } from '../model/login.request';
 
 export enum AuthAction {
   Login = '[Auth] Log In',

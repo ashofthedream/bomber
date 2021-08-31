@@ -1,10 +1,10 @@
-import { AuthService } from "../../services/auth.service";
-import { Actions, Effect, ofType } from "@ngrx/effects";
-import { Observable } from "rxjs";
-import { map, switchMap, tap } from "rxjs/operators";
-import { AuthAction, Login, LoginSuccess, LogoutSuccess } from "../actions/auth.actions";
-import { Injectable } from "@angular/core";
-import { GetUserSuccess } from "../../../shared/store/actions/user.actions";
+import { AuthService } from '../services/auth.service';
+import { Actions, Effect, ofType } from '@ngrx/effects';
+import { Observable } from 'rxjs';
+import { map, switchMap, tap } from 'rxjs/operators';
+import { AuthAction, Login, LoginSuccess, LogoutSuccess } from './auth.actions';
+import { Injectable } from '@angular/core';
+import { GetUserSuccess } from '../../shared/store/user.actions';
 
 @Injectable()
 export class AuthEffects {

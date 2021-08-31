@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
-import { Store } from "@ngrx/store";
-import { AtcState } from "../../../shared/store/state/atc.state";
-import { Logout } from "../../../auth/store/actions/auth.actions";
+import { Store } from '@ngrx/store';
+import { Logout } from '../../../auth/store/auth.actions';
+import { AtcState } from '../../../shared/store/atc.state';
 
 @Component({
   selector: 'atc-main-menu',
