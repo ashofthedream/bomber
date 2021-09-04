@@ -1,7 +1,7 @@
 package ashes.of.bomber.squadron.zookeeper;
 
 import ashes.of.bomber.squadron.Barrier;
-import ashes.of.bomber.core.Stage;
+import ashes.of.bomber.flight.Stage;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.recipes.barriers.DistributedDoubleBarrier;
 import org.apache.curator.framework.recipes.nodes.PersistentNode;

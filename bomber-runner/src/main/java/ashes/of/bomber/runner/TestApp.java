@@ -1,11 +1,11 @@
 package ashes.of.bomber.runner;
 
-import ashes.of.bomber.core.Settings;
+import ashes.of.bomber.flight.Settings;
 import ashes.of.bomber.descriptions.TestAppStateDescription;
 import ashes.of.bomber.descriptions.TestAppDescription;
 import ashes.of.bomber.descriptions.TestCaseDescription;
 import ashes.of.bomber.descriptions.TestSuiteDescription;
-import ashes.of.bomber.descriptions.WorkerStateDescription;
+import ashes.of.bomber.descriptions.WorkerDescription;
 import ashes.of.bomber.flight.FlightReport;
 import ashes.of.bomber.flight.FlightPlan;
 import ashes.of.bomber.flight.TestCasePlan;
@@ -36,6 +36,7 @@ public class TestApp {
     private static final Logger log = LogManager.getLogger();
 
     private static final RunnerState IDLE = new RunnerState(() -> true);
+
     private final AtomicLong flightPlanSeq = new AtomicLong();
 
     private final String name;
@@ -87,16 +88,16 @@ public class TestApp {
         return start(creteDefaultPlan(id));
     }
 
-    public FlightReport start(FlightPlan plan) {
-        this.plan = plan;
+    public FlightReport start(FlightPlan flightPlan) {
+        this.plan = flightPlan;
         ThreadContext.put("bomberApp", name);
-        ThreadContext.put("flightId", String.valueOf(plan.getId()));
+        ThreadContext.put("flightId", String.valueOf(flightPlan.getId()));
 
-        List<String> testSuiteNames = plan.getTestSuites().stream()
+        List<String> testSuiteNames = flightPlan.getTestSuites().stream()
                 .map(testSuite -> String.format("%s %s", testSuite.getName(), testSuite.getTestCases()))
                 .collect(Collectors.toList());
 
-        log.info("start flight: {} of test app with {} suites: {}", plan.getId(), plan.getTestSuites().size(), testSuiteNames);
+        log.info("start flight: {} of test app with {} suites: {}", flightPlan.getId(), flightPlan.getTestSuites().size(), testSuiteNames);
 
         ScheduledExecutorService watcherEx = Executors.newSingleThreadScheduledExecutor();
 
@@ -125,14 +126,14 @@ public class TestApp {
             Map<String, TestSuite<?>> suitesByName = testSuites.stream()
                     .collect(Collectors.toMap(TestSuite::getName, suite -> suite));
 
-            plan.getTestSuites()
-                    .forEach(planned -> {
-                        log.debug("try to run testSuite: {}", planned.getName());
-                        TestSuite<Object> testSuite = (TestSuite<Object>) suitesByName.get(planned.getName());
+            flightPlan.getTestSuites()
+                    .forEach(testSuitePlan -> {
+                        log.debug("try to run testSuite: {}", testSuitePlan.getName());
+                        TestSuite<Object> testSuite = (TestSuite<Object>) suitesByName.get(testSuitePlan.getName());
 
                         RunnerState state = new RunnerState(this::isStopped);
                         this.state = state;
-                        runner.startTestCase(testSuite.getEnv(), state, testSuite, planned.getTestCases());
+                        runner.runTestSuite(state, testSuitePlan, testSuite);
                     });
 
             log.debug("All test suites finished, state -> Idle ");
@@ -160,7 +161,7 @@ public class TestApp {
 
         ThreadContext.clearAll();
         log.info("Flight is over, report is ready");
-        return new FlightReport(plan, startTime, finishTime);
+        return new FlightReport(flightPlan, startTime, finishTime);
     }
 
     public CompletableFuture<FlightReport> startAsync(FlightPlan plan) {
@@ -192,13 +193,8 @@ public class TestApp {
     public TestAppStateDescription getState() {
         RunnerState state = this.state;
 
-        List<WorkerStateDescription> workerStates = pool.getAcquired().stream()
-                .map(worker -> {
-                    WorkerState ws = worker.getState();
-                    return new WorkerStateDescription(worker.getName(),
-                            ws.getCurrentIterationsCount(), ws.getRemainIterationsCount(), ws.getErrorsCount(),
-                            ws.getExpectedRecordsCount(), ws.getCaughtRecordsCount());
-                })
+        List<WorkerDescription> workerStates = pool.getAcquired().stream()
+                .map(Worker::getDescription)
                 .collect(Collectors.toList());
 
         Settings settings = state.getSettings();

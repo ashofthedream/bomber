@@ -2,7 +2,7 @@ package ashes.of.bomber.runner;
 
 import ashes.of.bomber.builder.TestAppBuilder;
 import ashes.of.bomber.builder.TestSuiteBuilder;
-import ashes.of.bomber.core.Settings;
+import ashes.of.bomber.flight.Settings;
 import ashes.of.bomber.tests.AllLifecycleMethodsTest;
 import ashes.of.bomber.tests.Counters;
 import org.apache.logging.log4j.LogManager;
@@ -29,10 +29,10 @@ public class BuilderLifecycleTest extends LifecycleTest {
                 .beforeSuite(true, AllLifecycleMethodsTest::beforeSuiteOnlyOnce)
                 .beforeCase(AllLifecycleMethodsTest::beforeCase)
                 .beforeCase(true, AllLifecycleMethodsTest::beforeCaseOnlyOnce)
-                .beforeEach(AllLifecycleMethodsTest::beforeEach)
+                .beforeEach(AllLifecycleMethodsTest::beforeEachCall)
                 .testCase("testA", AllLifecycleMethodsTest::testA)
                 .testCase("testB", AllLifecycleMethodsTest::testB)
-                .afterEach(AllLifecycleMethodsTest::afterEach)
+                .afterEach(AllLifecycleMethodsTest::afterEachCall)
                 .afterCase(AllLifecycleMethodsTest::afterCase)
                 .afterCase(true, AllLifecycleMethodsTest::afterCaseOnlyOnce)
                 .afterSuite(AllLifecycleMethodsTest::afterSuite)

@@ -1,4 +1,4 @@
-package ashes.of.bomber.core;
+package ashes.of.bomber.flight;
 
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
@@ -53,8 +53,7 @@ public class Settings {
     }
 
     public Settings disabled() {
-        disabled(true);
-        return this;
+        return disabled(true);
     }
 
 

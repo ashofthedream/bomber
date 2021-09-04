@@ -1,8 +1,9 @@
 package ashes.of.bomber.runner;
 
-import ashes.of.bomber.core.Iteration;
-import ashes.of.bomber.core.Settings;
-import ashes.of.bomber.core.Stage;
+import ashes.of.bomber.descriptions.WorkerDescription;
+import ashes.of.bomber.flight.Iteration;
+import ashes.of.bomber.flight.Settings;
+import ashes.of.bomber.flight.Stage;
 import ashes.of.bomber.delayer.Delayer;
 import ashes.of.bomber.limiter.Limiter;
 import ashes.of.bomber.sink.Sink;
@@ -37,8 +38,10 @@ public class Worker {
         this.thread = thread;
     }
 
-    public WorkerState getState() {
-        return state;
+    public WorkerDescription getDescription() {
+        return new WorkerDescription(getName(),
+                state.getCurrentIterationsCount(), state.getRemainIterationsCount(), state.getErrorsCount(),
+                state.getExpectedRecordsCount(), state.getCaughtRecordsCount());
     }
 
     public String getName() {
@@ -65,23 +68,22 @@ public class Worker {
         throw new RuntimeException("Hey, you can't run task on " + thread.getName() + ". It's terrible situation and should be fixed");
     }
 
-    public void runTestCase(TestSuite<Object> testSuite, TestCase<Object> testCase, Stage stage, Settings settings, RunnerState state,
-                                CountDownLatch startLatch, CountDownLatch endLatch, Environment env, Sink sink, Barrier barrier) {
-        this.state = new WorkerState(state);
-        run(() -> runTestCase(testSuite, testCase, stage, settings, this.state, startLatch, endLatch, env, sink, barrier));
+    public void runTestCase(RunnerState state, TestSuite<Object> testSuite, TestCase<Object> testCase, Stage stage, Settings settings,
+                            CountDownLatch startLatch, CountDownLatch endLatch, Sink sink, Barrier barrier) {
+        this.state = new WorkerState(state, startLatch, endLatch, sink, barrier);
+        run(() -> runTestCase(testSuite, testCase, stage, settings, this.state));
     }
 
-    private void runTestCase(TestSuite<Object> testSuite, TestCase<Object> testCase, Stage stage, Settings settings, WorkerState state,
-                                 CountDownLatch startLatch, CountDownLatch endLatch,
-                                 Environment env, Sink sink, Barrier barrier) {
+    private void runTestCase(TestSuite<Object> testSuite, TestCase<Object> testCase, Stage stage, Settings settings, WorkerState state) {
 
         ThreadContext.put("testSuite", testSuite.getName());
         ThreadContext.put("testCase", testCase.getName());
         ThreadContext.put("stage", stage.name());
 
-        Limiter limiter = env.getLimiter().get();
-        Delayer delayer = env.getDelayer().get();
+        Limiter limiter = testSuite.getEnv().getLimiter().get();
+        Delayer delayer = testSuite.getEnv().getDelayer().get();
 
+        var startLatch = state.getStartLatch();
         startLatch.countDown();
         try {
             log.trace("Await start testCase: {}", testCase.getName());
@@ -97,6 +99,8 @@ public class Worker {
         testSuite.beforeCase(instance);
 
         log.trace("Try start testCase: {} -> barrier enter", testCase.getName());
+        var sink = state.getSink();
+        var barrier = state.getBarrier();
         barrier.enterCase(stage, testSuite.getName(), testCase.getName());
 
         sink.beforeTestCase(stage, testSuite.getName(), testCase.getName(), state.getTestCaseStartTime(), settings);
@@ -110,10 +114,10 @@ public class Worker {
             if (!limiter.waitForPermit())
                 throw new RuntimeException("Limiter await failed");
 
-            Iteration it = new Iteration(state.nextItNumber(), stage, threadName, Instant.now(), testSuite.getName(), testCase.getName());
+            Iteration it = new Iteration(state.nextIterationNumber(), stage, threadName, Instant.now(), testSuite.getName(), testCase.getName());
 
             testSuite.beforeEach(it, instance);
-
+            sink.beforeEach(it);
             Tools tools = new Tools(it, record -> {
                 sink.timeRecorded(record);
                 state.addCaughtCount(1);
@@ -172,7 +176,7 @@ public class Worker {
         testSuite.afterCase(instance);
         log.debug("Finish testCase: {}", testCase.getName());
 
-        endLatch.countDown();
+        state.getEndLatch().countDown();
         ThreadContext.clearAll();
     }
 
@@ -181,7 +185,7 @@ public class Worker {
             if (this.instance != null)
                 log.error("Worker contains instance, this is looks like bug");
 
-            this.instance = testSuite.instance();
+            this.instance = testSuite.getInstance();
             testSuite.beforeSuite(instance);
             latch.countDown();
         });

@@ -1,8 +1,8 @@
 package ashes.of.bomber.sink;
 
-import ashes.of.bomber.core.Iteration;
-import ashes.of.bomber.core.Settings;
-import ashes.of.bomber.core.Stage;
+import ashes.of.bomber.flight.Iteration;
+import ashes.of.bomber.flight.Settings;
+import ashes.of.bomber.flight.Stage;
 import ashes.of.bomber.tools.Record;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -30,12 +30,6 @@ public class AsyncSink implements Sink {
     public AsyncSink(Sink sink, Executor ex) {
         this.sink = sink;
         this.ex = ex;
-
-//        Executors.newScheduledThreadPool(1).scheduleAtFixedRate(() -> {
-//            ThreadPoolExecutor tpe = (ThreadPoolExecutor)ex;
-//
-////            log.warn("QS:  " + tpe.getQueue().size() + " TC: " + tpe.getTaskCount());
-//        }, 1, 1, TimeUnit.SECONDS);
     }
 
     public AsyncSink(Sink sink) {

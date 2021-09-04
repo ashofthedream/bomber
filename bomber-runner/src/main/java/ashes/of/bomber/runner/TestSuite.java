@@ -1,7 +1,7 @@
 package ashes.of.bomber.runner;
 
-import ashes.of.bomber.core.Iteration;
-import ashes.of.bomber.core.Settings;
+import ashes.of.bomber.flight.Iteration;
+import ashes.of.bomber.flight.Settings;
 import ashes.of.bomber.methods.LifeCycleHolder;
 import ashes.of.bomber.methods.LifeCycleMethod;
 import org.apache.logging.log4j.LogManager;
@@ -63,7 +63,7 @@ public class TestSuite<T> {
         return env;
     }
 
-    public Object instance() {
+    public Object getInstance() {
         return instance.get();
     }
 

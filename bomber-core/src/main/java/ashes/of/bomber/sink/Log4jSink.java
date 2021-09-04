@@ -1,6 +1,6 @@
 package ashes.of.bomber.sink;
 
-import ashes.of.bomber.core.Iteration;
+import ashes.of.bomber.flight.Iteration;
 import ashes.of.bomber.tools.Record;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;

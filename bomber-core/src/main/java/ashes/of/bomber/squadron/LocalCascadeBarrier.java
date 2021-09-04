@@ -1,6 +1,6 @@
 package ashes.of.bomber.squadron;
 
-import ashes.of.bomber.core.Stage;
+import ashes.of.bomber.flight.Stage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

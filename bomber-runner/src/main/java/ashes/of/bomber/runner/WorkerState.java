@@ -1,76 +1,104 @@
 package ashes.of.bomber.runner;
 
-import ashes.of.bomber.core.Settings;
-import ashes.of.bomber.core.Stage;
+import ashes.of.bomber.flight.Settings;
+import ashes.of.bomber.flight.Stage;
+import ashes.of.bomber.sink.Sink;
+import ashes.of.bomber.squadron.Barrier;
 
 import java.time.Instant;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BooleanSupplier;
 
 public class WorkerState {
 
-    private final RunnerState state;
+    private final RunnerState runnerState;
+    private final CountDownLatch startLatch;
+    private final CountDownLatch endLatch;
+    private final Sink sink;
+    private final Barrier barrier;
 
-    private final AtomicLong itCount = new AtomicLong();
+    private final AtomicLong iterationsCountSeq = new AtomicLong();
+
     private final AtomicLong expectedRecordsCount = new AtomicLong();
     private final AtomicLong caughtRecordsCount = new AtomicLong();
-    private final AtomicLong errorCount = new AtomicLong();
+    private final AtomicLong errorsCount = new AtomicLong();
 
-    private final AtomicLong remainItCount = new AtomicLong();
+    private final AtomicLong remainIterationsCount = new AtomicLong();
 
-    public WorkerState(RunnerState state) {
-        this.state = state;
+    public WorkerState(RunnerState state, CountDownLatch startLatch, CountDownLatch endLatch, Sink sink, Barrier barrier) {
+        this.runnerState = state;
+        this.startLatch = startLatch;
+        this.endLatch = endLatch;
+        this.sink = sink;
+        this.barrier = barrier;
     }
 
-    public long nextItNumber() {
-        return itCount.getAndIncrement();
+    public CountDownLatch getStartLatch() {
+        return startLatch;
+    }
+
+    public CountDownLatch getEndLatch() {
+        return endLatch;
+    }
+
+    public Sink getSink() {
+        return sink;
+    }
+
+    public Barrier getBarrier() {
+        return barrier;
+    }
+
+    public long nextIterationNumber() {
+        return iterationsCountSeq.getAndIncrement();
     }
 
     public long getCurrentIterationsCount() {
-        return itCount.get();
+        return iterationsCountSeq.get();
     }
 
     public long getRemainIterationsCount() {
-        return remainItCount.get();
+        return remainIterationsCount.get();
     }
 
     public long getErrorsCount() {
-        return errorCount.get();
+        return errorsCount.get();
     }
 
     public String getTestSuite() {
-        return state.getTestSuite();
+        return runnerState.getTestSuite();
     }
 
     public Stage getStage() {
-        return state.getStage();
+        return runnerState.getStage();
     }
 
     public Instant getTestCaseStartTime() {
-        return state.getTestCaseStartTime();
+        return runnerState.getTestCaseStartTime();
     }
 
     public void startCaseIfNotStarted(String name, Stage stage, Settings settings) {
-        remainItCount.set(settings.getThreadIterationsCount());
-        state.startCaseIfNotStarted(name, stage, settings);
+        remainIterationsCount.set(settings.getThreadIterationsCount());
+        runnerState.startCaseIfNotStarted(name, stage, settings);
     }
 
     public void finishCase() {
-        state.finishCase();
+        runnerState.finishCase();
     }
 
     public void incError() {
-        errorCount.incrementAndGet();
-        state.incError();
+        errorsCount.incrementAndGet();
+        runnerState.incError();
     }
 
     public BooleanSupplier createChecker() {
-        BooleanSupplier checker = state.createChecker();
+        BooleanSupplier checker = runnerState.createChecker();
         return () -> check(checker);
     }
 
     private boolean check(BooleanSupplier checker) {
-        return remainItCount.decrementAndGet() >= 0 && checker.getAsBoolean();
+        return remainIterationsCount.decrementAndGet() >= 0 && checker.getAsBoolean();
     }
 
     public long getExpectedRecordsCount() {

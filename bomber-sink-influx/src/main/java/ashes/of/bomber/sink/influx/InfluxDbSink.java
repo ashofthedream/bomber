@@ -1,6 +1,6 @@
 package ashes.of.bomber.sink.influx;
 
-import ashes.of.bomber.core.Iteration;
+import ashes.of.bomber.flight.Iteration;
 import ashes.of.bomber.tools.Record;
 import ashes.of.bomber.sink.Sink;
 import org.influxdb.InfluxDB;
@@ -12,18 +12,18 @@ import java.util.concurrent.TimeUnit;
 
 public class InfluxDbSink implements Sink {
 
-    private final InfluxDB influxDB;
-    private final String lapCollectionName;
+    private final InfluxDB db;
+    private final String callCollectionName;
     private final String testCollectionName;
 
-    public InfluxDbSink(InfluxDB influxDB, String lapCollectionName, String testCollectionName) {
-        this.influxDB = influxDB;
-        this.lapCollectionName = lapCollectionName;
+    public InfluxDbSink(InfluxDB db, String callCollectionName, String testCollectionName) {
+        this.db = db;
+        this.callCollectionName = callCollectionName;
         this.testCollectionName = testCollectionName;
     }
 
-    public InfluxDbSink(InfluxDB influxDB) {
-        this(influxDB, "bomber_stopwatch_records", "bomber_tests");
+    public InfluxDbSink(InfluxDB db) {
+        this(db, "bomber_calls", "bomber_tests");
     }
 
     @Override
@@ -33,7 +33,7 @@ public class InfluxDbSink implements Sink {
                 .map(Throwable::getMessage)
                 .orElse("");
 
-        influxDB.write(Point.measurement(lapCollectionName)
+        db.write(Point.measurement(callCollectionName)
                 .time(it.getTimestamp().toEpochMilli(), TimeUnit.MILLISECONDS)
                 .tag("stage",           it.getStage().name())
                 .tag("testCase",        it.getTestSuite())
@@ -49,7 +49,7 @@ public class InfluxDbSink implements Sink {
     @Override
     public void afterEach(Iteration it, long elapsed, @Nullable Throwable throwable) {
         String error = Optional.ofNullable(throwable).map(Throwable::getMessage).orElse("");
-        influxDB.write(Point.measurement(testCollectionName)
+        db.write(Point.measurement(testCollectionName)
                 .time(it.getTimestamp().toEpochMilli(), TimeUnit.MILLISECONDS)
                 .tag("stage",           it.getStage().name())
                 .tag("testCase",        it.getTestSuite())

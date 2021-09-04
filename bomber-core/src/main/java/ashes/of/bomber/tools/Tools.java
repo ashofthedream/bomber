@@ -1,6 +1,6 @@
 package ashes.of.bomber.tools;
 
-import ashes.of.bomber.core.Iteration;
+import ashes.of.bomber.flight.Iteration;
 
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;

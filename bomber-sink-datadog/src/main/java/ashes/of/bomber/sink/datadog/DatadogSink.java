@@ -1,6 +1,6 @@
 package ashes.of.bomber.sink.datadog;
 
-import ashes.of.bomber.core.Iteration;
+import ashes.of.bomber.flight.Iteration;
 import ashes.of.bomber.tools.Record;
 import ashes.of.bomber.sink.Sink;
 import ashes.of.datadog.client.DatadogClient;
@@ -25,12 +25,12 @@ public class DatadogSink implements Sink {
                 .orElse("");
 
         client.timer("bomber_stopwatch_records")
-                .tag("stage",    it.getStage().name())
-                .tag("testCase", it.getTestSuite())
-                .tag("test",     it.getTestCase())
-                .tag("thread",   it.getThread())
-                .tag("error",    error)
-                .tag("label",    record.getLabel())
+                .tag("stage",       it.getStage().name())
+                .tag("testSuite",   it.getTestSuite())
+                .tag("testCase",    it.getTestCase())
+                .tag("thread",      it.getThread())
+                .tag("error",       error)
+                .tag("label",       record.getLabel())
                 .nanos(record.getElapsed());
     }
 
@@ -41,11 +41,11 @@ public class DatadogSink implements Sink {
                 .orElse("");
 
         client.timer("bomber_tests")
-                .tag("stage",    it.getStage().name())
-                .tag("testCase", it.getTestSuite())
-                .tag("test",     it.getTestCase())
-                .tag("thread",   it.getThread())
-                .tag("error",    error)
+                .tag("stage",       it.getStage().name())
+                .tag("testSuite",   it.getTestSuite())
+                .tag("testCase",    it.getTestCase())
+                .tag("thread",      it.getThread())
+                .tag("error",       error)
                 .nanos(elapsed);
     }
 }

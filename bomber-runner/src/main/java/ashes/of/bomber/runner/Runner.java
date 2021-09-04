@@ -1,8 +1,9 @@
 package ashes.of.bomber.runner;
 
-import ashes.of.bomber.core.Settings;
-import ashes.of.bomber.core.Stage;
+import ashes.of.bomber.flight.Settings;
+import ashes.of.bomber.flight.Stage;
 import ashes.of.bomber.flight.TestCasePlan;
+import ashes.of.bomber.flight.TestSuitePlan;
 import ashes.of.bomber.sink.AsyncSink;
 import ashes.of.bomber.sink.MultiSink;
 import ashes.of.bomber.sink.Sink;
@@ -17,7 +18,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.CountDownLatch;
 
-import static ashes.of.bomber.core.Stage.IDLE;
+import static ashes.of.bomber.flight.Stage.IDLE;
 
 
 public class Runner {
@@ -36,11 +37,11 @@ public class Runner {
     /**
      * Runs the test case
      */
-    public void startTestCase(Environment env, RunnerState state, TestSuite<Object> testSuite, List<TestCasePlan> testCases) {
+    public void runTestSuite(RunnerState state, TestSuitePlan plan, TestSuite<Object> testSuite) {
         ThreadContext.put("stage", IDLE.name());
         ThreadContext.put("testSuite", testSuite.getName());
 
-        log.info("Start test suite: {} with warm up: {} and test settings: {}",
+        log.info("Run test suite: {} with warm up: {} and test settings: {}",
                 testSuite.getName(), testSuite.getWarmUp(), testSuite.getSettings());
 
         log.trace("Reset before & after test suite lifecycle methods");
@@ -49,14 +50,15 @@ public class Runner {
         state.startSuiteIfNotStarted(testSuite.getName());
         sink.beforeTestSuite(testSuite.getName(), Instant.now());
 
-        int threads = testCases.stream()
+        int threads = plan.getTestCases().stream()
                 .map(TestCasePlan::getName)
                 .map(testSuite::getTestCase)
                 .mapToInt(testCase -> Math.max(
                         testCase.getWarmUp().getThreadsCount(),
-                        testCase.getLoadTest().getThreadsCount()
+                        testCase.getSettings().getThreadsCount()
                 ))
                 .max()
+                // todo what if this situation will happens?
                 .orElse(0);
 
         log.debug("Acquire {} workers", threads);
@@ -68,7 +70,7 @@ public class Runner {
         try {
             awaitBeforeSuite(testSuite);
 
-            testCases.stream()
+            plan.getTestCases().stream()
                     .map(TestCasePlan::getName)
                     .map(testSuite::getTestCase)
                     .forEach(testCase -> {
@@ -80,15 +82,15 @@ public class Runner {
 
                         Settings warmUp = testCase.getWarmUp();
                         if (!warmUp.isDisabled()) {
-                            startTestCase(env, state, testSuite, testCase, Stage.WARM_UP, warmUp);
+                            runTestCase(state, testSuite, testCase, Stage.WARM_UP, warmUp);
                         }
 
-                        startTestCase(env, state, testSuite, testCase, Stage.TEST, testCase.getLoadTest());
+                        runTestCase(state, testSuite, testCase, Stage.TEST, testCase.getSettings());
 
                         ThreadContext.remove("testCase");
                     });
 
-            awaitAwaitSuite(testSuite);
+            awaitAfterSuite(testSuite);
 
         } catch (Throwable throwable) {
             log.error("Run test suite: {} failed", testSuite.getName(), throwable);
@@ -113,7 +115,7 @@ public class Runner {
         beforeSuiteLatch.await();
     }
 
-    private void awaitAwaitSuite(TestSuite<Object> testSuite) throws InterruptedException {
+    private void awaitAfterSuite(TestSuite<Object> testSuite) throws InterruptedException {
         log.debug("Call afterSuite for all workers: {}", workers.size());
         CountDownLatch afterSuiteLatch = new CountDownLatch(workers.size());
         workers.forEach((name, worker) ->
@@ -123,12 +125,12 @@ public class Runner {
         afterSuiteLatch.await();
     }
 
-    public void startTestCase(Environment env, RunnerState state, TestSuite<Object> testSuite, TestCase<Object> testCase, Stage stage, Settings settings) {
+    private void runTestCase(RunnerState state, TestSuite<Object> testSuite, TestCase<Object> testCase, Stage stage, Settings settings) {
         ThreadContext.put("stage", stage.name());
         log.info("Start stage: {}", stage);
         state.startCaseIfNotStarted(testCase.getName(), stage, settings);
 
-        Barrier barrier = env.getBarrier()
+        Barrier barrier = testSuite.getEnv().getBarrier()
                 .workers(settings.getThreadsCount())
                 .build();
 
@@ -140,7 +142,7 @@ public class Runner {
         workers.values()
                 .stream()
                 .limit(settings.getThreadsCount())
-                .forEach(worker -> worker.runTestCase(testSuite, testCase, stage, settings, state, startLatch, finishLatch, env, sink, barrier));
+                .forEach(worker -> worker.runTestCase(state, testSuite, testCase, stage, settings, startLatch, finishLatch, sink, barrier));
 
         try {
             log.debug("Await end of stage: {}", stage);

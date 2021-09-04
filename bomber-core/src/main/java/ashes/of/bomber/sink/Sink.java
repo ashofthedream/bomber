@@ -1,8 +1,8 @@
 package ashes.of.bomber.sink;
 
-import ashes.of.bomber.core.Iteration;
-import ashes.of.bomber.core.Settings;
-import ashes.of.bomber.core.Stage;
+import ashes.of.bomber.flight.Iteration;
+import ashes.of.bomber.flight.Settings;
+import ashes.of.bomber.flight.Stage;
 import ashes.of.bomber.tools.Record;
 
 import javax.annotation.Nullable;
@@ -35,17 +35,19 @@ public interface Sink {
      */
     default void beforeTestCase(Stage stage, String testSuite, String testCase, Instant timestamp, Settings settings) {}
 
+    default void beforeEach(Iteration it) {}
+
     /**
      * Invokes when time was recorded
      *
-     * @param record  lap record
+     * @param record call time record
      */
     default void timeRecorded(Record record) {}
 
     /**
      * Invokes after each test case invocation
      *
-     * @param it        test it
+     * @param it current iteration
      * @param elapsed   elapsed time in nanoseconds
      * @param throwable thrown exception, if methods throws an exception
      */

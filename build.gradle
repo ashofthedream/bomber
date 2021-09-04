@@ -14,20 +14,9 @@ allprojects {
     apply plugin: 'java'
 
     java {
-        targetCompatibility = JavaVersion.VERSION_14
-        sourceCompatibility = JavaVersion.VERSION_14
+        targetCompatibility = JavaVersion.VERSION_15
+        sourceCompatibility = JavaVersion.VERSION_15
     }
-
-//    tasks.withType(JavaCompile) {
-//        options.compilerArgs.add('-parameters')
-//        options.compilerArgs.add('--enable-preview')
-//    }
-//
-//
-//    test {
-//        jvmArgs('--enable-preview')
-//    }
-
 
     buildscript {
         repositories {
@@ -42,11 +31,17 @@ allprojects {
         mavenCentral()
     }
 
+
     dependencies {
         implementation 'com.google.code.findbugs:jsr305:3.0.2'
         implementation 'org.apache.logging.log4j:log4j-api:2.14.1'
         implementation 'com.google.guava:guava:30.1.1-jre'
 
         testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.7.2'
+    }
+
+
+    test {
+        useJUnitPlatform()
     }
 }

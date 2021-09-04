@@ -8,11 +8,11 @@ import ashes.of.bomber.carrier.dto.TestCaseDto;
 import ashes.of.bomber.carrier.dto.TestSuiteDto;
 import ashes.of.bomber.carrier.dto.WorkerStateDto;
 import ashes.of.bomber.carrier.dto.requests.StartFlightRequest;
-import ashes.of.bomber.core.Settings;
+import ashes.of.bomber.flight.Settings;
 import ashes.of.bomber.descriptions.TestAppStateDescription;
 import ashes.of.bomber.descriptions.TestCaseDescription;
 import ashes.of.bomber.descriptions.TestSuiteDescription;
-import ashes.of.bomber.descriptions.WorkerStateDescription;
+import ashes.of.bomber.descriptions.WorkerDescription;
 import ashes.of.bomber.runner.TestApp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -113,15 +113,15 @@ public class ApplicationController {
                 .setRemainTime(state.getCaseRemainTime())
                 .setRemainTotalIterations(state.getRemainIterationsCount())
                 .setErrorsCount(state.getErrorCount())
-                .setWorkers(state.getWorkersState().stream()
+                .setWorkers(state.getWorkers().stream()
                         .map(this::workerState)
                         .collect(Collectors.toList()));
     }
 
-    private WorkerStateDto workerState(WorkerStateDescription state) {
+    private WorkerStateDto workerState(WorkerDescription state) {
         return new WorkerStateDto()
                 .setName(state.getWorker())
-                .setIterationsCount(state.getCurrentIterationCount())
+                .setIterationsCount(state.getCurrentIterationsCount())
                 .setRemainIterationsCount(state.getRemainIterationsCount())
                 .setErrorsCount(state.getErrorsCount());
     }

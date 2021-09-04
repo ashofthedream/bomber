@@ -19,7 +19,7 @@ public class ExampleTest {
         // This method will be invoked every time before each test case
     }
 
-    @BeforeEach
+    @BeforeEachIteration
     public void beforeTest() throws Exception {
         // This method will be invoked every time before each test case iteration
     }
@@ -44,7 +44,7 @@ public class ExampleTest {
         }
     }
 
-    @AfterEach
+    @AfterEachIteration
     public void afterTest() throws Exception {
         // This method will be invoked every time after each test case iteration
     }

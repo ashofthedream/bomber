@@ -1,9 +1,9 @@
 package ashes.of.bomber.watcher;
 
 import ashes.of.bomber.descriptions.TestAppDescription;
-import ashes.of.bomber.core.Stage;
+import ashes.of.bomber.flight.Stage;
 import ashes.of.bomber.descriptions.TestAppStateDescription;
-import ashes.of.bomber.descriptions.WorkerStateDescription;
+import ashes.of.bomber.descriptions.WorkerDescription;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
@@ -58,19 +58,19 @@ public class Log4jWatcher implements Watcher {
         long totalInv = state.getSettings().getTotalIterationsCount();
         long currentInv = totalInv - state.getRemainIterationsCount();
 
-        long expectedCount = state.getWorkersState()
+        long expectedCount = state.getWorkers()
                 .stream()
-                .mapToLong(WorkerStateDescription::getExpectedRecordsCount)
+                .mapToLong(WorkerDescription::getExpectedRecordsCount)
                 .sum();
 
-        long caughtCount = state.getWorkersState()
+        long caughtCount = state.getWorkers()
                 .stream()
-                .mapToLong(WorkerStateDescription::getCaughtRecordsCount)
+                .mapToLong(WorkerDescription::getCaughtRecordsCount)
                 .sum();
 
-        long watcherErrorCount = state.getWorkersState()
+        long watcherErrorCount = state.getWorkers()
                 .stream()
-                .mapToLong(WorkerStateDescription::getErrorsCount)
+                .mapToLong(WorkerDescription::getErrorsCount)
                 .sum();
 
         double totalSecs = state.getSettings().getTime().getSeconds();

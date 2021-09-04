@@ -1,6 +1,6 @@
 package ashes.of.bomber.builder;
 
-import ashes.of.bomber.core.Settings;
+import ashes.of.bomber.flight.Settings;
 import ashes.of.bomber.delayer.Delayer;
 import ashes.of.bomber.delayer.NoDelayDelayer;
 import ashes.of.bomber.limiter.Limiter;

@@ -1,7 +1,7 @@
 package ashes.of.bomber.descriptions;
 
-import ashes.of.bomber.core.Settings;
-import ashes.of.bomber.core.Stage;
+import ashes.of.bomber.flight.Settings;
+import ashes.of.bomber.flight.Stage;
 
 import java.time.Instant;
 import java.util.List;
@@ -20,14 +20,14 @@ public class TestAppStateDescription {
     private final Instant testCaseStartTime;
     private final long caseElapsedTime;
     private final long caseRemainTime;
-    private final List<WorkerStateDescription> workersState;
+    private final List<WorkerDescription> workers;
 
 
     public TestAppStateDescription(Stage stage, Settings settings, String testSuite, String testCase,
                                    long iterationsCount, long remainIterationsCount, long errorCount,
                                    Instant testSuiteStartTime, Instant testCaseStartTime,
                                    long caseElapsedTime, long caseRemainTime,
-                                   List<WorkerStateDescription> workersState) {
+                                   List<WorkerDescription> workers) {
         this.stage = stage;
         this.settings = settings;
         this.testSuite = testSuite;
@@ -39,7 +39,7 @@ public class TestAppStateDescription {
         this.testCaseStartTime = testCaseStartTime;
         this.caseElapsedTime = caseElapsedTime;
         this.caseRemainTime = caseRemainTime;
-        this.workersState = workersState;
+        this.workers = workers;
     }
 
     public Stage getStage() {
@@ -86,8 +86,7 @@ public class TestAppStateDescription {
         return caseRemainTime;
     }
 
-
-    public List<WorkerStateDescription> getWorkersState() {
-        return workersState;
+    public List<WorkerDescription> getWorkers() {
+        return workers;
     }
 }

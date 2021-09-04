@@ -3,7 +3,7 @@ package ashes.of.bomber.benchmark;
 import ashes.of.bomber.annotations.LoadTest;
 import ashes.of.bomber.annotations.LoadTestCase;
 import ashes.of.bomber.annotations.LoadTestSuite;
-import ashes.of.bomber.core.Settings;
+import ashes.of.bomber.flight.Settings;
 import ashes.of.bomber.builder.TestSuiteBuilder;
 import ashes.of.bomber.builder.TestAppBuilder;
 import ashes.of.bomber.tools.Tools;

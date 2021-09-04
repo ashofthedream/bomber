@@ -1,6 +1,6 @@
 package ashes.of.bomber.descriptions;
 
-import ashes.of.bomber.core.Settings;
+import ashes.of.bomber.flight.Settings;
 
 import java.util.List;
 

@@ -1,6 +1,6 @@
 package ashes.of.bomber.squadron;
 
-import ashes.of.bomber.core.Stage;
+import ashes.of.bomber.flight.Stage;
 
 public interface Barrier {
     default void enterSuite(Stage stage, String testSuite) {}

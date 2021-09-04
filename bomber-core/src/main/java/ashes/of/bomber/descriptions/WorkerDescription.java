@@ -1,17 +1,17 @@
 package ashes.of.bomber.descriptions;
 
-public class WorkerStateDescription {
+public class WorkerDescription {
     private final String worker;
 
-    private final long currentIterationCount;
+    private final long currentIterationsCount;
     private final long remainIterationsCount;
     private final long errorsCount;
     private final long expectedRecordsCount;
     private final long caughtRecordsCount;
 
-    public WorkerStateDescription(String worker, long currentIterationCount, long remainIterationsCount, long errorsCount, long expectedRecordsCount, long caughtRecordsCount) {
+    public WorkerDescription(String worker, long currentIterationsCount, long remainIterationsCount, long errorsCount, long expectedRecordsCount, long caughtRecordsCount) {
         this.worker = worker;
-        this.currentIterationCount = currentIterationCount;
+        this.currentIterationsCount = currentIterationsCount;
         this.remainIterationsCount = remainIterationsCount;
         this.errorsCount = errorsCount;
         this.expectedRecordsCount = expectedRecordsCount;
@@ -22,8 +22,8 @@ public class WorkerStateDescription {
         return worker;
     }
 
-    public long getCurrentIterationCount() {
-        return currentIterationCount;
+    public long getCurrentIterationsCount() {
+        return currentIterationsCount;
     }
 
     public long getRemainIterationsCount() {

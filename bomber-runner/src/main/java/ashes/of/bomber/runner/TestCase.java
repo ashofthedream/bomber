@@ -1,6 +1,6 @@
 package ashes.of.bomber.runner;
 
-import ashes.of.bomber.core.Settings;
+import ashes.of.bomber.flight.Settings;
 import ashes.of.bomber.methods.TestCaseMethodWithTools;
 import ashes.of.bomber.tools.Tools;
 
@@ -11,14 +11,14 @@ public class TestCase<T> {
     private final boolean async;
     private final TestCaseMethodWithTools<T> method;
     private final Supplier<Settings> warmUp;
-    private final Supplier<Settings> loadTest;
+    private final Supplier<Settings> settings;
 
-    public TestCase(String name, boolean async, TestCaseMethodWithTools<T> method, Supplier<Settings> warmUp, Supplier<Settings> loadTest) {
+    public TestCase(String name, boolean async, TestCaseMethodWithTools<T> method, Supplier<Settings> warmUp, Supplier<Settings> settings) {
         this.name = name;
         this.async = async;
         this.method = method;
         this.warmUp = warmUp;
-        this.loadTest = loadTest;
+        this.settings = settings;
     }
 
     public String getName() {
@@ -33,8 +33,8 @@ public class TestCase<T> {
         return warmUp.get();
     }
 
-    public Settings getLoadTest() {
-        return loadTest.get();
+    public Settings getSettings() {
+        return settings.get();
     }
 
     public void run(T instance, Tools tools) throws Throwable {
