@@ -74,3 +74,12 @@ public class ExampleTest {
     }
 }
 ```
+
+
+## External Dependencies
+
+Apache Zookeeper 3.7
+```
+docker run --name bomber-zookeeper -p2181:2181 -p2888:2888 -p3888:3888 -p8181:8080 -d zookeeper:3.7.0
+```
+

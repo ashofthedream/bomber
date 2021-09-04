@@ -27,7 +27,7 @@ import java.time.temporal.ChronoUnit;
         UserControllerLoadTest.class,
         AccountControllerLoadTest.class
 })
-@LoadTest(threads = 2, time = 300)
+@LoadTest(threads = 2, time = 10)
 @Throttle(time = 1)
 public class ExampleAnnotatedTestApp {
     private static final Logger log = LogManager.getLogger();
@@ -48,7 +48,7 @@ public class ExampleAnnotatedTestApp {
 
         BarrierBuilder barrier = members > 1 ? new ZookeeperBarrierBuilder().members(members) : new NoBarrier.Builder();
 
-        TestAppBuilder.create(ExampleAnnotatedTestApp.class)
+        var report = TestAppBuilder.create(ExampleAnnotatedTestApp.class)
                 // log all times to console via log4j and HdrHistogram
 //                .sink(new Log4jSink())
                 .sink(new HistogramTimelineSink(ChronoUnit.SECONDS, System.out))
@@ -57,5 +57,20 @@ public class ExampleAnnotatedTestApp {
                 .barrier(barrier)
                 .build()
                 .start();
+
+
+        log.info("test report for flight: {}", report.getPlan().getId());
+        report.getTestSuites()
+                .forEach(testSuite -> {
+                    log.debug("TestSuite name: {}", testSuite.getName());
+                    testSuite.getTestCases()
+                            .forEach(testCase -> {
+                                log.debug("TestCase name: {}, total iterations: {}, errors: {}, total time elapsed: {}ms",
+                                        testCase.getName(),
+                                        testCase.getTotalIterationsCount(),
+                                        testCase.getTotalErrorsCount(),
+                                        testCase.getTotalTimeElapsed());
+                            });
+                });
     }
 }

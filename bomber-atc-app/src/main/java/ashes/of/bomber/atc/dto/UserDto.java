@@ -1,20 +1,20 @@
-package ashes.of.bomber.atc.model;
+package ashes.of.bomber.atc.dto;
 
-public class User {
+public class UserDto {
     private String username;
 
-    public User(String username) {
+    public UserDto(String username) {
         this.username = username;
     }
 
-    public User() {
+    public UserDto() {
     }
 
     public String getUsername() {
         return username;
     }
 
-    public User setUsername(String username) {
+    public UserDto setUsername(String username) {
         this.username = username;
         return this;
     }

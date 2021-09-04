@@ -4,8 +4,10 @@ import ashes.of.bomber.carrier.dto.events.SinkEvent;
 import ashes.of.bomber.carrier.dto.events.SinkEventType;
 import ashes.of.bomber.carrier.starter.services.AtcService;
 import ashes.of.bomber.descriptions.TestAppDescription;
+import ashes.of.bomber.flight.FlightPlan;
 import ashes.of.bomber.flight.Settings;
 import ashes.of.bomber.flight.Stage;
+import ashes.of.bomber.runner.TestApp;
 import ashes.of.bomber.sink.Sink;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -17,6 +19,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import javax.annotation.Nullable;
 import java.net.URI;
 import java.time.Instant;
+import java.util.Optional;
 
 import static ashes.of.bomber.carrier.dto.events.SinkEventType.TEST_APP_FINISH;
 import static ashes.of.bomber.carrier.dto.events.SinkEventType.TEST_APP_START;
@@ -34,9 +37,9 @@ public class CarrierSink implements Sink {
 
     private final AtcService atcService;
     private final ServiceInstanceRegistration registration;
-    private final TestAppDescription app;
+    private final TestApp app;
 
-    public CarrierSink(AtcService atcService, ServiceInstanceRegistration registration, TestAppDescription app) {
+    public CarrierSink(AtcService atcService, ServiceInstanceRegistration registration, TestApp app) {
         this.atcService = atcService;
         this.registration = registration;
         this.app = app;
@@ -97,7 +100,7 @@ public class CarrierSink implements Sink {
         return new SinkEvent()
                 .setType(type)
                 .setTimestamp(timestamp.toEpochMilli())
-                .setFlightId(app.getPlan().getId())
+                .setFlightId(Optional.ofNullable(app.getFlightPlan()).map(FlightPlan::getId).orElse(0L))
                 .setCarrierId(registration.getServiceInstance().getId())
                 .setStage(stage != null ? stage.name() : null)
                 .setTestSuite(testSuite)

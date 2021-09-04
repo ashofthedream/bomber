@@ -101,6 +101,7 @@ public class Log4jWatcher implements Watcher {
                 ip.toString(),
                 totalInv,
                 watcherErrorCount,
+
                 "meta",
                 itRps.rps(),
                 recRps.rps(),

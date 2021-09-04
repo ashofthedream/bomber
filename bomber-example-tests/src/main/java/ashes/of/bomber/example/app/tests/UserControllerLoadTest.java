@@ -16,7 +16,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import java.util.Random;
 
 @LoadTestSuite(name = "UserController")
-@LoadTest(time = 30)
+@LoadTest(time = 10)
 @Throttle(threshold = 10, shared = true)
 public class UserControllerLoadTest {
     private static final Logger log = LogManager.getLogger();

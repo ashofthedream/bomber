@@ -3,7 +3,9 @@ package ashes.of.bomber.runner;
 import ashes.of.bomber.flight.Settings;
 import ashes.of.bomber.flight.Stage;
 import ashes.of.bomber.flight.TestCasePlan;
+import ashes.of.bomber.flight.TestCaseReport;
 import ashes.of.bomber.flight.TestSuitePlan;
+import ashes.of.bomber.flight.TestSuiteReport;
 import ashes.of.bomber.sink.AsyncSink;
 import ashes.of.bomber.sink.MultiSink;
 import ashes.of.bomber.sink.Sink;
@@ -13,6 +15,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentSkipListMap;
@@ -37,7 +40,7 @@ public class Runner {
     /**
      * Runs the test case
      */
-    public void runTestSuite(RunnerState state, TestSuitePlan plan, TestSuite<Object> testSuite) {
+    public TestSuiteReport runTestSuite(RunnerState state, TestSuitePlan plan, TestSuite<Object> testSuite) {
         ThreadContext.put("stage", IDLE.name());
         ThreadContext.put("testSuite", testSuite.getName());
 
@@ -67,6 +70,7 @@ public class Runner {
             workers.put(worker.getName(), worker);
         }
 
+        List<TestCaseReport> testCaseReports = new ArrayList<>();
         try {
             awaitBeforeSuite(testSuite);
 
@@ -85,8 +89,8 @@ public class Runner {
                             runTestCase(state, testSuite, testCase, Stage.WARM_UP, warmUp);
                         }
 
-                        runTestCase(state, testSuite, testCase, Stage.TEST, testCase.getSettings());
-
+                        var report = runTestCase(state, testSuite, testCase, Stage.TEST, testCase.getSettings());
+                        testCaseReports.add(report);
                         ThreadContext.remove("testCase");
                     });
 
@@ -103,6 +107,8 @@ public class Runner {
         sink.afterTestSuite(testSuite.getName());
         state.finishSuite();
         ThreadContext.clearAll();
+
+        return new TestSuiteReport(testSuite.getName(), testCaseReports);
     }
 
     private void awaitBeforeSuite(TestSuite<Object> testSuite) throws InterruptedException {
@@ -125,7 +131,7 @@ public class Runner {
         afterSuiteLatch.await();
     }
 
-    private void runTestCase(RunnerState state, TestSuite<Object> testSuite, TestCase<Object> testCase, Stage stage, Settings settings) {
+    private TestCaseReport runTestCase(RunnerState state, TestSuite<Object> testSuite, TestCase<Object> testCase, Stage stage, Settings settings) {
         ThreadContext.put("stage", stage.name());
         log.info("Start stage: {}", stage);
         state.startCaseIfNotStarted(testCase.getName(), stage, settings);
@@ -159,5 +165,11 @@ public class Runner {
         state.finishCase();
 
         ThreadContext.remove("stage");
+
+        return new TestCaseReport(testCase.getName(), settings,
+                settings.getTotalIterationsCount() - state.getTotalIterationsRemain(),
+                state.getErrorCount(),
+                state.getCaseElapsedTime()
+        );
     }
 }

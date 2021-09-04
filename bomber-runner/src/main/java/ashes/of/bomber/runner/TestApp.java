@@ -10,6 +10,7 @@ import ashes.of.bomber.flight.FlightReport;
 import ashes.of.bomber.flight.FlightPlan;
 import ashes.of.bomber.flight.TestCasePlan;
 import ashes.of.bomber.flight.TestSuitePlan;
+import ashes.of.bomber.flight.TestSuiteReport;
 import ashes.of.bomber.sink.Sink;
 import ashes.of.bomber.watcher.Watcher;
 import ashes.of.bomber.watcher.WatcherConfig;
@@ -20,6 +21,7 @@ import org.apache.logging.log4j.ThreadContext;
 import javax.annotation.Nullable;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -118,7 +120,7 @@ public class TestApp {
         env.getSinks()
                 .forEach(Sink::startUp);
 
-
+        List<TestSuiteReport> testSuiteReports = new ArrayList<>();
         try {
             log.debug("init runner");
             Runner runner = new Runner(pool, env.getSinks());
@@ -133,7 +135,9 @@ public class TestApp {
 
                         RunnerState state = new RunnerState(this::isStopped);
                         this.state = state;
-                        runner.runTestSuite(state, testSuitePlan, testSuite);
+                        var report = runner.runTestSuite(state, testSuitePlan, testSuite);
+
+                        testSuiteReports.add(report);
                     });
 
             log.debug("All test suites finished, state -> Idle ");
@@ -161,7 +165,7 @@ public class TestApp {
 
         ThreadContext.clearAll();
         log.info("Flight is over, report is ready");
-        return new FlightReport(flightPlan, startTime, finishTime);
+        return new FlightReport(flightPlan, startTime, finishTime, testSuiteReports);
     }
 
     public CompletableFuture<FlightReport> startAsync(FlightPlan plan) {
@@ -227,7 +231,7 @@ public class TestApp {
         var suites = getTestSuites().stream()
                 .map(testSuite -> {
                     List<TestCasePlan> cases = testSuite.getTestCases().stream()
-                            .map(testCase -> new TestCasePlan(testCase.getName()))
+                            .map(testCase -> new TestCasePlan(testCase.getName(), new Settings().disabled()))
                             .collect(Collectors.toList());
 
                     return new TestSuitePlan(testSuite.getName(), cases);

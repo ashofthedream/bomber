@@ -26,7 +26,7 @@ dependencies {
         exclude  group: 'org.springframework.cloud', module: 'spring-cloud-starter-netflix-ribbon'
     }
 
-    implementation('org.springframework.cloud:spring-cloud-starter-zookeeper-discovery:2.2.1.RELEASE') {
+    implementation('org.springframework.cloud:spring-cloud-starter-zookeeper-discovery:3.0.3') {
         exclude  group: 'org.apache.zookeeper', module: 'zookeeper'
         exclude  group: 'org.springframework.cloud', module: 'spring-cloud-starter-netflix-ribbon'
     }
