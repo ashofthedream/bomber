@@ -6,15 +6,15 @@ public enum Stage {
     /**
      * This stage doesn't run any tests
      */
-    Idle,
+    IDLE,
 
     /**
      * Like a test, but used for warm-up
      */
-    WarmUp,
+    WARM_UP,
 
     /**
      * Main test stage
      */
-    Test
+    TEST
 }

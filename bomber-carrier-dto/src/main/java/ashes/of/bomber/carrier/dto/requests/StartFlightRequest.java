@@ -1,14 +1,14 @@
 package ashes.of.bomber.carrier.dto.requests;
 
 public class StartFlightRequest {
-    private long id;
+    private long flightId;
 
-    public long getId() {
-        return id;
+    public long getFlightId() {
+        return flightId;
     }
 
-    public StartFlightRequest setId(long id) {
-        this.id = id;
+    public StartFlightRequest setFlightId(long flightId) {
+        this.flightId = flightId;
         return this;
     }
 }

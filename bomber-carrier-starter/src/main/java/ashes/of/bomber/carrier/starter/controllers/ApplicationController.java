@@ -8,12 +8,12 @@ import ashes.of.bomber.carrier.dto.TestCaseDto;
 import ashes.of.bomber.carrier.dto.TestSuiteDto;
 import ashes.of.bomber.carrier.dto.WorkerStateDto;
 import ashes.of.bomber.carrier.dto.requests.StartFlightRequest;
-import ashes.of.bomber.core.BomberApp;
 import ashes.of.bomber.core.Settings;
-import ashes.of.bomber.core.StateModel;
-import ashes.of.bomber.core.TestCaseModel;
-import ashes.of.bomber.core.TestSuiteModel;
-import ashes.of.bomber.core.WorkerStateModel;
+import ashes.of.bomber.descriptions.TestAppStateDescription;
+import ashes.of.bomber.descriptions.TestCaseDescription;
+import ashes.of.bomber.descriptions.TestSuiteDescription;
+import ashes.of.bomber.descriptions.WorkerStateDescription;
+import ashes.of.bomber.runner.TestApp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.ResponseEntity;
@@ -32,15 +32,16 @@ import java.util.stream.Collectors;
 public class ApplicationController {
     private static final Logger log = LogManager.getLogger();
 
-    private final BomberApp app;
+    private final TestApp app;
 
-    public ApplicationController(BomberApp app) {
+    public ApplicationController(TestApp app) {
         this.app = app;
     }
 
     @GetMapping
     public ResponseEntity<ApplicationDto> getApplications() {
         log.debug("get applications");
+
         ApplicationDto dto = new ApplicationDto()
                 .setName(app.getName())
                 .setState(state(app.getState()))
@@ -52,10 +53,10 @@ public class ApplicationController {
     @PostMapping("/start")
     public ResponseEntity<FlightStartedDto> start(@RequestBody StartFlightRequest start) {
         log.info("start all applications");
-        app.startAsync(app.createDefaultPlan(start.getId()));
+        app.startAsync(app.creteDefaultPlan(start.getFlightId()));
 
         return ResponseEntity.ok(new FlightStartedDto()
-                .setId(start.getId()));
+                .setId(start.getFlightId()));
     }
 
     @PostMapping("/stop")
@@ -66,13 +67,13 @@ public class ApplicationController {
         return ResponseEntity.ok().build();
     }
 
-    private List<TestSuiteDto> testSuites(List<TestSuiteModel> testSuites) {
+    private List<TestSuiteDto> testSuites(List<TestSuiteDescription> testSuites) {
         return testSuites.stream()
                 .map(this::testSuite)
                 .collect(Collectors.toList());
     }
 
-    private TestSuiteDto testSuite(TestSuiteModel suite) {
+    private TestSuiteDto testSuite(TestSuiteDescription suite) {
         return new TestSuiteDto()
                 .setLoadTest(settings(suite.getSettings()))
                 .setWarmUp(settings(suite.getWarmUp()))
@@ -80,13 +81,13 @@ public class ApplicationController {
                 .setTestCases(testCases(suite));
     }
 
-    private List<TestCaseDto> testCases(TestSuiteModel suite) {
+    private List<TestCaseDto> testCases(TestSuiteDescription suite) {
         return suite.getTestCases().stream()
                 .map(this::testCase)
                 .collect(Collectors.toList());
     }
 
-    private TestCaseDto testCase(TestCaseModel testCase) {
+    private TestCaseDto testCase(TestCaseDescription testCase) {
         return new TestCaseDto()
                 .setName(testCase.getName());
     }
@@ -100,7 +101,7 @@ public class ApplicationController {
                 .setTotalIterationsCount(settings.getTotalIterationsCount());
     }
 
-    private ApplicationStateDto state(StateModel state) {
+    private ApplicationStateDto state(TestAppStateDescription state) {
         return new ApplicationStateDto()
                 .setStage(state.getStage().name())
                 .setSettings(settings(state.getSettings()))
@@ -117,7 +118,7 @@ public class ApplicationController {
                         .collect(Collectors.toList()));
     }
 
-    private WorkerStateDto workerState(WorkerStateModel state) {
+    private WorkerStateDto workerState(WorkerStateDescription state) {
         return new WorkerStateDto()
                 .setName(state.getWorker())
                 .setIterationsCount(state.getCurrentIterationCount())

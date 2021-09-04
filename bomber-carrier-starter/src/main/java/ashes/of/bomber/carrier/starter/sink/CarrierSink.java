@@ -3,7 +3,7 @@ package ashes.of.bomber.carrier.starter.sink;
 import ashes.of.bomber.carrier.dto.events.SinkEvent;
 import ashes.of.bomber.carrier.dto.events.SinkEventType;
 import ashes.of.bomber.carrier.starter.services.AtcService;
-import ashes.of.bomber.core.BomberApp;
+import ashes.of.bomber.descriptions.TestAppDescription;
 import ashes.of.bomber.core.Settings;
 import ashes.of.bomber.core.Stage;
 import ashes.of.bomber.sink.Sink;
@@ -34,9 +34,9 @@ public class CarrierSink implements Sink {
 
     private final AtcService atcService;
     private final ServiceInstanceRegistration registration;
-    private final BomberApp app;
+    private final TestAppDescription app;
 
-    public CarrierSink(AtcService atcService, ServiceInstanceRegistration registration, BomberApp app) {
+    public CarrierSink(AtcService atcService, ServiceInstanceRegistration registration, TestAppDescription app) {
         this.atcService = atcService;
         this.registration = registration;
         this.app = app;
@@ -97,7 +97,7 @@ public class CarrierSink implements Sink {
         return new SinkEvent()
                 .setType(type)
                 .setTimestamp(timestamp.toEpochMilli())
-                .setFlightId(app.getFlightPlan().getId())
+                .setFlightId(app.getPlan().getId())
                 .setCarrierId(registration.getServiceInstance().getId())
                 .setStage(stage != null ? stage.name() : null)
                 .setTestSuite(testSuite)

@@ -1,6 +1,6 @@
 package ashes.of.bomber.carrier.starter.config;
 
-import ashes.of.bomber.core.BomberApp;
+import ashes.of.bomber.runner.TestApp;
 import ashes.of.bomber.sink.Sink;
 import ashes.of.bomber.watcher.Watcher;
 import org.apache.logging.log4j.LogManager;
@@ -19,12 +19,12 @@ public class CarrierConfiguration {
     private static final Logger log = LogManager.getLogger();
 
     @Autowired
-    public void configureSinks(BomberApp app, List<Sink> sinks) {
+    public void configureSinks(TestApp app, List<Sink> sinks) {
         sinks.forEach(app::add);
     }
 
     @Autowired
-    public void configureWatchers(BomberApp app, List<Watcher> watchers) {
+    public void configureWatchers(TestApp app, List<Watcher> watchers) {
         watchers.forEach(watcher -> app.add(1000, watcher));
     }
 }

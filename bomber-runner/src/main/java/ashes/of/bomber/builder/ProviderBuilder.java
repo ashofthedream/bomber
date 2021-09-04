@@ -37,7 +37,7 @@ public class ProviderBuilder {
     private final Map<Class<?>, Supplier<?>> providers = new LinkedHashMap<>();
 
     public ProviderBuilder add(ProviderBuilder builder) {
-        builder.providers.forEach(providers::put);
+        providers.putAll(builder.providers);
         return this;
     }
 

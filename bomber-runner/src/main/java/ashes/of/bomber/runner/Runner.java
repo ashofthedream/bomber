@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.CountDownLatch;
 
-import static ashes.of.bomber.core.Stage.Idle;
+import static ashes.of.bomber.core.Stage.IDLE;
 
 
 public class Runner {
@@ -37,7 +37,7 @@ public class Runner {
      * Runs the test case
      */
     public void startTestCase(Environment env, RunnerState state, TestSuite<Object> testSuite, List<TestCasePlan> testCases) {
-        ThreadContext.put("stage", Idle.name());
+        ThreadContext.put("stage", IDLE.name());
         ThreadContext.put("testSuite", testSuite.getName());
 
         log.info("Start test suite: {} with warm up: {} and test settings: {}",
@@ -80,10 +80,10 @@ public class Runner {
 
                         Settings warmUp = testCase.getWarmUp();
                         if (!warmUp.isDisabled()) {
-                            startTestCase(env, state, testSuite, testCase, Stage.WarmUp, warmUp);
+                            startTestCase(env, state, testSuite, testCase, Stage.WARM_UP, warmUp);
                         }
 
-                        startTestCase(env, state, testSuite, testCase, Stage.Test, testCase.getLoadTest());
+                        startTestCase(env, state, testSuite, testCase, Stage.TEST, testCase.getLoadTest());
 
                         ThreadContext.remove("testCase");
                     });

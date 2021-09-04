@@ -1,9 +1,9 @@
 package ashes.of.bomber.watcher;
 
-import ashes.of.bomber.core.BomberApp;
+import ashes.of.bomber.descriptions.TestAppDescription;
 import ashes.of.bomber.core.Stage;
-import ashes.of.bomber.core.StateModel;
-import ashes.of.bomber.core.WorkerStateModel;
+import ashes.of.bomber.descriptions.TestAppStateDescription;
+import ashes.of.bomber.descriptions.WorkerStateDescription;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
@@ -44,13 +44,13 @@ public class Log4jWatcher implements Watcher {
 
 
     @Override
-    public void watch(BomberApp app) {
-        StateModel state = app.getState();
+    public void watch(TestAppDescription app) {
+        TestAppStateDescription state = app.getState();
         ThreadContext.put("stage", state.getStage().name());
         ThreadContext.put("testSuite", state.getTestSuite());
         ThreadContext.put("testCase", state.getTestCase());
 
-        if (state.getStage() == Stage.Idle || state.getTestCase() == null) {
+        if (state.getStage() == Stage.IDLE || state.getTestCase() == null) {
             log.info("waiting...");
             return;
         }
@@ -60,17 +60,17 @@ public class Log4jWatcher implements Watcher {
 
         long expectedCount = state.getWorkersState()
                 .stream()
-                .mapToLong(WorkerStateModel::getExpectedRecordsCount)
+                .mapToLong(WorkerStateDescription::getExpectedRecordsCount)
                 .sum();
 
         long caughtCount = state.getWorkersState()
                 .stream()
-                .mapToLong(WorkerStateModel::getCaughtRecordsCount)
+                .mapToLong(WorkerStateDescription::getCaughtRecordsCount)
                 .sum();
 
         long watcherErrorCount = state.getWorkersState()
                 .stream()
-                .mapToLong(WorkerStateModel::getErrorsCount)
+                .mapToLong(WorkerStateDescription::getErrorsCount)
                 .sum();
 
         double totalSecs = state.getSettings().getTime().getSeconds();

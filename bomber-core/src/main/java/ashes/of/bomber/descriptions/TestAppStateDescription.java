@@ -1,9 +1,12 @@
-package ashes.of.bomber.core;
+package ashes.of.bomber.descriptions;
+
+import ashes.of.bomber.core.Settings;
+import ashes.of.bomber.core.Stage;
 
 import java.time.Instant;
 import java.util.List;
 
-public class StateModel {
+public class TestAppStateDescription {
     private final Stage stage;
     private final Settings settings;
     private final String testSuite;
@@ -17,14 +20,14 @@ public class StateModel {
     private final Instant testCaseStartTime;
     private final long caseElapsedTime;
     private final long caseRemainTime;
-    private final List<WorkerStateModel> workersState;
+    private final List<WorkerStateDescription> workersState;
 
 
-    public StateModel(Stage stage, Settings settings, String testSuite, String testCase,
-                      long iterationsCount, long remainIterationsCount, long errorCount,
-                      Instant testSuiteStartTime, Instant testCaseStartTime,
-                      long caseElapsedTime, long caseRemainTime,
-                      List<WorkerStateModel> workersState) {
+    public TestAppStateDescription(Stage stage, Settings settings, String testSuite, String testCase,
+                                   long iterationsCount, long remainIterationsCount, long errorCount,
+                                   Instant testSuiteStartTime, Instant testCaseStartTime,
+                                   long caseElapsedTime, long caseRemainTime,
+                                   List<WorkerStateDescription> workersState) {
         this.stage = stage;
         this.settings = settings;
         this.testSuite = testSuite;
@@ -84,7 +87,7 @@ public class StateModel {
     }
 
 
-    public List<WorkerStateModel> getWorkersState() {
+    public List<WorkerStateDescription> getWorkersState() {
         return workersState;
     }
 }

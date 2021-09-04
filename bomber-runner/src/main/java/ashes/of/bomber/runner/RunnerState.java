@@ -14,7 +14,7 @@ import java.util.function.BooleanSupplier;
 public class RunnerState {
     private static final Logger log = LogManager.getLogger();
 
-    private volatile Stage stage = Stage.Idle;
+    private volatile Stage stage = Stage.IDLE;
     private volatile Settings settings = new Settings();
 
     private volatile String testSuite;
@@ -92,7 +92,7 @@ public class RunnerState {
 
     public void finishCase() {
         testCase = "";
-        stage = Stage.Idle;
+        stage = Stage.IDLE;
         settings = new Settings().disabled();
         testCaseStartTime = Instant.EPOCH;
     }

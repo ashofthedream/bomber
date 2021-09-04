@@ -1,6 +1,5 @@
 package ashes.of.bomber.builder;
 
-import ashes.of.bomber.core.BomberApp;
 import ashes.of.bomber.core.Settings;
 import ashes.of.bomber.delayer.Delayer;
 import ashes.of.bomber.delayer.NoDelayDelayer;
@@ -298,7 +297,7 @@ public class TestAppBuilder {
         return addSuite(b);
     }
 
-    public BomberApp build() {
+    public TestApp build() {
         Objects.requireNonNull(name,     "name is null");
         Preconditions.checkArgument(!suites.isEmpty(), "No test suites found");
 

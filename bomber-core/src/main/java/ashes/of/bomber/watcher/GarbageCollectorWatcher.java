@@ -1,7 +1,7 @@
 package ashes.of.bomber.watcher;
 
-import ashes.of.bomber.core.BomberApp;
-import ashes.of.bomber.core.StateModel;
+import ashes.of.bomber.descriptions.TestAppDescription;
+import ashes.of.bomber.descriptions.TestAppStateDescription;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
@@ -13,8 +13,8 @@ public class GarbageCollectorWatcher implements Watcher {
     private static final Logger log = LogManager.getLogger(new StringFormatterMessageFactory());
 
     @Override
-    public void watch(BomberApp app) {
-        StateModel state = app.getState();
+    public void watch(TestAppDescription app) {
+        TestAppStateDescription state = app.getState();
         ThreadContext.put("stage", state.getStage().name());
         ThreadContext.put("testSuite", state.getTestSuite());
         ThreadContext.put("testCase", state.getTestCase());

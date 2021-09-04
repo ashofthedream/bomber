@@ -1,10 +1,10 @@
-package ashes.of.bomber.core;
+package ashes.of.bomber.descriptions;
 
-public class TestCaseModel {
+public class TestCaseDescription {
     private final String name;
     private final boolean async;
 
-    public TestCaseModel(String name, boolean async) {
+    public TestCaseDescription(String name, boolean async) {
         this.name = name;
         this.async = async;
     }

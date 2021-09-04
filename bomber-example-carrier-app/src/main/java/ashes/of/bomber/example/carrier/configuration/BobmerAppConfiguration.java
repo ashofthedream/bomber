@@ -1,7 +1,7 @@
 package ashes.of.bomber.example.carrier.configuration;
 
 import ashes.of.bomber.builder.TestAppBuilder;
-import ashes.of.bomber.core.BomberApp;
+import ashes.of.bomber.descriptions.TestAppDescription;
 import ashes.of.bomber.example.app.ExampleAnnotatedTestApp;
 import ashes.of.bomber.sink.histogram.HistogramSink;
 import ashes.of.bomber.sink.histogram.HistogramTimelineSink;
@@ -20,8 +20,8 @@ import java.time.temporal.ChronoUnit;
 public class BobmerAppConfiguration {
 
     @Bean
-    public BomberApp bomberApp(@Value("${bomber.target.url}") String url,
-                               @Value("${bomber.squadron.members}") int members) {
+    public TestAppDescription bomberApp(@Value("${bomber.target.url}") String url,
+                                        @Value("${bomber.squadron.members}") int members) {
 
         WebClient testClient = WebClient.builder()
                 .baseUrl(url)

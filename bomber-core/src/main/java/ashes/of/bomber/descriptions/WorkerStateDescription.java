@@ -1,6 +1,6 @@
-package ashes.of.bomber.core;
+package ashes.of.bomber.descriptions;
 
-public class WorkerStateModel {
+public class WorkerStateDescription {
     private final String worker;
 
     private final long currentIterationCount;
@@ -9,7 +9,7 @@ public class WorkerStateModel {
     private final long expectedRecordsCount;
     private final long caughtRecordsCount;
 
-    public WorkerStateModel(String worker, long currentIterationCount, long remainIterationsCount, long errorsCount, long expectedRecordsCount, long caughtRecordsCount) {
+    public WorkerStateDescription(String worker, long currentIterationCount, long remainIterationsCount, long errorsCount, long expectedRecordsCount, long caughtRecordsCount) {
         this.worker = worker;
         this.currentIterationCount = currentIterationCount;
         this.remainIterationsCount = remainIterationsCount;

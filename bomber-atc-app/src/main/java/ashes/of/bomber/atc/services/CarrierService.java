@@ -55,7 +55,7 @@ public class CarrierService {
     public Mono<FlightStartedDto> start(Carrier carrier, Flight flight) {
         URI uri = carrier.getInstance().getUri();
         StartFlightRequest request = new StartFlightRequest()
-                .setId(flight.getId());
+                .setFlightId(flight.getId());
 
         return webClient.post()
                 .uri(uri + "/applications/start")
