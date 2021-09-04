@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/atc/flights")
+@RequestMapping
 public class FlightController {
     private static final Logger log = LogManager.getLogger();
 
@@ -35,21 +35,21 @@ public class FlightController {
         this.flightService = flightService;
     }
 
-    @RequestMapping
+    @RequestMapping("/atc/flights")
     public Mono<List<FlightDto>> getAll() {
         return flightService.getFlights()
                 .map(this::toFlight)
                 .collectList();
     }
 
-    @RequestMapping("/active")
+    @RequestMapping("/atc/flights/active")
     public Mono<FlightDto> getActive() {
         return flightService.getActive()
                 .map(this::toFlight);
     }
 
     // start with flight plan
-    @PostMapping("/start")
+    @PostMapping("/atc/flights/start")
     public Mono<FlightsStartedDto> start() {
         log.debug("start all flights on all active carriers");
 
@@ -61,7 +61,7 @@ public class FlightController {
                         .setFlights(flights));
     }
 
-    @PostMapping("/{carrierId}/applications/{appId}/start")
+    @PostMapping("/atc/flights/{carrierId}/applications/{appId}/start")
     public Mono<FlightsStartedDto> startApplicationOnCarrierById(@PathVariable("carrierId") String carrierId, @PathVariable("appId") String appId) {
         log.debug("start application: {} on carrier: {}", appId, carrierId);
 

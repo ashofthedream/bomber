@@ -2,7 +2,9 @@ version = '1.0.0-SNAPSHOT'
 
 
 configurations {
-    compile.exclude module: 'spring-boot-starter-logging'
+    all {
+        exclude module: 'spring-boot-starter-logging'
+    }
 }
 
 dependencies {

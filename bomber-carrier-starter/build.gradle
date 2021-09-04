@@ -6,7 +6,7 @@ dependencies {
     implementation project(':bomber-runner')
     implementation project(':bomber-carrier-dto')
 
-    implementation 'org.springframework.boot:spring-boot-starter-webflux:2.5.4'
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
     implementation('org.springframework.cloud:spring-cloud-starter-zookeeper-discovery:2.2.5.RELEASE') {
         exclude group: 'org.apache.zookeeper', module: 'zookeeper'

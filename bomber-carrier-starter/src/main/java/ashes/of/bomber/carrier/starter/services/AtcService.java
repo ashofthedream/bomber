@@ -1,7 +1,7 @@
 package ashes.of.bomber.carrier.starter.services;
 
 import ashes.of.bomber.carrier.starter.model.Atc;
-import ashes.of.bomber.descriptions.TestAppDescription;
+import ashes.of.bomber.runner.TestApp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
@@ -17,7 +17,7 @@ public class AtcService {
     private final Registration registration;
 
 
-    public AtcService(ReactiveDiscoveryClient discoveryClient, Registration instance, TestAppDescription app) {
+    public AtcService(ReactiveDiscoveryClient discoveryClient, Registration instance, TestApp app) {
         this.discoveryClient = discoveryClient;
         this.registration = instance;
     }

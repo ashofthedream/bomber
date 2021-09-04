@@ -13,7 +13,9 @@ apply plugin: 'io.spring.dependency-management'
 
 
 configurations {
-    compile.exclude module: 'spring-boot-starter-logging'
+    all {
+        exclude module: 'spring-boot-starter-logging'
+    }
 }
 
 

@@ -12,8 +12,10 @@ apply plugin: 'io.spring.dependency-management'
 
 
 configurations {
-    compile.exclude module: 'spring-boot-starter-logging'
-    compile.exclude module: 'slf4j-log4j12'
+    all {
+        exclude module: 'spring-boot-starter-logging'
+        exclude module: 'slf4j-log4j12'
+    }
 }
 
 

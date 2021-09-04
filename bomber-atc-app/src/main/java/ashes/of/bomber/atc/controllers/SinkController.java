@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/atc/sink")
+@RequestMapping
 public class SinkController {
     private static final Logger log = LogManager.getLogger();
 
@@ -20,7 +20,7 @@ public class SinkController {
         this.flightService = flightService;
     }
 
-    @PostMapping
+    @PostMapping("/atc/sink")
     public void sink(@RequestBody SinkEvent event) {
         log.debug("received event: event: {}", event);
         flightService.getActive()

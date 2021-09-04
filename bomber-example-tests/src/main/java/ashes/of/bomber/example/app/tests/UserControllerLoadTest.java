@@ -52,7 +52,7 @@ public class UserControllerLoadTest {
     @LoadTestCase
     public void getUserByIdSync() {
         ResponseEntity<Void> response = webClient.get()
-                .uri("/users/{id}", 1 + random.nextInt(1000))
+                .uri("/users/{id}/{testId}", 1 + random.nextInt(1000), "getUserByIdSync")
                 .retrieve()
                 .toBodilessEntity()
                 .block();
@@ -62,7 +62,7 @@ public class UserControllerLoadTest {
     public void getUserByIdAsync(Tools tools) {
         Stopwatch stopwatch = tools.stopwatch("getUsers");
         webClient.get()
-                .uri("/users/{id}", 1 + random.nextInt(1000))
+                .uri("/users/{id}/{testId}", 1 + random.nextInt(1000), "getUserByIdAsync")
                 .exchange()
                 .doOnNext(response -> {
                     if (response.statusCode().isError())

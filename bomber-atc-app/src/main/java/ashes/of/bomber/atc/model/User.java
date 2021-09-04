@@ -1,20 +1,20 @@
-package ashes.of.bomber.atc.records;
+package ashes.of.bomber.atc.model;
 
-public class UserRecord {
+public class User {
     private String username;
 
-    public UserRecord(String username) {
+    public User(String username) {
         this.username = username;
     }
 
-    public UserRecord() {
+    public User() {
     }
 
     public String getUsername() {
         return username;
     }
 
-    public UserRecord setUsername(String username) {
+    public User setUsername(String username) {
         this.username = username;
         return this;
     }

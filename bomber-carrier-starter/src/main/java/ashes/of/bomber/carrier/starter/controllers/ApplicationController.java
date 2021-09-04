@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 
 
 @RestController
-@RequestMapping("/applications")
+@RequestMapping
 public class ApplicationController {
     private static final Logger log = LogManager.getLogger();
 
@@ -38,19 +38,20 @@ public class ApplicationController {
         this.app = app;
     }
 
-    @GetMapping
+    @GetMapping("/applications")
     public ResponseEntity<ApplicationDto> getApplications() {
         log.debug("get applications");
+        var desc = app.getDescription();
 
         ApplicationDto dto = new ApplicationDto()
-                .setName(app.getName())
-                .setState(state(app.getState()))
-                .setTestSuites(testSuites(app.getTestSuites()));
+                .setName(desc.getName())
+                .setState(state(desc.getState()))
+                .setTestSuites(testSuites(desc.getTestSuites()));
 
         return ResponseEntity.ok(dto);
     }
 
-    @PostMapping("/start")
+    @PostMapping("/applications/start")
     public ResponseEntity<FlightStartedDto> start(@RequestBody StartFlightRequest start) {
         log.info("start all applications");
         app.startAsync(app.creteDefaultPlan(start.getFlightId()));
@@ -59,13 +60,15 @@ public class ApplicationController {
                 .setId(start.getFlightId()));
     }
 
-    @PostMapping("/stop")
+    @PostMapping("/applications/stop")
     public ResponseEntity<?> stop() {
         log.info("stop application");
         app.stop();
 
         return ResponseEntity.ok().build();
     }
+
+
 
     private List<TestSuiteDto> testSuites(List<TestSuiteDescription> testSuites) {
         return testSuites.stream()

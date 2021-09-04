@@ -2,7 +2,7 @@ package ashes.of.bomber.atc.config;
 
 import ashes.of.bomber.atc.config.properties.SecurityProperties;
 import ashes.of.bomber.atc.dto.ResponseEntities;
-import ashes.of.bomber.atc.records.UserRecord;
+import ashes.of.bomber.atc.model.User;
 import ashes.of.bomber.atc.dto.requests.LoginRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,7 +23,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.MapReactiveUserDetailsService;
 import org.springframework.security.core.userdetails.ReactiveUserDetailsService;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -83,8 +82,8 @@ public class SecurityConfiguration {
 
 
     private Mono<Void> onAuthenticationSuccess(WebFilterExchange exchange, Authentication authentication) {
-        User principal = (User) authentication.getPrincipal();
-        UserRecord dto = new UserRecord(principal.getUsername());
+        org.springframework.security.core.userdetails.User principal = (org.springframework.security.core.userdetails.User) authentication.getPrincipal();
+        User dto = new User(principal.getUsername());
         return sendResponse(exchange, ResponseEntities.ok(dto));
     }
 
@@ -124,7 +123,7 @@ public class SecurityConfiguration {
 
     @Bean
     public MapReactiveUserDetailsService userDetailsService(PasswordEncoder passwordEncoder, SecurityProperties properties) {
-        UserDetails user = User
+        UserDetails user = org.springframework.security.core.userdetails.User
                 .withUsername(properties.getUsername())
                 .password(passwordEncoder.encode(properties.getPassword()))
                 .roles("ADMIN")

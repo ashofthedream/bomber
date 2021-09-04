@@ -1,8 +1,8 @@
 package ashes.of.bomber.atc.controllers;
 
-import ashes.of.bomber.atc.services.CarrierService;
 import ashes.of.bomber.atc.dto.CarrierDto;
 import ashes.of.bomber.atc.dto.ResponseEntities;
+import ashes.of.bomber.atc.services.CarrierService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +17,7 @@ import java.util.List;
 
 
 @RestController
-@RequestMapping("/atc/carriers")
+@RequestMapping
 public class CarrierController {
     private static final Logger log = LogManager.getLogger();
 
@@ -31,7 +31,7 @@ public class CarrierController {
     /**
      * @return all active carriers with all application
      */
-    @GetMapping("/active")
+    @GetMapping("/atc/carriers/active")
     public Mono<List<CarrierDto>> getActive() {
         log.debug("get active carriers");
 
@@ -41,7 +41,7 @@ public class CarrierController {
     }
 
 
-    @PostMapping("/applications/stop")
+    @PostMapping("/atc/carriers/applications/stop")
     public ResponseEntity<?> stopAllApplications() {
         log.debug("stop all applications on all active carriers");
 
@@ -51,7 +51,7 @@ public class CarrierController {
         return ResponseEntities.ok();
     }
 
-    @PostMapping("/{carrierId}/applications/{appId}/stop")
+    @PostMapping("/atc/carriers/{carrierId}/applications/{appId}/stop")
     public ResponseEntity<?> stopApplicationOnCarrierById(@PathVariable("carrierId") String carrierId, @PathVariable("appId") String appId) {
         log.debug("stop application: {} on carrier: {}", appId, carrierId);
 
