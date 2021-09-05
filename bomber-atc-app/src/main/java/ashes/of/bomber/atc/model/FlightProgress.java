@@ -7,12 +7,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public class FlightData {
+public class FlightProgress {
     private final String carrierId;
 
     private List<FlightRecord> records = new CopyOnWriteArrayList<>();
 
-    public FlightData(String carrierId) {
+    public FlightProgress(String carrierId) {
         this.carrierId = carrierId;
     }
 

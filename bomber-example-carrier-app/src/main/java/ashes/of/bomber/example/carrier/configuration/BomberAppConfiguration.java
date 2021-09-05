@@ -17,7 +17,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import java.time.temporal.ChronoUnit;
 
 @Configuration
-public class BobmerAppConfiguration {
+public class BomberAppConfiguration {
 
     @Bean
     public TestApp bomberApp(@Value("${bomber.target.url}") String url,

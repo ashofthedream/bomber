@@ -8,6 +8,7 @@ export enum CarrierAction {
 
 export type CarrierActions = GetActiveCarriers | GetActiveCarriersSuccess;
 
+
 export class GetActiveCarriers implements Action {
   public readonly type = CarrierAction.GetActiveCarriers;
 }

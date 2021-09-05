@@ -15,6 +15,7 @@ import { AtcComponent } from './atc.component';
 import { AuthEffects } from './modules/auth/store/auth.effects';
 import { CarrierModule } from './modules/carrier/carrier.module';
 import { CarrierEffects } from './modules/carrier/store/carrier.effects';
+import { FlightEffects } from './modules/flight/store/flight.effects';
 import { MainModule } from './modules/main/main.module';
 import { AuthRequiredInterceptor } from './modules/shared/interceptors/auth-required.interceptor';
 import { RequestLogHttpInterceptor } from './modules/shared/interceptors/request-log.interceptor';
@@ -39,7 +40,7 @@ registerLocaleData(en);
     HttpClientModule,
     BrowserAnimationsModule,
     StoreModule.forRoot(atcReducers),
-    EffectsModule.forRoot([UserEffects, CarrierEffects, AuthEffects]),
+    EffectsModule.forRoot([UserEffects, CarrierEffects, FlightEffects, AuthEffects]),
     StoreDevtoolsModule.instrument()
   ],
   providers: [

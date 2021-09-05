@@ -34,7 +34,7 @@ export class CarrierEffects {
         .pipe(
             tap(action => console.log(action)),
             ofType(CarrierAction.GetActiveCarriers),
-            switchMap(() => this.carrierService.getActiveCarriers()),
+            switchMap(() => this.carrierService.getActive()),
             map(carriers => new GetActiveCarriersSuccess(carriers))
         );
   }

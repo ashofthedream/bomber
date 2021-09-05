@@ -145,11 +145,14 @@ public class SecurityConfiguration {
 
                 .authorizeExchange()
                 .pathMatchers("/atc/login").permitAll()
+                .pathMatchers("/atc/sink").permitAll()
                 .anyExchange().authenticated()
 
                 .and()
 
-                .exceptionHandling().authenticationEntryPoint(this::authenticationEntryPoint)
+                .exceptionHandling()
+                    .authenticationEntryPoint(this::authenticationEntryPoint)
+
                 .and()
                 .httpBasic().disable()
                 .formLogin().disable()

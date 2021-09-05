@@ -1,15 +1,20 @@
 package ashes.of.bomber.example.carrier;
 
 import ashes.of.bomber.carrier.starter.config.CarrierConfiguration;
+import ashes.of.bomber.flight.FlightPlan;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Import;
+import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import javax.annotation.PostConstruct;
+import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 @SpringBootApplication
 @Import(CarrierConfiguration.class)
@@ -24,13 +29,16 @@ public class ExampleCarrierApp {
 
     @PostConstruct
     public void init() {
-        log.info("BomberApp will be started via http after 5s");
         // run app via http
-//        Executors.newSingleThreadScheduledExecutor()
-//                .schedule(this::startBomberAppViaHttp, 5, TimeUnit.SECONDS);
+        log.info("BomberApp will be started via http after 5s");
+        Executors.newSingleThreadScheduledExecutor()
+                .schedule(this::startBomberAppViaHttp, 5, TimeUnit.SECONDS);
     }
 
     private void startBomberAppViaHttp() {
+        if (true)
+            return;
+
         WebClient client = WebClient.builder()
                 .baseUrl("http://localhost:" + port)
                 .build();
@@ -38,6 +46,7 @@ public class ExampleCarrierApp {
         log.info("try to start BomberApp via http");
         client.post()
                 .uri("/applications/start")
+                .body(BodyInserters.fromValue(new FlightPlan(1, List.of())))
                 .retrieve()
                 .toBodilessEntity()
                 .subscribe(

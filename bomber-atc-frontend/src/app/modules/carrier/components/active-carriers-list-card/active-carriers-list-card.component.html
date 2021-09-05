@@ -1,0 +1,15 @@
+<nz-card nzTitle="Active Carriers" [nzExtra]="actions">
+    <ng-template #actions>
+        <a routerLink="/carriers/active">More</a>
+    </ng-template>
+
+    <div *ngIf="carriers | async; let list; else noCarriers">
+        <ng-container *ngFor="let carrier of list; ">
+            <atc-carrier-label [carrier]="carrier"></atc-carrier-label>
+        </ng-container>
+    </div>
+
+    <ng-template #noCarriers>
+        <p>No Active Carriers</p>
+    </ng-template>
+</nz-card>

@@ -10,6 +10,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 import java.util.Random;
 
@@ -48,10 +49,11 @@ public class AccountControllerLoadTest {
         Stopwatch stopwatch = tools.stopwatch("getAccounts");
         webClient.get()
                 .uri("/accounts/{id}", 1 + random.nextInt(1000))
-                .exchange()
-                .doOnNext(response -> {
+                .exchangeToMono(response -> {
                     if (response.statusCode().isError())
                         throw new RuntimeException("invalid request");
+
+                    return Mono.just(response);
                 })
                 .subscribe(response -> stopwatch.success(), stopwatch::fail);
     }

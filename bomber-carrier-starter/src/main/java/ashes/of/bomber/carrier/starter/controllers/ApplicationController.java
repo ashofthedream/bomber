@@ -1,18 +1,14 @@
 package ashes.of.bomber.carrier.starter.controllers;
 
 import ashes.of.bomber.carrier.dto.ApplicationDto;
-import ashes.of.bomber.carrier.dto.ApplicationStateDto;
 import ashes.of.bomber.carrier.dto.FlightStartedDto;
-import ashes.of.bomber.carrier.dto.SettingsDto;
 import ashes.of.bomber.carrier.dto.TestCaseDto;
 import ashes.of.bomber.carrier.dto.TestSuiteDto;
-import ashes.of.bomber.carrier.dto.WorkerStateDto;
 import ashes.of.bomber.carrier.dto.requests.StartFlightRequest;
-import ashes.of.bomber.flight.Settings;
-import ashes.of.bomber.descriptions.TestAppStateDescription;
+import ashes.of.bomber.carrier.starter.mapping.ApplicationStateMapper;
+import ashes.of.bomber.carrier.starter.mapping.SettingsMapper;
 import ashes.of.bomber.descriptions.TestCaseDescription;
 import ashes.of.bomber.descriptions.TestSuiteDescription;
-import ashes.of.bomber.descriptions.WorkerDescription;
 import ashes.of.bomber.runner.TestApp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -45,7 +41,7 @@ public class ApplicationController {
 
         ApplicationDto dto = new ApplicationDto()
                 .setName(desc.getName())
-                .setState(state(desc.getState()))
+                .setState(ApplicationStateMapper.toDto(desc.getState()))
                 .setTestSuites(testSuites(desc.getTestSuites()));
 
         return ResponseEntity.ok(dto);
@@ -78,8 +74,8 @@ public class ApplicationController {
 
     private TestSuiteDto testSuite(TestSuiteDescription suite) {
         return new TestSuiteDto()
-                .setLoadTest(settings(suite.getSettings()))
-                .setWarmUp(settings(suite.getWarmUp()))
+                .setLoadTest(SettingsMapper.toDto(suite.getSettings()))
+                .setWarmUp(SettingsMapper.toDto(suite.getWarmUp()))
                 .setName(suite.getName())
                 .setTestCases(testCases(suite));
     }
@@ -95,37 +91,8 @@ public class ApplicationController {
                 .setName(testCase.getName());
     }
 
-    private SettingsDto settings(Settings settings) {
-        return new SettingsDto()
-                .setDisabled(settings.isDisabled())
-                .setDuration(settings.getTime().toMillis())
-                .setThreadsCount(settings.getThreadsCount())
-                .setThreadIterationsCount(settings.getThreadIterationsCount())
-                .setTotalIterationsCount(settings.getTotalIterationsCount());
-    }
 
-    private ApplicationStateDto state(TestAppStateDescription state) {
-        return new ApplicationStateDto()
-                .setStage(state.getStage().name())
-                .setSettings(settings(state.getSettings()))
-                .setTestSuite(state.getTestSuite())
-                .setTestCase(state.getTestCase())
-                .setTestSuiteStart(state.getTestSuiteStartTime().toEpochMilli())
-                .setTestCaseStart(state.getTestCaseStartTime().toEpochMilli())
-                .setElapsedTime(state.getCaseElapsedTime())
-                .setRemainTime(state.getCaseRemainTime())
-                .setRemainTotalIterations(state.getRemainIterationsCount())
-                .setErrorsCount(state.getErrorCount())
-                .setWorkers(state.getWorkers().stream()
-                        .map(this::workerState)
-                        .collect(Collectors.toList()));
-    }
 
-    private WorkerStateDto workerState(WorkerDescription state) {
-        return new WorkerStateDto()
-                .setName(state.getWorker())
-                .setIterationsCount(state.getCurrentIterationsCount())
-                .setRemainIterationsCount(state.getRemainIterationsCount())
-                .setErrorsCount(state.getErrorsCount());
-    }
+
+
 }

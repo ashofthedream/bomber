@@ -12,7 +12,7 @@ export class CarrierService {
   constructor(private readonly rest: RestService) {
   }
 
-  public getActiveCarriers(): Observable<Carrier[]> {
+  public getActive(): Observable<Carrier[]> {
     return this.rest.get('carriers/active')
         .pipe(
             catchError((err, caught) => of([]))

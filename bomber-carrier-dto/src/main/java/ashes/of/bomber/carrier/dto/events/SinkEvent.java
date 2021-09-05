@@ -1,8 +1,11 @@
 package ashes.of.bomber.carrier.dto.events;
 
+import ashes.of.bomber.carrier.dto.ApplicationStateDto;
+
 import javax.annotation.Nullable;
 
 public class SinkEvent {
+    private long id;
     private long timestamp;
     private SinkEventType type;
     private long flightId;
@@ -15,6 +18,17 @@ public class SinkEvent {
 
     @Nullable
     private String testCase;
+
+    private ApplicationStateDto state;
+
+    public long getId() {
+        return id;
+    }
+
+    public SinkEvent setId(long id) {
+        this.id = id;
+        return this;
+    }
 
     public long getTimestamp() {
         return timestamp;
@@ -79,5 +93,29 @@ public class SinkEvent {
     public SinkEvent setTestCase(@Nullable String testCase) {
         this.testCase = testCase;
         return this;
+    }
+
+    public ApplicationStateDto getState() {
+        return state;
+    }
+
+    public SinkEvent setState(ApplicationStateDto state) {
+        this.state = state;
+        return this;
+    }
+
+    @Override
+    public String toString() {
+        return "SinkEvent{" +
+                "id=" + id +
+                ", timestamp=" + timestamp +
+                ", type=" + type +
+                ", flightId=" + flightId +
+                ", carrierId='" + carrierId + '\'' +
+                ", stage='" + stage + '\'' +
+                ", testSuite='" + testSuite + '\'' +
+                ", testCase='" + testCase + '\'' +
+                ", state=" + state +
+                '}';
     }
 }

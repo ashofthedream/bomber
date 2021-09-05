@@ -1,45 +1,17 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
-import {Subscription, timer} from 'rxjs';
-import {flatMap} from 'rxjs/operators';
-import {FlightService} from '../../services/flight.service';
-import {Flight} from '../../models/flight';
-import {FlightData} from '../../models/flight-data';
-import {ApplicationState} from '../../../main/models/application-state';
+import { Component } from '@angular/core';
+import { Store } from '@ngrx/store';
+import { ApplicationState } from '../../../main/models/application-state';
+import { AtcState } from '../../../shared/store/atc.state';
+import { activeFlight } from '../../store/flight.selectors';
 
 @Component({
   selector: 'atc-flights-active-page',
   templateUrl: './active-flight-page.component.html'
 })
-export class ActiveFlightPageComponent implements OnInit, OnDestroy {
-  flight: Flight;
+export class ActiveFlightPageComponent {
+  flight = this.store.select(activeFlight);
 
-  private flightSub: Subscription;
-
-  constructor(private readonly service: FlightService) {
-  }
-
-  ngOnInit() {
-    this.flightSub = timer(0, 3000)
-        .pipe(
-            flatMap(() => this.service.getActive())
-        )
-        .subscribe(flight => {
-          this.flight = flight;
-        });
-  }
-
-  ngOnDestroy(): void {
-    if (this.flightSub) {
-      this.flightSub.unsubscribe();
-    }
-  }
-
-  flightData(): FlightData[] {
-    if (this.flight) {
-      return Object.values(this.flight.data);
-    }
-
-    return [];
+  constructor(private readonly store: Store<AtcState>) {
   }
 
   iterationsProgress(state: ApplicationState): number {
@@ -51,7 +23,7 @@ export class ActiveFlightPageComponent implements OnInit, OnDestroy {
   }
 
   currentTime(state: ApplicationState): number {
-      return state.settings.duration - state.remainTime;
+    return state.settings.duration - state.remainTime;
   }
 
   currentIterations(state: ApplicationState): number {

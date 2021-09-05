@@ -32,7 +32,7 @@ import java.time.temporal.ChronoUnit;
 public class ExampleAnnotatedTestApp {
     private static final Logger log = LogManager.getLogger();
 
-    private static String url;
+    private static String url = "http://localhost:8080";
 
     @Provide
     public WebClient webClient() {

@@ -76,7 +76,7 @@ public class FlightController {
     private FlightDto toFlight(Flight flight) {
         Map<String, FlightDataDto> all = new HashMap<>();
 
-        flight.getData().forEach((carrierId, data) -> {
+        flight.getProgress().forEach((carrierId, data) -> {
 
             List<FlightRecordDto> records = data.getRecords().stream()
                     .map(this::toFlightRecord)

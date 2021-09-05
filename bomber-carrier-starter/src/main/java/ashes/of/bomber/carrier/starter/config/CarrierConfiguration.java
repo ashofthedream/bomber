@@ -20,11 +20,13 @@ public class CarrierConfiguration {
 
     @Autowired
     public void configureSinks(TestApp app, List<Sink> sinks) {
+        log.warn("CONFIGURE SINKS: {}", sinks);
         sinks.forEach(app::add);
     }
 
     @Autowired
     public void configureWatchers(TestApp app, List<Watcher> watchers) {
+        log.warn("CONFIGURE WATCHERS: {}", watchers);
         watchers.forEach(watcher -> app.add(1000, watcher));
     }
 }

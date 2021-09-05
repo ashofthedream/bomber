@@ -1,51 +1,50 @@
 <nz-page-header [nzGhost]="false">
-    <nz-page-header-title>Active Flight <span *ngIf="flight">#{{flight.id}}</span>
-    </nz-page-header-title>
+  <nz-page-header-title>
+    Active Flight <span *ngIf="flight | async let fl">#{{fl.id}}</span>
+  </nz-page-header-title>
 </nz-page-header>
 
 
-<ng-container *ngIf="flight; else empty">
+<ng-container *ngIf="flight | async let fl; else empty">
+  <div *ngFor="let data of fl.data | keyvalue">
+    <nz-table [nzData]="data.value.records" nzSize="small" [nzShowPagination]="false">
+      <thead>
+      <tr>
+        <th>Carrier</th>
+        <th>Type</th>
+        <th>Stage</th>
+        <th>Test Suite</th>
+        <th>Test Case</th>
+        <th>Progress</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let record of data.value.records">
+        <td>{{data.key}}</td>
+        <td>{{record.type}}</td>
+        <td>{{record.state?.stage}}</td>
+        <td>{{record.testSuite}}</td>
+        <td>{{record.testCase}}</td>
+        <td>
+          <p *ngIf="record.type == 'TEST_CASE_PROGRESS'">
+            <strong>Iterations:</strong> {{currentIterations(record.state)}}
+            of {{record.state.settings.totalIterationsCount}}
+            <nz-progress [nzPercent]="iterationsProgress(record.state)"></nz-progress>
+          </p>
 
-    <div *ngFor="let data of flightData()">
-
-        <nz-table [nzData]="data.records" nzSize="small" [nzShowPagination]="false">
-            <thead>
-            <tr>
-                <th>Carrier</th>
-                <th>Type</th>
-                <th>Stage</th>
-                <th>Test Suite</th>
-                <th>Test Case</th>
-                <th>Progress</th>
-            </tr>
-            </thead>
-            <tbody>
-                <tr *ngFor="let record of data.records">
-                    <td>{{data.carrierId}}</td>
-                    <td>{{record.type}}</td>
-                    <td>{{record.state?.stage}}</td>
-                    <td>{{record.testSuite}}</td>
-                    <td>{{record.testCase}}</td>
-                    <td>
-                        <p *ngIf="record.type == 'TEST_CASE_PROGRESS'">
-                            <strong>Iterations:</strong> {{currentIterations(record.state)}} of {{record.state.settings.totalIterationsCount}}
-                            <nz-progress [nzPercent]="iterationsProgress(record.state)"></nz-progress>
-                        </p>
-
-                        <p *ngIf="record.type == 'TEST_CASE_PROGRESS'">
-                            <strong>Time:</strong> {{currentTime(record.state)}}ms of {{record.state.settings.duration}}ms
-                            <nz-progress [nzPercent]="timeProgress(record.state)"></nz-progress>
-                        </p>
-                    </td>
-                </tr>
-            </tbody>
-        </nz-table>
-    </div>
-
+          <p *ngIf="record.type == 'TEST_CASE_PROGRESS'">
+            <strong>Time:</strong> {{currentTime(record.state)}}ms of {{record.state.settings.duration}}ms
+            <nz-progress [nzPercent]="timeProgress(record.state)"></nz-progress>
+          </p>
+        </td>
+      </tr>
+      </tbody>
+    </nz-table>
+  </div>
 </ng-container>
 
 <ng-template #empty>
-    <div style="padding: 50px">
-        <nz-empty></nz-empty>
-    </div>
+  <div style="padding: 50px">
+    <nz-empty></nz-empty>
+  </div>
 </ng-template>

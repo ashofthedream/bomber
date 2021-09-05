@@ -1,0 +1,18 @@
+<nz-card nzTitle="Applications">
+  <nz-spin [nzSpinning]="activeCarriersLoading | async">
+    <ng-container *ngIf="tree.length; else noApplications">
+      <nz-tree [nzData]="tree" (nzClick)="select($event.node.origin)" nzCheckable></nz-tree>
+
+      <div *ngIf="selected">
+        <strong>{{selected.title}}</strong>
+        <p *ngFor="let carrier of selected.carriers">
+          {{carrier.id}}
+        </p>
+      </div>
+    </ng-container>
+  </nz-spin>
+
+  <ng-template #noApplications>
+    <p>No Applications</p>
+  </ng-template>
+</nz-card>

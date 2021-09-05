@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping
-public class AtcController {
+public class UserController {
 
     @GetMapping("/atc/users/current")
     public ResponseEntity<UserDto> getCurrentUser(Authentication auth) {

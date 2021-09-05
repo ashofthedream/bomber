@@ -8,7 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Flight {
     private final long id;
 
-    private final Map<String, FlightData> data = new ConcurrentHashMap<>();
+    private final Map<String, FlightProgress> progress = new ConcurrentHashMap<>();
     private volatile long startedAt;
     private volatile long finishedAt;
 
@@ -36,20 +36,21 @@ public class Flight {
         this.finishedAt = finishedAt;
     }
 
-    public FlightData getData(String carrierId) {
-        return data.computeIfAbsent(carrierId, FlightData::new);
+    public FlightProgress getData(String carrierId) {
+        return progress.computeIfAbsent(carrierId, FlightProgress::new);
     }
 
-    public Map<String, FlightData> getData() {
-        return data;
+    public Map<String, FlightProgress> getProgress() {
+        return progress;
     }
 
     public void event(SinkEvent event) {
-        FlightData data = getData(event.getCarrierId());
+        FlightProgress data = getData(event.getCarrierId());
 
         FlightRecord record = new FlightRecord(event.getType().name(), event.getTimestamp(), null);
         record.setTestSuite(event.getTestSuite());
         record.setTestCase(event.getTestCase());
+        record.setState(event.getState());
 
         data.add(record);
     }

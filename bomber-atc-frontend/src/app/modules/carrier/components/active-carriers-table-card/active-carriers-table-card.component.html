@@ -1,0 +1,31 @@
+<nz-card nzTitle="Carriers" >
+  <ng-container *ngIf="hasActiveCarriers | async; else noCarriers">
+    <nz-table [nzData]="activeCarriers | async" nzSize="small" [nzShowPagination]="false">
+      <thead>
+      <tr>
+        <th></th>
+        <th>Carrier</th>
+        <th>Test Suites</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let carrier of activeCarriers | async">
+        <td [nzShowCheckbox]="true" [(nzChecked)]="carrier.selected"></td>
+        <td>
+          <atc-carrier-label [carrier]="carrier"></atc-carrier-label>
+        </td>
+        <td>
+          <p *ngFor="let testSuite of carrier.app.testSuites">
+            <strong>{{testSuite.name}}</strong><br/>
+            <span *ngFor="let testCase of testSuite.testCases">&nbsp;&nbsp;&nbsp;&nbsp;{{testCase.name}}<br/></span>
+          </p>
+        </td>
+      </tr>
+      </tbody>
+    </nz-table>
+  </ng-container>
+
+  <ng-template #noCarriers>
+    <p>No Carriers</p>
+  </ng-template>
+</nz-card>

@@ -1,7 +1,7 @@
 package ashes.of.bomber.atc.services;
 
 import ashes.of.bomber.atc.model.Flight;
-import ashes.of.bomber.atc.model.FlightData;
+import ashes.of.bomber.atc.model.FlightProgress;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -28,15 +28,16 @@ public class FlightService {
         this.carrierService = carrierService;
     }
 
-    @Scheduled(fixedRate = 1000)
+//    @Scheduled(fixedRate = 1000)
     public void updateActiveFlight() {
         Flight flight = active;
         if (flight == null)
             return;
+
         carrierService.getCarriers()
                 .flatMap(carrierService::status)
                 .subscribe(carrier -> {
-                    FlightData data = flight.getData(carrier.getId());
+                    FlightProgress data = flight.getData(carrier.getId());
                     data.add(carrier.getApp().getState());
                 });
     }

@@ -17,7 +17,7 @@ export interface ApplicationState {
 
 
 export enum Stage {
-  Idle = 'Idle',
-  WarmUp = 'WarmUp',
-  Test = 'Test'
+  IDLE = 'IDLE',
+  WARM_UP = 'WARM_UP',
+  TEST = 'TEST'
 }
