@@ -5,7 +5,6 @@ import ashes.of.bomber.carrier.dto.events.SinkEvent;
 import ashes.of.bomber.carrier.dto.events.SinkEventType;
 import ashes.of.bomber.carrier.starter.mapping.ApplicationStateMapper;
 import ashes.of.bomber.carrier.starter.services.AtcService;
-import ashes.of.bomber.descriptions.TestAppStateDescription;
 import ashes.of.bomber.flight.FlightPlan;
 import ashes.of.bomber.flight.Iteration;
 import ashes.of.bomber.flight.Settings;
@@ -36,7 +35,6 @@ import static ashes.of.bomber.carrier.dto.events.SinkEventType.TEST_SUITE_START;
 @Component
 public class CarrierHttpSink implements Sink {
     private static final Logger log = LogManager.getLogger();
-    private static final AtomicLong eventIdSeq = new AtomicLong();
 
     private final WebClient webClient = WebClient.builder()
             .build();
@@ -54,13 +52,13 @@ public class CarrierHttpSink implements Sink {
     }
 
     @Override
-    public void startUp() {
-        SinkEvent event = event(TEST_APP_START, Instant.now(), null,null, null, null);
+    public void startUp(Instant timestamp) {
+        SinkEvent event = event(TEST_APP_START, timestamp, null,null, null, null);
         send(event);
     }
 
     @Override
-    public void beforeTestSuite(String testSuite, Instant timestamp) {
+    public void beforeTestSuite(Instant timestamp, String testSuite) {
         SinkEvent event = event(TEST_SUITE_START, timestamp, null, testSuite, null, null);
         send(event);
     }
@@ -77,7 +75,7 @@ public class CarrierHttpSink implements Sink {
     }
 
     @Override
-    public void beforeTestCase(Stage stage, String testSuite, String testCase, Instant timestamp, Settings settings) {
+    public void beforeTestCase(Instant timestamp, Stage stage, String testSuite, String testCase, Settings settings) {
         SinkEvent event = event(TEST_CASE_START, timestamp, stage, testSuite, testCase, null);
         send(event);
     }
@@ -95,8 +93,8 @@ public class CarrierHttpSink implements Sink {
     }
 
     @Override
-    public void shutDown() {
-        SinkEvent event = event(TEST_APP_FINISH, Instant.now(), null, null, null, null);
+    public void shutDown(Instant timestamp) {
+        SinkEvent event = event(TEST_APP_FINISH, timestamp, null, null, null, null);
         send(event);
     }
 
@@ -116,7 +114,7 @@ public class CarrierHttpSink implements Sink {
 
     private SinkEvent event(SinkEventType type, Instant timestamp, @Nullable Stage stage, @Nullable String testSuite, @Nullable String testCase, @Nullable ApplicationStateDto state) {
         return new SinkEvent()
-                .setId(eventIdSeq.incrementAndGet())
+                .setId(SinkEvent.nextId())
                 .setType(type)
                 .setTimestamp(timestamp.toEpochMilli())
                 .setFlightId(Optional.ofNullable(app.getFlightPlan()).map(FlightPlan::getId).orElse(0L))

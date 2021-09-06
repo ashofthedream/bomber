@@ -34,6 +34,10 @@ public class WorkerState {
         this.barrier = barrier;
     }
 
+    public RunnerState getRunnerState() {
+        return runnerState;
+    }
+
     public CountDownLatch getStartLatch() {
         return startLatch;
     }

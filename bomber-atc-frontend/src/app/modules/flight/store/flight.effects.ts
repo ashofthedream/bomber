@@ -30,7 +30,6 @@ export class FlightEffects {
   public getActiveFlight(): Observable<GetActiveFlightSuccess> {
     return this.actions
         .pipe(
-            tap(action => console.log(action)),
             ofType(FlightAction.GetActiveFlight),
             switchMap(() => this.flightService.getActive()),
             map(flight => new GetActiveFlightSuccess(flight))

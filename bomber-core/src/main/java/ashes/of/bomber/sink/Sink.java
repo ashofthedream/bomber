@@ -13,27 +13,28 @@ public interface Sink {
 
     /**
      * Invokes then app starts
+     *
+     * @param timestamp application start time
      */
-    default void startUp() {}
+    default void startUp(Instant timestamp) {}
 
     /**
      * Invokes before all test cases in suite
      *
+     * @param timestamp test suite start time
      * @param testSuite test suite name
-     * @param timestamp stage start time
      */
-    default void beforeTestSuite(String testSuite, Instant timestamp) {}
+    default void beforeTestSuite(Instant timestamp, String testSuite) {}
 
     /**
      * Invokes before test case run
-     *
+     * @param timestamp test case start time
      * @param stage     stage
      * @param testSuite test suite name
      * @param testCase  test suite name
-     * @param timestamp stage start time
      * @param settings  stage settings
      */
-    default void beforeTestCase(Stage stage, String testSuite, String testCase, Instant timestamp, Settings settings) {}
+    default void beforeTestCase(Instant timestamp, Stage stage, String testSuite, String testCase, Settings settings) {}
 
     default void beforeEach(Iteration it) {}
 
@@ -71,6 +72,8 @@ public interface Sink {
 
     /**
      * Invokes then app
+     *
+     * @param timestamp application shutdown time
      */
-    default void shutDown() {}
+    default void shutDown(Instant timestamp) {}
 }

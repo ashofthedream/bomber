@@ -7,5 +7,6 @@ public enum SinkEventType {
     TEST_SUITE_FINISH,
     TEST_CASE_START,
     TEST_CASE_PROGRESS,
+    TEST_CASE_HISTOGRAM,
     TEST_CASE_FINISH,
 }

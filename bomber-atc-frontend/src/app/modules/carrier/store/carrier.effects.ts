@@ -32,7 +32,6 @@ export class CarrierEffects {
   public getActiveCarriers(): Observable<GetActiveCarriersSuccess> {
     return this.actions
         .pipe(
-            tap(action => console.log(action)),
             ofType(CarrierAction.GetActiveCarriers),
             switchMap(() => this.carrierService.getActive()),
             map(carriers => new GetActiveCarriersSuccess(carriers))

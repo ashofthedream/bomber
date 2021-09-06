@@ -8,6 +8,7 @@ import ashes.of.bomber.builder.TestAppBuilder;
 import ashes.of.bomber.example.app.tests.AccountControllerLoadTest;
 import ashes.of.bomber.example.app.tests.UserControllerLoadTest;
 import ashes.of.bomber.sink.histogram.HistogramSink;
+import ashes.of.bomber.sink.histogram.HistogramTimelinePrintStreamPrinter;
 import ashes.of.bomber.sink.histogram.HistogramTimelineSink;
 import ashes.of.bomber.squadron.BarrierBuilder;
 import ashes.of.bomber.squadron.NoBarrier;
@@ -51,7 +52,7 @@ public class ExampleAnnotatedTestApp {
         var report = TestAppBuilder.create(ExampleAnnotatedTestApp.class)
                 // log all times to console via log4j and HdrHistogram
 //                .sink(new Log4jSink())
-                .sink(new HistogramTimelineSink(ChronoUnit.SECONDS, System.out))
+                .sink(new HistogramTimelineSink(ChronoUnit.SECONDS, new HistogramTimelinePrintStreamPrinter()))
                 .sink(new HistogramSink())
                 .watcher(1000, new Log4jWatcher())
                 .barrier(barrier)

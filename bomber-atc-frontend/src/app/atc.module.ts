@@ -21,6 +21,7 @@ import { AuthRequiredInterceptor } from './modules/shared/interceptors/auth-requ
 import { RequestLogHttpInterceptor } from './modules/shared/interceptors/request-log.interceptor';
 import { SharedModule } from './modules/shared/shared.module';
 import { atcReducers } from './modules/shared/store/atc.reducers';
+import { TraceEffects } from './modules/shared/store/trace.effects';
 import { UserEffects } from './modules/shared/store/user.effects';
 
 registerLocaleData(en);
@@ -40,8 +41,16 @@ registerLocaleData(en);
     HttpClientModule,
     BrowserAnimationsModule,
     StoreModule.forRoot(atcReducers),
-    EffectsModule.forRoot([UserEffects, CarrierEffects, FlightEffects, AuthEffects]),
-    StoreDevtoolsModule.instrument()
+    EffectsModule.forRoot([
+        TraceEffects,
+        AuthEffects,
+        CarrierEffects,
+        FlightEffects,
+        UserEffects
+    ]),
+    StoreDevtoolsModule.instrument({
+      maxAge: 100
+    })
   ],
   providers: [
     { provide: NZ_I18N, useValue: en_US },

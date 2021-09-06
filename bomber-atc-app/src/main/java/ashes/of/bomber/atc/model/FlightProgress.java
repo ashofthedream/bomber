@@ -9,8 +9,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 public class FlightProgress {
     private final String carrierId;
-
-    private List<FlightRecord> records = new CopyOnWriteArrayList<>();
+    private final List<FlightRecord> records = new CopyOnWriteArrayList<>();
 
     public FlightProgress(String carrierId) {
         this.carrierId = carrierId;
@@ -18,6 +17,12 @@ public class FlightProgress {
 
 
     public void add(FlightRecord record) {
+        FlightRecord last = getActual();
+//        if (last != null && isSameProgressEvent(record, last)) {
+//            records.set(records.size() - 1, record);
+//            return;
+//        }
+
         records.add(record);
     }
 
@@ -28,13 +33,7 @@ public class FlightProgress {
         record.setTestSuite(state.getTestSuite());
         record.setTestCase(state.getTestCase());
 
-        FlightRecord last = getActual();
-        if (last != null && isSameProgressEvent(record, last)) {
-            records.set(records.size() - 1, record);
-            return;
-        }
-
-        records.add(record);
+        add(record);
     }
 
     private boolean isSameProgressEvent(FlightRecord record, FlightRecord last) {

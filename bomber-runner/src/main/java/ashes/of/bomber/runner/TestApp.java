@@ -118,7 +118,7 @@ public class TestApp {
                 .forEach(Watcher::startUp);
 
         env.getSinks()
-                .forEach(Sink::startUp);
+                .forEach(sink -> sink.startUp(startTime));
 
         List<TestSuiteReport> testSuiteReports = new ArrayList<>();
         try {
@@ -146,9 +146,10 @@ public class TestApp {
             log.error("Unexpected throwable", th);
         }
 
+        Instant finishTime = Instant.now();
         log.debug("Shutdown for each sink and watcher");
         env.getSinks()
-                .forEach(Sink::shutDown);
+                .forEach(sink -> sink.shutDown(finishTime));
 
         env.getWatchers().stream()
                 .map(WatcherConfig::getWatcher)
@@ -157,7 +158,7 @@ public class TestApp {
         log.debug("Shutdown wat each sink and watcher");
         watcherEx.shutdown();
 
-        Instant finishTime = Instant.now();
+
         endLatch.countDown();
         endLatch = new CountDownLatch(1);
 

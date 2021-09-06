@@ -6,6 +6,7 @@ dependencies {
     implementation project(':bomber-runner')
     implementation project(':bomber-carrier-dto')
 
+    implementation 'org.hdrhistogram:HdrHistogram:2.1.12'
     implementation 'org.springframework.boot:spring-boot-starter-webflux:2.5.4'
 
     implementation('org.springframework.cloud:spring-cloud-starter-zookeeper-discovery:3.0.3') {

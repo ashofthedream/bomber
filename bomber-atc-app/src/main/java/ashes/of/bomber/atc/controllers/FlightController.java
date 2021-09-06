@@ -107,6 +107,7 @@ public class FlightController {
                 .setType(record.getType())
                 .setTestSuite(record.getTestSuite())
                 .setTestCase(record.getTestCase())
-                .setState(record.getState());
+                .setState(record.getState())
+                .setHistograms(record.getHistograms());
     }
 }

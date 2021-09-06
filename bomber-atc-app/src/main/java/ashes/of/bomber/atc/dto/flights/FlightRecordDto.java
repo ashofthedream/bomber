@@ -1,6 +1,9 @@
 package ashes.of.bomber.atc.dto.flights;
 
 import ashes.of.bomber.carrier.dto.ApplicationStateDto;
+import ashes.of.bomber.carrier.dto.events.HistogramDto;
+
+import java.util.List;
 
 public class FlightRecordDto {
     private long timestamp;
@@ -8,6 +11,7 @@ public class FlightRecordDto {
     private String testSuite;
     private String testCase;
     private ApplicationStateDto state;
+    private List<HistogramDto> histograms;
 
     public long getTimestamp() {
         return timestamp;
@@ -51,6 +55,15 @@ public class FlightRecordDto {
 
     public FlightRecordDto setState(ApplicationStateDto state) {
         this.state = state;
+        return this;
+    }
+
+    public List<HistogramDto> getHistograms() {
+        return histograms;
+    }
+
+    public FlightRecordDto setHistograms(List<HistogramDto> histograms) {
+        this.histograms = histograms;
         return this;
     }
 }

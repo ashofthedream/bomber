@@ -15,7 +15,7 @@ import ashes.of.bomber.annotations.WarmUp;
 import ashes.of.bomber.flight.Settings;
 import ashes.of.bomber.delayer.RandomDelayer;
 import ashes.of.bomber.limiter.Limiter;
-import ashes.of.bomber.methods.TestCaseMethodWithTools;
+import ashes.of.bomber.methods.TestCaseWithTools;
 import ashes.of.bomber.tools.Tools;
 import com.google.common.base.Strings;
 import org.apache.logging.log4j.LogManager;
@@ -171,14 +171,14 @@ public class TestSuiteProcessor<T> {
             return;
 
         MethodHandle mh = MethodHandles.lookup().unreflect(method);
-        AtomicReference<TestCaseMethodWithTools<T>> ref = new AtomicReference<>();
+        AtomicReference<TestCaseWithTools<T>> ref = new AtomicReference<>();
         AtomicBoolean skip = new AtomicBoolean();
 
         b.testCase(name, loadTest.async(), (suite, tools) -> {
             if (skip.get())
                 return;
 
-            TestCaseMethodWithTools<T> proxy = ref.get();
+            TestCaseWithTools<T> proxy = ref.get();
             if (proxy == null) {
                 log.debug("init testCase: {} proxy method", name);
                 Class<?>[] types = method.getParameterTypes();

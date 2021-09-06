@@ -1,29 +1,25 @@
 package ashes.of.bomber.sink.histogram;
 
-import ashes.of.bomber.tools.Record;
+import ashes.of.bomber.flight.Stage;
 import ashes.of.bomber.sink.Sink;
-import org.HdrHistogram.Histogram;
+import ashes.of.bomber.tools.Record;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.annotation.Nullable;
-import java.io.PrintStream;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.Temporal;
 import java.time.temporal.TemporalUnit;
+import java.util.Map;
 import java.util.NavigableMap;
+import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 
 public class HistogramTimelineSink implements Sink {
     private static final Logger log = LogManager.getLogger();
-
-    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss.SSS")
-            .withZone(ZoneId.systemDefault());
 
 
     // because I want to obtain resolution between 1s and 1ms...
@@ -66,91 +62,57 @@ public class HistogramTimelineSink implements Sink {
         }
     }
 
-
+    private final Map<MeasurementKey, NavigableMap<Instant, Measurements>> timeline = new ConcurrentHashMap<>();
     private final TemporalUnit resolution;
-    private final PrintStream out;
+    private final HistogramTimelinePrinter printer;
 
-    private final NavigableMap<Instant, Measurements> timeline = new ConcurrentSkipListMap<>();
-
-
-    public HistogramTimelineSink(Duration resolution, PrintStream out) {
+    public HistogramTimelineSink(Duration resolution, HistogramTimelinePrinter printer) {
         this.resolution = new DurationTemporalUnit(resolution);
-        this.out = out;
+        this.printer = printer;
     }
 
-    public HistogramTimelineSink(ChronoUnit resolution, PrintStream out) {
+    public HistogramTimelineSink(ChronoUnit resolution, HistogramTimelinePrinter printer) {
         this.resolution = resolution;
-        this.out = out;
+        this.printer = printer;
     }
 
     public HistogramTimelineSink() {
-        this(ChronoUnit.MINUTES, System.out);
+        this(ChronoUnit.MINUTES, new HistogramTimelinePrintStreamPrinter());
     }
 
     @Override
     public void timeRecorded(Record record) {
-        Instant ts = record.getIteration().getTimestamp().truncatedTo(resolution);
-        timeline.computeIfAbsent(ts, Measurements::new).add(record);
+        var it = record.getIteration();
+        var ts = it.getTimestamp().truncatedTo(resolution);
+        var key = new MeasurementKey(it.getTestSuite(), it.getTestCase(), it.getStage());
+        timeline.computeIfAbsent(key, k -> new ConcurrentSkipListMap<>())
+                .computeIfAbsent(ts, timestamp -> new Measurements(key))
+                .add(record);
     }
 
     @Override
-    public void shutDown() {
-        print();
+    public void afterTestCase(Stage stage, String testSuite, String testCase) {
+        var key = new MeasurementKey(testSuite, testCase, stage);
+        var measurements = timeline.get(key);
+        if (measurements != null) {
+            printer.print(resolution, measurements);
+        }
+    }
+
+    @Override
+    public void shutDown(Instant timestamp) {
+        printer.print(resolution, timeline);
 
         timeline.clear();
     }
 
-    private void print() {
-        if (timeline.isEmpty()) {
-            log.warn("Nothing to print, timeline is empty");
-            return;
+
+    public NavigableMap<Instant, Measurements> getTimeline(MeasurementKey key) {
+        var measurements = timeline.get(key);
+        if (measurements != null) {
+            return measurements;
         }
 
-        Instant time = timeline.firstKey();
-        Instant end = timeline.lastKey();
-
-        out.printf("count: %s, start: %s, end: %s%n", timeline.size(), time, end);
-        out.printf("%-14s %-50s %11s %11s %11s %11s %11s %11s %11s %10s %10s%n", "time", "label", "median", "75.00", "90.00", "95.00", "99.00", "99.90", "max", "count", "errors");
-        while (!time.isAfter(end)) {
-            Measurements measurements = timeline.get(time);
-            print(time, measurements);
-
-            time = time.plus(resolution.getDuration());
-        }
-    }
-
-    private void print(Instant time, @Nullable Measurements measurements) {
-        if (measurements == null) {
-            printEmptyRow(time);
-            return;
-        }
-
-        if (measurements.data.isEmpty()) {
-            printEmptyRow(time);
-            return;
-        }
-
-        measurements.data.forEach((label, tae) -> printRow(time, label, tae.histogram, tae.errors.sum()));
-    }
-
-    private void printEmptyRow(Instant time) {
-        out.printf("%-14s %n", formatter.format(time));
-    }
-
-    private void printRow(Instant time, String label, Histogram h, long errorsCount) {
-        out.printf("%-14s %-50s %11.2f %11.2f %11.2f %11.2f %11.2f %11.2f %11.2f %,10d %,10d%n",
-                formatter.format(time), label,
-                ms(h.getValueAtPercentile(0.5)),
-                ms(h.getValueAtPercentile(0.75)),
-                ms(h.getValueAtPercentile(0.90)),
-                ms(h.getValueAtPercentile(0.95)),
-                ms(h.getValueAtPercentile(0.99)),
-                ms(h.getValueAtPercentile(0.999)),
-                ms(h.getMaxValue()),
-                h.getTotalCount(), errorsCount);
-    }
-
-    private static double ms(long ns) {
-        return ns / 1_000_000.0;
+        return new TreeMap<>();
     }
 }

@@ -3,8 +3,8 @@
         <a routerLink="/carriers/active">More</a>
     </ng-template>
 
-    <div *ngIf="carriers | async; let list; else noCarriers">
-        <ng-container *ngFor="let carrier of list; ">
+    <div *ngIf="hasCarriers | async; else noCarriers">
+        <ng-container *ngFor="let carrier of carriers | async">
             <atc-carrier-label [carrier]="carrier"></atc-carrier-label>
         </ng-container>
     </div>

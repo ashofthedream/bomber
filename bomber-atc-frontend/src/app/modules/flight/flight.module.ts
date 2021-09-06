@@ -7,6 +7,7 @@ import { en_US, NZ_I18N } from 'ng-zorro-antd/i18n';
 import { NzPageHeaderModule } from 'ng-zorro-antd/page-header';
 import { NzProgressModule } from 'ng-zorro-antd/progress';
 import { NzTableModule } from 'ng-zorro-antd/table';
+import { NgxEchartsModule } from 'ngx-echarts';
 import { FlightRoutingModule } from './flight-routing.module';
 import { ActiveFlightPageComponent } from './components/active-flight-page/active-flight-page.component';
 import { AllFlightsPageComponent } from './components/all-flights-page/all-flights-page.component';
@@ -33,7 +34,11 @@ registerLocaleData(en);
     NzPageHeaderModule,
     NzTableModule,
     NzProgressModule,
-    FlightRoutingModule
+    FlightRoutingModule,
+
+    NgxEchartsModule.forRoot({
+      echarts: () => import('echarts')
+    })
   ],
   exports: [
     LatestFlightsCardComponent

@@ -51,7 +51,7 @@ public class Runner {
         testSuite.resetBeforeAndAfterSuite();
 
         state.startSuiteIfNotStarted(testSuite.getName());
-        sink.beforeTestSuite(testSuite.getName(), Instant.now());
+        sink.beforeTestSuite(Instant.now(), testSuite.getName());
 
         int threads = plan.getTestCases().stream()
                 .map(TestCasePlan::getName)

@@ -38,18 +38,18 @@ public class AsyncSink implements Sink {
 
 
     @Override
-    public void startUp() {
-        ex.execute(sink::startUp);
+    public void startUp(Instant timestamp) {
+        ex.execute(() -> sink.startUp(timestamp));
     }
 
     @Override
-    public void beforeTestSuite(String testSuite, Instant timestamp) {
-        ex.execute(() -> sink.beforeTestSuite(testSuite, timestamp));
+    public void beforeTestSuite(Instant timestamp, String testSuite) {
+        ex.execute(() -> sink.beforeTestSuite(timestamp, testSuite));
     }
 
     @Override
-    public void beforeTestCase(Stage stage, String testSuite, String testCase, Instant timestamp, Settings settings) {
-        ex.execute(() -> sink.beforeTestCase(stage, testSuite, testCase, timestamp, settings));
+    public void beforeTestCase(Instant timestamp, Stage stage, String testSuite, String testCase, Settings settings) {
+        ex.execute(() -> sink.beforeTestCase(timestamp, stage, testSuite, testCase, settings));
     }
 
     @Override
@@ -73,7 +73,7 @@ public class AsyncSink implements Sink {
     }
 
     @Override
-    public void shutDown() {
-        ex.execute(sink::shutDown);
+    public void shutDown(Instant timestamp) {
+        ex.execute(() -> sink.shutDown(timestamp));
     }
 }

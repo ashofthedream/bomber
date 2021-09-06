@@ -102,8 +102,8 @@ public class Worker {
         var sink = state.getSink();
         var barrier = state.getBarrier();
         barrier.enterCase(stage, testSuite.getName(), testCase.getName());
-
-        sink.beforeTestCase(stage, testSuite.getName(), testCase.getName(), state.getTestCaseStartTime(), settings);
+        if (state.getRunnerState().needCallSinkBeforeTestCase())
+            sink.beforeTestCase(state.getTestCaseStartTime(), stage, testSuite.getName(), testCase.getName(), settings);
         log.debug("Start testCase: {}", testCase.getName());
 
         state.startCaseIfNotStarted(testCase.getName(), stage, settings);
@@ -171,7 +171,8 @@ public class Worker {
 
         log.trace("Try finish testCase: {} -> barrier leave", testCase.getName());
         barrier.leaveCase(stage, testSuite.getName(), testCase.getName());
-        sink.afterTestCase(stage, testSuite.getName(), testCase.getName());
+        if (state.getRunnerState().needCallSinkAfterTestCase())
+            sink.afterTestCase(stage, testSuite.getName(), testCase.getName());
         state.finishCase();
         testSuite.afterCase(instance);
         log.debug("Finish testCase: {}", testCase.getName());

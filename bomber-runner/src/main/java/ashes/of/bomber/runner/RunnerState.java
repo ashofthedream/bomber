@@ -6,6 +6,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.time.Instant;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.BooleanSupplier;
@@ -25,6 +26,9 @@ public class RunnerState {
 
     private final AtomicLong remainItCount = new AtomicLong(0);
     private final LongAdder errorCount = new LongAdder();
+
+    private final AtomicBoolean needCallSinkBeforeTestCase = new AtomicBoolean();
+    private final AtomicBoolean needCallSinkAfterTestCase = new AtomicBoolean();
 
     private final BooleanSupplier shutdown;
 
@@ -82,6 +86,8 @@ public class RunnerState {
 
     public void startCaseIfNotStarted(String testCase, Stage stage, Settings settings) {
         if (!isCaseStated()) {
+            this.needCallSinkBeforeTestCase.set(true);
+            this.needCallSinkAfterTestCase.set(true);
             this.testCase = testCase;
             this.stage = stage;
             this.settings = settings;
@@ -135,4 +141,12 @@ public class RunnerState {
                 System.currentTimeMillis() < deadline;
     }
 
+
+    public boolean needCallSinkBeforeTestCase() {
+        return needCallSinkBeforeTestCase.compareAndSet(true, false);
+    }
+
+    public boolean needCallSinkAfterTestCase() {
+        return needCallSinkAfterTestCase.compareAndSet(true, false);
+    }
 }

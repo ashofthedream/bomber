@@ -18,18 +18,18 @@ public class MultiSink implements Sink {
     }
 
     @Override
-    public void startUp() {
-        sinks.forEach(Sink::startUp);
+    public void startUp(Instant timestamp) {
+        sinks.forEach(sink -> sink.startUp(timestamp));
     }
 
     @Override
-    public void beforeTestSuite(String testSuite, Instant timestamp) {
-        sinks.forEach(sink -> sink.beforeTestSuite(testSuite, timestamp));
+    public void beforeTestSuite(Instant timestamp, String testSuite) {
+        sinks.forEach(sink -> sink.beforeTestSuite(timestamp, testSuite));
     }
 
     @Override
-    public void beforeTestCase(Stage stage, String testSuite, String testCase, Instant timestamp, Settings settings) {
-        sinks.forEach(sink -> sink.beforeTestCase(stage, testSuite, testCase, timestamp, settings));
+    public void beforeTestCase(Instant timestamp, Stage stage, String testSuite, String testCase, Settings settings) {
+        sinks.forEach(sink -> sink.beforeTestCase(timestamp, stage, testSuite, testCase, settings));
     }
 
     @Override
@@ -53,7 +53,7 @@ public class MultiSink implements Sink {
     }
 
     @Override
-    public void shutDown() {
-        sinks.forEach(Sink::shutDown);
+    public void shutDown(Instant timestamp) {
+        sinks.forEach(sink -> sink.shutDown(timestamp));
     }
 }

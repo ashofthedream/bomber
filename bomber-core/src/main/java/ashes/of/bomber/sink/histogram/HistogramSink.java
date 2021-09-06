@@ -1,51 +1,50 @@
 package ashes.of.bomber.sink.histogram;
 
-import ashes.of.bomber.tools.Record;
+import ashes.of.bomber.flight.Stage;
 import ashes.of.bomber.sink.Sink;
-import org.HdrHistogram.Histogram;
+import ashes.of.bomber.tools.Record;
 
-import java.io.PrintStream;
+import java.time.Instant;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class HistogramSink implements Sink {
 
-    private final Map<String, Measurements> measurements = new ConcurrentHashMap<>();
-    private final PrintStream out;
+    /**
+     * Measurements by testSuite and testCase
+     */
+    private final Map<MeasurementKey, Measurements> measurements = new ConcurrentHashMap<>();
 
-    public HistogramSink(PrintStream out) {
-        this.out = out;
+    private final HistogramPrinter printer;
+
+    public HistogramSink(HistogramPrinter printer) {
+        this.printer = printer;
     }
 
     public HistogramSink() {
-        this(System.out);
+        this(new HistogramPrintStreamPrinter());
     }
 
     public void timeRecorded(Record record) {
+        var it = record.getIteration();
         measurements
-                .computeIfAbsent(record.getIteration().getTestSuite(), name -> new Measurements(record.getIteration().getTimestamp()))
+                .computeIfAbsent(new MeasurementKey(it.getTestSuite(), it.getTestCase(), it.getStage()), Measurements::new)
                 .add(record);
     }
 
     @Override
-    public void shutDown() {
-        print();
-
-        measurements.clear();
+    public void afterTestCase(Stage stage, String testSuite, String testCase) {
+        var key = new MeasurementKey(testSuite, testCase, stage);
+        var measurements = this.measurements.get(key);
+        if (measurements != null) {
+            printer.print(key, measurements);
+        }
     }
 
-    private void print() {
-        measurements.forEach((testSuite, m) -> {
+    @Override
+    public void shutDown(Instant timestamp) {
+        measurements.forEach(printer::print);
 
-            out.printf("suite: %s%n", testSuite);
-            m.data.forEach((label, hae) -> {
-                out.printf("label: %s, errors: %,12d%n", label, hae.errors.sum());
-                Histogram h = new Histogram(hae.histogram);
-                h.outputPercentileDistribution(out, 1_000_000.0);
-
-                out.println();
-                out.println();
-            });
-        });
+        measurements.clear();
     }
 }

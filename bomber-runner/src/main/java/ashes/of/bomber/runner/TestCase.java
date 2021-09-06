@@ -1,7 +1,7 @@
 package ashes.of.bomber.runner;
 
 import ashes.of.bomber.flight.Settings;
-import ashes.of.bomber.methods.TestCaseMethodWithTools;
+import ashes.of.bomber.methods.TestCaseWithTools;
 import ashes.of.bomber.tools.Tools;
 
 import java.util.function.Supplier;
@@ -9,11 +9,11 @@ import java.util.function.Supplier;
 public class TestCase<T> {
     private final String name;
     private final boolean async;
-    private final TestCaseMethodWithTools<T> method;
+    private final TestCaseWithTools<T> method;
     private final Supplier<Settings> warmUp;
     private final Supplier<Settings> settings;
 
-    public TestCase(String name, boolean async, TestCaseMethodWithTools<T> method, Supplier<Settings> warmUp, Supplier<Settings> settings) {
+    public TestCase(String name, boolean async, TestCaseWithTools<T> method, Supplier<Settings> warmUp, Supplier<Settings> settings) {
         this.name = name;
         this.async = async;
         this.method = method;

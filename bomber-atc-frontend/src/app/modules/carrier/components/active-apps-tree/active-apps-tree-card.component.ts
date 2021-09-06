@@ -1,19 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { NzTreeNodeOptions } from 'ng-zorro-antd/tree';
-import { interval } from 'rxjs';
 import { FlightService } from '../../../flight/services/flight.service';
 import { TestCase } from '../../../main/models/test-case';
 import { TestSuite } from '../../../main/models/test-suite';
 import { AtcState } from '../../../shared/store/atc.state';
 import { Carrier } from '../../models/carrier';
-import {
-  activeCarriers,
-  activeCarriersLoading,
-  hasActiveCarriers,
-  isStartDisabled,
-  isStopDisabled
-} from '../../store/carrier.selectors';
+import { activeCarriers, activeCarriersLoading } from '../../store/carrier.selectors';
 
 
 @Component({
@@ -25,10 +18,7 @@ export class ActiveAppsTreeCardComponent implements OnInit {
   selected: AppTreeNode;
 
   activeCarriers = this.store.select(activeCarriers);
-  hasActiveCarriers = this.store.select(hasActiveCarriers);
   activeCarriersLoading = this.store.select(activeCarriersLoading);
-  isStartButtonDisabled = this.store.select(isStartDisabled);
-  isStopButtonDisabled = this.store.select(isStopDisabled);
 
   constructor(private readonly store: Store<AtcState>,
               private readonly flightService: FlightService) {
@@ -39,14 +29,16 @@ export class ActiveAppsTreeCardComponent implements OnInit {
         .subscribe(carriers => {
           const nodes: AppTreeNode[] = carriers
               .map(carrier => this.testAppNode(carrier));
+          if (this.tree.length > 0)
+            return;
 
-          this.tree = this.merge(this.tree, nodes);
+          this.tree = this.merge([], nodes);
         });
 
-    interval(3000)
-        .subscribe(value => {
-          this.showChecked(this.tree);
-        });
+    // interval(3000)
+    //     .subscribe(value => {
+    //       this.showChecked(this.tree);
+    //     });
   }
 
   select(node: AppTreeNode) {

@@ -46,7 +46,7 @@ public class ExampleCarrierApp {
         log.info("try to start BomberApp via http");
         client.post()
                 .uri("/applications/start")
-                .body(BodyInserters.fromValue(new FlightPlan(1, List.of())))
+                .body(BodyInserters.fromValue(new FlightPlan(System.currentTimeMillis() - 1630891500000L, List.of())))
                 .retrieve()
                 .toBodilessEntity()
                 .subscribe(

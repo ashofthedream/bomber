@@ -1,7 +1,5 @@
 package ashes.of.bomber.atc.model;
 
-import ashes.of.bomber.carrier.dto.events.SinkEvent;
-
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -36,22 +34,11 @@ public class Flight {
         this.finishedAt = finishedAt;
     }
 
-    public FlightProgress getData(String carrierId) {
+    public FlightProgress getOrCreateCarrierProgress(String carrierId) {
         return progress.computeIfAbsent(carrierId, FlightProgress::new);
     }
 
     public Map<String, FlightProgress> getProgress() {
         return progress;
-    }
-
-    public void event(SinkEvent event) {
-        FlightProgress data = getData(event.getCarrierId());
-
-        FlightRecord record = new FlightRecord(event.getType().name(), event.getTimestamp(), null);
-        record.setTestSuite(event.getTestSuite());
-        record.setTestCase(event.getTestCase());
-        record.setState(event.getState());
-
-        data.add(record);
     }
 }

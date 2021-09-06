@@ -6,6 +6,6 @@ import ashes.of.bomber.tools.Tools;
  * Test method with {@link Tools}
  */
 @FunctionalInterface
-public interface TestCaseMethodWithTools<T> {
+public interface TestCaseWithTools<T> {
     void run(T suite, Tools tools) throws Throwable;
 }

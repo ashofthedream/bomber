@@ -4,6 +4,6 @@ package ashes.of.bomber.methods;
  * Test method without any arguments
  */
 @FunctionalInterface
-public interface TestCaseMethodWithoutTools<T> {
-    void run(T testCase) throws Throwable;
+public interface TestCaseWithoutTools<T> {
+    void run(T suite) throws Throwable;
 }

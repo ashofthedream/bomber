@@ -3,8 +3,13 @@ package ashes.of.bomber.carrier.dto.events;
 import ashes.of.bomber.carrier.dto.ApplicationStateDto;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class SinkEvent {
+    private static final AtomicLong eventIdSeq = new AtomicLong();
+
     private long id;
     private long timestamp;
     private SinkEventType type;
@@ -20,6 +25,11 @@ public class SinkEvent {
     private String testCase;
 
     private ApplicationStateDto state;
+    private List<HistogramDto> histograms = new ArrayList<>();
+
+    public static long nextId() {
+        return eventIdSeq.incrementAndGet();
+    }
 
     public long getId() {
         return id;
@@ -101,6 +111,15 @@ public class SinkEvent {
 
     public SinkEvent setState(ApplicationStateDto state) {
         this.state = state;
+        return this;
+    }
+
+    public List<HistogramDto> getHistograms() {
+        return histograms;
+    }
+
+    public SinkEvent setHistograms(List<HistogramDto> histograms) {
+        this.histograms = histograms;
         return this;
     }
 
