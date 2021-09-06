@@ -1,5 +1,6 @@
 package ashes.of.bomber.runner;
 
+import ashes.of.bomber.threads.BomberThreadFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -11,12 +12,10 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.atomic.AtomicInteger;
+
 
 public class WorkerPool {
     private static final Logger log = LogManager.getLogger();
-
-    private final AtomicInteger idSeq = new AtomicInteger();
 
     private final List<Worker> workers = new CopyOnWriteArrayList<>();
     private final BlockingQueue<Worker> available = new LinkedBlockingQueue<>();
@@ -40,7 +39,7 @@ public class WorkerPool {
 
     private Worker createWorker() {
         BlockingQueue<Runnable> queue = new SynchronousQueue<>();
-        Thread thread = new Thread(() -> {
+        Thread thread = BomberThreadFactory.worker().newThread(() -> {
             while (true) {
                 try {
                     Runnable task = queue.take();
@@ -53,7 +52,6 @@ public class WorkerPool {
         });
 
         thread.setUncaughtExceptionHandler(WorkerPool::uncaughtExceptionHandler);
-        thread.setName(String.format("bomber-worker-%04d", idSeq.getAndIncrement()));
         thread.start();
 
         Worker worker = new Worker(queue, thread);

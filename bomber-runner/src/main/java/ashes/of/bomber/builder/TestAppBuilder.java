@@ -3,6 +3,7 @@ package ashes.of.bomber.builder;
 import ashes.of.bomber.flight.Settings;
 import ashes.of.bomber.delayer.Delayer;
 import ashes.of.bomber.delayer.NoDelayDelayer;
+import ashes.of.bomber.flight.SettingsBuilder;
 import ashes.of.bomber.limiter.Limiter;
 import ashes.of.bomber.runner.Environment;
 import ashes.of.bomber.runner.TestApp;
@@ -36,10 +37,8 @@ public class TestAppBuilder {
 
     private String name;
 
-    private Settings warmUp = new Settings()
-            .disabled();
-
-    private Settings settings = new Settings();
+    private Settings warmUp = SettingsBuilder.disabled();
+    private Settings settings = new SettingsBuilder().build();
 
     private final List<Sink> sinks = new ArrayList<>();
     private final List<WatcherConfig> watchers = new ArrayList<>();
@@ -70,7 +69,7 @@ public class TestAppBuilder {
 
     public TestAppBuilder warmUp(Settings settings) {
         Objects.requireNonNull(settings, "settings is null");
-        this.warmUp = new Settings(settings);
+        this.warmUp = settings;
         return this;
     }
 
@@ -82,13 +81,14 @@ public class TestAppBuilder {
 
     public TestAppBuilder settings(Settings settings) {
         Objects.requireNonNull(settings, "settings is null");
-        this.settings = new Settings(settings);
+        this.settings = settings;
         return this;
     }
 
-    public TestAppBuilder settings(Consumer<Settings> settings) {
-        settings.accept(this.settings);
-        return this;
+    public TestAppBuilder settings(Consumer<SettingsBuilder> settings) {
+        SettingsBuilder builder = new SettingsBuilder();
+        settings.accept(builder);
+        return settings(builder.build());
     }
 
 

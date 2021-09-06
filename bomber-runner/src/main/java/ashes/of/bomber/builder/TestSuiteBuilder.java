@@ -3,6 +3,7 @@ package ashes.of.bomber.builder;
 import ashes.of.bomber.flight.Settings;
 import ashes.of.bomber.delayer.Delayer;
 import ashes.of.bomber.delayer.NoDelayDelayer;
+import ashes.of.bomber.flight.SettingsBuilder;
 import ashes.of.bomber.limiter.Limiter;
 import ashes.of.bomber.methods.LifeCycleHolder;
 import ashes.of.bomber.methods.LifeCycleMethod;
@@ -23,9 +24,8 @@ import java.util.function.Supplier;
 
 public class TestSuiteBuilder<T> {
 
-    private Settings settings = new Settings();
-    private Settings warmUp = new Settings()
-            .disabled();
+    private Settings warmUp = SettingsBuilder.disabled();
+    private Settings settings = new SettingsBuilder().build();
 
     private final List<LifeCycleHolder<T>> beforeSuite = new ArrayList<>();
     private final List<LifeCycleHolder<T>> beforeCase = new ArrayList<>();
@@ -48,7 +48,7 @@ public class TestSuiteBuilder<T> {
 
     public TestSuiteBuilder<T> warmUp(Settings settings) {
         Objects.requireNonNull(settings, "settings is null");
-        this.warmUp = new Settings(settings);
+        this.warmUp = settings;
         return this;
     }
 
@@ -60,13 +60,14 @@ public class TestSuiteBuilder<T> {
 
     public TestSuiteBuilder<T> settings(Settings settings) {
         Objects.requireNonNull(settings, "settings is null");
-        this.settings = new Settings(settings);
+        this.settings = settings;
         return this;
     }
 
-    public TestSuiteBuilder<T> settings(Consumer<Settings> settings) {
-        settings.accept(this.settings);
-        return this;
+    public TestSuiteBuilder<T> settings(Consumer<SettingsBuilder> settings) {
+        SettingsBuilder builder = new SettingsBuilder();
+        settings.accept(builder);
+        return settings(builder.build());
     }
 
     public TestSuiteBuilder<T> delayer(Delayer delayer) {

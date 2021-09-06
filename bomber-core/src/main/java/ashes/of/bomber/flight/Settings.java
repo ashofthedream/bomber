@@ -1,7 +1,6 @@
 package ashes.of.bomber.flight;
 
 import java.time.Duration;
-import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -12,79 +11,34 @@ public class Settings {
     /**
      * This flag indicates that stage may be disabled
      */
-    private boolean disabled;
+    private final boolean disabled;
 
     /**
      * Stage duration time
      */
-    private Duration time = Duration.ofMinutes(1);
+    private final Duration time;
 
     /**
      * Threads count
      */
-    private int threadsCount = 1;
+    private final int threadsCount;
 
     /**
      * Iterations count per each thread
      */
-    private long threadIterationsCount = 1_000_000_000;
+    private final long threadIterationsCount;
 
     /**
      * Total iterations count
      */
-    private long totalIterationsCount = 1_000_000_000;
+    private final long totalIterationsCount;
 
-
-    public Settings(Settings settings) {
-        this.disabled = settings.isDisabled();
-        this.time = settings.getTime();
-        this.threadsCount = settings.getThreadsCount();
-        this.threadIterationsCount = settings.getThreadIterationsCount();
-        this.totalIterationsCount = settings.getTotalIterationsCount();
-    }
-
-    public Settings() {
-    }
-
-
-    public Settings disabled(boolean disabled) {
+    public Settings(boolean disabled, Duration time, int threadsCount, long threadIterationsCount, long totalIterationsCount) {
         this.disabled = disabled;
-        return this;
-    }
-
-    public Settings disabled() {
-        return disabled(true);
-    }
-
-
-    public Settings time(long time, TimeUnit unit) {
-        return duration(Duration.ofMillis(unit.toMillis(time)));
-    }
-
-    public Settings seconds(long seconds) {
-        return duration(Duration.ofSeconds(seconds));
-    }
-
-    public Settings duration(Duration time) {
         this.time = time;
-        return this;
-    }
-
-
-    public Settings threadCount(int threads) {
-        this.threadsCount = threads;
-        return this;
-    }
-
-
-    public Settings threadIterations(long count) {
-        this.threadIterationsCount = count;
-        return this;
-    }
-
-    public Settings totalIterations(long count) {
-        this.totalIterationsCount = count;
-        return this;
+        this.threadsCount = threadsCount;
+        this.threadIterationsCount = threadIterationsCount;
+        this.totalIterationsCount = totalIterationsCount;
     }
 
 

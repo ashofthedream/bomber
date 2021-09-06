@@ -50,8 +50,8 @@ public class TestSuite<T> {
         this.afterEach = afterEach;
         this.afterCase = afterCase;
         this.afterSuite = afterSuite;
-        this.settings = new Settings(settings);
-        this.warmUp = new Settings(warmUp);
+        this.settings = settings;
+        this.warmUp = warmUp;
     }
 
 

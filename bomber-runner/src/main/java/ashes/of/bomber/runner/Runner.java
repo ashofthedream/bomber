@@ -18,8 +18,10 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.CountDownLatch;
+import java.util.stream.Stream;
 
 import static ashes.of.bomber.flight.Stage.IDLE;
 
@@ -53,16 +55,11 @@ public class Runner {
         state.startSuiteIfNotStarted(testSuite.getName());
         sink.beforeTestSuite(Instant.now(), testSuite.getName());
 
+
         int threads = plan.getTestCases().stream()
-                .map(TestCasePlan::getName)
-                .map(testSuite::getTestCase)
-                .mapToInt(testCase -> Math.max(
-                        testCase.getWarmUp().getThreadsCount(),
-                        testCase.getSettings().getThreadsCount()
-                ))
+                .mapToInt(testCasePlan -> determineWorkerThreadsCount(testSuite, testCasePlan))
                 .max()
-                // todo what if this situation will happens?
-                .orElse(0);
+                .orElseThrow(() -> new RuntimeException("Can't determine thread count for test suite: " + testSuite.getName()));
 
         log.debug("Acquire {} workers", threads);
         for (int t = 0; t < threads; t++) {
@@ -74,22 +71,28 @@ public class Runner {
         try {
             awaitBeforeSuite(testSuite);
 
-            plan.getTestCases().stream()
-                    .map(TestCasePlan::getName)
-                    .map(testSuite::getTestCase)
-                    .forEach(testCase -> {
+            plan.getTestCases()
+                    .forEach(testCasePlan -> {
+                        var testCase = testSuite.getTestCase(testCasePlan.getName());
+                        if (testCase == null) {
+                            log.warn("Test case: {} not found in test suite: {}, but it exists in the plan",
+                                    testCasePlan.getName(), testSuite.getName());
+                            return;
+                        }
+
                         log.trace("Reset before & after test case lifecycle methods");
                         testSuite.resetBeforeAndAfterCase();
 
-                        ThreadContext.put("testCase", testCase.getName());
-                        log.debug("Run test case: {}", testCase.getName());
+                        ThreadContext.put("testCase", testCasePlan.getName());
+                        log.debug("Run test case: {}", testCasePlan.getName());
 
-                        Settings warmUp = testCase.getWarmUp();
+                        Settings warmUp = testCasePlan.getWarmUp() != null ? testCasePlan.getWarmUp() : testCase.getWarmUp();
+                        Settings settings = testCasePlan.getSettings() != null ? testCasePlan.getSettings() : testCase.getSettings();
                         if (!warmUp.isDisabled()) {
                             runTestCase(state, testSuite, testCase, Stage.WARM_UP, warmUp);
                         }
 
-                        var report = runTestCase(state, testSuite, testCase, Stage.TEST, testCase.getSettings());
+                        var report = runTestCase(state, testSuite, testCase, Stage.TEST, settings);
                         testCaseReports.add(report);
                         ThreadContext.remove("testCase");
                     });
@@ -109,6 +112,19 @@ public class Runner {
         ThreadContext.clearAll();
 
         return new TestSuiteReport(testSuite.getName(), testCaseReports);
+    }
+
+    private int determineWorkerThreadsCount(TestSuite<Object> testSuite, TestCasePlan testCasePlan) {
+        return Stream.concat(Stream.ofNullable(testCasePlan.getWarmUp()), Stream.ofNullable(testCasePlan.getSettings()))
+                .mapToInt(Settings::getThreadsCount)
+                .max()
+                .orElseGet(() -> {
+                    var testCase = testSuite.getTestCase(testCasePlan.getName());
+                    return Math.max(
+                            testCase.getWarmUp().getThreadsCount(),
+                            testCase.getSettings().getThreadsCount()
+                    );
+                });
     }
 
     private void awaitBeforeSuite(TestSuite<Object> testSuite) throws InterruptedException {
@@ -164,7 +180,7 @@ public class Runner {
         log.info("Finish stage: {}, elapsed time: {}ms", stage, state.getCaseElapsedTime());
         state.finishCase();
 
-        ThreadContext.remove("stage");
+        ThreadContext.put("stage", stage.name());
 
         return new TestCaseReport(testCase.getName(), settings,
                 settings.getTotalIterationsCount() - state.getTotalIterationsRemain(),

@@ -25,7 +25,7 @@ public class SinkEvent {
     private String testCase;
 
     private ApplicationStateDto state;
-    private List<HistogramDto> histograms = new ArrayList<>();
+    private List<HistogramPointDto> histograms = new ArrayList<>();
 
     public static long nextId() {
         return eventIdSeq.incrementAndGet();
@@ -114,11 +114,11 @@ public class SinkEvent {
         return this;
     }
 
-    public List<HistogramDto> getHistograms() {
+    public List<HistogramPointDto> getHistograms() {
         return histograms;
     }
 
-    public SinkEvent setHistograms(List<HistogramDto> histograms) {
+    public SinkEvent setHistograms(List<HistogramPointDto> histograms) {
         this.histograms = histograms;
         return this;
     }

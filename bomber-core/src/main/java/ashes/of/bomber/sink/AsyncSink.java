@@ -3,6 +3,7 @@ package ashes.of.bomber.sink;
 import ashes.of.bomber.flight.Iteration;
 import ashes.of.bomber.flight.Settings;
 import ashes.of.bomber.flight.Stage;
+import ashes.of.bomber.threads.BomberThreadFactory;
 import ashes.of.bomber.tools.Record;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -16,13 +17,7 @@ import java.util.concurrent.Executors;
 public class AsyncSink implements Sink {
     private static final Logger log = LogManager.getLogger();
 
-    private static final Executor defaultExecutor = Executors.newFixedThreadPool(1, r -> {
-        Thread thread = new Thread(r);
-        thread.setName("bomber-async-sink");
-        thread.setDaemon(true);
-        thread.setUncaughtExceptionHandler((t, e) -> log.warn("Uncaught exception in thread: {}", t.getName(), e));
-        return thread;
-    });
+    private static final Executor defaultExecutor = Executors.newFixedThreadPool(1, BomberThreadFactory.asyncSink());
 
     private final Sink sink;
     private final Executor ex;

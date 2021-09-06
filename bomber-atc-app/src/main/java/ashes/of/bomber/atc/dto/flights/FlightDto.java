@@ -4,7 +4,7 @@ import java.util.Map;
 
 public class FlightDto {
     private long id;
-    private Map<String, FlightDataDto> data;
+    private Map<String, FlightProgressDto> data;
 
     public long getId() {
         return id;
@@ -15,11 +15,11 @@ public class FlightDto {
         return this;
     }
 
-    public Map<String, FlightDataDto> getData() {
+    public Map<String, FlightProgressDto> getData() {
         return data;
     }
 
-    public FlightDto setData(Map<String, FlightDataDto> data) {
+    public FlightDto setData(Map<String, FlightProgressDto> data) {
         this.data = data;
         return this;
     }

@@ -1,6 +1,7 @@
 package ashes.of.bomber.runner;
 
 import ashes.of.bomber.flight.Settings;
+import ashes.of.bomber.flight.SettingsBuilder;
 import ashes.of.bomber.flight.Stage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -16,7 +17,7 @@ public class RunnerState {
     private static final Logger log = LogManager.getLogger();
 
     private volatile Stage stage = Stage.IDLE;
-    private volatile Settings settings = new Settings();
+    private volatile Settings settings = SettingsBuilder.disabled();
 
     private volatile String testSuite;
     private volatile String testCase;
@@ -24,12 +25,13 @@ public class RunnerState {
     private volatile Instant testSuiteStartTime = Instant.EPOCH;
     private volatile Instant testCaseStartTime = Instant.EPOCH;
 
-    private final AtomicLong remainItCount = new AtomicLong(0);
+    private final AtomicLong remainItCount = new AtomicLong();
     private final LongAdder errorCount = new LongAdder();
 
     private final AtomicBoolean needCallSinkBeforeTestCase = new AtomicBoolean();
     private final AtomicBoolean needCallSinkAfterTestCase = new AtomicBoolean();
 
+    private final AtomicLong lastUpdated = new AtomicLong();
     private final BooleanSupplier shutdown;
 
     public RunnerState(BooleanSupplier shutdown) {
@@ -99,7 +101,7 @@ public class RunnerState {
     public void finishCase() {
         testCase = "";
         stage = Stage.IDLE;
-        settings = new Settings().disabled();
+        settings = SettingsBuilder.disabled();
         testCaseStartTime = Instant.EPOCH;
     }
 
@@ -148,5 +150,11 @@ public class RunnerState {
 
     public boolean needCallSinkAfterTestCase() {
         return needCallSinkAfterTestCase.compareAndSet(true, false);
+    }
+
+    public boolean needUpdate() {
+        var now = System.currentTimeMillis() / 1000;
+        var last = lastUpdated.get();
+        return now != last && lastUpdated.compareAndSet(last, now);
     }
 }

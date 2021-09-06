@@ -8,10 +8,12 @@ import ashes.of.bomber.descriptions.TestSuiteDescription;
 import ashes.of.bomber.descriptions.WorkerDescription;
 import ashes.of.bomber.flight.FlightReport;
 import ashes.of.bomber.flight.FlightPlan;
+import ashes.of.bomber.flight.SettingsBuilder;
 import ashes.of.bomber.flight.TestCasePlan;
 import ashes.of.bomber.flight.TestSuitePlan;
 import ashes.of.bomber.flight.TestSuiteReport;
 import ashes.of.bomber.sink.Sink;
+import ashes.of.bomber.threads.BomberThreadFactory;
 import ashes.of.bomber.watcher.Watcher;
 import ashes.of.bomber.watcher.WatcherConfig;
 import org.apache.logging.log4j.LogManager;
@@ -95,13 +97,16 @@ public class TestApp {
         ThreadContext.put("bomberApp", name);
         ThreadContext.put("flightId", String.valueOf(flightPlan.getId()));
 
-        List<String> testSuiteNames = flightPlan.getTestSuites().stream()
-                .map(testSuite -> String.format("%s %s", testSuite.getName(), testSuite.getTestCases()))
-                .collect(Collectors.toList());
+        log.info("Start flight: {}", flightPlan.getId());
+        flightPlan.getTestSuites()
+                .forEach(testSuite -> {
+                    log.debug("Planned test suite: {}", testSuite.getName());
+                    testSuite.getTestCases().forEach(testCase -> {
+                        log.debug("Planned test case: {}.{}, settings: {}", testSuite.getName(), testCase.getName(), testCase.getSettings());
+                    });
+                });
 
-        log.info("start flight: {} of test app with {} suites: {}", flightPlan.getId(), flightPlan.getTestSuites().size(), testSuiteNames);
-
-        ScheduledExecutorService watcherEx = Executors.newSingleThreadScheduledExecutor();
+        ScheduledExecutorService watcherEx = Executors.newSingleThreadScheduledExecutor(BomberThreadFactory.watcher());
 
         List<ScheduledFuture<?>> wfs = env.getWatchers()
                 .stream()
@@ -129,13 +134,13 @@ public class TestApp {
                     .collect(Collectors.toMap(TestSuite::getName, suite -> suite));
 
             flightPlan.getTestSuites()
-                    .forEach(testSuitePlan -> {
-                        log.debug("try to run testSuite: {}", testSuitePlan.getName());
-                        TestSuite<Object> testSuite = (TestSuite<Object>) suitesByName.get(testSuitePlan.getName());
+                    .forEach(plan -> {
+                        log.debug("try to run testSuite: {}", plan.getName());
+                        TestSuite<Object> testSuite = (TestSuite<Object>) suitesByName.get(plan.getName());
 
                         RunnerState state = new RunnerState(this::isStopped);
                         this.state = state;
-                        var report = runner.runTestSuite(state, testSuitePlan, testSuite);
+                        var report = runner.runTestSuite(state, plan, testSuite);
 
                         testSuiteReports.add(report);
                     });
@@ -155,9 +160,9 @@ public class TestApp {
                 .map(WatcherConfig::getWatcher)
                 .forEach(Watcher::shutDown);
 
-        log.debug("Shutdown wat each sink and watcher");
+        log.debug("Shutdown wait each sink and watcher");
+        wfs.forEach(wf -> wf.cancel(false));
         watcherEx.shutdown();
-
 
         endLatch.countDown();
         endLatch = new CountDownLatch(1);
@@ -173,19 +178,19 @@ public class TestApp {
         return CompletableFuture.supplyAsync(() -> start(plan));
     }
 
+    private boolean isStopped() {
+        return endLatch.getCount() == 0;
+    }
+
 
     public void await() throws InterruptedException {
         endLatch.await();
     }
 
-
     public void stop() {
-        log.info("stop");
+        // todo check that application isn't idle
+        log.info("stop application: {}", name);
         endLatch.countDown();
-    }
-
-    public boolean isStopped() {
-        return endLatch.getCount() == 0;
     }
 
 
@@ -231,11 +236,11 @@ public class TestApp {
     public FlightPlan creteDefaultPlan(long id) {
         var suites = getTestSuites().stream()
                 .map(testSuite -> {
-                    List<TestCasePlan> cases = testSuite.getTestCases().stream()
-                            .map(testCase -> new TestCasePlan(testCase.getName(), new Settings().disabled()))
+                    List<TestCasePlan> testCases = testSuite.getTestCases().stream()
+                            .map(testCase -> new TestCasePlan(testCase.getName(), testSuite.getWarmUp(), testSuite.getSettings()))
                             .collect(Collectors.toList());
 
-                    return new TestSuitePlan(testSuite.getName(), cases);
+                    return new TestSuitePlan(testSuite.getName(), testCases);
                 })
                 .collect(Collectors.toList());
 

@@ -1,13 +1,20 @@
 package ashes.of.bomber.flight;
 
+import javax.annotation.Nullable;
+
 public class TestCasePlan {
     private final String name;
+
+    @Nullable
+    private final Settings warmUp;
+
+    @Nullable
     private final Settings settings;
 
-    // todo add Setting here
 
-    public TestCasePlan(String name, Settings settings) {
+    public TestCasePlan(String name, @Nullable Settings warmUp, @Nullable Settings settings) {
         this.name = name;
+        this.warmUp = warmUp;
         this.settings = settings;
     }
 
@@ -15,6 +22,12 @@ public class TestCasePlan {
         return name;
     }
 
+    @Nullable
+    public Settings getWarmUp() {
+        return warmUp;
+    }
+
+    @Nullable
     public Settings getSettings() {
         return settings;
     }

@@ -1,6 +1,6 @@
 package ashes.of.bomber.atc.controllers;
 
-import ashes.of.bomber.atc.dto.flights.FlightDataDto;
+import ashes.of.bomber.atc.dto.flights.FlightProgressDto;
 import ashes.of.bomber.atc.dto.flights.FlightDto;
 import ashes.of.bomber.atc.dto.flights.FlightRecordDto;
 import ashes.of.bomber.atc.dto.flights.FlightsStartedDto;
@@ -74,7 +74,7 @@ public class FlightController {
 
 
     private FlightDto toFlight(Flight flight) {
-        Map<String, FlightDataDto> all = new HashMap<>();
+        Map<String, FlightProgressDto> all = new HashMap<>();
 
         flight.getProgress().forEach((carrierId, data) -> {
 
@@ -84,7 +84,7 @@ public class FlightController {
 
             FlightRecordDto actual = toFlightRecord(data.getActual());
 
-            FlightDataDto dto = new FlightDataDto()
+            FlightProgressDto dto = new FlightProgressDto()
                     .setCarrierId(carrierId)
                     .setRecords(records)
                     .setActual(actual);

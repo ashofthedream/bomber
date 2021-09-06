@@ -98,12 +98,16 @@ public class Worker {
 
         testSuite.beforeCase(instance);
 
-        log.trace("Try start testCase: {} -> barrier enter", testCase.getName());
+        var runnerState = state.getRunnerState();
         var sink = state.getSink();
+
         var barrier = state.getBarrier();
+        log.trace("Try start testCase: {} -> barrier enter", testCase.getName());
         barrier.enterCase(stage, testSuite.getName(), testCase.getName());
-        if (state.getRunnerState().needCallSinkBeforeTestCase())
+
+        if (runnerState.needCallSinkBeforeTestCase())
             sink.beforeTestCase(state.getTestCaseStartTime(), stage, testSuite.getName(), testCase.getName(), settings);
+
         log.debug("Start testCase: {}", testCase.getName());
 
         state.startCaseIfNotStarted(testCase.getName(), stage, settings);
@@ -115,7 +119,11 @@ public class Worker {
                 throw new RuntimeException("Limiter await failed");
 
             Iteration it = new Iteration(state.nextIterationNumber(), stage, threadName, Instant.now(), testSuite.getName(), testCase.getName());
-
+            if (runnerState.needUpdate()) {
+                var remainIt = runnerState.getTotalIterationsRemain();
+                log.debug("Current progress. iterations count: {}, remain count: {}, remain time: {}ms",
+                        settings.getTotalIterationsCount() - remainIt, remainIt, runnerState.getCaseRemainTime());
+            }
             testSuite.beforeEach(it, instance);
             sink.beforeEach(it);
             Tools tools = new Tools(it, record -> {
@@ -171,7 +179,7 @@ public class Worker {
 
         log.trace("Try finish testCase: {} -> barrier leave", testCase.getName());
         barrier.leaveCase(stage, testSuite.getName(), testCase.getName());
-        if (state.getRunnerState().needCallSinkAfterTestCase())
+        if (runnerState.needCallSinkAfterTestCase())
             sink.afterTestCase(stage, testSuite.getName(), testCase.getName());
         state.finishCase();
         testSuite.afterCase(instance);

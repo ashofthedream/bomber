@@ -3,7 +3,7 @@ package ashes.of.bomber.atc.dto.flights;
 
 import java.util.List;
 
-public class FlightDataDto {
+public class FlightProgressDto {
     private String carrierId;
     private List<FlightRecordDto> records;
     private FlightRecordDto actual;
@@ -12,7 +12,7 @@ public class FlightDataDto {
         return carrierId;
     }
 
-    public FlightDataDto setCarrierId(String carrierId) {
+    public FlightProgressDto setCarrierId(String carrierId) {
         this.carrierId = carrierId;
         return this;
     }
@@ -21,7 +21,7 @@ public class FlightDataDto {
         return records;
     }
 
-    public FlightDataDto setRecords(List<FlightRecordDto> records) {
+    public FlightProgressDto setRecords(List<FlightRecordDto> records) {
         this.records = records;
         return this;
     }
@@ -30,7 +30,7 @@ public class FlightDataDto {
         return actual;
     }
 
-    public FlightDataDto setActual(FlightRecordDto actual) {
+    public FlightProgressDto setActual(FlightRecordDto actual) {
         this.actual = actual;
         return this;
     }

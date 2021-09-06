@@ -14,6 +14,7 @@ import ashes.of.bomber.annotations.Throttle;
 import ashes.of.bomber.annotations.WarmUp;
 import ashes.of.bomber.flight.Settings;
 import ashes.of.bomber.delayer.RandomDelayer;
+import ashes.of.bomber.flight.SettingsBuilder;
 import ashes.of.bomber.limiter.Limiter;
 import ashes.of.bomber.methods.TestCaseWithTools;
 import ashes.of.bomber.tools.Tools;
@@ -128,19 +129,21 @@ public class TestSuiteProcessor<T> {
     }
 
     private Settings settings(LoadTest ann) {
-        return new Settings()
-                .threadCount(ann.threads())
-                .threadIterations(ann.threadIterations())
-                .totalIterations(ann.totalIterations())
-                .time(ann.time(), ann.timeUnit());
+        return new SettingsBuilder()
+                .setTime(ann.time(), ann.timeUnit())
+                .setThreadsCount(ann.threads())
+                .setThreadIterationsCount(ann.threadIterations())
+                .setTotalIterationsCount(ann.totalIterations())
+                .build();
     }
 
     private Settings settings(WarmUp ann) {
-        return new Settings()
-                .threadCount(ann.threads())
-                .threadIterations(ann.threadIterations())
-                .totalIterations(ann.totalIterations())
-                .time(ann.time(), ann.timeUnit());
+        return new SettingsBuilder()
+                .setTime(ann.time(), ann.timeUnit())
+                .setThreadsCount(ann.threads())
+                .setThreadIterationsCount(ann.threadIterations())
+                .setTotalIterationsCount(ann.totalIterations())
+                .build();
     }
 
 

@@ -5,7 +5,6 @@ import ashes.of.bomber.builder.TestSuiteBuilder;
 import ashes.of.bomber.example.app.tests.AccountControllerLoadTest;
 import ashes.of.bomber.example.app.tests.UserControllerLoadTest;
 import ashes.of.bomber.limiter.Limiter;
-import ashes.of.bomber.sink.histogram.HistogramSink;
 import ashes.of.bomber.sink.histogram.HistogramTimelinePrintStreamPrinter;
 import ashes.of.bomber.sink.histogram.HistogramTimelineSink;
 import ashes.of.bomber.squadron.BarrierBuilder;
@@ -37,7 +36,7 @@ public class ExampleBuilderTestApp {
 
         new TestAppBuilder()
                 .name("example")
-                .settings(settings -> settings.threadCount(2).seconds(3))
+                .settings(settings -> settings.setThreadsCount(2).setSeconds(3))
                 .limiter(() -> Limiter.withRate(10, 1))
                 // log all times to console via log4j and HdrHistogram
 //                .sink(new Log4jSink())

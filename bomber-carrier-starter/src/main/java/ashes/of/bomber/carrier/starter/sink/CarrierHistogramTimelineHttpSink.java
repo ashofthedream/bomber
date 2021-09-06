@@ -1,6 +1,6 @@
 package ashes.of.bomber.carrier.starter.sink;
 
-import ashes.of.bomber.carrier.dto.events.HistogramDto;
+import ashes.of.bomber.carrier.dto.events.HistogramPointDto;
 import ashes.of.bomber.carrier.dto.events.SinkEvent;
 import ashes.of.bomber.carrier.starter.services.AtcService;
 import ashes.of.bomber.flight.FlightPlan;
@@ -73,7 +73,7 @@ public class CarrierHistogramTimelineHttpSink implements Sink {
 
                                 var h = hae.getValue().getHistogram();
 
-                                return new HistogramDto()
+                                return new HistogramPointDto()
                                         .setLabel(hae.getKey())
                                         .setTimestamp(time.toEpochMilli())
                                         .setTotalCount(h.getTotalCount())

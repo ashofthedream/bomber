@@ -1,6 +1,6 @@
 package ashes.of.bomber.carrier.dto.events;
 
-public class HistogramDto {
+public class HistogramPointDto {
     private String label;
     private long timestamp;
     private long totalCount;
@@ -13,7 +13,7 @@ public class HistogramDto {
         return label;
     }
 
-    public HistogramDto setLabel(String label) {
+    public HistogramPointDto setLabel(String label) {
         this.label = label;
         return this;
     }
@@ -22,7 +22,7 @@ public class HistogramDto {
         return timestamp;
     }
 
-    public HistogramDto setTimestamp(long timestamp) {
+    public HistogramPointDto setTimestamp(long timestamp) {
         this.timestamp = timestamp;
         return this;
     }
@@ -35,12 +35,12 @@ public class HistogramDto {
         return totalCount;
     }
 
-    public HistogramDto setTotalCount(long totalCount) {
+    public HistogramPointDto setTotalCount(long totalCount) {
         this.totalCount = totalCount;
         return this;
     }
 
-    public HistogramDto setErrorsCount(long errorsCount) {
+    public HistogramPointDto setErrorsCount(long errorsCount) {
         this.errorsCount = errorsCount;
         return this;
     }
@@ -49,9 +49,8 @@ public class HistogramDto {
         return percentiles;
     }
 
-    public HistogramDto setPercentiles(double... percentiles) {
+    public HistogramPointDto setPercentiles(double... percentiles) {
         this.percentiles = percentiles;
         return this;
     }
-
 }
