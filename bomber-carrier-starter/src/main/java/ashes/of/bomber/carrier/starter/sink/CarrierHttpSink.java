@@ -3,7 +3,7 @@ package ashes.of.bomber.carrier.starter.sink;
 import ashes.of.bomber.carrier.dto.ApplicationStateDto;
 import ashes.of.bomber.carrier.dto.events.SinkEvent;
 import ashes.of.bomber.carrier.dto.events.SinkEventType;
-import ashes.of.bomber.carrier.starter.mapping.ApplicationStateMapper;
+import ashes.of.bomber.carrier.starter.mappers.ApplicationMapper;
 import ashes.of.bomber.carrier.starter.services.AtcService;
 import ashes.of.bomber.flight.FlightPlan;
 import ashes.of.bomber.flight.Iteration;
@@ -68,7 +68,7 @@ public class CarrierHttpSink implements Sink {
         var current = System.currentTimeMillis() / 1000;
         var last = lastUpdate.get();
         if (last != current && lastUpdate.compareAndSet(last, current)) {
-            var state = ApplicationStateMapper.toDto(app.getState());
+            var state = ApplicationMapper.toDto(app.getState());
             SinkEvent event = event(TEST_CASE_PROGRESS, Instant.now(), it.getStage(), it.getTestSuite(), it.getTestCase(), state);
             send(event);
         }
@@ -117,7 +117,7 @@ public class CarrierHttpSink implements Sink {
                 .setId(SinkEvent.nextId())
                 .setType(type)
                 .setTimestamp(timestamp.toEpochMilli())
-                .setFlightId(Optional.ofNullable(app.getFlightPlan()).map(FlightPlan::getId).orElse(0L))
+                .setFlightId(Optional.ofNullable(app.getFlightPlan()).map(FlightPlan::getFlightId).orElse(0L))
                 .setCarrierId(registration.getServiceInstance().getId())
                 .setStage(stage != null ? stage.name() : null)
                 .setTestSuite(testSuite)

@@ -8,7 +8,6 @@ import ashes.of.bomber.descriptions.TestSuiteDescription;
 import ashes.of.bomber.descriptions.WorkerDescription;
 import ashes.of.bomber.flight.FlightReport;
 import ashes.of.bomber.flight.FlightPlan;
-import ashes.of.bomber.flight.SettingsBuilder;
 import ashes.of.bomber.flight.TestCasePlan;
 import ashes.of.bomber.flight.TestSuitePlan;
 import ashes.of.bomber.flight.TestSuiteReport;
@@ -32,7 +31,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 
@@ -40,8 +38,6 @@ public class TestApp {
     private static final Logger log = LogManager.getLogger();
 
     private static final RunnerState IDLE = new RunnerState(() -> true);
-
-    private final AtomicLong flightPlanSeq = new AtomicLong();
 
     private final String name;
     private final WorkerPool pool;
@@ -83,21 +79,43 @@ public class TestApp {
     }
 
 
-
+    /**
+     * Start application with default flight plan which includes
+     * all test suites with all test cases and default settings
+     *
+     * @return report
+     */
     public FlightReport start() {
-        return start(creteDefaultPlan(flightPlanSeq.incrementAndGet()));
+        var suites = getTestSuites().stream()
+                .map(testSuite -> {
+                    List<TestCasePlan> testCases = testSuite.getTestCases().stream()
+                            .map(testCase -> new TestCasePlan(testCase.getName(), testSuite.getWarmUp(), testSuite.getSettings()))
+                            .collect(Collectors.toList());
+
+                    return new TestSuitePlan(testSuite.getName(), testCases);
+                })
+                .collect(Collectors.toList());
+
+        var plan = new FlightPlan(System.currentTimeMillis() - 1630454400, suites);
+        return start(plan);
     }
 
-    public FlightReport start(long id) {
-        return start(creteDefaultPlan(id));
+    public CompletableFuture<FlightReport> startAsync() {
+        return CompletableFuture.supplyAsync(this::start);
     }
 
+    /**
+     * Start application with specified flight plan
+     *
+     * @param flightPlan flight plan with list of test suites, test cases and settings
+     * @return report
+     */
     public FlightReport start(FlightPlan flightPlan) {
         this.plan = flightPlan;
         ThreadContext.put("bomberApp", name);
-        ThreadContext.put("flightId", String.valueOf(flightPlan.getId()));
+        ThreadContext.put("flightId", String.valueOf(flightPlan.getFlightId()));
 
-        log.info("Start flight: {}", flightPlan.getId());
+        log.info("Start flight: {}", flightPlan.getFlightId());
         flightPlan.getTestSuites()
                 .forEach(testSuite -> {
                     log.debug("Planned test suite: {}", testSuite.getName());
@@ -228,23 +246,4 @@ public class TestApp {
 
         return new TestSuiteDescription(suite.getName(), testCases, suite.getSettings(), suite.getWarmUp());
     }
-
-
-
-
-
-    public FlightPlan creteDefaultPlan(long id) {
-        var suites = getTestSuites().stream()
-                .map(testSuite -> {
-                    List<TestCasePlan> testCases = testSuite.getTestCases().stream()
-                            .map(testCase -> new TestCasePlan(testCase.getName(), testSuite.getWarmUp(), testSuite.getSettings()))
-                            .collect(Collectors.toList());
-
-                    return new TestSuitePlan(testSuite.getName(), testCases);
-                })
-                .collect(Collectors.toList());
-
-        return new FlightPlan(id, suites);
-    }
-
 }

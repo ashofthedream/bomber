@@ -1,6 +1,7 @@
 package ashes.of.bomber.atc.services;
 
 import ashes.of.bomber.atc.dto.CarrierDto;
+import ashes.of.bomber.atc.mappers.FlightMapper;
 import ashes.of.bomber.atc.model.Carrier;
 import ashes.of.bomber.atc.model.Flight;
 import ashes.of.bomber.carrier.dto.ApplicationDto;
@@ -55,7 +56,7 @@ public class CarrierService {
     public Mono<FlightStartedDto> start(Carrier carrier, Flight flight) {
         URI uri = carrier.getInstance().getUri();
         StartFlightRequest request = new StartFlightRequest()
-                .setFlightId(flight.getId());
+                .setPlan(FlightMapper.toDto(flight.getPlan()));
 
         return webClient.post()
                 .uri(uri + "/applications/start")

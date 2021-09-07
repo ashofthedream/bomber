@@ -4,6 +4,7 @@ import ashes.of.bomber.atc.model.Flight;
 import ashes.of.bomber.atc.model.FlightProgress;
 import ashes.of.bomber.atc.model.FlightRecord;
 import ashes.of.bomber.carrier.dto.events.SinkEvent;
+import ashes.of.bomber.flight.FlightPlan;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
@@ -11,6 +12,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.Nullable;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
@@ -19,7 +21,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public class FlightService {
     private static final Logger log = LogManager.getLogger();
 
-    private final AtomicLong idSeq = new AtomicLong();
+    private final AtomicLong flightIdSeq = new AtomicLong();
     private final Map<Long, Flight> flights = new ConcurrentHashMap<>();
     private final CarrierService carrierService;
 
@@ -56,13 +58,13 @@ public class FlightService {
                     "Flight will be created and marked as active. It's temporal solution",
                     event.getCarrierId(), event.getFlightId());
 
-            var foundOrCreated = flights.computeIfAbsent(event.getFlightId(), Flight::new);
+            var foundOrCreated = flights.computeIfAbsent(event.getFlightId(), planId -> new Flight(new FlightPlan(planId, List.of())));
             active = flight = foundOrCreated;
         }
 
-        if (flight.getId() != event.getFlightId()) {
+        if (flight.getPlan().getFlightId() != event.getFlightId()) {
             log.warn("ATC received event from carrier: {} with flight: {}, bur current active flight: {}. Just ignore it",
-                    event.getCarrierId(), event.getFlightId(), flight.getId());
+                    event.getCarrierId(), event.getFlightId(), flight.getPlan().getFlightId());
             return;
         }
 
@@ -77,17 +79,21 @@ public class FlightService {
     }
 
     // todo potential race condition
-    public Flight startFlight() {
+    public Flight startFlight(FlightPlan plan) {
         if (active != null)
             throw new RuntimeException("Already started");
 
-        Flight flight = new Flight(idSeq.incrementAndGet());
+        Flight flight = new Flight(plan);
         active = flight;
-        flights.put(flight.getId(), flight);
+        flights.put(flight.getPlan().getFlightId(), flight);
         return flight;
     }
 
     public Flux<Flight> getFlights() {
         return Flux.fromIterable(flights.values());
+    }
+
+    public long getNextFlightId() {
+        return flightIdSeq.incrementAndGet();
     }
 }

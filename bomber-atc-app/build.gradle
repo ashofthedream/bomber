@@ -20,6 +20,7 @@ configurations {
 
 
 dependencies {
+    implementation project(':bomber-core')
     implementation project(':bomber-carrier-dto')
 
     implementation('org.springframework.cloud:spring-cloud-starter-loadbalancer') {

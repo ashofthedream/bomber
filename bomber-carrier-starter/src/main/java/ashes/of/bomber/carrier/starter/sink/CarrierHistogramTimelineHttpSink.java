@@ -96,7 +96,7 @@ public class CarrierHistogramTimelineHttpSink implements Sink {
                 .setId(SinkEvent.nextId())
                 .setType(TEST_CASE_HISTOGRAM)
                 .setTimestamp(System.currentTimeMillis())
-                .setFlightId(Optional.ofNullable(app.getFlightPlan()).map(FlightPlan::getId).orElse(0L))
+                .setFlightId(Optional.ofNullable(app.getFlightPlan()).map(FlightPlan::getFlightId).orElse(0L))
                 .setCarrierId(registration.getServiceInstance().getId())
                 .setStage(key.getStage().name())
                 .setTestSuite(key.getTestSuite())

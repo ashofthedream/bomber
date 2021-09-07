@@ -1,4 +1,4 @@
-package ashes.of.bomber.carrier.starter.mapping;
+package ashes.of.bomber.carrier.starter.mappers;
 
 import ashes.of.bomber.carrier.dto.SettingsDto;
 import ashes.of.bomber.flight.Settings;

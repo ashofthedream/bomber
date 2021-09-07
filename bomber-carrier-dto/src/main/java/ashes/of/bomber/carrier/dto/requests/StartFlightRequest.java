@@ -1,28 +1,16 @@
 package ashes.of.bomber.carrier.dto.requests;
 
-import ashes.of.bomber.carrier.dto.TestSuiteDto;
-
-import java.util.List;
+import ashes.of.bomber.carrier.dto.FlightPlanDto;
 
 public class StartFlightRequest {
-    private long flightId;
-    private List<TestSuiteDto> testSuites;
+    private FlightPlanDto plan;
 
-    public long getFlightId() {
-        return flightId;
+    public FlightPlanDto getPlan() {
+        return plan;
     }
 
-    public StartFlightRequest setFlightId(long flightId) {
-        this.flightId = flightId;
-        return this;
-    }
-
-    public List<TestSuiteDto> getTestSuites() {
-        return testSuites;
-    }
-
-    public StartFlightRequest setTestSuites(List<TestSuiteDto> testSuites) {
-        this.testSuites = testSuites;
+    public StartFlightRequest setPlan(FlightPlanDto plan) {
+        this.plan = plan;
         return this;
     }
 }

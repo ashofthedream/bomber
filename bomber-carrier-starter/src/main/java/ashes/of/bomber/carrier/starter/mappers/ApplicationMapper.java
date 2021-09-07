@@ -1,4 +1,4 @@
-package ashes.of.bomber.carrier.starter.mapping;
+package ashes.of.bomber.carrier.starter.mappers;
 
 import ashes.of.bomber.carrier.dto.ApplicationStateDto;
 import ashes.of.bomber.carrier.dto.WorkerStateDto;
@@ -7,7 +7,7 @@ import ashes.of.bomber.descriptions.WorkerDescription;
 
 import java.util.stream.Collectors;
 
-public class ApplicationStateMapper {
+public class ApplicationMapper {
 
     public static ApplicationStateDto toDto(TestAppStateDescription state) {
         return new ApplicationStateDto()
@@ -22,7 +22,7 @@ public class ApplicationStateMapper {
                 .setRemainTotalIterations(state.getRemainIterationsCount())
                 .setErrorsCount(state.getErrorCount())
                 .setWorkers(state.getWorkers().stream()
-                        .map(ApplicationStateMapper::toDto)
+                        .map(ApplicationMapper::toDto)
                         .collect(Collectors.toList()));
     }
 

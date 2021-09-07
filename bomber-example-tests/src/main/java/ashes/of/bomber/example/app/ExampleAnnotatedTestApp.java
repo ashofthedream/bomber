@@ -60,7 +60,7 @@ public class ExampleAnnotatedTestApp {
                 .start();
 
 
-        log.info("test report for flight: {}", report.getPlan().getId());
+        log.info("test report for flight: {}", report.getPlan().getFlightId());
         report.getTestSuites()
                 .forEach(testSuite -> {
                     log.debug("TestSuite name: {}", testSuite.getName());
