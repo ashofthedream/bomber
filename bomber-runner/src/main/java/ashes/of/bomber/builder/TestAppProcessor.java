@@ -1,6 +1,7 @@
 package ashes.of.bomber.builder;
 
 import ashes.of.bomber.annotations.LoadTestApp;
+import ashes.of.bomber.annotations.LoadTestSuite;
 import ashes.of.bomber.annotations.Provide;
 import com.google.common.base.Strings;
 import org.apache.logging.log4j.LogManager;
@@ -20,7 +21,7 @@ public class TestAppProcessor {
     private final AtomicReference<Object> app = new AtomicReference<>();
 
     public TestAppBuilder process(Class<?> cls) {
-        log.debug("start process app: {} ", cls);
+        log.debug("Start process app: {} ", cls);
         b.config(env -> env.process(cls));
 
         for (Method method : cls.getDeclaredMethods()) {
@@ -28,14 +29,14 @@ public class TestAppProcessor {
             if (Modifier.isStatic(modifiers) || !Modifier.isPublic(modifiers))
                 continue;
 
-            log.debug("process app: {} method: {}", cls, method.getName());
+            log.debug("Process app: {}, method: {}", cls, method.getName());
             try {
                 Provide provide = method.getAnnotation(Provide.class);
                 if (provide != null)
                     provide(cls, method, provide);
 
             } catch (Exception e) {
-                log.warn("Can't mh method: {}", method.getName(), e);
+                log.warn("Can't process method: {}", method.getName(), e);
             }
         }
 
@@ -43,14 +44,15 @@ public class TestAppProcessor {
         if (app == null)
             throw new RuntimeException("Test application class should be market with @LoadTestApp");
 
-        if (app.testSuites().length < 1)
-            throw new RuntimeException("Test application class should contains at least one test suite");
-
+        LoadTestSuite suite = cls.getAnnotation(LoadTestSuite.class);
+        if (app.testSuites().length < 1 && suite == null)
+            throw new RuntimeException("Test application class should contains at least one test suite @LoadTestApp(testSuites = {ExampleTestSuite.class}) or marked by @LoadTestSuite");
 
         b.name(!Strings.isNullOrEmpty(app.name()) ? app.name() : cls.getSimpleName());
+        b.testSuiteClass(cls);
 
         for (Class<?> testSuiteClass : app.testSuites()) {
-            log.debug("add testSuiteClass: {}", testSuiteClass);
+            log.debug("Add testSuiteClass: {}", testSuiteClass);
             b.testSuiteClass(testSuiteClass);
         }
 

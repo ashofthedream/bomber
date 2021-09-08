@@ -1,6 +1,6 @@
 package ashes.of.bomber.runner;
 
-import ashes.of.bomber.methods.TestCaseWithTools;
+import ashes.of.bomber.methods.TestCaseMethod;
 import ashes.of.bomber.tools.Tools;
 
 public class TestCase<T> {
@@ -8,9 +8,9 @@ public class TestCase<T> {
     private final boolean async;
     private final Configuration configuration;
 
-    private final TestCaseWithTools<T> test;
+    private final TestCaseMethod<T> test;
 
-    public TestCase(String name, boolean async, Configuration configuration, TestCaseWithTools<T> test) {
+    public TestCase(String name, boolean async, Configuration configuration, TestCaseMethod<T> test) {
         this.name = name;
         this.async = async;
         this.configuration = configuration;

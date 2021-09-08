@@ -6,13 +6,9 @@ import ashes.of.bomber.annotations.AfterTestSuite;
 import ashes.of.bomber.annotations.BeforeEachIteration;
 import ashes.of.bomber.annotations.BeforeTestCase;
 import ashes.of.bomber.annotations.BeforeTestSuite;
-import ashes.of.bomber.annotations.LoadTest;
 import ashes.of.bomber.annotations.LoadTestCase;
 import ashes.of.bomber.annotations.LoadTestSuite;
-import ashes.of.bomber.annotations.WarmUp;
-import ashes.of.bomber.flight.Settings;
-import ashes.of.bomber.flight.SettingsBuilder;
-import ashes.of.bomber.methods.TestCaseWithTools;
+import ashes.of.bomber.methods.TestCaseMethod;
 import ashes.of.bomber.tools.Tools;
 import com.google.common.base.Strings;
 import org.apache.logging.log4j.LogManager;
@@ -22,11 +18,9 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Arrays;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
+
 
 public class TestSuiteProcessor<T> {
     private static final Logger log = LogManager.getLogger();
@@ -42,7 +36,7 @@ public class TestSuiteProcessor<T> {
     }
 
     public TestSuiteBuilder<T> process(Class<T> cls, Supplier<T> supplier) {
-        log.debug("start process suite: {}", cls);
+        log.debug("Start process test suite: {}", cls);
         b.config(config -> config.process(cls));
 
         LoadTestSuite suite = cls.getAnnotation(LoadTestSuite.class);
@@ -97,7 +91,8 @@ public class TestSuiteProcessor<T> {
                     buildAfterSuite(method, afterSuite);
 
             } catch (Exception e) {
-                log.warn("Can't mh method: {}", method.getName(), e);
+                log.warn("Can't process test suite class: {} method: {}", cls.getName(), method.getName(), e);
+//                throw new RuntimeException(e);
             }
         }
 
@@ -117,12 +112,12 @@ public class TestSuiteProcessor<T> {
     }
     
     private void buildBeforeEach(Method method, BeforeEachIteration beforeEach) throws Exception {
-        log.debug("Found #BeforeEach method: {}", method.getName());
+        log.debug("Found @BeforeEachIteration method: {}", method.getName());
         MethodHandle mh = MethodHandles.lookup().unreflect(method);
         b.beforeEach(instance -> mh.bindTo(instance).invoke());
     }
 
-    private void buildTestCase(Method method, LoadTestCase loadTest) throws Exception {
+    private void buildTestCase(Method method, LoadTestCase loadTest) {
         String value = loadTest.value();
         String name = !value.isEmpty() ? value : method.getName();
         log.debug("Found @LoadTestCase method: {}, name: {}, disabled: {}", method.getName(), name, loadTest.disabled());
@@ -130,46 +125,62 @@ public class TestSuiteProcessor<T> {
         if (loadTest.disabled())
             return;
 
-        MethodHandle mh = MethodHandles.lookup().unreflect(method);
-        AtomicReference<TestCaseWithTools<T>> ref = new AtomicReference<>();
-        AtomicBoolean skip = new AtomicBoolean();
+        Class<?>[] types = method.getParameterTypes();
+        if (types.length > 1) {
+            throw new RuntimeException("Build test case: " + name + " failed. Only one parameter with type: " + Tools.class.getName() + " is allowed)");
+        }
 
-        b.testCase(name, loadTest.async(), (suite, tools) -> {
-            if (skip.get())
-                return;
+        for (Class<?> type : types) {
+            if (!type.equals(Tools.class))
+                throw new RuntimeException("Build test case: " + name + " failed. Not allowed parameter: " + type.getName()  + ", only " + Tools.class.getName() + " is allowed");
+        }
 
-            TestCaseWithTools<T> proxy = ref.get();
-            if (proxy == null) {
-                log.debug("init testCase: {} proxy method", name);
-                Class<?>[] types = method.getParameterTypes();
-                Object[] params = Stream.of(types)
-                        .map(param -> {
-                            if (param.equals(Tools.class))
-                                return tools;
+        b.testCase(builder -> builder
+                .name(name)
+                .async(loadTest.async())
+                .config(config -> config.process(method))
+                .test(buildTestCaseMethod(method))
+        );
+    }
 
-                            skip.set(true);
-                            log.warn("Skip test {}: not allowed parameters (only {} is allowed)", name, Tools.class.getName());
-                            throw new RuntimeException("Skip test " + name + ": not allowed parameters (only " + Tools.class.getName() + " is allowed)");
-                        })
-                        .toArray();
+    private TestCaseMethod<T> buildTestCaseMethod(Method method) {
+        try {
+            MethodHandle mh = MethodHandles.lookup().unreflect(method);
+            AtomicReference<TestCaseMethod<T>> ref = new AtomicReference<>();
+            if (method.getParameterTypes().length == 0) {
+                return (suite, tools) -> {
+                    TestCaseMethod<T> proxy = ref.get();
+                    if (proxy == null) {
+                        log.debug("Init test case method: {} proxy", method.getName());
+                        MethodHandle bind = mh.bindTo(suite);
 
-                log.trace("bind test method with params: {}", Arrays.toString(params));
+                        proxy = (o, t) -> bind.invoke();
+                        ref.set(proxy);
+                    }
 
-                MethodHandle bind = mh.bindTo(suite);
+                    proxy.run(suite, tools);
+                };
+            } else {
+                return (suite, tools) -> {
+                    TestCaseMethod<T> proxy = ref.get();
+                    if (proxy == null) {
+                        log.debug("Init test case method: {} proxy", method.getName());
+                        MethodHandle bind = mh.bindTo(suite);
 
-                proxy = types.length == 0 ?
-                        (tc, t) -> bind.invoke() :
-                        (tc, t) -> bind.invokeWithArguments(t) ;
+                        proxy = (o, t) -> bind.invokeWithArguments(t);
+                        ref.set(proxy);
+                    }
 
-                ref.set(proxy);
+                    proxy.run(suite, tools);
+                };
             }
-
-            proxy.run(suite, tools);
-        });
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void buildAfterEach(Method method, AfterEachIteration afterEach) throws Exception {
-        log.debug("Found @AfterEach method: {}", method.getName());
+        log.debug("Found @AfterEachIteration method: {}", method.getName());
         MethodHandle mh = MethodHandles.lookup().unreflect(method);
         b.afterEach(instance -> mh.bindTo(instance).invoke());
     }

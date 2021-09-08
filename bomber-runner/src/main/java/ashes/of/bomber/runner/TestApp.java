@@ -163,7 +163,7 @@ public class TestApp {
 
             flightPlan.getTestSuites()
                     .forEach(plan -> {
-                        log.debug("try to run testSuite: {}", plan.getName());
+                        log.debug("Try to run test suite: {}", plan.getName());
                         TestSuite<Object> testSuite = (TestSuite<Object>) suitesByName.get(plan.getName());
 
                         RunnerState state = new RunnerState(this::isStopped);

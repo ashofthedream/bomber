@@ -59,7 +59,7 @@ public class ExampleBuilderTestApp {
                 .instance(() -> new UserControllerLoadTest(webClient))
                 .beforeSuite(UserControllerLoadTest::beforeAll)
 //                .beforeEach(UserControllerLoadTest::beforeEach)
-                .testCase("getUsersBlock", UserControllerLoadTest::getUserByIdSync)
+                .testCase("getUsersBlock", (suite, tools) -> suite.getUserByIdSync())
                 .asyncTestCase("getUsersAsync", UserControllerLoadTest::getUserByIdAsync)
 //                .afterEach(UserControllerLoadTest::afterEach)
                 .afterSuite(UserControllerLoadTest::afterAll);
@@ -70,7 +70,7 @@ public class ExampleBuilderTestApp {
                 .instance(() -> new AccountControllerLoadTest(webClient))
                 .beforeSuite(AccountControllerLoadTest::beforeAll)
 //                .beforeEach(UserControllerLoadTest::beforeEach)
-                .testCase("getUsersBlock", AccountControllerLoadTest::getAccountByIdSync)
+                .testCase("getUsersBlock", (suite, tools) -> suite.getAccountByIdSync())
                 .asyncTestCase("getUsersAsync", AccountControllerLoadTest::getAccountByIdAsync)
 //                .afterEach(UserControllerLoadTest::afterEach)
                 .afterSuite(AccountControllerLoadTest::afterAll);

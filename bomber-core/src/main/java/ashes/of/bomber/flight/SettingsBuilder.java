@@ -23,12 +23,12 @@ public class SettingsBuilder {
     /**
      * Iterations count per each thread
      */
-    private long threadIterationsCount = 1_000_000;
+    private long threadIterationsCount = 1_000_000_000;
 
     /**
      * Total iterations count
      */
-    private long totalIterationsCount = 1_000_000;
+    private long totalIterationsCount = 1_000_000_000;
 
     public static SettingsBuilder of(Settings settings) {
         return new SettingsBuilder()

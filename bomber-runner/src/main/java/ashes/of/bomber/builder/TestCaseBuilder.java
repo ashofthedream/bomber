@@ -1,7 +1,6 @@
 package ashes.of.bomber.builder;
 
-import ashes.of.bomber.flight.SettingsBuilder;
-import ashes.of.bomber.methods.TestCaseWithTools;
+import ashes.of.bomber.methods.TestCaseMethod;
 import ashes.of.bomber.runner.TestCase;
 
 import java.util.Objects;
@@ -11,7 +10,7 @@ public class TestCaseBuilder<T> {
     private String name;
     private boolean async;
     private ConfigurationBuilder config = new ConfigurationBuilder();
-    private TestCaseWithTools<T> test;
+    private TestCaseMethod<T> test;
 
     public TestCaseBuilder<T> name(String name) {
         this.name = name;
@@ -37,7 +36,7 @@ public class TestCaseBuilder<T> {
         return this;
     }
 
-    public TestCaseBuilder<T> test(TestCaseWithTools<T> test) {
+    public TestCaseBuilder<T> test(TestCaseMethod<T> test) {
         this.test = test;
         return this;
     }

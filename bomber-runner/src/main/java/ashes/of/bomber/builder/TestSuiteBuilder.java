@@ -2,8 +2,7 @@ package ashes.of.bomber.builder;
 
 import ashes.of.bomber.methods.LifeCycleHolder;
 import ashes.of.bomber.methods.LifeCycleMethod;
-import ashes.of.bomber.methods.TestCaseWithTools;
-import ashes.of.bomber.methods.TestCaseWithoutTools;
+import ashes.of.bomber.methods.TestCaseMethod;
 import ashes.of.bomber.runner.TestCase;
 import ashes.of.bomber.runner.TestSuite;
 import com.google.common.base.Preconditions;
@@ -106,7 +105,7 @@ public class TestSuiteBuilder<T> {
         return this;
     }
 
-    public TestSuiteBuilder<T> testCase(String name, boolean async, TestCaseWithTools<T> test) {
+    public TestSuiteBuilder<T> testCase(String name, boolean async, TestCaseMethod<T> test) {
         Objects.requireNonNull(name, "name is null");
         Objects.requireNonNull(test, "test is null");
         return testCase(new TestCaseBuilder<T>()
@@ -116,19 +115,11 @@ public class TestSuiteBuilder<T> {
                 .test(test));
     }
 
-    public TestSuiteBuilder<T> testCase(String name, boolean async, TestCaseWithoutTools<T> test) {
-        return testCase(name, async, (tc, tools) -> test.run(tc));
-    }
-
-    public TestSuiteBuilder<T> testCase(String name, TestCaseWithTools<T> test) {
+    public TestSuiteBuilder<T> testCase(String name, TestCaseMethod<T> test) {
         return testCase(name, false, test);
     }
 
-    public TestSuiteBuilder<T> testCase(String name, TestCaseWithoutTools<T> test) {
-        return testCase(name, false, test);
-    }
-
-    public TestSuiteBuilder<T> asyncTestCase(String name, TestCaseWithTools<T> test) {
+    public TestSuiteBuilder<T> asyncTestCase(String name, TestCaseMethod<T> test) {
         return testCase(name, true, test);
     }
 
@@ -162,10 +153,14 @@ public class TestSuiteBuilder<T> {
     }
 
 
+    public boolean hasTestCases() {
+        return !testCases.isEmpty();
+    }
+
     public TestSuite<T> build() {
         Objects.requireNonNull(name,     "name is null");
         // todo it may be useful, but not today
-        Preconditions.checkArgument(!testCases.isEmpty(), "No test cases found");
+        Preconditions.checkArgument(!testCases.isEmpty(), "No test cases found for test suite: " + name);
 
         return new TestSuite<>(name, config.build(), instance, beforeSuite, beforeCase, beforeEach, testCases, afterEach, afterCase, afterSuite);
     }

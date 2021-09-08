@@ -239,6 +239,7 @@ public class TestAppBuilder {
         WorkerPool pool = new WorkerPool();
         Configuration configuration = this.configuration.build();
         List<TestSuite<?>> suites = this.testSuites.stream()
+                .filter(TestSuiteBuilder::hasTestCases)
                 .map(TestSuiteBuilder::build)
                 .collect(Collectors.toList());
 
