@@ -3,9 +3,9 @@ package ashes.of.bomber.benchmark;
 import ashes.of.bomber.annotations.LoadTest;
 import ashes.of.bomber.annotations.LoadTestCase;
 import ashes.of.bomber.annotations.LoadTestSuite;
-import ashes.of.bomber.flight.Settings;
 import ashes.of.bomber.builder.TestSuiteBuilder;
 import ashes.of.bomber.builder.TestAppBuilder;
+import ashes.of.bomber.flight.SettingsBuilder;
 import ashes.of.bomber.tools.Tools;
 import org.HdrHistogram.ConcurrentHistogram;
 import org.HdrHistogram.Histogram;
@@ -62,11 +62,11 @@ public class AnnotationProcessingBenchmark {
         TestSuiteBuilder<Test> suite = new TestSuiteBuilder<Test>()
                 .name("create-with-builder")
                 .sharedInstance(test)
-                    .warmUp(Settings::disabled)
+                .config(config -> config
+                    .warmUp(SettingsBuilder.disabled())
                     .settings(settings -> settings
-//                                .time(20_000)
-                            .threadCount(1)
-                            .threadIterations(1_000_000))
+                            .setThreadsCount(1)
+                            .setThreadIterationsCount(1_000_000)))
                 .testCase("test", Test::test);
 
         new TestAppBuilder()

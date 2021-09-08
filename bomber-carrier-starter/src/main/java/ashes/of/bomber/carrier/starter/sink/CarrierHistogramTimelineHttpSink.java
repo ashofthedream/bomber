@@ -2,7 +2,7 @@ package ashes.of.bomber.carrier.starter.sink;
 
 import ashes.of.bomber.carrier.dto.events.HistogramPointDto;
 import ashes.of.bomber.carrier.dto.events.SinkEvent;
-import ashes.of.bomber.carrier.starter.services.AtcService;
+import ashes.of.bomber.carrier.starter.services.CarrierService;
 import ashes.of.bomber.flight.FlightPlan;
 import ashes.of.bomber.flight.Stage;
 import ashes.of.bomber.runner.TestApp;
@@ -15,10 +15,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.cloud.zookeeper.serviceregistry.ServiceInstanceRegistration;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.net.URI;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
@@ -36,12 +34,12 @@ public class CarrierHistogramTimelineHttpSink implements Sink {
     private final AtomicLong lastUpdate = new AtomicLong(0);
     private final HistogramTimelineSink sink;
 
-    private final AtcService atcService;
+    private final CarrierService carrierService;
     private final ServiceInstanceRegistration registration;
     private final TestApp app;
 
-    public CarrierHistogramTimelineHttpSink(AtcService atcService, ServiceInstanceRegistration registration, TestApp app) {
-        this.atcService = atcService;
+    public CarrierHistogramTimelineHttpSink(CarrierService carrierService, ServiceInstanceRegistration registration, TestApp app) {
+        this.carrierService = carrierService;
         this.registration = registration;
         this.app = app;
         this.sink = new HistogramTimelineSink(ChronoUnit.SECONDS, new HistogramTimelineDummyPrinter());
@@ -92,7 +90,7 @@ public class CarrierHistogramTimelineHttpSink implements Sink {
                 })
                 .collect(Collectors.toList());
 
-        send(new SinkEvent()
+        carrierService.event(new SinkEvent()
                 .setId(SinkEvent.nextId())
                 .setType(TEST_CASE_HISTOGRAM)
                 .setTimestamp(System.currentTimeMillis())
@@ -122,16 +120,6 @@ public class CarrierHistogramTimelineHttpSink implements Sink {
     }
 
     private void send(SinkEvent event) {
-        atcService.getAtc()
-                .flatMap(atc -> {
-                    URI uri = atc.getInstance().getUri();
-                    return webClient.post()
-                            .uri(uri + "/atc/sink")
-                            .body(BodyInserters.fromValue(event))
-                            .retrieve()
-                            .toBodilessEntity()
-                            .onErrorContinue((throwable, o) -> log.warn("Can't send status to ATC: {}", atc.getId(), throwable));
-                })
-                .subscribe();
+        carrierService.event(event).subscribe();
     }
 }

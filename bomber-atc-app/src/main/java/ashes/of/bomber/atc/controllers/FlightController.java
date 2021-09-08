@@ -4,7 +4,7 @@ import ashes.of.bomber.atc.dto.flights.FlightProgressDto;
 import ashes.of.bomber.atc.dto.flights.FlightDto;
 import ashes.of.bomber.atc.dto.flights.FlightRecordDto;
 import ashes.of.bomber.atc.dto.flights.FlightsStartedDto;
-import ashes.of.bomber.atc.mappers.FlightMapper;
+import ashes.of.bomber.atc.mappers.FlightPlanMapper;
 import ashes.of.bomber.atc.model.Flight;
 import ashes.of.bomber.atc.model.FlightRecord;
 import ashes.of.bomber.atc.services.CarrierService;
@@ -56,7 +56,7 @@ public class FlightController {
     public Mono<FlightsStartedDto> start(@RequestBody StartFlightRequest request) {
         log.debug("start all flights on all active carriers");
 
-        var plan = FlightMapper.toPlan(flightService.getNextFlightId(), request.getPlan());
+        var plan = FlightPlanMapper.toPlan(flightService.getNextFlightId(), request.getPlan());
         var flight = flightService.startFlight(plan);
         return carrierService.getCarriers()
                 .flatMap(carrier -> carrierService.start(carrier, flight))
@@ -72,7 +72,7 @@ public class FlightController {
             @RequestBody StartFlightRequest request) {
         log.debug("start application: {} on carrier: {}", appId, carrierId);
 
-        var plan = FlightMapper.toPlan(flightService.getNextFlightId(), request.getPlan());
+        var plan = FlightPlanMapper.toPlan(flightService.getNextFlightId(), request.getPlan());
         var flight = flightService.startFlight(plan);
 
         return carrierService.getCarrier(carrierId)

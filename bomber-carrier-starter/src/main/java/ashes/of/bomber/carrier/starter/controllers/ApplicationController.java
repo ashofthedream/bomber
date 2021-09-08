@@ -3,11 +3,10 @@ package ashes.of.bomber.carrier.starter.controllers;
 import ashes.of.bomber.carrier.dto.ApplicationDto;
 import ashes.of.bomber.carrier.dto.FlightStartedDto;
 import ashes.of.bomber.carrier.dto.SettingsDto;
-import ashes.of.bomber.carrier.dto.TestCaseDto;
-import ashes.of.bomber.carrier.dto.TestSuiteDto;
+import ashes.of.bomber.carrier.dto.flight.TestCasePlanDto;
+import ashes.of.bomber.carrier.dto.flight.TestSuitePlanDto;
 import ashes.of.bomber.carrier.dto.requests.StartFlightRequest;
 import ashes.of.bomber.carrier.starter.mappers.ApplicationMapper;
-import ashes.of.bomber.carrier.starter.mappers.SettingsMapper;
 import ashes.of.bomber.descriptions.TestCaseDescription;
 import ashes.of.bomber.descriptions.TestSuiteDescription;
 import ashes.of.bomber.flight.FlightPlan;
@@ -83,8 +82,8 @@ public class ApplicationController {
                             .stream()
                             .map(testCase -> new TestCasePlan(
                                     testCase.getName(),
-                                    toSettings(testCase.getWarmUp()),
-                                    toSettings(testCase.getLoadTest())
+                                    toSettings(testCase.getConfiguration().getWarmUp()),
+                                    toSettings(testCase.getConfiguration().getSettings())
                             ))
                             .collect(Collectors.toList());
 
@@ -109,33 +108,26 @@ public class ApplicationController {
                 .build();
     }
 
-    private List<TestSuiteDto> testSuites(List<TestSuiteDescription> testSuites) {
+    private List<TestSuitePlanDto> testSuites(List<TestSuiteDescription> testSuites) {
         return testSuites.stream()
                 .map(this::testSuite)
                 .collect(Collectors.toList());
     }
 
-    private TestSuiteDto testSuite(TestSuiteDescription suite) {
-        return new TestSuiteDto()
-                .setLoadTest(SettingsMapper.toDto(suite.getSettings()))
-                .setWarmUp(SettingsMapper.toDto(suite.getWarmUp()))
+    private TestSuitePlanDto testSuite(TestSuiteDescription suite) {
+        return new TestSuitePlanDto()
                 .setName(suite.getName())
                 .setTestCases(testCases(suite));
     }
 
-    private List<TestCaseDto> testCases(TestSuiteDescription suite) {
+    private List<TestCasePlanDto> testCases(TestSuiteDescription suite) {
         return suite.getTestCases().stream()
                 .map(this::testCase)
                 .collect(Collectors.toList());
     }
 
-    private TestCaseDto testCase(TestCaseDescription testCase) {
-        return new TestCaseDto()
+    private TestCasePlanDto testCase(TestCaseDescription testCase) {
+        return new TestCasePlanDto()
                 .setName(testCase.getName());
     }
-
-
-
-
-
 }

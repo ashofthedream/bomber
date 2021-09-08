@@ -1,10 +1,10 @@
-package ashes.of.bomber.carrier.dto;
+package ashes.of.bomber.carrier.dto.flight;
 
 import java.util.List;
 
 public class FlightPlanDto {
     private long id;
-    private List<TestSuiteDto> testSuites;
+    private List<TestSuitePlanDto> testSuites;
 
     public long getId() {
         return id;
@@ -15,11 +15,11 @@ public class FlightPlanDto {
         return this;
     }
 
-    public List<TestSuiteDto> getTestSuites() {
+    public List<TestSuitePlanDto> getTestSuites() {
         return testSuites;
     }
 
-    public FlightPlanDto setTestSuites(List<TestSuiteDto> testSuites) {
+    public FlightPlanDto setTestSuites(List<TestSuitePlanDto> testSuites) {
         this.testSuites = testSuites;
         return this;
     }

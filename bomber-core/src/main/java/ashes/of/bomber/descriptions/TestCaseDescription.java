@@ -2,18 +2,18 @@ package ashes.of.bomber.descriptions;
 
 public class TestCaseDescription {
     private final String name;
-    private final boolean async;
+    private final ConfigurationDescription configuration;
 
-    public TestCaseDescription(String name, boolean async) {
+    public TestCaseDescription(String name, ConfigurationDescription configuration) {
         this.name = name;
-        this.async = async;
+        this.configuration = configuration;
     }
 
     public String getName() {
         return name;
     }
 
-    public boolean isAsync() {
-        return async;
+    public ConfigurationDescription getConfiguration() {
+        return configuration;
     }
 }

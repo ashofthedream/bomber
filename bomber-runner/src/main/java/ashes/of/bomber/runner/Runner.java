@@ -6,8 +6,6 @@ import ashes.of.bomber.flight.TestCasePlan;
 import ashes.of.bomber.flight.TestCaseReport;
 import ashes.of.bomber.flight.TestSuitePlan;
 import ashes.of.bomber.flight.TestSuiteReport;
-import ashes.of.bomber.sink.AsyncSink;
-import ashes.of.bomber.sink.MultiSink;
 import ashes.of.bomber.sink.Sink;
 import ashes.of.bomber.squadron.Barrier;
 import org.apache.logging.log4j.LogManager;
@@ -18,7 +16,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.stream.Stream;
@@ -34,9 +31,9 @@ public class Runner {
 
     private final Map<String, Worker> workers = new ConcurrentSkipListMap<>();
 
-    public Runner(WorkerPool pool, List<Sink> sinks) {
+    public Runner(WorkerPool pool, Sink sink) {
         this.pool = pool;
-        this.sink = new AsyncSink(new MultiSink(sinks));
+        this.sink = sink;
     }
 
     /**
@@ -46,8 +43,7 @@ public class Runner {
         ThreadContext.put("stage", IDLE.name());
         ThreadContext.put("testSuite", testSuite.getName());
 
-        log.info("Run test suite: {} with warm up: {} and test settings: {}",
-                testSuite.getName(), testSuite.getWarmUp(), testSuite.getSettings());
+        log.info("Run test suite: {}", testSuite.getName());
 
         log.trace("Reset before & after test suite lifecycle methods");
         testSuite.resetBeforeAndAfterSuite();
@@ -86,8 +82,8 @@ public class Runner {
                         ThreadContext.put("testCase", testCasePlan.getName());
                         log.debug("Run test case: {}", testCasePlan.getName());
 
-                        Settings warmUp = testCasePlan.getWarmUp() != null ? testCasePlan.getWarmUp() : testCase.getWarmUp();
-                        Settings settings = testCasePlan.getSettings() != null ? testCasePlan.getSettings() : testCase.getSettings();
+                        Settings warmUp = testCasePlan.getWarmUp() != null ? testCasePlan.getWarmUp() : testCase.getConfiguration().getWarmUp();
+                        Settings settings = testCasePlan.getSettings() != null ? testCasePlan.getSettings() : testCase.getConfiguration().getSettings();
                         if (!warmUp.isDisabled()) {
                             runTestCase(state, testSuite, testCase, Stage.WARM_UP, warmUp);
                         }
@@ -121,8 +117,8 @@ public class Runner {
                 .orElseGet(() -> {
                     var testCase = testSuite.getTestCase(testCasePlan.getName());
                     return Math.max(
-                            testCase.getWarmUp().getThreadsCount(),
-                            testCase.getSettings().getThreadsCount()
+                            testCase.getConfiguration().getWarmUp().getThreadsCount(),
+                            testCase.getConfiguration().getSettings().getThreadsCount()
                     );
                 });
     }
@@ -152,7 +148,7 @@ public class Runner {
         log.info("Start stage: {}", stage);
         state.startCaseIfNotStarted(testCase.getName(), stage, settings);
 
-        Barrier barrier = testSuite.getEnv().getBarrier()
+        Barrier barrier = testCase.getConfiguration().getBarrier()
                 .workers(settings.getThreadsCount())
                 .build();
 

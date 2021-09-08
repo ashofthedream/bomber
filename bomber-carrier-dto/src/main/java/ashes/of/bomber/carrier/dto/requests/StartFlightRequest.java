@@ -1,6 +1,6 @@
 package ashes.of.bomber.carrier.dto.requests;
 
-import ashes.of.bomber.carrier.dto.FlightPlanDto;
+import ashes.of.bomber.carrier.dto.flight.FlightPlanDto;
 
 public class StartFlightRequest {
     private FlightPlanDto plan;

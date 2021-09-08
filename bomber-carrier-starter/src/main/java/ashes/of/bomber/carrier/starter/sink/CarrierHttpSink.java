@@ -4,7 +4,7 @@ import ashes.of.bomber.carrier.dto.ApplicationStateDto;
 import ashes.of.bomber.carrier.dto.events.SinkEvent;
 import ashes.of.bomber.carrier.dto.events.SinkEventType;
 import ashes.of.bomber.carrier.starter.mappers.ApplicationMapper;
-import ashes.of.bomber.carrier.starter.services.AtcService;
+import ashes.of.bomber.carrier.starter.services.CarrierService;
 import ashes.of.bomber.flight.FlightPlan;
 import ashes.of.bomber.flight.Iteration;
 import ashes.of.bomber.flight.Settings;
@@ -15,11 +15,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.cloud.zookeeper.serviceregistry.ServiceInstanceRegistration;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import javax.annotation.Nullable;
-import java.net.URI;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
@@ -39,14 +37,14 @@ public class CarrierHttpSink implements Sink {
     private final WebClient webClient = WebClient.builder()
             .build();
 
-    private final AtcService atcService;
+    private final CarrierService carrierService;
     private final ServiceInstanceRegistration registration;
     private final TestApp app;
 
     private final AtomicLong lastUpdate = new AtomicLong(0);
 
-    public CarrierHttpSink(AtcService atcService, ServiceInstanceRegistration registration, TestApp app) {
-        this.atcService = atcService;
+    public CarrierHttpSink(CarrierService carrierService, ServiceInstanceRegistration registration, TestApp app) {
+        this.carrierService = carrierService;
         this.registration = registration;
         this.app = app;
     }
@@ -99,17 +97,7 @@ public class CarrierHttpSink implements Sink {
     }
 
     private void send(SinkEvent event) {
-        atcService.getAtc()
-                .flatMap(atc -> {
-                    URI uri = atc.getInstance().getUri();
-                    return webClient.post()
-                            .uri(uri + "/atc/sink")
-                            .body(BodyInserters.fromValue(event))
-                            .retrieve()
-                            .toBodilessEntity()
-                            .onErrorContinue((throwable, o) -> log.warn("Can't send status to ATC: {}", atc.getId(), throwable));
-                })
-                .subscribe();
+        carrierService.event(event).subscribe();
     }
 
     private SinkEvent event(SinkEventType type, Instant timestamp, @Nullable Stage stage, @Nullable String testSuite, @Nullable String testCase, @Nullable ApplicationStateDto state) {

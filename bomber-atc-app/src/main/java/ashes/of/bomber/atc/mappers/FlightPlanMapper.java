@@ -1,16 +1,16 @@
 package ashes.of.bomber.atc.mappers;
 
-import ashes.of.bomber.carrier.dto.FlightPlanDto;
+import ashes.of.bomber.carrier.dto.flight.FlightPlanDto;
 import ashes.of.bomber.flight.FlightPlan;
 
 import java.util.stream.Collectors;
 
-public class FlightMapper {
+public class FlightPlanMapper {
 
     public static FlightPlan toPlan(long id, FlightPlanDto plan) {
         var testSuites = plan.getTestSuites()
                 .stream()
-                .map(TestSuiteMapper::toPlan)
+                .map(TestSuitePlanMapper::toPlan)
                 .collect(Collectors.toList());
 
         return new FlightPlan(id, testSuites);
@@ -20,7 +20,7 @@ public class FlightMapper {
     public static FlightPlanDto toDto(FlightPlan plan) {
         var testSuites = plan.getTestSuites()
                 .stream()
-                .map(TestSuiteMapper::toDto)
+                .map(TestSuitePlanMapper::toDto)
                 .collect(Collectors.toList());
 
         return new FlightPlanDto()

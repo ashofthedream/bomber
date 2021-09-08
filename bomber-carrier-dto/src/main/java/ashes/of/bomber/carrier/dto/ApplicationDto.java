@@ -1,12 +1,13 @@
 package ashes.of.bomber.carrier.dto;
 
+import ashes.of.bomber.carrier.dto.flight.TestSuitePlanDto;
 
 import java.util.List;
 
 public class ApplicationDto {
     private String name;
     private ApplicationStateDto state;
-    private List<TestSuiteDto> testSuites;
+    private List<TestSuitePlanDto> testSuites;
 
     public String getName() {
         return name;
@@ -26,11 +27,11 @@ public class ApplicationDto {
         return this;
     }
 
-    public List<TestSuiteDto> getTestSuites() {
+    public List<TestSuitePlanDto> getTestSuites() {
         return testSuites;
     }
 
-    public ApplicationDto setTestSuites(List<TestSuiteDto> testSuites) {
+    public ApplicationDto setTestSuites(List<TestSuitePlanDto> testSuites) {
         this.testSuites = testSuites;
         return this;
     }

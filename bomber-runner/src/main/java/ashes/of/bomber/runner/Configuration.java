@@ -1,37 +1,27 @@
 package ashes.of.bomber.runner;
 
 import ashes.of.bomber.delayer.Delayer;
+import ashes.of.bomber.flight.Settings;
 import ashes.of.bomber.limiter.Limiter;
-import ashes.of.bomber.sink.Sink;
 import ashes.of.bomber.squadron.BarrierBuilder;
-import ashes.of.bomber.watcher.WatcherConfig;
 
-import java.util.List;
 import java.util.function.Supplier;
 
 
-public class Environment {
+public class Configuration {
 
-    private final List<Sink> sinks;
-    private final List<WatcherConfig> watchers;
     private final Supplier<Delayer> delayer;
     private final Supplier<Limiter> limiter;
     private final BarrierBuilder barrier;
+    private final Settings warmUp;
+    private final Settings settings;
 
-    public Environment(List<Sink> sinks, List<WatcherConfig> watchers, Supplier<Delayer> delayer, Supplier<Limiter> limiter, BarrierBuilder barrier) {
-        this.sinks = sinks;
-        this.watchers = watchers;
+    public Configuration(Supplier<Delayer> delayer, Supplier<Limiter> limiter, BarrierBuilder barrier, Settings warmUp, Settings settings) {
         this.delayer = delayer;
         this.limiter = limiter;
         this.barrier = barrier;
-    }
-
-    public List<Sink> getSinks() {
-        return sinks;
-    }
-
-    public List<WatcherConfig> getWatchers() {
-        return watchers;
+        this.warmUp = warmUp;
+        this.settings = settings;
     }
 
     public Supplier<Delayer> getDelayer() {
@@ -44,5 +34,13 @@ public class Environment {
 
     public BarrierBuilder getBarrier() {
         return barrier;
+    }
+
+    public Settings getWarmUp() {
+        return warmUp;
+    }
+
+    public Settings getSettings() {
+        return settings;
     }
 }

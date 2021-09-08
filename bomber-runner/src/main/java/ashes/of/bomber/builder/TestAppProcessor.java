@@ -1,15 +1,7 @@
 package ashes.of.bomber.builder;
 
-import ashes.of.bomber.annotations.Delay;
-import ashes.of.bomber.annotations.LoadTest;
 import ashes.of.bomber.annotations.LoadTestApp;
 import ashes.of.bomber.annotations.Provide;
-import ashes.of.bomber.annotations.Throttle;
-import ashes.of.bomber.annotations.WarmUp;
-import ashes.of.bomber.flight.Settings;
-import ashes.of.bomber.delayer.RandomDelayer;
-import ashes.of.bomber.flight.SettingsBuilder;
-import ashes.of.bomber.limiter.Limiter;
 import com.google.common.base.Strings;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -19,7 +11,6 @@ import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Supplier;
 
 
 public class TestAppProcessor {
@@ -30,28 +21,7 @@ public class TestAppProcessor {
 
     public TestAppBuilder process(Class<?> cls) {
         log.debug("start process app: {} ", cls);
-
-        WarmUp warmUp = cls.getAnnotation(WarmUp.class);
-        if (warmUp != null)
-            b.warmUp(settings(warmUp));
-
-        LoadTest loadTest = cls.getAnnotation(LoadTest.class);
-        if (loadTest != null)
-            b.settings(settings(loadTest));
-
-        Throttle throttle = cls.getAnnotation(Throttle.class);
-        if (throttle != null) {
-            Supplier<Limiter> limiter = () -> Limiter.withRate(throttle.threshold(), throttle.time(), throttle.timeUnit());
-            if (throttle.shared()) {
-                b.limiter(limiter.get());
-            } else {
-                b.limiter(limiter);
-            }
-        }
-
-        Delay delay = cls.getAnnotation(Delay.class);
-        if (delay != null)
-            b.delayer(new RandomDelayer(delay.min(), delay.max(), delay.timeUnit()));
+        b.config(env -> env.process(cls));
 
         for (Method method : cls.getDeclaredMethods()) {
             int modifiers = method.getModifiers();
@@ -77,7 +47,7 @@ public class TestAppProcessor {
             throw new RuntimeException("Test application class should contains at least one test suite");
 
 
-        b. name(!Strings.isNullOrEmpty(app.name()) ? app.name() : cls.getSimpleName());
+        b.name(!Strings.isNullOrEmpty(app.name()) ? app.name() : cls.getSimpleName());
 
         for (Class<?> testSuiteClass : app.testSuites()) {
             log.debug("add testSuiteClass: {}", testSuiteClass);
@@ -126,23 +96,5 @@ public class TestAppProcessor {
         }
 
         return a;
-    }
-
-    private Settings settings(LoadTest ann) {
-        return new SettingsBuilder()
-                .setTime(ann.time(), ann.timeUnit())
-                .setThreadsCount(ann.threads())
-                .setThreadIterationsCount(ann.threadIterations())
-                .setTotalIterationsCount(ann.totalIterations())
-                .build();
-    }
-
-    private Settings settings(WarmUp ann) {
-        return new SettingsBuilder()
-                .setTime(ann.time(), ann.timeUnit())
-                .setThreadsCount(ann.threads())
-                .setThreadIterationsCount(ann.threadIterations())
-                .setTotalIterationsCount(ann.totalIterations())
-                .build();
     }
 }

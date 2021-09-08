@@ -1,17 +1,10 @@
 package ashes.of.bomber.builder;
 
-import ashes.of.bomber.flight.Settings;
-import ashes.of.bomber.delayer.Delayer;
-import ashes.of.bomber.delayer.NoDelayDelayer;
-import ashes.of.bomber.flight.SettingsBuilder;
-import ashes.of.bomber.limiter.Limiter;
-import ashes.of.bomber.runner.Environment;
+import ashes.of.bomber.runner.Configuration;
 import ashes.of.bomber.runner.TestApp;
 import ashes.of.bomber.runner.TestSuite;
 import ashes.of.bomber.runner.WorkerPool;
 import ashes.of.bomber.sink.Sink;
-import ashes.of.bomber.squadron.BarrierBuilder;
-import ashes.of.bomber.squadron.NoBarrier;
 import ashes.of.bomber.watcher.Watcher;
 import ashes.of.bomber.watcher.WatcherConfig;
 import com.google.common.base.Preconditions;
@@ -37,22 +30,16 @@ public class TestAppBuilder {
 
     private String name;
 
-    private Settings warmUp = SettingsBuilder.disabled();
-    private Settings settings = new SettingsBuilder().build();
-
     private final List<Sink> sinks = new ArrayList<>();
     private final List<WatcherConfig> watchers = new ArrayList<>();
-    private BarrierBuilder barrier = new NoBarrier.Builder();
-    private Delayer delayer = new NoDelayDelayer();
-    private Supplier<Limiter> limiter = Limiter::alwaysPermit;
 
-    private final ProviderBuilder provider = new ProviderBuilder();
+    private ProviderBuilder provider = new ProviderBuilder();
+    private ConfigurationBuilder configuration = new ConfigurationBuilder();
 
     /**
      * Test suites for run
      */
-    private final List<TestSuiteBuilder<?>> suites = new ArrayList<>();
-
+    private final List<TestSuiteBuilder<?>> testSuites = new ArrayList<>();
 
     public static TestAppBuilder create(Class<?> cls) {
         Objects.requireNonNull(cls, "cls is null");
@@ -66,64 +53,13 @@ public class TestAppBuilder {
         return this;
     }
 
-
-    public TestAppBuilder warmUp(Settings settings) {
-        Objects.requireNonNull(settings, "settings is null");
-        this.warmUp = settings;
+    public TestAppBuilder config(Consumer<ConfigurationBuilder> consumer) {
+        consumer.accept(configuration);
         return this;
     }
 
-    public TestAppBuilder warmUp(Consumer<Settings> settings) {
-        settings.accept(warmUp);
-        return this;
-    }
-
-
-    public TestAppBuilder settings(Settings settings) {
-        Objects.requireNonNull(settings, "settings is null");
-        this.settings = settings;
-        return this;
-    }
-
-    public TestAppBuilder settings(Consumer<SettingsBuilder> settings) {
-        SettingsBuilder builder = new SettingsBuilder();
-        settings.accept(builder);
-        return settings(builder.build());
-    }
-
-
-    public TestAppBuilder barrier(BarrierBuilder barrier) {
-        this.barrier = barrier;
-        return this;
-    }
-
-
-    public TestAppBuilder delayer(Delayer delayer) {
-        Objects.requireNonNull(delayer, "delayer is null");
-        this.delayer = delayer;
-        return this;
-    }
-    
-    /**
-     * Adds limiter which will be shared across all workers threads
-     *
-     * @param limiter shared limiter
-     * @return builder
-     */
-    public TestAppBuilder limiter(Limiter limiter) {
-        Objects.requireNonNull(limiter, "limiter is null");
-        return limiter(() -> limiter);
-    }
-
-    /**
-     * Adds limiter which will be created for each worker thread
-     * note: it may be shared if supplier will return same instance
-     *
-     * @param limiter shared request limiter
-     * @return builder
-     */
-    public TestAppBuilder limiter(Supplier<Limiter> limiter) {
-        this.limiter = limiter;
+    public TestAppBuilder config(ConfigurationBuilder config) {
+        this.configuration = config;
         return this;
     }
 
@@ -176,17 +112,10 @@ public class TestAppBuilder {
         return this;
     }
 
+
     private <T> TestSuiteBuilder<T> newSuiteBuilder() {
         return new TestSuiteBuilder<T>()
-                .delayer(delayer)
-                .limiter(limiter)
-                .settings(settings)
-                .warmUp(warmUp);
-    }
-
-    public <T> TestAppBuilder addSuite(TestSuiteBuilder<T> builder) {
-        suites.add(builder);
-        return this;
+                .config(new ConfigurationBuilder(configuration));
     }
 
     public <T> TestAppBuilder createSuite(Consumer<TestSuiteBuilder<T>> consumer) {
@@ -209,6 +138,12 @@ public class TestAppBuilder {
 
         return addSuite(builder);
     }
+
+    public <T> TestAppBuilder addSuite(TestSuiteBuilder<T> builder) {
+        testSuites.add(builder);
+        return this;
+    }
+
 
     public <T> TestAppBuilder testSuiteObject(T testSuite) {
         return testSuite((Class<T>) testSuite.getClass(), () -> testSuite);
@@ -299,14 +234,14 @@ public class TestAppBuilder {
 
     public TestApp build() {
         Objects.requireNonNull(name,     "name is null");
-        Preconditions.checkArgument(!suites.isEmpty(), "No test suites found");
+        Preconditions.checkArgument(!testSuites.isEmpty(), "No test suites found");
 
         WorkerPool pool = new WorkerPool();
-        Environment env = new Environment(sinks, watchers, () -> delayer, limiter, barrier);
-        List<TestSuite<?>> suites = this.suites.stream()
-                .map(b -> b.build(env))
+        Configuration configuration = this.configuration.build();
+        List<TestSuite<?>> suites = this.testSuites.stream()
+                .map(TestSuiteBuilder::build)
                 .collect(Collectors.toList());
 
-        return new TestApp(name, pool, env, suites);
+        return new TestApp(name, pool, configuration, suites, sinks, watchers);
     }
 }

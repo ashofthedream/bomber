@@ -28,6 +28,7 @@ public interface Sink {
 
     /**
      * Invokes before test case run
+     *
      * @param timestamp test case start time
      * @param stage     stage
      * @param testSuite test suite name

@@ -36,14 +36,15 @@ public class ExampleBuilderTestApp {
 
         new TestAppBuilder()
                 .name("example")
-                .settings(settings -> settings.setThreadsCount(2).setSeconds(3))
-                .limiter(() -> Limiter.withRate(10, 1))
+                .config(env -> env
+                        .settings(settings -> settings.setThreadsCount(2).setSeconds(3))
+                        .limiter(() -> Limiter.withRate(10, 1))
+                        .barrier(barrier))
                 // log all times to console via log4j and HdrHistogram
 //                .sink(new Log4jSink())
                 .sink(new HistogramTimelineSink(ChronoUnit.SECONDS, new HistogramTimelinePrintStreamPrinter()))
 //                .sink(new HistogramSink())
                 .watcher(1000, new Log4jWatcher())
-                .barrier(barrier)
 
                 // add example test suite via static init method
                 .createSuite(ExampleBuilderTestApp::createUserControllerSuite, webClient)

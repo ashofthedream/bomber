@@ -36,7 +36,7 @@ public class BomberAppConfiguration {
 //                .sink(new Log4jSink())
                 .sink(new HistogramTimelineSink(ChronoUnit.SECONDS, new HistogramTimelinePrintStreamPrinter()))
                 .sink(new HistogramSink())
-                .barrier(barrier)
+                .config(env -> env.barrier(barrier))
                 .watcher(1000, new Log4jWatcher())
                 .build();
     }

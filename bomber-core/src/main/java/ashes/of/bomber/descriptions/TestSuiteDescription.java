@@ -1,20 +1,14 @@
 package ashes.of.bomber.descriptions;
 
-import ashes.of.bomber.flight.Settings;
-
 import java.util.List;
 
 public class TestSuiteDescription {
     private final String name;
     private final List<TestCaseDescription> testCases;
-    private final Settings settings;
-    private final Settings warmUp;
 
-    public TestSuiteDescription(String name, List<TestCaseDescription> testCases, Settings settings, Settings warmUp) {
+    public TestSuiteDescription(String name, List<TestCaseDescription> testCases) {
         this.name = name;
         this.testCases = testCases;
-        this.settings = settings;
-        this.warmUp = warmUp;
     }
 
     public String getName() {
@@ -23,13 +17,5 @@ public class TestSuiteDescription {
 
     public List<TestCaseDescription> getTestCases() {
         return testCases;
-    }
-
-    public Settings getSettings() {
-        return settings;
-    }
-
-    public Settings getWarmUp() {
-        return warmUp;
     }
 }

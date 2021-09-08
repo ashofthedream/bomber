@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
+@Target({ElementType.TYPE, ElementType.METHOD})
 public @interface Delay {
 
     /**

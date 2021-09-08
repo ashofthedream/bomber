@@ -1,7 +1,6 @@
 package ashes.of.bomber.runner;
 
 import ashes.of.bomber.flight.Iteration;
-import ashes.of.bomber.flight.Settings;
 import ashes.of.bomber.methods.LifeCycleHolder;
 import ashes.of.bomber.methods.LifeCycleMethod;
 import org.apache.logging.log4j.LogManager;
@@ -17,7 +16,7 @@ public class TestSuite<T> {
     private static final Logger log = LogManager.getLogger();
 
     private final String name;
-    private final Environment env;
+    private final Configuration configuration;
     private final Supplier<T> instance;
     private final List<LifeCycleHolder<T>> beforeSuite;
     private final List<LifeCycleHolder<T>> beforeCase;
@@ -26,11 +25,9 @@ public class TestSuite<T> {
     private final List<LifeCycleHolder<T>> afterEach;
     private final List<LifeCycleHolder<T>> afterCase;
     private final List<LifeCycleHolder<T>> afterSuite;
-    private final Settings settings;
-    private final Settings warmUp;
 
-
-    public TestSuite(String name, Environment env,
+    public TestSuite(String name,
+                     Configuration configuration,
                      Supplier<T> instance,
                      List<LifeCycleHolder<T>> beforeSuite,
                      List<LifeCycleHolder<T>> beforeCase,
@@ -38,10 +35,9 @@ public class TestSuite<T> {
                      Map<String, TestCase<T>> testCases,
                      List<LifeCycleHolder<T>> afterEach,
                      List<LifeCycleHolder<T>> afterCase,
-                     List<LifeCycleHolder<T>> afterSuite,
-                     Settings settings, Settings warmUp) {
+                     List<LifeCycleHolder<T>> afterSuite) {
         this.name = name;
-        this.env = env;
+        this.configuration = configuration;
         this.instance = instance;
         this.beforeSuite = beforeSuite;
         this.beforeCase = beforeCase;
@@ -50,36 +46,38 @@ public class TestSuite<T> {
         this.afterEach = afterEach;
         this.afterCase = afterCase;
         this.afterSuite = afterSuite;
-        this.settings = settings;
-        this.warmUp = warmUp;
     }
-
 
     public String getName() {
         return name;
-    }
-
-    public Environment getEnv() {
-        return env;
     }
 
     public Object getInstance() {
         return instance.get();
     }
 
-    public Map<String, TestCase<T>> testCases() {
-        return testCases;
+    public Collection<TestCase<T>> getTestCases() {
+        return testCases.values();
     }
 
-    public TestCase<T> getTestCase(String testCase) {
-        return testCases.computeIfAbsent(testCase,
-                k -> { throw new IllegalArgumentException("Test suite " + name + " doesn't contain test case " + k); });
+    public TestCase<T> getTestCase(String name) {
+        var testCase = testCases.get(name);
+        if (testCase == null)
+            throw new IllegalArgumentException("Test suite " + this.name + " doesn't contain test case " + name);
+
+        return testCase;
     }
 
     public void resetBeforeAndAfterSuite() {
         Stream.concat(beforeSuite.stream(), afterSuite.stream())
                 .forEach(LifeCycleHolder::reset);
     }
+
+    public void resetBeforeAndAfterCase() {
+        Stream.concat(beforeCase.stream(), afterCase.stream())
+                .forEach(LifeCycleHolder::reset);
+    }
+
 
     public void beforeSuite(T object) {
         beforeSuite.forEach(l -> beforeSuite(object, l));
@@ -95,11 +93,6 @@ public class TestSuite<T> {
     }
 
 
-    public void resetBeforeAndAfterCase() {
-        Stream.concat(beforeCase.stream(), afterCase.stream())
-                .forEach(LifeCycleHolder::reset);
-    }
-
     public void beforeCase(T object) {
         beforeCase.forEach(l -> beforeCase(object, l));
     }
@@ -112,6 +105,7 @@ public class TestSuite<T> {
             log.warn("Call beforeCase instance: {}, failed", object, th);
         }
     }    
+
 
     public void beforeEach(Iteration it, T object) {
         beforeEach.forEach(method -> beforeEach(it, object, method));
@@ -140,6 +134,7 @@ public class TestSuite<T> {
         }
     }
 
+
     public void afterCase(T object) {
         afterCase.forEach(method -> afterCase(object, method));
     }
@@ -152,7 +147,8 @@ public class TestSuite<T> {
             log.warn("Call afterCase instance: {}, failed", object, th);
         }
     }
-    
+
+
     public void afterSuite(T object) {
         afterSuite.forEach(method -> afterSuite(object, method));
     }
@@ -164,17 +160,5 @@ public class TestSuite<T> {
         } catch (Throwable th) {
             log.warn("Call afterSuite instance: {}, failed", object, th);
         }
-    }
-
-    public Settings getWarmUp() {
-        return warmUp;
-    }
-
-    public Settings getSettings() {
-        return settings;
-    }
-
-    public Collection<TestCase<T>> getTestCases() {
-        return testCases.values();
     }
 }

@@ -6,16 +6,12 @@ import ashes.of.bomber.annotations.AfterTestSuite;
 import ashes.of.bomber.annotations.BeforeEachIteration;
 import ashes.of.bomber.annotations.BeforeTestCase;
 import ashes.of.bomber.annotations.BeforeTestSuite;
-import ashes.of.bomber.annotations.Delay;
 import ashes.of.bomber.annotations.LoadTest;
 import ashes.of.bomber.annotations.LoadTestCase;
 import ashes.of.bomber.annotations.LoadTestSuite;
-import ashes.of.bomber.annotations.Throttle;
 import ashes.of.bomber.annotations.WarmUp;
 import ashes.of.bomber.flight.Settings;
-import ashes.of.bomber.delayer.RandomDelayer;
 import ashes.of.bomber.flight.SettingsBuilder;
-import ashes.of.bomber.limiter.Limiter;
 import ashes.of.bomber.methods.TestCaseWithTools;
 import ashes.of.bomber.tools.Tools;
 import com.google.common.base.Strings;
@@ -47,27 +43,7 @@ public class TestSuiteProcessor<T> {
 
     public TestSuiteBuilder<T> process(Class<T> cls, Supplier<T> supplier) {
         log.debug("start process suite: {}", cls);
-        WarmUp warmUp = cls.getAnnotation(WarmUp.class);
-        if (warmUp != null)
-            b.warmUp(settings(warmUp));
-
-        LoadTest loadTest = cls.getAnnotation(LoadTest.class);
-        if (loadTest != null)
-            b.settings(settings(loadTest));
-
-        Throttle throttle = cls.getAnnotation(Throttle.class);
-        if (throttle != null) {
-            Supplier<Limiter> limiter = () -> Limiter.withRate(throttle.threshold(), throttle.time(), throttle.timeUnit());
-            if (throttle.shared()) {
-                b.limiter(limiter.get());
-            } else {
-                b.limiter(limiter);
-            }
-        }
-
-        Delay delay = cls.getAnnotation(Delay.class);
-        if (delay != null)
-            b.delayer(new RandomDelayer(delay.min(), delay.max(), delay.timeUnit()));
+        b.config(config -> config.process(cls));
 
         LoadTestSuite suite = cls.getAnnotation(LoadTestSuite.class);
         if (suite != null) {
@@ -95,11 +71,11 @@ public class TestSuiteProcessor<T> {
                 BeforeTestSuite beforeSuite = method.getAnnotation(BeforeTestSuite.class);
                 if (beforeSuite != null)
                     buildBeforeSuite(method, beforeSuite);
-                
+
                 BeforeTestCase beforeCase = method.getAnnotation(BeforeTestCase.class);
                 if (beforeCase != null)
                     buildBeforeCase(method, beforeCase);
-                
+
                 BeforeEachIteration beforeEach = method.getAnnotation(BeforeEachIteration.class);
                 if (beforeEach != null)
                     buildBeforeEach(method, beforeEach);
@@ -115,7 +91,7 @@ public class TestSuiteProcessor<T> {
                 AfterTestCase afterCase = method.getAnnotation(AfterTestCase.class);
                 if (afterCase != null)
                     buildAfterCase(method, afterCase);
-                
+
                 AfterTestSuite afterSuite = method.getAnnotation(AfterTestSuite.class);
                 if (afterSuite != null)
                     buildAfterSuite(method, afterSuite);
@@ -127,25 +103,6 @@ public class TestSuiteProcessor<T> {
 
         return b;
     }
-
-    private Settings settings(LoadTest ann) {
-        return new SettingsBuilder()
-                .setTime(ann.time(), ann.timeUnit())
-                .setThreadsCount(ann.threads())
-                .setThreadIterationsCount(ann.threadIterations())
-                .setTotalIterationsCount(ann.totalIterations())
-                .build();
-    }
-
-    private Settings settings(WarmUp ann) {
-        return new SettingsBuilder()
-                .setTime(ann.time(), ann.timeUnit())
-                .setThreadsCount(ann.threads())
-                .setThreadIterationsCount(ann.threadIterations())
-                .setTotalIterationsCount(ann.totalIterations())
-                .build();
-    }
-
 
     private void buildBeforeSuite(Method method, BeforeTestSuite beforeAll) throws Exception {
         log.debug("Found @BeforeTestSuite method: {}", method.getName());

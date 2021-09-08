@@ -1,17 +1,12 @@
 package ashes.of.bomber.builder;
 
-import ashes.of.bomber.flight.Settings;
-import ashes.of.bomber.delayer.Delayer;
-import ashes.of.bomber.delayer.NoDelayDelayer;
-import ashes.of.bomber.flight.SettingsBuilder;
-import ashes.of.bomber.limiter.Limiter;
 import ashes.of.bomber.methods.LifeCycleHolder;
 import ashes.of.bomber.methods.LifeCycleMethod;
 import ashes.of.bomber.methods.TestCaseWithTools;
 import ashes.of.bomber.methods.TestCaseWithoutTools;
-import ashes.of.bomber.runner.Environment;
 import ashes.of.bomber.runner.TestCase;
 import ashes.of.bomber.runner.TestSuite;
+import com.google.common.base.Preconditions;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -24,9 +19,6 @@ import java.util.function.Supplier;
 
 public class TestSuiteBuilder<T> {
 
-    private Settings warmUp = SettingsBuilder.disabled();
-    private Settings settings = new SettingsBuilder().build();
-
     private final List<LifeCycleHolder<T>> beforeSuite = new ArrayList<>();
     private final List<LifeCycleHolder<T>> beforeCase = new ArrayList<>();
     private final List<LifeCycleHolder<T>> beforeEach = new ArrayList<>();
@@ -35,9 +27,8 @@ public class TestSuiteBuilder<T> {
     private final List<LifeCycleHolder<T>> afterCase = new ArrayList<>();
     private final List<LifeCycleHolder<T>> afterSuite = new ArrayList<>();
 
-    private Delayer delayer = new NoDelayDelayer();
-    private Supplier<Limiter> limiter = Limiter::alwaysPermit;
     private String name;
+    private ConfigurationBuilder config = new ConfigurationBuilder();
     private Supplier<T> instance = () -> null;
 
     public TestSuiteBuilder<T> name(String name) {
@@ -45,57 +36,13 @@ public class TestSuiteBuilder<T> {
         return this;
     }
 
-
-    public TestSuiteBuilder<T> warmUp(Settings settings) {
-        Objects.requireNonNull(settings, "settings is null");
-        this.warmUp = settings;
+    public TestSuiteBuilder<T> config(Consumer<ConfigurationBuilder> consumer) {
+        consumer.accept(this.config);
         return this;
     }
 
-    public TestSuiteBuilder<T> warmUp(Consumer<Settings> settings) {
-        settings.accept(warmUp);
-        return this;
-    }
-
-
-    public TestSuiteBuilder<T> settings(Settings settings) {
-        Objects.requireNonNull(settings, "settings is null");
-        this.settings = settings;
-        return this;
-    }
-
-    public TestSuiteBuilder<T> settings(Consumer<SettingsBuilder> settings) {
-        SettingsBuilder builder = new SettingsBuilder();
-        settings.accept(builder);
-        return settings(builder.build());
-    }
-
-    public TestSuiteBuilder<T> delayer(Delayer delayer) {
-        Objects.requireNonNull(delayer, "delayer is null");
-        this.delayer = delayer;
-        return this;
-    }
-
-    /**
-     * Adds limiter which will be shared across all workers threads
-     *
-     * @param limiter shared limiter
-     * @return builder
-     */
-    public TestSuiteBuilder<T> limiter(Limiter limiter) {
-        Objects.requireNonNull(limiter, "limiter is null");
-        return limiter(() -> limiter);
-    }
-
-    /**
-     * Adds limiter which will be created for each worker thread
-     * note: it may be shared if supplier will return same instance
-     *
-     * @param limiter shared request limiter
-     * @return builder
-     */
-    public TestSuiteBuilder<T> limiter(Supplier<Limiter> limiter) {
-        this.limiter = limiter;
+    public TestSuiteBuilder<T> config(ConfigurationBuilder config) {
+        this.config = config;
         return this;
     }
 
@@ -110,6 +57,7 @@ public class TestSuiteBuilder<T> {
         Objects.requireNonNull(object, "suite is null");
         return instance(() -> object);
     }
+
 
 
     public TestSuiteBuilder<T> beforeSuite(boolean onlyOnce, LifeCycleMethod<T> before) {
@@ -142,14 +90,33 @@ public class TestSuiteBuilder<T> {
         return this;
     }
 
-    TestSuiteBuilder<T> testCase(String name, boolean async, TestCaseWithTools<T> test) {
-        Objects.requireNonNull(name, "name is null");
-        this.testCases.put(name, new TestCase<>(name, async, test, () -> warmUp, () -> settings));
+
+    public TestSuiteBuilder<T> testCase(Consumer<TestCaseBuilder<T>> consumer) {
+        var b = new TestCaseBuilder<T>()
+                .config(new ConfigurationBuilder(this.config));
+
+        consumer.accept(b);
+        return testCase(b);
+    }
+
+    public TestSuiteBuilder<T> testCase(TestCaseBuilder<T> builder) {
+        Objects.requireNonNull(name, "builder is null");
+        var testCase = builder.build();
+        this.testCases.put(testCase.getName(), testCase);
         return this;
     }
 
-    TestSuiteBuilder<T> testCase(String name, boolean async, TestCaseWithoutTools<T> test) {
+    public TestSuiteBuilder<T> testCase(String name, boolean async, TestCaseWithTools<T> test) {
         Objects.requireNonNull(name, "name is null");
+        Objects.requireNonNull(test, "test is null");
+        return testCase(new TestCaseBuilder<T>()
+                .name(name)
+                .async(async)
+                .config(new ConfigurationBuilder(config))
+                .test(test));
+    }
+
+    public TestSuiteBuilder<T> testCase(String name, boolean async, TestCaseWithoutTools<T> test) {
         return testCase(name, async, (tc, tools) -> test.run(tc));
     }
 
@@ -195,15 +162,12 @@ public class TestSuiteBuilder<T> {
     }
 
 
-    public TestSuite<T> build(Environment app) {
+    public TestSuite<T> build() {
         Objects.requireNonNull(name,     "name is null");
-        Objects.requireNonNull(instance, "instance is null");
         // todo it may be useful, but not today
-        // Preconditions.checkArgument(!testCases.isEmpty(), "No test cases found");
+        Preconditions.checkArgument(!testCases.isEmpty(), "No test cases found");
 
-        Environment env = new Environment(app.getSinks(), app.getWatchers(), () -> delayer, limiter, app.getBarrier());
-
-        return new TestSuite<>(name, env, instance, beforeSuite, beforeCase, beforeEach, testCases, afterEach, afterCase, afterSuite, settings, warmUp);
+        return new TestSuite<>(name, config.build(), instance, beforeSuite, beforeCase, beforeEach, testCases, afterEach, afterCase, afterSuite);
     }
 }
 

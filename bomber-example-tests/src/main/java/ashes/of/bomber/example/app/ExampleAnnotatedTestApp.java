@@ -55,7 +55,7 @@ public class ExampleAnnotatedTestApp {
                 .sink(new HistogramTimelineSink(ChronoUnit.SECONDS, new HistogramTimelinePrintStreamPrinter()))
                 .sink(new HistogramSink())
                 .watcher(1000, new Log4jWatcher())
-                .barrier(barrier)
+                .config(env -> env.barrier(barrier))
                 .build()
                 .start();
 

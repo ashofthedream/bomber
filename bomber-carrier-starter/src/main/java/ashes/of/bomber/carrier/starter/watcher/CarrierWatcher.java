@@ -1,6 +1,6 @@
 package ashes.of.bomber.carrier.starter.watcher;
 
-import ashes.of.bomber.carrier.starter.services.AtcService;
+import ashes.of.bomber.carrier.starter.services.CarrierService;
 import ashes.of.bomber.descriptions.TestAppDescription;
 import ashes.of.bomber.watcher.Watcher;
 import org.springframework.stereotype.Component;
@@ -8,10 +8,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class CarrierWatcher implements Watcher {
 
-    private final AtcService atcService;
+    private final CarrierService carrierService;
 
-    public CarrierWatcher(AtcService atcService) {
-        this.atcService = atcService;
+    public CarrierWatcher(CarrierService carrierService) {
+        this.carrierService = carrierService;
     }
 
     @Override

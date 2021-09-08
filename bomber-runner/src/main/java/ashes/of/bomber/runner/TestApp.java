@@ -1,5 +1,6 @@
 package ashes.of.bomber.runner;
 
+import ashes.of.bomber.descriptions.ConfigurationDescription;
 import ashes.of.bomber.flight.Settings;
 import ashes.of.bomber.descriptions.TestAppStateDescription;
 import ashes.of.bomber.descriptions.TestAppDescription;
@@ -11,6 +12,8 @@ import ashes.of.bomber.flight.FlightPlan;
 import ashes.of.bomber.flight.TestCasePlan;
 import ashes.of.bomber.flight.TestSuitePlan;
 import ashes.of.bomber.flight.TestSuiteReport;
+import ashes.of.bomber.sink.AsyncSink;
+import ashes.of.bomber.sink.MultiSink;
 import ashes.of.bomber.sink.Sink;
 import ashes.of.bomber.threads.BomberThreadFactory;
 import ashes.of.bomber.watcher.Watcher;
@@ -41,8 +44,10 @@ public class TestApp {
 
     private final String name;
     private final WorkerPool pool;
-    private final Environment env;
+    private final Configuration configuration;
     private final List<TestSuite<?>> testSuites;
+    private final List<Sink> sinks;
+    private final List<WatcherConfig> watchers;
 
     @Nullable
     private volatile FlightPlan plan;
@@ -50,11 +55,13 @@ public class TestApp {
     private volatile RunnerState state = IDLE;
     private volatile CountDownLatch endLatch = new CountDownLatch(1);
 
-    public TestApp(String name, WorkerPool pool, Environment env, List<TestSuite<?>> testSuites) {
+    public TestApp(String name, WorkerPool pool, Configuration configuration, List<TestSuite<?>> testSuites, List<Sink> sinks, List<WatcherConfig> watchers) {
         this.name = name;
         this.pool = pool;
-        this.env = env;
+        this.configuration = configuration;
         this.testSuites = testSuites;
+        this.sinks = sinks;
+        this.watchers = watchers;
     }
 
     public String getName() {
@@ -67,11 +74,11 @@ public class TestApp {
 
 
     public void add(Sink sink) {
-        env.getSinks().add(sink);
+        sinks.add(sink);
     }
 
     public void add(long ms, Watcher watcher) {
-        env.getWatchers().add(new WatcherConfig(ms, TimeUnit.MILLISECONDS, watcher));
+        watchers.add(new WatcherConfig(ms, TimeUnit.MILLISECONDS, watcher));
     }
 
     void add(Duration duration, Watcher watcher) {
@@ -89,14 +96,17 @@ public class TestApp {
         var suites = getTestSuites().stream()
                 .map(testSuite -> {
                     List<TestCasePlan> testCases = testSuite.getTestCases().stream()
-                            .map(testCase -> new TestCasePlan(testCase.getName(), testSuite.getWarmUp(), testSuite.getSettings()))
+                            .map(testCase -> new TestCasePlan(
+                                    testCase.getName(),
+                                    testCase.getConfiguration().getWarmUp(),
+                                    testCase.getConfiguration().getSettings()))
                             .collect(Collectors.toList());
 
                     return new TestSuitePlan(testSuite.getName(), testCases);
                 })
                 .collect(Collectors.toList());
 
-        var plan = new FlightPlan(System.currentTimeMillis() - 1630454400, suites);
+        var plan = new FlightPlan(System.currentTimeMillis() - 1630454400000L, suites);
         return start(plan);
     }
 
@@ -126,8 +136,7 @@ public class TestApp {
 
         ScheduledExecutorService watcherEx = Executors.newSingleThreadScheduledExecutor(BomberThreadFactory.watcher());
 
-        List<ScheduledFuture<?>> wfs = env.getWatchers()
-                .stream()
+        List<ScheduledFuture<?>> wfs = watchers.stream()
                 .map(config -> {
                     Watcher watcher = config.getWatcher();
                     return watcherEx.scheduleAtFixedRate(() -> watcher.watch(getDescription()), 0, config.getPeriod(), config.getTimeUnit());
@@ -136,17 +145,18 @@ public class TestApp {
 
         Instant startTime = Instant.now();
 
-        env.getWatchers().stream()
+        watchers.stream()
                 .map(WatcherConfig::getWatcher)
                 .forEach(Watcher::startUp);
 
-        env.getSinks()
-                .forEach(sink -> sink.startUp(startTime));
+        Sink sink = new AsyncSink(new MultiSink(sinks));
+
+        sink.startUp(startTime);
 
         List<TestSuiteReport> testSuiteReports = new ArrayList<>();
         try {
             log.debug("init runner");
-            Runner runner = new Runner(pool, env.getSinks());
+            Runner runner = new Runner(pool, sink);
 
             Map<String, TestSuite<?>> suitesByName = testSuites.stream()
                     .collect(Collectors.toMap(TestSuite::getName, suite -> suite));
@@ -171,10 +181,9 @@ public class TestApp {
 
         Instant finishTime = Instant.now();
         log.debug("Shutdown for each sink and watcher");
-        env.getSinks()
-                .forEach(sink -> sink.shutDown(finishTime));
+        sink.shutDown(finishTime);
 
-        env.getWatchers().stream()
+        watchers.stream()
                 .map(WatcherConfig::getWatcher)
                 .forEach(Watcher::shutDown);
 
@@ -241,9 +250,18 @@ public class TestApp {
 
     private TestSuiteDescription toTestSuite(TestSuite<?> suite) {
         List<TestCaseDescription> testCases = suite.getTestCases().stream()
-                .map(testCase -> new TestCaseDescription(testCase.getName(), testCase.isAsync()))
+                .map(this::toTestCase)
                 .collect(Collectors.toList());
 
-        return new TestSuiteDescription(suite.getName(), testCases, suite.getSettings(), suite.getWarmUp());
+        return new TestSuiteDescription(suite.getName(), testCases);
+    }
+
+    private TestCaseDescription toTestCase(TestCase<?> testCase) {
+        return new TestCaseDescription(testCase.getName(),
+                new ConfigurationDescription(
+                        testCase.getConfiguration().getWarmUp(),
+                        testCase.getConfiguration().getSettings()
+                )
+        );
     }
 }

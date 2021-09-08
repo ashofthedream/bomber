@@ -80,8 +80,8 @@ public class Worker {
         ThreadContext.put("testCase", testCase.getName());
         ThreadContext.put("stage", stage.name());
 
-        Limiter limiter = testSuite.getEnv().getLimiter().get();
-        Delayer delayer = testSuite.getEnv().getDelayer().get();
+        Limiter limiter = testCase.getConfiguration().getLimiter().get();
+        Delayer delayer = testCase.getConfiguration().getDelayer().get();
 
         var startLatch = state.getStartLatch();
         startLatch.countDown();

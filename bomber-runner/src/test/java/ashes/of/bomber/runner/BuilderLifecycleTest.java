@@ -2,7 +2,7 @@ package ashes.of.bomber.runner;
 
 import ashes.of.bomber.builder.TestAppBuilder;
 import ashes.of.bomber.builder.TestSuiteBuilder;
-import ashes.of.bomber.flight.Settings;
+import ashes.of.bomber.flight.SettingsBuilder;
 import ashes.of.bomber.tests.AllLifecycleMethodsTest;
 import ashes.of.bomber.tests.Counters;
 import org.apache.logging.log4j.LogManager;
@@ -20,11 +20,12 @@ public class BuilderLifecycleTest extends LifecycleTest {
         TestSuiteBuilder<AllLifecycleMethodsTest> suite = new TestSuiteBuilder<AllLifecycleMethodsTest>()
                 .name("lifecycleAll")
                 .instance(() -> new AllLifecycleMethodsTest(counters))
-                .warmUp(Settings::disabled)
-                .settings(settings -> settings
-                        .seconds(20)
-                        .threadCount(2)
-                        .threadIterations(10))
+                .config(config -> config
+                        .warmUp(SettingsBuilder.disabled())
+                        .settings(settings -> settings
+                                .setSeconds(20)
+                                .setThreadsCount(2)
+                                .setThreadIterationsCount(10)))
                 .beforeSuite(AllLifecycleMethodsTest::beforeSuite)
                 .beforeSuite(true, AllLifecycleMethodsTest::beforeSuiteOnlyOnce)
                 .beforeCase(AllLifecycleMethodsTest::beforeCase)
