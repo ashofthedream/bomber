@@ -8,8 +8,6 @@ import ashes.of.bomber.annotations.BeforeTestCase;
 import ashes.of.bomber.annotations.BeforeTestSuite;
 import ashes.of.bomber.annotations.LoadTestCase;
 import ashes.of.bomber.annotations.LoadTestSuite;
-import ashes.of.bomber.methods.TestCaseMethod;
-import ashes.of.bomber.tools.Tools;
 import com.google.common.base.Strings;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -18,40 +16,35 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
 
 public class TestSuiteProcessor<T> {
     private static final Logger log = LogManager.getLogger();
 
-    private final TestSuiteBuilder<T> b;
+    private final TestSuiteBuilder<T> builder;
 
-    public TestSuiteProcessor(TestSuiteBuilder<T> b) {
-        this.b = b;
-    }
-
-    public TestSuiteProcessor() {
-        this.b = new TestSuiteBuilder<>();
+    public TestSuiteProcessor(TestSuiteBuilder<T> builder) {
+        this.builder = builder;
     }
 
     public TestSuiteBuilder<T> process(Class<T> cls, Supplier<T> supplier) {
         log.debug("Start process test suite: {}", cls);
-        b.config(config -> config.process(cls));
+        builder.config(config -> config.process(cls));
 
         LoadTestSuite suite = cls.getAnnotation(LoadTestSuite.class);
         if (suite != null) {
-            b. name(!Strings.isNullOrEmpty(suite.name()) ? suite.name() : cls.getSimpleName());
+            builder. name(!Strings.isNullOrEmpty(suite.name()) ? suite.name() : cls.getSimpleName());
 
             if (suite.shared()) {
-                b.sharedInstance(supplier.get());
+                builder.sharedInstance(supplier.get());
             } else {
-                b.instance(supplier);
+                builder.instance(supplier);
             }
 
         } else {
             // todo may be user should always annotate class with @LoadTestSuite
-            b.name(cls.getSimpleName());
+            builder.name(cls.getSimpleName());
         }
 
 
@@ -96,104 +89,54 @@ public class TestSuiteProcessor<T> {
             }
         }
 
-        return b;
+        return builder;
+    }
+
+    private void buildTestCase(Method method, LoadTestCase testCase) {
+        if (testCase.disabled()) {
+            log.debug("Test case: {} is disabled", method.getName());
+            return;
+        }
+
+        builder.testCase(builder -> {
+            new TestCaseProcessor<T>(builder)
+                    .process(method, testCase);
+        });
     }
 
     private void buildBeforeSuite(Method method, BeforeTestSuite beforeAll) throws Exception {
         log.debug("Found @BeforeTestSuite method: {}", method.getName());
         MethodHandle mh = MethodHandles.lookup().unreflect(method);
-        b.beforeSuite(beforeAll.onlyOnce(), instance -> mh.bindTo(instance).invoke());
+        builder.beforeSuite(beforeAll.onlyOnce(), instance -> mh.bindTo(instance).invoke());
     }
 
     private void buildBeforeCase(Method method, BeforeTestCase beforeAll) throws Exception {
         log.debug("Found @BeforeTestCase method: {}", method.getName());
         MethodHandle mh = MethodHandles.lookup().unreflect(method);
-        b.beforeCase(beforeAll.onlyOnce(), instance -> mh.bindTo(instance).invoke());
+        builder.beforeCase(beforeAll.onlyOnce(), instance -> mh.bindTo(instance).invoke());
     }
     
     private void buildBeforeEach(Method method, BeforeEachIteration beforeEach) throws Exception {
         log.debug("Found @BeforeEachIteration method: {}", method.getName());
         MethodHandle mh = MethodHandles.lookup().unreflect(method);
-        b.beforeEach(instance -> mh.bindTo(instance).invoke());
-    }
-
-    private void buildTestCase(Method method, LoadTestCase loadTest) {
-        String value = loadTest.value();
-        String name = !value.isEmpty() ? value : method.getName();
-        log.debug("Found @LoadTestCase method: {}, name: {}, disabled: {}", method.getName(), name, loadTest.disabled());
-
-        if (loadTest.disabled())
-            return;
-
-        Class<?>[] types = method.getParameterTypes();
-        if (types.length > 1) {
-            throw new RuntimeException("Build test case: " + name + " failed. Only one parameter with type: " + Tools.class.getName() + " is allowed)");
-        }
-
-        for (Class<?> type : types) {
-            if (!type.equals(Tools.class))
-                throw new RuntimeException("Build test case: " + name + " failed. Not allowed parameter: " + type.getName()  + ", only " + Tools.class.getName() + " is allowed");
-        }
-
-        b.testCase(builder -> builder
-                .name(name)
-                .async(loadTest.async())
-                .config(config -> config.process(method))
-                .test(buildTestCaseMethod(method))
-        );
-    }
-
-    private TestCaseMethod<T> buildTestCaseMethod(Method method) {
-        try {
-            MethodHandle mh = MethodHandles.lookup().unreflect(method);
-            AtomicReference<TestCaseMethod<T>> ref = new AtomicReference<>();
-            if (method.getParameterTypes().length == 0) {
-                return (suite, tools) -> {
-                    TestCaseMethod<T> proxy = ref.get();
-                    if (proxy == null) {
-                        log.debug("Init test case method: {} proxy", method.getName());
-                        MethodHandle bind = mh.bindTo(suite);
-
-                        proxy = (o, t) -> bind.invoke();
-                        ref.set(proxy);
-                    }
-
-                    proxy.run(suite, tools);
-                };
-            } else {
-                return (suite, tools) -> {
-                    TestCaseMethod<T> proxy = ref.get();
-                    if (proxy == null) {
-                        log.debug("Init test case method: {} proxy", method.getName());
-                        MethodHandle bind = mh.bindTo(suite);
-
-                        proxy = (o, t) -> bind.invokeWithArguments(t);
-                        ref.set(proxy);
-                    }
-
-                    proxy.run(suite, tools);
-                };
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        builder.beforeEach(instance -> mh.bindTo(instance).invoke());
     }
 
     private void buildAfterEach(Method method, AfterEachIteration afterEach) throws Exception {
         log.debug("Found @AfterEachIteration method: {}", method.getName());
         MethodHandle mh = MethodHandles.lookup().unreflect(method);
-        b.afterEach(instance -> mh.bindTo(instance).invoke());
+        builder.afterEach(instance -> mh.bindTo(instance).invoke());
     }
 
     private void buildAfterCase(Method method, AfterTestCase afterAll) throws Exception {
         log.debug("Found @AfterTestCase method: {}", method.getName());
         MethodHandle mh = MethodHandles.lookup().unreflect(method);
-        b.afterCase(afterAll.onlyOnce(), instance -> mh.bindTo(instance).invoke());
+        builder.afterCase(afterAll.onlyOnce(), instance -> mh.bindTo(instance).invoke());
     }
 
     private void buildAfterSuite(Method method, AfterTestSuite afterAll) throws Exception {
         log.debug("Found @AfterTestSuite method: {}", method.getName());
         MethodHandle mh = MethodHandles.lookup().unreflect(method);
-        b.afterSuite(afterAll.onlyOnce(), instance -> mh.bindTo(instance).invoke());
+        builder.afterSuite(afterAll.onlyOnce(), instance -> mh.bindTo(instance).invoke());
     }
 }

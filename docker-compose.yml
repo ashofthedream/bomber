@@ -1,8 +1,71 @@
-version: "3.7"
+version: "3.9"
 services:
-  boomber-zookeeper:
-    image: "zookeeper:3.4.14"
+  bomber-zookeeper:
+    container_name: bomber-zookeeper
+    image: zookeeper:3.7.0
     ports:
       - "2181:2181"
       - "2888:2888"
       - "3888:3888"
+
+  bomber-example-app:
+    build:
+      context: ./bomber-example-app
+      dockerfile: Dockerfile
+    container_name: bomber-example
+    image: bomber/bomber-example-app
+    ports:
+      - "8080:8080"
+
+  bomber-atc-app:
+    build:
+      context: ./bomber-atc-app
+      dockerfile: Dockerfile
+    container_name: bomber-atc
+    depends_on:
+      - bomber-zookeeper
+    image: bomber/bomber-atc-app:latest
+    ports:
+      - "8088:8088"
+    environment:
+      ZOOKEEPER_URL: "bomber-zookeeper:2181"
+
+  bomber-atc-frontend:
+    build:
+      context: ./bomber-atc-frontend
+      dockerfile: Dockerfile
+    container_name: bomber-frontend
+    image: bomber/bomber-atc-app:latest
+    ports:
+      - "8080:80"
+
+  bomber-carrier-app-9001:
+    build:
+      context: ./bomber-example-carrier-app
+      dockerfile: Dockerfile
+    container_name: bomber-carrier-9001
+    depends_on:
+      - bomber-zookeeper
+      - bomber-atc-app
+      - bomber-example-app
+    image: bomber/bomber-example-carrier-app
+    ports:
+      - "9001:9000"
+    environment:
+      ZOOKEEPER_URL: "bomber-zookeeper:2181"
+      EXAMPLE_APP_URL: "bomber-example:8080"
+
+  bomber-carrier-app-9002:
+    build:
+      context: ./bomber-example-carrier-app
+      dockerfile: Dockerfile
+    container_name: bomber-carrier-9002
+    depends_on:
+      - bomber-zookeeper
+      - bomber-atc-app
+    image: bomber/bomber-example-carrier-app
+    ports:
+      - "9002:9000"
+    environment:
+      ZOOKEEPER_URL: "bomber-zookeeper:2181"
+      EXAMPLE_APP_URL: "bomber-example:8080"

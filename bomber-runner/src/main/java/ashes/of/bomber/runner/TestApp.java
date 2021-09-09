@@ -156,22 +156,10 @@ public class TestApp {
         List<TestSuiteReport> testSuiteReports = new ArrayList<>();
         try {
             log.debug("init runner");
-            Runner runner = new Runner(pool, sink);
-
-            Map<String, TestSuite<?>> suitesByName = testSuites.stream()
-                    .collect(Collectors.toMap(TestSuite::getName, suite -> suite));
-
-            flightPlan.getTestSuites()
-                    .forEach(plan -> {
-                        log.debug("Try to run test suite: {}", plan.getName());
-                        TestSuite<Object> testSuite = (TestSuite<Object>) suitesByName.get(plan.getName());
-
-                        RunnerState state = new RunnerState(this::isStopped);
-                        this.state = state;
-                        var report = runner.runTestSuite(state, plan, testSuite);
-
-                        testSuiteReports.add(report);
-                    });
+            Runner runner = new Runner(pool, sink, testSuites);
+            RunnerState state = new RunnerState(this::isStopped);
+            this.state = state;
+            testSuiteReports = runner.runTestApp(state, flightPlan);
 
             log.debug("All test suites finished, state -> Idle ");
             state = IDLE;

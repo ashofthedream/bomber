@@ -1,6 +1,6 @@
 spring:
   application:
-    name: bomber-atc
+    name: bomber-carrier
   cloud:
     zookeeper:
       connect-string: ${ZOOKEEPER_URL:localhost:2181}

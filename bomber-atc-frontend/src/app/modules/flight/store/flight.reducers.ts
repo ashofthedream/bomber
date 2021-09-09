@@ -8,31 +8,31 @@ export const flightReducers = (state = initialFlightState, action: FlightActions
     case FlightAction.GetActiveFlightSuccess:
 
       let onlyHistograms = [];
-      console.log(action.flight.data);
-      Object.values(action.flight.data)
-          .forEach((data: FlightData) => {
+      if (action.flight) {
+        console.log(action.flight.data);
+        Object.values(action.flight.data)
+            .forEach((data: FlightData) => {
 
-            const hrec = data.records
-                .filter(record => record.type === 'TEST_CASE_HISTOGRAM');
+              const hrec = data.records
+                  .filter(record => record.type === 'TEST_CASE_HISTOGRAM');
 
-            let records: FlightRecord[] = [];
-            for (let i = 0; i < hrec.length; i ++) {
-              const record = hrec[i];
-              if (records.length === 0) {
-                records.push(record);
-                continue;
+              let records: FlightRecord[] = [];
+              for (let i = 0; i < hrec.length; i ++) {
+                const record = hrec[i];
+                if (records.length === 0) {
+                  records.push(record);
+                  continue;
+                }
+
+                let last = records[records.length - 1];
+                if (last.testSuite === record.testSuite && last.testCase === record.testCase) {
+                  records[records.length - 1] = record;
+                } else {
+                  records.push(record);
+                }
               }
 
-              let last = records[records.length - 1];
-              if (last.testSuite === record.testSuite && last.testCase === record.testCase) {
-                records[records.length - 1] = record;
-              }
-              else {
-                records.push(record);
-              }
-            }
-
-            records.forEach(record =>  {
+              records.forEach(record => {
                 record.histograms.forEach(h => {
                   onlyHistograms.push({
                     testSuite: record.testSuite,
@@ -42,11 +42,11 @@ export const flightReducers = (state = initialFlightState, action: FlightActions
                     values: h.percentiles
                   });
                 });
+              });
+
+              console.log(onlyHistograms);
             });
-
-            console.log(onlyHistograms);
-          });
-
+      }
       return {
         ...state,
         active: action.flight,

@@ -1,5 +1,6 @@
 package ashes.of.bomber.runner;
 
+import ashes.of.bomber.flight.FlightPlan;
 import ashes.of.bomber.flight.Settings;
 import ashes.of.bomber.flight.Stage;
 import ashes.of.bomber.flight.TestCasePlan;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.CountDownLatch;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static ashes.of.bomber.flight.Stage.IDLE;
@@ -28,12 +30,33 @@ public class Runner {
 
     private final WorkerPool pool;
     private final Sink sink;
+    private final List<TestSuite<?>> testSuites;
 
     private final Map<String, Worker> workers = new ConcurrentSkipListMap<>();
 
-    public Runner(WorkerPool pool, Sink sink) {
+    public Runner(WorkerPool pool, Sink sink, List<TestSuite<?>> testSuites) {
         this.pool = pool;
         this.sink = sink;
+        this.testSuites = testSuites;
+    }
+
+    public List<TestSuiteReport> runTestApp(RunnerState state, FlightPlan flightPlan) {
+        Map<String, TestSuite<?>> suitesByName = testSuites.stream()
+                .collect(Collectors.toMap(TestSuite::getName, suite -> suite));
+
+        return flightPlan.getTestSuites()
+                .stream()
+                .map(plan -> {
+                    log.debug("Try to run test suite: {}", plan.getName());
+                    TestSuite<Object> testSuite = (TestSuite<Object>) suitesByName.get(plan.getName());
+                    if (testSuite == null) {
+                        log.warn("Test suite: {} not found", plan.getName());
+                        return new TestSuiteReport(plan.getName(), List.of());
+                    }
+
+                    return runTestSuite(state, plan, testSuite);
+                })
+                .collect(Collectors.toList());
     }
 
     /**

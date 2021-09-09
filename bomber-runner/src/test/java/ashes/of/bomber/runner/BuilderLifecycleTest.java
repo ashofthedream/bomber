@@ -31,7 +31,7 @@ public class BuilderLifecycleTest extends LifecycleTest {
                 .beforeCase(AllLifecycleMethodsTest::beforeCase)
                 .beforeCase(true, AllLifecycleMethodsTest::beforeCaseOnlyOnce)
                 .beforeEach(AllLifecycleMethodsTest::beforeEachCall)
-                .testCase("testA", AllLifecycleMethodsTest::testA)
+                .testCase("testA", (s, tools) -> s.testA())
                 .testCase("testB", AllLifecycleMethodsTest::testB)
                 .afterEach(AllLifecycleMethodsTest::afterEachCall)
                 .afterCase(AllLifecycleMethodsTest::afterCase)

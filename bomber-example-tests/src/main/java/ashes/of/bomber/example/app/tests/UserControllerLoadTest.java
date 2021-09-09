@@ -2,6 +2,7 @@ package ashes.of.bomber.example.app.tests;
 
 import ashes.of.bomber.annotations.AfterTestSuite;
 import ashes.of.bomber.annotations.BeforeTestSuite;
+import ashes.of.bomber.annotations.Delay;
 import ashes.of.bomber.annotations.LoadTest;
 import ashes.of.bomber.annotations.LoadTestCase;
 import ashes.of.bomber.annotations.LoadTestSuite;
@@ -49,11 +50,11 @@ public class UserControllerLoadTest {
         log.info("This method will be invoked after each test invocation");
     }
 
-
+//    @Throttle(time = 5)
     @LoadTestCase
     public void getUserByIdSync() {
         ResponseEntity<Void> response = webClient.get()
-                .uri("/users/{id}/{testId}", 1 + random.nextInt(1000), "getUserByIdSync")
+                .uri("/users/{id}", 1 + random.nextInt(1000))
                 .retrieve()
                 .toBodilessEntity()
                 .block();
@@ -63,7 +64,7 @@ public class UserControllerLoadTest {
     public void getUserByIdAsync(Tools tools) {
         Stopwatch stopwatch = tools.stopwatch("getUsers");
         webClient.get()
-                .uri("/users/{id}/{testId}", 1 + random.nextInt(1000), "getUserByIdAsync")
+                .uri("/users/{id}", 1 + random.nextInt(1000))
                 .exchangeToMono(response -> {
                     if (response.statusCode().isError())
                         throw new RuntimeException("invalid request");

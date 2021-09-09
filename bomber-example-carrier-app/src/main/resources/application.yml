@@ -7,12 +7,12 @@ spring:
 
   cloud:
     zookeeper:
-      connect-string: localhost:2181
+      connect-string: ${ZOOKEEPER_URL:localhost:2181}
 
 
 bomber:
   target:
-    url: http://localhost:8080
+    url: ${EXAMPLE_APP_URL:http://localhost:8080}
   squadron:
     members: 1
 

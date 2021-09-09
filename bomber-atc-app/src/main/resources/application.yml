@@ -7,7 +7,7 @@ spring:
 
   cloud:
     zookeeper:
-      connect-string: localhost:2181
+      connect-string: ${ZOOKEEPER_URL:localhost:2181}
       dependencies:
         bomber-carrier:
           required: false

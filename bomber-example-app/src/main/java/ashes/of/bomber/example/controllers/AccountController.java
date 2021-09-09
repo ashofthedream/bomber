@@ -46,6 +46,4 @@ public class AccountController {
         Collection<Account> accounts = mockService.getAllAccounts();
         return ResponseEntity.ok(accounts);
     }
-
-
 }

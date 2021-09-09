@@ -17,12 +17,12 @@ import java.util.concurrent.atomic.AtomicReference;
 public class TestAppProcessor {
     private static final Logger log = LogManager.getLogger();
 
-    private final TestAppBuilder b = new TestAppBuilder();
+    private final TestAppBuilder builder = new TestAppBuilder();
     private final AtomicReference<Object> app = new AtomicReference<>();
 
     public TestAppBuilder process(Class<?> cls) {
         log.debug("Start process app: {} ", cls);
-        b.config(env -> env.process(cls));
+        builder.config(config -> config.process(cls));
 
         for (Method method : cls.getDeclaredMethods()) {
             int modifiers = method.getModifiers();
@@ -48,15 +48,15 @@ public class TestAppProcessor {
         if (app.testSuites().length < 1 && suite == null)
             throw new RuntimeException("Test application class should contains at least one test suite @LoadTestApp(testSuites = {ExampleTestSuite.class}) or marked by @LoadTestSuite");
 
-        b.name(!Strings.isNullOrEmpty(app.name()) ? app.name() : cls.getSimpleName());
-        b.testSuiteClass(cls);
+        builder.name(!Strings.isNullOrEmpty(app.name()) ? app.name() : cls.getSimpleName());
+        builder.testSuiteClass(cls);
 
         for (Class<?> testSuiteClass : app.testSuites()) {
             log.debug("Add testSuiteClass: {}", testSuiteClass);
-            b.testSuiteClass(testSuiteClass);
+            builder.testSuiteClass(testSuiteClass);
         }
 
-        return b;
+        return builder;
     }
 
     private void provide(Class<?> cls, Method method, Provide provide) throws IllegalAccessException {
@@ -65,7 +65,7 @@ public class TestAppProcessor {
         MethodHandle mh = MethodHandles.lookup().unreflect(method);
         AtomicReference<Object> object = new AtomicReference<>();
 
-        b.provide(ret, () -> {
+        builder.provide(ret, () -> {
 
             Object res = object.get();
             if (res == null) {

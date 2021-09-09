@@ -30,7 +30,7 @@ import java.time.Duration;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 //@RunWith(SpringRunner.class)
-@SpringBootTest(webEnvironment = RANDOM_PORT)
+//@SpringBootTest(webEnvironment = RANDOM_PORT)
 public class ManagerWebSocketHandlerTest {
     private static final Logger log = LogManager.getLogger();
 

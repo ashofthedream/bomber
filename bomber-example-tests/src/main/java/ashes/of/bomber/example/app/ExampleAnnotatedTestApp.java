@@ -26,7 +26,7 @@ import java.time.temporal.ChronoUnit;
  */
 @LoadTestApp(testSuites = {
         UserControllerLoadTest.class,
-        AccountControllerLoadTest.class
+//        AccountControllerLoadTest.class
 })
 @LoadTest(threads = 2, time = 10)
 @Throttle(time = 1)
