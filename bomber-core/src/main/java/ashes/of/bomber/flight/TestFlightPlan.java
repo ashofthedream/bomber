@@ -2,11 +2,11 @@ package ashes.of.bomber.flight;
 
 import java.util.List;
 
-public class FlightPlan {
+public class TestFlightPlan {
     private final long flightId;
     private final List<TestSuitePlan> testSuites;
 
-    public FlightPlan(long flightId, List<TestSuitePlan> testSuites) {
+    public TestFlightPlan(long flightId, List<TestSuitePlan> testSuites) {
         this.flightId = flightId;
         this.testSuites = testSuites;
     }

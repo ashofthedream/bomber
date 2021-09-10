@@ -1,7 +1,7 @@
 package ashes.of.bomber.example.controllers;
 
 import ashes.of.bomber.builder.TestAppBuilder;
-import ashes.of.bomber.flight.FlightReport;
+import ashes.of.bomber.flight.TestFlightReport;
 import ashes.of.bomber.example.app.tests.UserControllerLoadTest;
 import ashes.of.bomber.sink.Sink;
 import ashes.of.bomber.sink.histogram.HistogramSink;
@@ -52,7 +52,7 @@ public class UserControllerTest {
                 .build();
 
         ErrorCounter errorCounter = new ErrorCounter();
-        FlightReport report = new TestAppBuilder()
+        TestFlightReport report = new TestAppBuilder()
                 .sink(new HistogramSink())
                 .sink(errorCounter)
                 .testSuiteClass(UserControllerLoadTest.class, new Class[]{WebClient.class}, webClient)

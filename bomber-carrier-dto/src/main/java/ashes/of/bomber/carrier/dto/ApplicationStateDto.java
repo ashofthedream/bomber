@@ -1,5 +1,7 @@
 package ashes.of.bomber.carrier.dto;
 
+import ashes.of.bomber.carrier.dto.flight.SettingsDto;
+
 import java.util.List;
 
 public class ApplicationStateDto {

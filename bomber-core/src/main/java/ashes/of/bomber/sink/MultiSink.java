@@ -1,7 +1,7 @@
 package ashes.of.bomber.sink;
 
 import ashes.of.bomber.flight.Iteration;
-import ashes.of.bomber.flight.Settings;
+import ashes.of.bomber.configuration.Settings;
 import ashes.of.bomber.flight.Stage;
 import ashes.of.bomber.tools.Record;
 

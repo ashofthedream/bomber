@@ -1,7 +1,6 @@
-package ashes.of.bomber.runner;
+package ashes.of.bomber.configuration;
 
 import ashes.of.bomber.delayer.Delayer;
-import ashes.of.bomber.flight.Settings;
 import ashes.of.bomber.limiter.Limiter;
 import ashes.of.bomber.squadron.BarrierBuilder;
 

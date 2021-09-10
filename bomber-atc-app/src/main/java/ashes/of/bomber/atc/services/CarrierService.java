@@ -1,11 +1,11 @@
 package ashes.of.bomber.atc.services;
 
 import ashes.of.bomber.atc.dto.CarrierDto;
-import ashes.of.bomber.atc.mappers.FlightPlanMapper;
+import ashes.of.bomber.carrier.mappers.TestFlightMapper;
 import ashes.of.bomber.atc.model.Carrier;
 import ashes.of.bomber.atc.model.Flight;
 import ashes.of.bomber.carrier.dto.ApplicationDto;
-import ashes.of.bomber.carrier.dto.FlightStartedDto;
+import ashes.of.bomber.carrier.dto.requests.FlightStartedResponse;
 import ashes.of.bomber.carrier.dto.requests.StartFlightRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -53,16 +53,16 @@ public class CarrierService {
                 .onErrorContinue((throwable, o) -> log.warn("Can't get status of carrier: {}", carrier.getId(), throwable));
     }
 
-    public Mono<FlightStartedDto> start(Carrier carrier, Flight flight) {
+    public Mono<FlightStartedResponse> start(Carrier carrier, Flight flight) {
         URI uri = carrier.getInstance().getUri();
         StartFlightRequest request = new StartFlightRequest()
-                .setPlan(FlightPlanMapper.toDto(flight.getPlan()));
+                .setPlan(TestFlightMapper.toDto(flight.getPlan()));
 
         return webClient.post()
                 .uri(uri + "/applications/start")
                 .body(BodyInserters.fromValue(request))
                 .retrieve()
-                .bodyToMono(FlightStartedDto.class)
+                .bodyToMono(FlightStartedResponse.class)
                 .onErrorContinue((throwable, o) -> log.warn("Can't start flight on carrier: {}", carrier.getId(), throwable));
     }
 

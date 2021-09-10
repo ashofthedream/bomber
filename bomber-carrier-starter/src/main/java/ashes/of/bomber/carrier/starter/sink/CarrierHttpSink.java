@@ -3,11 +3,11 @@ package ashes.of.bomber.carrier.starter.sink;
 import ashes.of.bomber.carrier.dto.ApplicationStateDto;
 import ashes.of.bomber.carrier.dto.events.SinkEvent;
 import ashes.of.bomber.carrier.dto.events.SinkEventType;
-import ashes.of.bomber.carrier.starter.mappers.ApplicationMapper;
+import ashes.of.bomber.carrier.mappers.ApplicationMapper;
 import ashes.of.bomber.carrier.starter.services.CarrierService;
-import ashes.of.bomber.flight.FlightPlan;
+import ashes.of.bomber.flight.TestFlightPlan;
 import ashes.of.bomber.flight.Iteration;
-import ashes.of.bomber.flight.Settings;
+import ashes.of.bomber.configuration.Settings;
 import ashes.of.bomber.flight.Stage;
 import ashes.of.bomber.runner.TestApp;
 import ashes.of.bomber.sink.Sink;
@@ -105,7 +105,7 @@ public class CarrierHttpSink implements Sink {
                 .setId(SinkEvent.nextId())
                 .setType(type)
                 .setTimestamp(timestamp.toEpochMilli())
-                .setFlightId(Optional.ofNullable(app.getFlightPlan()).map(FlightPlan::getFlightId).orElse(0L))
+                .setFlightId(Optional.ofNullable(app.getFlightPlan()).map(TestFlightPlan::getFlightId).orElse(0L))
                 .setCarrierId(registration.getServiceInstance().getId())
                 .setStage(stage != null ? stage.name() : null)
                 .setTestSuite(testSuite)

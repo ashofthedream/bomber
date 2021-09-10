@@ -1,7 +1,7 @@
 package ashes.of.bomber.example.carrier;
 
 import ashes.of.bomber.carrier.starter.config.CarrierConfiguration;
-import ashes.of.bomber.flight.FlightPlan;
+import ashes.of.bomber.flight.TestFlightPlan;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
@@ -46,7 +46,7 @@ public class ExampleCarrierApp {
         log.info("try to start BomberApp via http");
         client.post()
                 .uri("/applications/start")
-                .body(BodyInserters.fromValue(new FlightPlan(System.currentTimeMillis() - 1630891500000L, List.of())))
+                .body(BodyInserters.fromValue(new TestFlightPlan(System.currentTimeMillis() - 1630891500000L, List.of())))
                 .retrieve()
                 .toBodilessEntity()
                 .subscribe(

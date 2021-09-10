@@ -3,7 +3,7 @@ package ashes.of.bomber.carrier.starter.sink;
 import ashes.of.bomber.carrier.dto.events.HistogramPointDto;
 import ashes.of.bomber.carrier.dto.events.SinkEvent;
 import ashes.of.bomber.carrier.starter.services.CarrierService;
-import ashes.of.bomber.flight.FlightPlan;
+import ashes.of.bomber.flight.TestFlightPlan;
 import ashes.of.bomber.flight.Stage;
 import ashes.of.bomber.runner.TestApp;
 import ashes.of.bomber.sink.Sink;
@@ -94,7 +94,7 @@ public class CarrierHistogramTimelineHttpSink implements Sink {
                 .setId(SinkEvent.nextId())
                 .setType(TEST_CASE_HISTOGRAM)
                 .setTimestamp(System.currentTimeMillis())
-                .setFlightId(Optional.ofNullable(app.getFlightPlan()).map(FlightPlan::getFlightId).orElse(0L))
+                .setFlightId(Optional.ofNullable(app.getFlightPlan()).map(TestFlightPlan::getFlightId).orElse(0L))
                 .setCarrierId(registration.getServiceInstance().getId())
                 .setStage(key.getStage().name())
                 .setTestSuite(key.getTestSuite())

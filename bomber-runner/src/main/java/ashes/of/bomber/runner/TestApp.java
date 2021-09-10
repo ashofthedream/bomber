@@ -1,14 +1,14 @@
 package ashes.of.bomber.runner;
 
 import ashes.of.bomber.descriptions.ConfigurationDescription;
-import ashes.of.bomber.flight.Settings;
+import ashes.of.bomber.configuration.Settings;
 import ashes.of.bomber.descriptions.TestAppStateDescription;
 import ashes.of.bomber.descriptions.TestAppDescription;
 import ashes.of.bomber.descriptions.TestCaseDescription;
 import ashes.of.bomber.descriptions.TestSuiteDescription;
 import ashes.of.bomber.descriptions.WorkerDescription;
-import ashes.of.bomber.flight.FlightReport;
-import ashes.of.bomber.flight.FlightPlan;
+import ashes.of.bomber.flight.TestFlightReport;
+import ashes.of.bomber.flight.TestFlightPlan;
 import ashes.of.bomber.flight.TestCasePlan;
 import ashes.of.bomber.flight.TestSuitePlan;
 import ashes.of.bomber.flight.TestSuiteReport;
@@ -27,7 +27,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
@@ -44,21 +44,19 @@ public class TestApp {
 
     private final String name;
     private final WorkerPool pool;
-    private final Configuration configuration;
     private final List<TestSuite<?>> testSuites;
     private final List<Sink> sinks;
     private final List<WatcherConfig> watchers;
 
     @Nullable
-    private volatile FlightPlan plan;
+    private volatile TestFlightPlan plan;
 
     private volatile RunnerState state = IDLE;
     private volatile CountDownLatch endLatch = new CountDownLatch(1);
 
-    public TestApp(String name, WorkerPool pool, Configuration configuration, List<TestSuite<?>> testSuites, List<Sink> sinks, List<WatcherConfig> watchers) {
+    public TestApp(String name, WorkerPool pool, List<TestSuite<?>> testSuites, List<Sink> sinks, List<WatcherConfig> watchers) {
         this.name = name;
         this.pool = pool;
-        this.configuration = configuration;
         this.testSuites = testSuites;
         this.sinks = sinks;
         this.watchers = watchers;
@@ -68,7 +66,7 @@ public class TestApp {
         return name;
     }
 
-    public FlightPlan getFlightPlan() {
+    public TestFlightPlan getFlightPlan() {
         return plan;
     }
 
@@ -92,25 +90,22 @@ public class TestApp {
      *
      * @return report
      */
-    public FlightReport start() {
+    public TestFlightReport start() {
         var suites = getTestSuites().stream()
                 .map(testSuite -> {
                     List<TestCasePlan> testCases = testSuite.getTestCases().stream()
-                            .map(testCase -> new TestCasePlan(
-                                    testCase.getName(),
-                                    testCase.getConfiguration().getWarmUp(),
-                                    testCase.getConfiguration().getSettings()))
+                            .map(testCase -> new TestCasePlan(testCase.getName(), testCase.getConfiguration()))
                             .collect(Collectors.toList());
 
                     return new TestSuitePlan(testSuite.getName(), testCases);
                 })
                 .collect(Collectors.toList());
 
-        var plan = new FlightPlan(System.currentTimeMillis() - 1630454400000L, suites);
+        var plan = new TestFlightPlan(System.currentTimeMillis() - 1630454400000L, suites);
         return start(plan);
     }
 
-    public CompletableFuture<FlightReport> startAsync() {
+    public CompletableFuture<TestFlightReport> startAsync() {
         return CompletableFuture.supplyAsync(this::start);
     }
 
@@ -120,7 +115,7 @@ public class TestApp {
      * @param flightPlan flight plan with list of test suites, test cases and settings
      * @return report
      */
-    public FlightReport start(FlightPlan flightPlan) {
+    public TestFlightReport start(TestFlightPlan flightPlan) {
         this.plan = flightPlan;
         ThreadContext.put("bomberApp", name);
         ThreadContext.put("flightId", String.valueOf(flightPlan.getFlightId()));
@@ -130,7 +125,10 @@ public class TestApp {
                 .forEach(testSuite -> {
                     log.debug("Planned test suite: {}", testSuite.getName());
                     testSuite.getTestCases().forEach(testCase -> {
-                        log.debug("Planned test case: {}.{}, settings: {}", testSuite.getName(), testCase.getName(), testCase.getSettings());
+                        log.debug("Planned test case: {}.{}, settings: {}", testSuite.getName(), testCase.getName(),
+                                Optional.ofNullable(testCase.getConfiguration())
+                                        .map(ConfigurationDescription::getSettings)
+                                        .orElse(null));
                     });
                 });
 
@@ -162,7 +160,7 @@ public class TestApp {
             testSuiteReports = runner.runTestApp(state, flightPlan);
 
             log.debug("All test suites finished, state -> Idle ");
-            state = IDLE;
+            this.state = IDLE;
         } catch (Throwable th) {
             log.error("Unexpected throwable", th);
         }
@@ -186,10 +184,10 @@ public class TestApp {
 
         ThreadContext.clearAll();
         log.info("Flight is over, report is ready");
-        return new FlightReport(flightPlan, startTime, finishTime, testSuiteReports);
+        return new TestFlightReport(flightPlan, startTime, finishTime, testSuiteReports);
     }
 
-    public CompletableFuture<FlightReport> startAsync(FlightPlan plan) {
+    public CompletableFuture<TestFlightReport> startAsync(TestFlightPlan plan) {
         return CompletableFuture.supplyAsync(() -> start(plan));
     }
 

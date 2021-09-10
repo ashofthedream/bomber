@@ -90,16 +90,20 @@ public class TestSuiteBuilder<T> {
     }
 
 
+    private TestCaseBuilder<T> newTestCaseBuilder() {
+        return new TestCaseBuilder<T>()
+                .config(new ConfigurationBuilder(config));
+    }
+
     public TestSuiteBuilder<T> testCase(Consumer<TestCaseBuilder<T>> consumer) {
-        var b = new TestCaseBuilder<T>()
-                .config(new ConfigurationBuilder(this.config));
+        var b = newTestCaseBuilder();
 
         consumer.accept(b);
         return testCase(b);
     }
 
     public TestSuiteBuilder<T> testCase(TestCaseBuilder<T> builder) {
-        Objects.requireNonNull(name, "builder is null");
+        Objects.requireNonNull(builder, "builder is null");
         var testCase = builder.build();
         this.testCases.put(testCase.getName(), testCase);
         return this;
@@ -108,10 +112,10 @@ public class TestSuiteBuilder<T> {
     public TestSuiteBuilder<T> testCase(String name, boolean async, TestCaseMethod<T> test) {
         Objects.requireNonNull(name, "name is null");
         Objects.requireNonNull(test, "test is null");
-        return testCase(new TestCaseBuilder<T>()
+
+        return testCase(newTestCaseBuilder()
                 .name(name)
                 .async(async)
-                .config(new ConfigurationBuilder(config))
                 .test(test));
     }
 
@@ -162,7 +166,7 @@ public class TestSuiteBuilder<T> {
         // todo it may be useful, but not today
         Preconditions.checkArgument(!testCases.isEmpty(), "No test cases found for test suite: " + name);
 
-        return new TestSuite<>(name, config.build(), instance, beforeSuite, beforeCase, beforeEach, testCases, afterEach, afterCase, afterSuite);
+        return new TestSuite<>(name, instance, beforeSuite, beforeCase, beforeEach, testCases, afterEach, afterCase, afterSuite);
     }
 }
 

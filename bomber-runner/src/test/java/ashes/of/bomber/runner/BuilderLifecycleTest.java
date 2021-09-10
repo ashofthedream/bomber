@@ -2,7 +2,7 @@ package ashes.of.bomber.runner;
 
 import ashes.of.bomber.builder.TestAppBuilder;
 import ashes.of.bomber.builder.TestSuiteBuilder;
-import ashes.of.bomber.flight.SettingsBuilder;
+import ashes.of.bomber.configuration.SettingsBuilder;
 import ashes.of.bomber.tests.AllLifecycleMethodsTest;
 import ashes.of.bomber.tests.Counters;
 import org.apache.logging.log4j.LogManager;

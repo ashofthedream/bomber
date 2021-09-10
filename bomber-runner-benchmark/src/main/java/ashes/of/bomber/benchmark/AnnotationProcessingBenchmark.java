@@ -5,7 +5,7 @@ import ashes.of.bomber.annotations.LoadTestCase;
 import ashes.of.bomber.annotations.LoadTestSuite;
 import ashes.of.bomber.builder.TestSuiteBuilder;
 import ashes.of.bomber.builder.TestAppBuilder;
-import ashes.of.bomber.flight.SettingsBuilder;
+import ashes.of.bomber.configuration.SettingsBuilder;
 import ashes.of.bomber.tools.Tools;
 import org.HdrHistogram.ConcurrentHistogram;
 import org.HdrHistogram.Histogram;

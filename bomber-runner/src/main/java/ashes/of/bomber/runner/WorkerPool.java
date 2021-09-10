@@ -4,14 +4,14 @@ import ashes.of.bomber.threads.BomberThreadFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
+import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.SynchronousQueue;
+import java.util.stream.IntStream;
 
 
 public class WorkerPool {
@@ -19,7 +19,7 @@ public class WorkerPool {
 
     private final List<Worker> workers = new CopyOnWriteArrayList<>();
     private final BlockingQueue<Worker> available = new LinkedBlockingQueue<>();
-    private final Set<Worker> acquired = new CopyOnWriteArraySet<>();
+    private final BlockingQueue<Worker> acquired = new LinkedBlockingQueue<>();
 
     public WorkerPool(int count) {
         for (int i = 0; i < count; i++)
@@ -65,20 +65,31 @@ public class WorkerPool {
         Worker available = this.available.poll();
         Worker worker = available != null ? available : createWorker();
 
-        log.debug("acquire {}", worker.getName());
+        log.debug("Acquire worker: {}", worker.getName());
         acquired.add(worker);
 
         return worker;
     }
 
+    public List<Worker> acquire(int count) {
+        log.debug("Acquire {} workers", count);
+        List<Worker> workers = new ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            workers.add(acquire());
+        }
+
+        return workers;
+    }
+
     public void release(Worker worker) {
-        log.debug("release {}", worker.getName());
+        log.debug("Release worker: {}", worker.getName());
         available.add(worker);
         acquired.remove(worker);
     }
 
-    public void release(Collection<Worker> workers) {
-        workers.forEach(this::release);
+    public void releaseAll() {
+        log.debug("Release all {} workers", acquired.size());
+        acquired.drainTo(available);
     }
 
     public void shutdown() {
@@ -88,7 +99,7 @@ public class WorkerPool {
         workers.clear();
     }
 
-    public Set<Worker> getAcquired() {
+    public Queue<Worker> getAcquired() {
         return acquired;
     }
 }

@@ -1,7 +1,9 @@
-package ashes.of.bomber.carrier.starter.mappers;
+package ashes.of.bomber.carrier.mappers;
 
+import ashes.of.bomber.carrier.dto.ApplicationDto;
 import ashes.of.bomber.carrier.dto.ApplicationStateDto;
 import ashes.of.bomber.carrier.dto.WorkerStateDto;
+import ashes.of.bomber.descriptions.TestAppDescription;
 import ashes.of.bomber.descriptions.TestAppStateDescription;
 import ashes.of.bomber.descriptions.WorkerDescription;
 
@@ -32,5 +34,16 @@ public class ApplicationMapper {
                 .setIterationsCount(state.getCurrentIterationsCount())
                 .setRemainIterationsCount(state.getRemainIterationsCount())
                 .setErrorsCount(state.getErrorsCount());
+    }
+
+    public static ApplicationDto toDto(TestAppDescription desc) {
+        var testSuites = desc.getTestSuites().stream()
+                .map(TestSuiteMapper::toDto)
+                .collect(Collectors.toList());
+
+        return new ApplicationDto()
+                .setName(desc.getName())
+                .setState(toDto(desc.getState()))
+                .setTestSuites(testSuites);
     }
 }

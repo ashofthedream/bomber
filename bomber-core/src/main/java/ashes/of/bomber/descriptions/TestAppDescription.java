@@ -1,16 +1,16 @@
 package ashes.of.bomber.descriptions;
 
-import ashes.of.bomber.flight.FlightPlan;
+import ashes.of.bomber.flight.TestFlightPlan;
 
 import java.util.List;
 
 public class TestAppDescription {
     private final String name;
-    private final FlightPlan plan;
+    private final TestFlightPlan plan;
     private final TestAppStateDescription state;
     private final List<TestSuiteDescription> testSuites;
 
-    public TestAppDescription(String name, FlightPlan plan, TestAppStateDescription state, List<TestSuiteDescription> testSuites) {
+    public TestAppDescription(String name, TestFlightPlan plan, TestAppStateDescription state, List<TestSuiteDescription> testSuites) {
         this.name = name;
         this.plan = plan;
         this.state = state;
@@ -21,7 +21,7 @@ public class TestAppDescription {
         return name;
     }
 
-    public FlightPlan getPlan() {
+    public TestFlightPlan getPlan() {
         return plan;
     }
 

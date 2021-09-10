@@ -1,4 +1,4 @@
-package ashes.of.bomber.carrier.dto;
+package ashes.of.bomber.carrier.dto.flight;
 
 public class SettingsDto {
     private boolean disabled;

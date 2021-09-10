@@ -1,5 +1,6 @@
 package ashes.of.bomber.runner;
 
+import ashes.of.bomber.configuration.Configuration;
 import ashes.of.bomber.methods.TestCaseMethod;
 import ashes.of.bomber.tools.Tools;
 

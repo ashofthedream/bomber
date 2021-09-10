@@ -1,6 +1,6 @@
 package ashes.of.bomber.descriptions;
 
-import ashes.of.bomber.flight.Settings;
+import ashes.of.bomber.configuration.Settings;
 
 public class ConfigurationDescription {
     private final Settings warmUp;

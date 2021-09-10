@@ -1,21 +1,18 @@
 package ashes.of.bomber.flight;
 
+import ashes.of.bomber.descriptions.ConfigurationDescription;
+
 import javax.annotation.Nullable;
 
 public class TestCasePlan {
     private final String name;
 
     @Nullable
-    private final Settings warmUp;
+    private final ConfigurationDescription configuration;
 
-    @Nullable
-    private final Settings settings;
-
-
-    public TestCasePlan(String name, @Nullable Settings warmUp, @Nullable Settings settings) {
+    public TestCasePlan(String name, @Nullable ConfigurationDescription configuration) {
         this.name = name;
-        this.warmUp = warmUp;
-        this.settings = settings;
+        this.configuration = configuration;
     }
 
     public String getName() {
@@ -23,12 +20,7 @@ public class TestCasePlan {
     }
 
     @Nullable
-    public Settings getWarmUp() {
-        return warmUp;
-    }
-
-    @Nullable
-    public Settings getSettings() {
-        return settings;
+    public ConfigurationDescription getConfiguration() {
+        return configuration;
     }
 }

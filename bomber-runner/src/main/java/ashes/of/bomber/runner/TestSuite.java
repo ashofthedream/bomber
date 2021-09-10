@@ -16,7 +16,6 @@ public class TestSuite<T> {
     private static final Logger log = LogManager.getLogger();
 
     private final String name;
-    private final Configuration configuration;
     private final Supplier<T> instance;
     private final List<LifeCycleHolder<T>> beforeSuite;
     private final List<LifeCycleHolder<T>> beforeCase;
@@ -27,7 +26,6 @@ public class TestSuite<T> {
     private final List<LifeCycleHolder<T>> afterSuite;
 
     public TestSuite(String name,
-                     Configuration configuration,
                      Supplier<T> instance,
                      List<LifeCycleHolder<T>> beforeSuite,
                      List<LifeCycleHolder<T>> beforeCase,
@@ -37,7 +35,6 @@ public class TestSuite<T> {
                      List<LifeCycleHolder<T>> afterCase,
                      List<LifeCycleHolder<T>> afterSuite) {
         this.name = name;
-        this.configuration = configuration;
         this.instance = instance;
         this.beforeSuite = beforeSuite;
         this.beforeCase = beforeCase;

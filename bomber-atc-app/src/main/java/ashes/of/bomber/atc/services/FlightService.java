@@ -4,7 +4,7 @@ import ashes.of.bomber.atc.model.Flight;
 import ashes.of.bomber.atc.model.FlightProgress;
 import ashes.of.bomber.atc.model.FlightRecord;
 import ashes.of.bomber.carrier.dto.events.SinkEvent;
-import ashes.of.bomber.flight.FlightPlan;
+import ashes.of.bomber.flight.TestFlightPlan;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
@@ -58,7 +58,7 @@ public class FlightService {
                     "Flight will be created and marked as active. It's temporal solution",
                     event.getCarrierId(), event.getFlightId());
 
-            var foundOrCreated = flights.computeIfAbsent(event.getFlightId(), planId -> new Flight(new FlightPlan(planId, List.of())));
+            var foundOrCreated = flights.computeIfAbsent(event.getFlightId(), planId -> new Flight(new TestFlightPlan(planId, List.of())));
             active = flight = foundOrCreated;
         }
 
@@ -79,7 +79,7 @@ public class FlightService {
     }
 
     // todo potential race condition
-    public Flight startFlight(FlightPlan plan) {
+    public Flight startFlight(TestFlightPlan plan) {
         if (active != null)
             throw new RuntimeException("Already started");
 

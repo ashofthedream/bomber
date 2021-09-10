@@ -1,9 +1,10 @@
 package ashes.of.bomber.runner;
 
-import ashes.of.bomber.flight.FlightPlan;
-import ashes.of.bomber.flight.Settings;
-import ashes.of.bomber.flight.Stage;
+import ashes.of.bomber.descriptions.ConfigurationDescription;
 import ashes.of.bomber.flight.TestCasePlan;
+import ashes.of.bomber.flight.TestFlightPlan;
+import ashes.of.bomber.configuration.Settings;
+import ashes.of.bomber.flight.Stage;
 import ashes.of.bomber.flight.TestCaseReport;
 import ashes.of.bomber.flight.TestSuitePlan;
 import ashes.of.bomber.flight.TestSuiteReport;
@@ -17,7 +18,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -32,15 +33,13 @@ public class Runner {
     private final Sink sink;
     private final List<TestSuite<?>> testSuites;
 
-    private final Map<String, Worker> workers = new ConcurrentSkipListMap<>();
-
     public Runner(WorkerPool pool, Sink sink, List<TestSuite<?>> testSuites) {
         this.pool = pool;
         this.sink = sink;
         this.testSuites = testSuites;
     }
 
-    public List<TestSuiteReport> runTestApp(RunnerState state, FlightPlan flightPlan) {
+    public List<TestSuiteReport> runTestApp(RunnerState state, TestFlightPlan flightPlan) {
         Map<String, TestSuite<?>> suitesByName = testSuites.stream()
                 .collect(Collectors.toMap(TestSuite::getName, suite -> suite));
 
@@ -74,17 +73,12 @@ public class Runner {
         state.startSuiteIfNotStarted(testSuite.getName());
         sink.beforeTestSuite(Instant.now(), testSuite.getName());
 
-
         int threads = plan.getTestCases().stream()
                 .mapToInt(testCasePlan -> determineWorkerThreadsCount(testSuite, testCasePlan))
                 .max()
                 .orElseThrow(() -> new RuntimeException("Can't determine thread count for test suite: " + testSuite.getName()));
 
-        log.debug("Acquire {} workers", threads);
-        for (int t = 0; t < threads; t++) {
-            Worker worker = pool.acquire();
-            workers.put(worker.getName(), worker);
-        }
+        pool.acquire(threads);
 
         List<TestCaseReport> testCaseReports = new ArrayList<>();
         try {
@@ -104,9 +98,15 @@ public class Runner {
 
                         ThreadContext.put("testCase", testCasePlan.getName());
                         log.debug("Run test case: {}", testCasePlan.getName());
+                        var config = Optional.ofNullable(testCasePlan.getConfiguration());
+                        Settings warmUp = config
+                                .map(ConfigurationDescription::getWarmUp)
+                                .orElse(testCase.getConfiguration().getWarmUp());
 
-                        Settings warmUp = testCasePlan.getWarmUp() != null ? testCasePlan.getWarmUp() : testCase.getConfiguration().getWarmUp();
-                        Settings settings = testCasePlan.getSettings() != null ? testCasePlan.getSettings() : testCase.getConfiguration().getSettings();
+                        Settings settings = config.map(ConfigurationDescription::getSettings)
+                                .orElse(testCase.getConfiguration()
+                                        .getSettings());
+
                         if (!warmUp.isDisabled()) {
                             runTestCase(state, testSuite, testCase, Stage.WARM_UP, warmUp);
                         }
@@ -122,9 +122,7 @@ public class Runner {
             log.error("Run test suite: {} failed", testSuite.getName(), throwable);
         }
 
-        log.debug("Release all workers: {}", workers.size());
-        pool.release(workers.values());
-        workers.clear();
+        pool.releaseAll();
 
         sink.afterTestSuite(testSuite.getName());
         state.finishSuite();
@@ -134,22 +132,37 @@ public class Runner {
     }
 
     private int determineWorkerThreadsCount(TestSuite<Object> testSuite, TestCasePlan testCasePlan) {
-        return Stream.concat(Stream.ofNullable(testCasePlan.getWarmUp()), Stream.ofNullable(testCasePlan.getSettings()))
+        var warmUp = Optional.ofNullable(testCasePlan.getConfiguration())
+                .map(ConfigurationDescription::getWarmUp)
+                .stream();
+
+        var settings = Optional.ofNullable(testCasePlan.getConfiguration())
+                .map(ConfigurationDescription::getSettings)
+                .stream();
+
+        return Stream.concat(warmUp, settings)
                 .mapToInt(Settings::getThreadsCount)
                 .max()
                 .orElseGet(() -> {
                     var testCase = testSuite.getTestCase(testCasePlan.getName());
+                    if (testCase == null) {
+                        log.warn("Test case: {} not found in test suite: {}, but it exists in the plan",
+                                testCasePlan.getName(), testSuite.getName());
+                        return 0;
+                    }
+
+                    var config = testCase.getConfiguration();
                     return Math.max(
-                            testCase.getConfiguration().getWarmUp().getThreadsCount(),
-                            testCase.getConfiguration().getSettings().getThreadsCount()
+                            config.getWarmUp().getThreadsCount(),
+                            config.getSettings().getThreadsCount()
                     );
                 });
     }
 
     private void awaitBeforeSuite(TestSuite<Object> testSuite) throws InterruptedException {
-        log.debug("Call beforeSuite for all workers: {}", workers.size());
-        CountDownLatch beforeSuiteLatch = new CountDownLatch(workers.size());
-        workers.forEach((name, worker) ->
+        log.debug("Call beforeSuite for all workers: {}", pool.getAcquired().size());
+        CountDownLatch beforeSuiteLatch = new CountDownLatch(pool.getAcquired().size());
+        pool.getAcquired().forEach(worker ->
                 worker.runBeforeSuite(testSuite, beforeSuiteLatch));
 
         log.debug("Await workers beforeSuite");
@@ -157,9 +170,9 @@ public class Runner {
     }
 
     private void awaitAfterSuite(TestSuite<Object> testSuite) throws InterruptedException {
-        log.debug("Call afterSuite for all workers: {}", workers.size());
-        CountDownLatch afterSuiteLatch = new CountDownLatch(workers.size());
-        workers.forEach((name, worker) ->
+        log.debug("Call afterSuite for all workers: {}", pool.getAcquired().size());
+        CountDownLatch afterSuiteLatch = new CountDownLatch(pool.getAcquired().size());
+        pool.getAcquired().forEach(worker ->
                 worker.runAfterSuite(testSuite, afterSuiteLatch));
 
         log.debug("Await workers afterSuite");
@@ -180,7 +193,7 @@ public class Runner {
 
         log.debug("Run {} workers", settings.getThreadsCount());
 
-        workers.values()
+        pool.getAcquired()
                 .stream()
                 .limit(settings.getThreadsCount())
                 .forEach(worker -> worker.runTestCase(state, testSuite, testCase, stage, settings, startLatch, finishLatch, sink, barrier));

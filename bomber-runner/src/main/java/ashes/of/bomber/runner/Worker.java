@@ -2,7 +2,7 @@ package ashes.of.bomber.runner;
 
 import ashes.of.bomber.descriptions.WorkerDescription;
 import ashes.of.bomber.flight.Iteration;
-import ashes.of.bomber.flight.Settings;
+import ashes.of.bomber.configuration.Settings;
 import ashes.of.bomber.flight.Stage;
 import ashes.of.bomber.delayer.Delayer;
 import ashes.of.bomber.limiter.Limiter;

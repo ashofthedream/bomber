@@ -1,21 +1,21 @@
 package ashes.of.bomber.atc.model;
 
-import ashes.of.bomber.flight.FlightPlan;
+import ashes.of.bomber.flight.TestFlightPlan;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Flight {
-    private final FlightPlan plan;
+    private final TestFlightPlan plan;
     private final Map<String, FlightProgress> progress = new ConcurrentHashMap<>();
     private volatile long startedAt;
     private volatile long finishedAt;
 
-    public Flight(FlightPlan plan) {
+    public Flight(TestFlightPlan plan) {
         this.plan = plan;
     }
 
-    public FlightPlan getPlan() {
+    public TestFlightPlan getPlan() {
         return plan;
     }
 

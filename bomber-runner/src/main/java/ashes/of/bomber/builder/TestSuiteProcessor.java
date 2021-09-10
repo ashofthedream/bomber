@@ -99,7 +99,7 @@ public class TestSuiteProcessor<T> {
         }
 
         builder.testCase(builder -> {
-            new TestCaseProcessor<T>(builder)
+            new TestCaseProcessor<>(builder)
                     .process(method, testCase);
         });
     }

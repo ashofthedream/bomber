@@ -1,8 +1,8 @@
-package ashes.of.bomber.atc.mappers;
+package ashes.of.bomber.carrier.mappers;
 
-import ashes.of.bomber.carrier.dto.SettingsDto;
-import ashes.of.bomber.flight.Settings;
-import ashes.of.bomber.flight.SettingsBuilder;
+import ashes.of.bomber.carrier.dto.flight.SettingsDto;
+import ashes.of.bomber.configuration.Settings;
+import ashes.of.bomber.configuration.SettingsBuilder;
 
 import javax.annotation.Nullable;
 import java.util.concurrent.TimeUnit;

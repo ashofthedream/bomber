@@ -1,6 +1,5 @@
 package ashes.of.bomber.builder;
 
-import ashes.of.bomber.runner.Configuration;
 import ashes.of.bomber.runner.TestApp;
 import ashes.of.bomber.runner.TestSuite;
 import ashes.of.bomber.runner.WorkerPool;
@@ -119,22 +118,18 @@ public class TestAppBuilder {
     }
 
     public <T> TestAppBuilder createSuite(Consumer<TestSuiteBuilder<T>> consumer) {
-        TestSuiteBuilder<T> b = newSuiteBuilder();
-        consumer.accept(b);
-
-        return addSuite(b);
+        TriConsumer<TestSuiteBuilder<T>, Void, Void> c = (builder, a1, a2) -> consumer.accept(builder);
+        return createSuite(c, null, null);
     }
 
-    public <T, A> TestAppBuilder createSuite(BiConsumer<TestSuiteBuilder<T>, A> consumer, A a) {
-        TestSuiteBuilder<T> builder = newSuiteBuilder();
-        consumer.accept(builder, a);
-
-        return addSuite(builder);
+    public <T, A> TestAppBuilder createSuite(BiConsumer<TestSuiteBuilder<T>, A> consumer, A arg1) {
+        TriConsumer<TestSuiteBuilder<T>, A, Void> c = (builder, a1, b) -> consumer.accept(builder, a1);
+        return createSuite(c, arg1, null);
     }
 
-    public <T, A, B> TestAppBuilder createSuite(TriConsumer<TestSuiteBuilder<T>, A, B> consumer, A a, B b) {
+    public <T, A, B> TestAppBuilder createSuite(TriConsumer<TestSuiteBuilder<T>, A, B> consumer, A arg1, B arg2) {
         TestSuiteBuilder<T> builder = newSuiteBuilder();
-        consumer.accept(builder, a, b);
+        consumer.accept(builder, arg1, arg2);
 
         return addSuite(builder);
     }
@@ -237,12 +232,11 @@ public class TestAppBuilder {
         Preconditions.checkArgument(!testSuites.isEmpty(), "No test suites found");
 
         WorkerPool pool = new WorkerPool();
-        Configuration configuration = this.configuration.build();
         List<TestSuite<?>> suites = this.testSuites.stream()
                 .filter(TestSuiteBuilder::hasTestCases)
                 .map(TestSuiteBuilder::build)
                 .collect(Collectors.toList());
 
-        return new TestApp(name, pool, configuration, suites, sinks, watchers);
+        return new TestApp(name, pool, suites, sinks, watchers);
     }
 }

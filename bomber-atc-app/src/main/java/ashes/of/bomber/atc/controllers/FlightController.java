@@ -3,8 +3,8 @@ package ashes.of.bomber.atc.controllers;
 import ashes.of.bomber.atc.dto.flights.FlightProgressDto;
 import ashes.of.bomber.atc.dto.flights.FlightDto;
 import ashes.of.bomber.atc.dto.flights.FlightRecordDto;
-import ashes.of.bomber.atc.dto.flights.FlightsStartedDto;
-import ashes.of.bomber.atc.mappers.FlightPlanMapper;
+import ashes.of.bomber.carrier.dto.requests.FlightsStartedResponse;
+import ashes.of.bomber.carrier.mappers.TestFlightMapper;
 import ashes.of.bomber.atc.model.Flight;
 import ashes.of.bomber.atc.model.FlightRecord;
 import ashes.of.bomber.atc.services.CarrierService;
@@ -53,31 +53,34 @@ public class FlightController {
 
     // start with flight plan
     @PostMapping("/atc/flights/start")
-    public Mono<FlightsStartedDto> start(@RequestBody StartFlightRequest request) {
+    public Mono<FlightsStartedResponse> start(@RequestBody StartFlightRequest request) {
         log.debug("start all flights on all active carriers");
+        var plan = request.getPlan()
+                .setId(flightService.getNextFlightId());
 
-        var plan = FlightPlanMapper.toPlan(flightService.getNextFlightId(), request.getPlan());
-        var flight = flightService.startFlight(plan);
+        var flight = flightService.startFlight(TestFlightMapper.toPlan(plan));
         return carrierService.getCarriers()
                 .flatMap(carrier -> carrierService.start(carrier, flight))
                 .collectList()
-                .map(flights -> new FlightsStartedDto()
+                .map(flights -> new FlightsStartedResponse()
                         .setFlights(flights));
     }
 
     @PostMapping("/atc/flights/{carrierId}/applications/{appId}/start")
-    public Mono<FlightsStartedDto> startApplicationOnCarrierById(
+    public Mono<FlightsStartedResponse> startApplicationOnCarrierById(
             @PathVariable("carrierId") String carrierId,
             @PathVariable("appId") String appId,
             @RequestBody StartFlightRequest request) {
         log.debug("start application: {} on carrier: {}", appId, carrierId);
 
-        var plan = FlightPlanMapper.toPlan(flightService.getNextFlightId(), request.getPlan());
-        var flight = flightService.startFlight(plan);
+        var plan = request.getPlan()
+                .setId(flightService.getNextFlightId());
+
+        var flight = flightService.startFlight(TestFlightMapper.toPlan(plan));
 
         return carrierService.getCarrier(carrierId)
                 .flatMap(carrier -> carrierService.start(carrier, flight))
-                .map(started -> new FlightsStartedDto()
+                .map(started -> new FlightsStartedResponse()
                         .setFlights(List.of(started)));
     }
 

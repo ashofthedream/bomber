@@ -7,10 +7,10 @@ import ashes.of.bomber.annotations.WarmUp;
 import ashes.of.bomber.delayer.Delayer;
 import ashes.of.bomber.delayer.NoDelayDelayer;
 import ashes.of.bomber.delayer.RandomDelayer;
-import ashes.of.bomber.flight.Settings;
-import ashes.of.bomber.flight.SettingsBuilder;
+import ashes.of.bomber.configuration.Settings;
+import ashes.of.bomber.configuration.SettingsBuilder;
 import ashes.of.bomber.limiter.Limiter;
-import ashes.of.bomber.runner.Configuration;
+import ashes.of.bomber.configuration.Configuration;
 import ashes.of.bomber.squadron.BarrierBuilder;
 import ashes.of.bomber.squadron.NoBarrier;
 

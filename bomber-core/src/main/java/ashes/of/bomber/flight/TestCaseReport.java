@@ -1,5 +1,7 @@
 package ashes.of.bomber.flight;
 
+import ashes.of.bomber.configuration.Settings;
+
 public class TestCaseReport {
 
     private final String name;
