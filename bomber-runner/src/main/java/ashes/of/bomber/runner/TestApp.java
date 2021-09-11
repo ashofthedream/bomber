@@ -7,6 +7,9 @@ import ashes.of.bomber.descriptions.TestAppDescription;
 import ashes.of.bomber.descriptions.TestCaseDescription;
 import ashes.of.bomber.descriptions.TestSuiteDescription;
 import ashes.of.bomber.descriptions.WorkerDescription;
+import ashes.of.bomber.events.TestAppFinishedEvent;
+import ashes.of.bomber.events.TestAppStartedEvent;
+import ashes.of.bomber.flight.TestAppPlan;
 import ashes.of.bomber.flight.TestFlightReport;
 import ashes.of.bomber.flight.TestFlightPlan;
 import ashes.of.bomber.flight.TestCasePlan;
@@ -101,7 +104,9 @@ public class TestApp {
                 })
                 .collect(Collectors.toList());
 
-        var plan = new TestFlightPlan(System.currentTimeMillis() - 1630454400000L, suites);
+        var apps = new TestAppPlan(name, suites);
+
+        var plan = new TestFlightPlan(System.currentTimeMillis() - 1630454400000L, List.of(apps));
         return start(plan);
     }
 
@@ -121,7 +126,13 @@ public class TestApp {
         ThreadContext.put("flightId", String.valueOf(flightPlan.getFlightId()));
 
         log.info("Start flight: {}", flightPlan.getFlightId());
-        flightPlan.getTestSuites()
+        var testAppPlan = flightPlan.getTestApps()
+                .stream()
+                .filter(p -> p.getName().equals(name))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Flight plan doesn't contains this app: " + name));
+
+        testAppPlan.getTestSuites()
                 .forEach(testSuite -> {
                     log.debug("Planned test suite: {}", testSuite.getName());
                     testSuite.getTestCases().forEach(testCase -> {
@@ -149,15 +160,15 @@ public class TestApp {
 
         Sink sink = new AsyncSink(new MultiSink(sinks));
 
-        sink.startUp(startTime);
+        sink.beforeTestApp(new TestAppStartedEvent(startTime, flightPlan.getFlightId(), name));
 
         List<TestSuiteReport> testSuiteReports = new ArrayList<>();
         try {
             log.debug("init runner");
-            Runner runner = new Runner(pool, sink, testSuites);
+            Runner runner = new Runner(name, pool, sink, testSuites);
             RunnerState state = new RunnerState(this::isStopped);
             this.state = state;
-            testSuiteReports = runner.runTestApp(state, flightPlan);
+            testSuiteReports = runner.runTestApp(state, flightPlan.getFlightId(), testAppPlan);
 
             log.debug("All test suites finished, state -> Idle ");
             this.state = IDLE;
@@ -167,7 +178,7 @@ public class TestApp {
 
         Instant finishTime = Instant.now();
         log.debug("Shutdown for each sink and watcher");
-        sink.shutDown(finishTime);
+        sink.afterTestApp(new TestAppFinishedEvent(finishTime, flightPlan.getFlightId(), name));
 
         watchers.stream()
                 .map(WatcherConfig::getWatcher)

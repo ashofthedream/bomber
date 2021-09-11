@@ -7,14 +7,16 @@ public class Iteration {
 
     private final long number;
     private final Stage stage;
+    private final String testApp;
     private final String testSuite;
     private final String testCase;
     private final String thread;
     private final Instant timestamp;
 
-    public Iteration(long number, Stage stage, String thread, Instant timestamp, String testSuite, String testCase) {
+    public Iteration(long number, Stage stage, String thread, Instant timestamp, String testApp, String testSuite, String testCase) {
         this.number = number;
         this.stage = stage;
+        this.testApp = testApp;
         this.testSuite = testSuite;
         this.testCase = testCase;
         this.thread = thread;
@@ -27,6 +29,10 @@ public class Iteration {
 
     public Stage getStage() {
         return stage;
+    }
+
+    public String getTestApp() {
+        return testApp;
     }
 
     public String getTestSuite() {
@@ -50,6 +56,7 @@ public class Iteration {
         return "Iteration{" +
                 "number=" + number +
                 ", stage=" + stage +
+                ", testApp='" + testApp + '\'' +
                 ", testSuite='" + testSuite + '\'' +
                 ", testCase='" + testCase + '\'' +
                 ", thread='" + thread + '\'' +

@@ -8,22 +8,22 @@ import java.util.stream.Collectors;
 public class TestFlightMapper {
 
     public static TestFlightPlan toPlan(TestFlightDto flight) {
-        var testSuites = flight.getTestSuites()
+        var testApps = flight.getTestApps()
                 .stream()
-                .map(TestSuiteMapper::toPlan)
+                .map(TestAppMapper::toPlan)
                 .collect(Collectors.toList());
 
-        return new TestFlightPlan(flight.getId(), testSuites);
+        return new TestFlightPlan(flight.getId(), testApps);
     }
 
     public static TestFlightDto toDto(TestFlightPlan flight) {
-        var testSuites = flight.getTestSuites()
+        var testApps = flight.getTestApps()
                 .stream()
-                .map(TestSuiteMapper::toDto)
+                .map(TestAppMapper::toDto)
                 .collect(Collectors.toList());
 
         return new TestFlightDto()
                 .setId(flight.getFlightId())
-                .setTestSuites(testSuites);
+                .setTestApps(testApps);
     }
 }

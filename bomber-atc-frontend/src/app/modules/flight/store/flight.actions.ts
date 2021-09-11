@@ -1,8 +1,17 @@
 import { Action } from '@ngrx/store';
+import { TestApp } from '../../app/models/test-app';
 import { Flight } from '../models/flight';
+import { TestFlight } from '../models/test-flight';
 
 
 export enum FlightAction {
+  StartAll = '[Flight] Start All',
+  StartFlight = '[Flight] Start Flight',
+  StartFlightSuccess = '[Flight] Start Flight Success',
+
+  StopFlight = '[Flight] Stop Flight',
+  StopFlightSuccess = '[Flight] Stop Flight Success',
+
   GetActiveFlight = '[Flight] Get Active Flight',
   GetActiveFlightSuccess = '[Flight] Get Active Flight Success',
 
@@ -11,8 +20,38 @@ export enum FlightAction {
 }
 
 export type FlightActions =
+    StartAll | StartFlight | StartFlightSuccess |
+    StopFlight | StopFlightSuccess |
     GetActiveFlight | GetActiveFlightSuccess |
     GetAllFlights | GetAllFlightsSuccess;
+
+
+export class StartAll implements Action {
+  public readonly type = FlightAction.StartAll;
+}
+
+export class StartFlight implements Action {
+  public readonly type = FlightAction.StartFlight;
+
+  public constructor(public readonly flight: TestFlight) {
+  }
+}
+
+export class StartFlightSuccess implements Action {
+  public readonly type = FlightAction.StartFlightSuccess;
+
+  public constructor(public readonly flightId: number) {
+  }
+}
+
+
+export class StopFlight implements Action {
+  public readonly type = FlightAction.StopFlight;
+}
+
+export class StopFlightSuccess implements Action {
+  public readonly type = FlightAction.StopFlightSuccess;
+}
 
 
 export class GetActiveFlight implements Action {

@@ -1,12 +1,17 @@
 package ashes.of.bomber.sink;
 
+import ashes.of.bomber.events.TestAppFinishedEvent;
+import ashes.of.bomber.events.TestAppStartedEvent;
+import ashes.of.bomber.events.TestCaseAfterEachEvent;
+import ashes.of.bomber.events.TestCaseBeforeEachEvent;
+import ashes.of.bomber.events.TestCaseFinishedEvent;
+import ashes.of.bomber.events.TestCaseStartedEvent;
+import ashes.of.bomber.events.TestSuiteFinishedEvent;
+import ashes.of.bomber.events.TestSuiteStartedEvent;
 import ashes.of.bomber.flight.Iteration;
-import ashes.of.bomber.configuration.Settings;
-import ashes.of.bomber.flight.Stage;
 import ashes.of.bomber.tools.Record;
 
 import javax.annotation.Nullable;
-import java.time.Instant;
 import java.util.List;
 
 public class MultiSink implements Sink {
@@ -18,18 +23,23 @@ public class MultiSink implements Sink {
     }
 
     @Override
-    public void startUp(Instant timestamp) {
-        sinks.forEach(sink -> sink.startUp(timestamp));
+    public void beforeTestApp(TestAppStartedEvent event) {
+        sinks.forEach(sink -> sink.beforeTestApp(event));
     }
 
     @Override
-    public void beforeTestSuite(Instant timestamp, String testSuite) {
-        sinks.forEach(sink -> sink.beforeTestSuite(timestamp, testSuite));
+    public void beforeTestSuite(TestSuiteStartedEvent event) {
+        sinks.forEach(sink -> sink.beforeTestSuite(event));
     }
 
     @Override
-    public void beforeTestCase(Instant timestamp, Stage stage, String testSuite, String testCase, Settings settings) {
-        sinks.forEach(sink -> sink.beforeTestCase(timestamp, stage, testSuite, testCase, settings));
+    public void beforeTestCase(TestCaseStartedEvent event) {
+        sinks.forEach(sink -> sink.beforeTestCase(event));
+    }
+
+    @Override
+    public void beforeEach(TestCaseBeforeEachEvent event) {
+        sinks.forEach(sink -> sink.beforeEach(event));
     }
 
     @Override
@@ -38,22 +48,22 @@ public class MultiSink implements Sink {
     }
 
     @Override
-    public void afterEach(Iteration it, long elapsed, @Nullable Throwable throwable) {
-        sinks.forEach(sink -> sink.afterEach(it, elapsed, throwable));
+    public void afterEach(TestCaseAfterEachEvent event) {
+        sinks.forEach(sink -> sink.afterEach(event));
     }
 
     @Override
-    public void afterTestCase(Stage stage, String testSuite, String testCase) {
-        sinks.forEach(sink -> sink.afterTestCase(stage, testSuite, testCase));
+    public void afterTestCase(TestCaseFinishedEvent event) {
+        sinks.forEach(sink -> sink.afterTestCase(event));
     }
 
     @Override
-    public void afterTestSuite(String testSuite) {
-        sinks.forEach(sink -> sink.afterTestSuite(testSuite));
+    public void afterTestSuite(TestSuiteFinishedEvent event) {
+        sinks.forEach(sink -> sink.afterTestSuite(event));
     }
 
     @Override
-    public void shutDown(Instant timestamp) {
-        sinks.forEach(sink -> sink.shutDown(timestamp));
+    public void afterTestApp(TestAppFinishedEvent event) {
+        sinks.forEach(sink -> sink.afterTestApp(event));
     }
 }

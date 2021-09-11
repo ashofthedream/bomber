@@ -6,14 +6,14 @@ export const carrierReducers = (state = initialCarrierState, action: CarrierActi
     case CarrierAction.GetActiveCarriers:
       return {
         ...state,
-        activeLoading: true
+        loadingActive: true
       };
 
     case CarrierAction.GetActiveCarriersSuccess:
       return {
         ...state,
-        active: action.carries,
-        activeLoading: false
+        active: action.carriers,
+        loadingActive: false
       };
 
     default:

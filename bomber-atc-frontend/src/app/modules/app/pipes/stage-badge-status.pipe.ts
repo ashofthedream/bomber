@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { Stage } from '../../main/models/application-state';
+import { Stage } from '../models/application-state';
 
 @Pipe({
   name: 'stageBadgeStatus',

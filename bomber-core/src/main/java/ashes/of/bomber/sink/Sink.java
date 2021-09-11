@@ -1,43 +1,40 @@
 package ashes.of.bomber.sink;
 
+import ashes.of.bomber.events.TestAppFinishedEvent;
+import ashes.of.bomber.events.TestAppStartedEvent;
+import ashes.of.bomber.events.TestCaseAfterEachEvent;
+import ashes.of.bomber.events.TestCaseBeforeEachEvent;
+import ashes.of.bomber.events.TestCaseFinishedEvent;
+import ashes.of.bomber.events.TestCaseStartedEvent;
+import ashes.of.bomber.events.TestSuiteFinishedEvent;
+import ashes.of.bomber.events.TestSuiteStartedEvent;
 import ashes.of.bomber.flight.Iteration;
-import ashes.of.bomber.configuration.Settings;
-import ashes.of.bomber.flight.Stage;
 import ashes.of.bomber.tools.Record;
 
 import javax.annotation.Nullable;
-import java.time.Instant;
 
 
 public interface Sink {
 
     /**
      * Invokes then app starts
-     *
-     * @param timestamp application start time
      */
-    default void startUp(Instant timestamp) {}
+    default void beforeTestApp(TestAppStartedEvent event) {}
 
     /**
      * Invokes before all test cases in suite
-     *
-     * @param timestamp test suite start time
-     * @param testSuite test suite name
      */
-    default void beforeTestSuite(Instant timestamp, String testSuite) {}
+    default void beforeTestSuite(TestSuiteStartedEvent event) {}
 
     /**
      * Invokes before test case run
-     *
-     * @param timestamp test case start time
-     * @param stage     stage
-     * @param testSuite test suite name
-     * @param testCase  test suite name
-     * @param settings  stage settings
      */
-    default void beforeTestCase(Instant timestamp, Stage stage, String testSuite, String testCase, Settings settings) {}
+    default void beforeTestCase(TestCaseStartedEvent event) {}
 
-    default void beforeEach(Iteration it) {}
+    /**
+     * Invokes after each test case invocation
+     */
+    default void beforeEach(TestCaseBeforeEachEvent event) {}
 
     /**
      * Invokes when time was recorded
@@ -48,33 +45,21 @@ public interface Sink {
 
     /**
      * Invokes after each test case invocation
-     *
-     * @param it current iteration
-     * @param elapsed   elapsed time in nanoseconds
-     * @param throwable thrown exception, if methods throws an exception
      */
-    default void afterEach(Iteration it, long elapsed, @Nullable Throwable throwable) {}
+    default void afterEach(TestCaseAfterEachEvent event) {}
 
     /**
      * Invokes before test case run
-     *
-     * @param stage     stage
-     * @param testSuite test suite name
-     * @param testCase  test suite name
      */
-    default void afterTestCase(Stage stage, String testSuite, String testCase) {}
+    default void afterTestCase(TestCaseFinishedEvent event) {}
 
     /**
      * Invokes after all tests in test suite
-     *
-     * @param testSuite test suite name
      */
-    default void afterTestSuite(String testSuite) {}
+    default void afterTestSuite(TestSuiteFinishedEvent event) {}
 
     /**
-     * Invokes then app
-     *
-     * @param timestamp application shutdown time
+     * Invokes then test app shuts down
      */
-    default void shutDown(Instant timestamp) {}
+    default void afterTestApp(TestAppFinishedEvent event) {}
 }

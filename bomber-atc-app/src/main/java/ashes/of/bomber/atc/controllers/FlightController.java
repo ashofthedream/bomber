@@ -3,7 +3,7 @@ package ashes.of.bomber.atc.controllers;
 import ashes.of.bomber.atc.dto.flights.FlightProgressDto;
 import ashes.of.bomber.atc.dto.flights.FlightDto;
 import ashes.of.bomber.atc.dto.flights.FlightRecordDto;
-import ashes.of.bomber.carrier.dto.requests.FlightsStartedResponse;
+import ashes.of.bomber.carrier.dto.requests.FlightStartedResponse;
 import ashes.of.bomber.carrier.mappers.TestFlightMapper;
 import ashes.of.bomber.atc.model.Flight;
 import ashes.of.bomber.atc.model.FlightRecord;
@@ -53,35 +53,49 @@ public class FlightController {
 
     // start with flight plan
     @PostMapping("/atc/flights/start")
-    public Mono<FlightsStartedResponse> start(@RequestBody StartFlightRequest request) {
+    public Mono<FlightStartedResponse> start(@RequestBody StartFlightRequest request) {
         log.debug("start all flights on all active carriers");
-        var plan = request.getPlan()
+        var plan = request.getFlight()
                 .setId(flightService.getNextFlightId());
 
         var flight = flightService.startFlight(TestFlightMapper.toPlan(plan));
         return carrierService.getCarriers()
                 .flatMap(carrier -> carrierService.start(carrier, flight))
                 .collectList()
-                .map(flights -> new FlightsStartedResponse()
-                        .setFlights(flights));
+                .map(flights -> {
+
+                    var flightIds = flights.stream()
+                            .map(FlightStartedResponse::getId)
+                            .distinct()
+                            .collect(Collectors.toList());
+
+                    if (flightIds.size() > 1) {
+                        log.warn("Non unique flights started: {}", flightIds);
+                    }
+
+                    var flightId = flightIds.stream()
+                            .findFirst()
+                            .orElseThrow(() -> new RuntimeException("No flights started"));
+
+                    return new FlightStartedResponse()
+                            .setId(flightId);
+                });
     }
 
     @PostMapping("/atc/flights/{carrierId}/applications/{appId}/start")
-    public Mono<FlightsStartedResponse> startApplicationOnCarrierById(
+    public Mono<FlightStartedResponse> startApplicationOnCarrierById(
             @PathVariable("carrierId") String carrierId,
             @PathVariable("appId") String appId,
             @RequestBody StartFlightRequest request) {
         log.debug("start application: {} on carrier: {}", appId, carrierId);
 
-        var plan = request.getPlan()
+        var plan = request.getFlight()
                 .setId(flightService.getNextFlightId());
 
         var flight = flightService.startFlight(TestFlightMapper.toPlan(plan));
 
         return carrierService.getCarrier(carrierId)
-                .flatMap(carrier -> carrierService.start(carrier, flight))
-                .map(started -> new FlightsStartedResponse()
-                        .setFlights(List.of(started)));
+                .flatMap(carrier -> carrierService.start(carrier, flight));
     }
 
 

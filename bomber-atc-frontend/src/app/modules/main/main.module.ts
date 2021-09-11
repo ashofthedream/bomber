@@ -22,7 +22,6 @@ import { SharedModule } from '../shared/shared.module';
 import { DashboardPageComponent } from './components/dashboard-page/dashboard-page.component';
 import { LoginPageComponent } from './components/login-page/login-page.component';
 import { MainMenuComponent } from './components/main-menu/main-menu.component';
-import { SettingsLabelComponent } from './components/settings-label/settings-label.component';
 import { AccountSettingsPageComponent } from './settings/components/account-settings-page/account-settings-page.component';
 
 registerLocaleData(en);
@@ -33,29 +32,30 @@ registerLocaleData(en);
     AccountSettingsPageComponent,
     DashboardPageComponent,
     LoginPageComponent,
-    MainMenuComponent,
-    SettingsLabelComponent,
+    MainMenuComponent
   ],
   imports: [
     CommonModule,
     BrowserModule,
     BrowserAnimationsModule,
     HttpClientModule,
+    ReactiveFormsModule,
 
     NzButtonModule,
+    NzCardModule,
     NzIconModule,
     NzGridModule,
     NzFormModule,
     NzPageHeaderModule,
     NzMenuModule,
     NzToolTipModule,
-    ReactiveFormsModule,
     NzInputModule,
+
+    AtcRoutingModule,
     CarrierModule,
     FlightModule,
-    AtcRoutingModule,
-    SharedModule,
-    NzCardModule
+
+    SharedModule
   ],
   exports: [
     AccountSettingsPageComponent,

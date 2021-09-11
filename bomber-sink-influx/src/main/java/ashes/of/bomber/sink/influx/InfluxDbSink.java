@@ -1,5 +1,6 @@
 package ashes.of.bomber.sink.influx;
 
+import ashes.of.bomber.events.TestCaseAfterEachEvent;
 import ashes.of.bomber.flight.Iteration;
 import ashes.of.bomber.tools.Record;
 import ashes.of.bomber.sink.Sink;
@@ -47,17 +48,20 @@ public class InfluxDbSink implements Sink {
     }
 
     @Override
-    public void afterEach(Iteration it, long elapsed, @Nullable Throwable throwable) {
-        String error = Optional.ofNullable(throwable).map(Throwable::getMessage).orElse("");
+    public void afterEach(TestCaseAfterEachEvent event) {
+        String error = Optional.ofNullable(event.getThrowable())
+                .map(Throwable::getMessage)
+                .orElse("");
+
         db.write(Point.measurement(testCollectionName)
-                .time(it.getTimestamp().toEpochMilli(), TimeUnit.MILLISECONDS)
-                .tag("stage",           it.getStage().name())
-                .tag("testSuite",       it.getTestSuite())
-                .tag("testCase",        it.getTestCase())
-                .tag("thread",          it.getThread())
+                .time(event.getTimestamp().toEpochMilli(), TimeUnit.MILLISECONDS)
+                .tag("stage",           event.getStage().name())
+                .tag("testSuite",       event.getTestSuite())
+                .tag("testCase",        event.getTestCase())
+                .tag("thread",          event.getWorker())
                 .tag("error",           error)
-                .addField("iteration",  it.getNumber())
-                .addField("elapsed",    elapsed)
+                .addField("iteration",  event.getNumber())
+                .addField("elapsed",    event.getElapsed())
                 .build());
     }
 

@@ -1,10 +1,10 @@
 package ashes.of.bomber.sink.histogram;
 
-import ashes.of.bomber.flight.Stage;
+import ashes.of.bomber.events.TestAppFinishedEvent;
+import ashes.of.bomber.events.TestCaseFinishedEvent;
 import ashes.of.bomber.sink.Sink;
 import ashes.of.bomber.tools.Record;
 
-import java.time.Instant;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -28,13 +28,13 @@ public class HistogramSink implements Sink {
     public void timeRecorded(Record record) {
         var it = record.getIteration();
         measurements
-                .computeIfAbsent(new MeasurementKey(it.getTestSuite(), it.getTestCase(), it.getStage()), Measurements::new)
+                .computeIfAbsent(new MeasurementKey(it.getTestApp(), it.getTestSuite(), it.getTestCase(), it.getStage()), Measurements::new)
                 .add(record);
     }
 
     @Override
-    public void afterTestCase(Stage stage, String testSuite, String testCase) {
-        var key = new MeasurementKey(testSuite, testCase, stage);
+    public void afterTestCase(TestCaseFinishedEvent event) {
+        var key = new MeasurementKey(event.getTestApp(), event.getTestSuite(), event.getTestCase(), event.getStage());
         var measurements = this.measurements.get(key);
         if (measurements != null) {
             printer.print(key, measurements);
@@ -42,7 +42,7 @@ public class HistogramSink implements Sink {
     }
 
     @Override
-    public void shutDown(Instant timestamp) {
+    public void afterTestApp(TestAppFinishedEvent event) {
         measurements.forEach(printer::print);
 
         measurements.clear();

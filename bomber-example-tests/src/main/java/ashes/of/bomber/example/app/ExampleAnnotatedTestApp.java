@@ -1,5 +1,6 @@
 package ashes.of.bomber.example.app;
 
+import ashes.of.bomber.Bomber;
 import ashes.of.bomber.annotations.LoadTest;
 import ashes.of.bomber.annotations.LoadTestApp;
 import ashes.of.bomber.annotations.Provide;
@@ -26,7 +27,7 @@ import java.time.temporal.ChronoUnit;
  */
 @LoadTestApp(testSuites = {
         UserControllerLoadTest.class,
-//        AccountControllerLoadTest.class
+        AccountControllerLoadTest.class
 })
 @LoadTest(threads = 2, time = 10)
 @Throttle(time = 1)
@@ -49,16 +50,21 @@ public class ExampleAnnotatedTestApp {
 
         BarrierBuilder barrier = members > 1 ? new ZookeeperBarrierBuilder().members(members) : new NoBarrier.Builder();
 
-        var report = TestAppBuilder.create(ExampleAnnotatedTestApp.class)
+        var builder = TestAppBuilder.create(ExampleAnnotatedTestApp.class)
+                .config(config -> config.barrier(barrier))
+                .watcher(1000, new Log4jWatcher())
+                .build();
+
+        var reports = new Bomber()
                 // log all times to console via log4j and HdrHistogram
-//                .sink(new Log4jSink())
+                // .sink(new Log4jSink())
                 .sink(new HistogramTimelineSink(ChronoUnit.SECONDS, new HistogramTimelinePrintStreamPrinter()))
                 .sink(new HistogramSink())
-                .watcher(1000, new Log4jWatcher())
-                .config(env -> env.barrier(barrier))
-                .build()
+                .watcher(new Log4jWatcher())
+                .add(builder)
                 .start();
 
+        var report = reports.stream().findFirst().orElseThrow();
 
         log.info("test report for flight: {}", report.getPlan().getFlightId());
         report.getTestSuites()

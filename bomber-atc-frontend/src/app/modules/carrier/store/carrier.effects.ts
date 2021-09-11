@@ -20,7 +20,7 @@ export class CarrierEffects {
 
   @Effect()
   public getActiveCarriersTimer(): Observable<GetActiveCarriers> {
-    return timer(0, 3000)
+    return timer(0, 10_000)
         .pipe(
             switchMap(n => this.store.select(isAuthenticated)),
             filter(auth => auth),

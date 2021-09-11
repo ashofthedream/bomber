@@ -1,9 +1,7 @@
-import { Application } from '../../main/models/application';
+import { TestApp } from '../../app/models/test-app';
 
-export class Carrier {
+export interface Carrier {
   id: string;
   uri: string;
-  app: Application;
-
-  selected = true;
+  apps: TestApp[];
 }

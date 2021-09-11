@@ -16,6 +16,6 @@ export class GetActiveCarriers implements Action {
 export class GetActiveCarriersSuccess implements Action {
   public readonly type = CarrierAction.GetActiveCarriersSuccess;
 
-  public constructor(public readonly carries: Carrier[]) {
+  public constructor(public readonly carriers: Carrier[]) {
   }
 }

@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { Application } from '../../../main/models/application';
+import { TestApp } from '../../models/test-app';
 
 @Component({
   selector: 'atc-app-label',
@@ -8,6 +8,6 @@ import { Application } from '../../../main/models/application';
 export class AppLabelComponent {
 
   @Input()
-  app: Application;
+  app: TestApp;
 
 }

@@ -26,7 +26,7 @@ public class CarrierController {
         var registration = carrierService.getRegistration();
 
         var dto = new CarrierDto()
-                .setInstanceId(registration.getInstanceId());
+                .setId(registration.getInstanceId());
 
         return Mono.just(dto);
     }

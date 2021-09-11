@@ -1,4 +1,4 @@
-import { ApplicationState } from '../../main/models/application-state';
+import { ApplicationState } from '../../app/models/application-state';
 
 export interface FlightRecord {
   timestamp: number;

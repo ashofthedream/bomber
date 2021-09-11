@@ -1,11 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { ApplicationState } from '../../../main/models/application-state';
+import { ApplicationState } from '../../../app/models/application-state';
 import { AtcState } from '../../../shared/store/atc.state';
 import { activeFlight, activeFlightHistogram } from '../../store/flight.selectors';
 
 @Component({
-  selector: 'atc-flights-active-page',
+  selector: 'atc-flights-active',
   templateUrl: './active-flight-page.component.html'
 })
 export class ActiveFlightPageComponent implements OnInit {
@@ -21,6 +21,7 @@ export class ActiveFlightPageComponent implements OnInit {
   private p095data = [];
   private p100data = [];
   private timer: any;
+  private count = 0;
 
   constructor(private readonly store: Store<AtcState>) {
   }
@@ -28,7 +29,7 @@ export class ActiveFlightPageComponent implements OnInit {
   ngOnInit(): void {
     this.value = Math.random() * 1000;
 
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < 100; i ++) {
       // let data = this.randomData();
       // this.p050data.push(data[0]);
       // this.p095data.push(data[1]);
@@ -42,18 +43,18 @@ export class ActiveFlightPageComponent implements OnInit {
         align: 'left',
       },
       // title: {
-        // text: 'Time Percentiles'
+      // text: 'Time Percentiles'
       // },
       // tooltip: {
       //   trigger: 'axis',
-        // formatter: (params) => {
-        //   params = params[0];
-        //   const date = new Date(params.name);
-        //   return date.toString();
-        // },
-        // axisPointer: {
-        //   animation: false
-        // }
+      // formatter: (params) => {
+      //   params = params[0];
+      //   const date = new Date(params.name);
+      //   return date.toString();
+      // },
+      // axisPointer: {
+      //   animation: false
+      // }
       // },
       xAxis: {
         type: 'value',
@@ -69,62 +70,62 @@ export class ActiveFlightPageComponent implements OnInit {
         // }
       },
       series: [
-          {
-            name: 'min',
-            type: 'line',
-            showSymbol: false,
-            hoverAnimation: false,
-            data: []
-          },
-          {
-            name: 'mean',
-            type: 'line',
-            showSymbol: false,
-            hoverAnimation: false,
-            data: []
-          },
-          {
-            name: '0.75000p',
-            type: 'line',
-            showSymbol: false,
-            hoverAnimation: false,
-            data: []
-          },
-          {
-            name: '0.90000p',
-            type: 'line',
-            showSymbol: false,
-            hoverAnimation: false,
-            data: []
-          },
-          {
-            name: '0.95000p',
-            type: 'line',
-            showSymbol: false,
-            hoverAnimation: false,
-            data: []
-          },
-          {
-            name: '0.99000p',
-            type: 'line',
-            showSymbol: false,
-            hoverAnimation: false,
-            data: []
-          },
-          {
-            name: '0.99900p',
-            type: 'line',
-            showSymbol: false,
-            hoverAnimation: false,
-            data: []
-          },
-          {
-              name: 'max',
-              type: 'line',
-              showSymbol: false,
-              hoverAnimation: false,
-              data: this.p100data
-          }]
+        {
+          name: 'min',
+          type: 'line',
+          showSymbol: false,
+          hoverAnimation: false,
+          data: []
+        },
+        {
+          name: 'mean',
+          type: 'line',
+          showSymbol: false,
+          hoverAnimation: false,
+          data: []
+        },
+        {
+          name: '0.75000p',
+          type: 'line',
+          showSymbol: false,
+          hoverAnimation: false,
+          data: []
+        },
+        {
+          name: '0.90000p',
+          type: 'line',
+          showSymbol: false,
+          hoverAnimation: false,
+          data: []
+        },
+        {
+          name: '0.95000p',
+          type: 'line',
+          showSymbol: false,
+          hoverAnimation: false,
+          data: []
+        },
+        {
+          name: '0.99000p',
+          type: 'line',
+          showSymbol: false,
+          hoverAnimation: false,
+          data: []
+        },
+        {
+          name: '0.99900p',
+          type: 'line',
+          showSymbol: false,
+          hoverAnimation: false,
+          data: []
+        },
+        {
+          name: 'max',
+          type: 'line',
+          showSymbol: false,
+          hoverAnimation: false,
+          data: this.p100data
+        }]
     };
 
 
@@ -146,17 +147,17 @@ export class ActiveFlightPageComponent implements OnInit {
           });
 
           this.updateOptions = {
-              series: [
-                  { data: [] },
-                  { data: mean },
-                  { data: [] },
-                  { data: [] },
-                  { data: [] },
-                  { data: [] },
-                  { data: [] },
-                  { data: max }
-              ]
-            };
+            series: [
+              { data: [] },
+              { data: mean },
+              { data: [] },
+              { data: [] },
+              { data: [] },
+              { data: [] },
+              { data: [] },
+              { data: max }
+            ]
+          };
         });
 
     // Mock dynamic data:
@@ -183,11 +184,9 @@ export class ActiveFlightPageComponent implements OnInit {
     // }, 1000);
   }
 
-
-  private count = 0;
   randomData() {
     const now = new Date();
-    this.count++;
+    this.count ++;
     this.value = this.value + Math.random() * 21 - 10;
     const mean = Math.round(this.value);
     const p75 = Math.round(mean * ( 1 + Math.random() * 0.05 ));
@@ -196,15 +195,15 @@ export class ActiveFlightPageComponent implements OnInit {
     // return [mean, p95 + 100, max + 100];
     return [{
         // name: now.toString(),
-        value: [this.count - 1 , mean]
+        value: [this.count - 1, mean]
       },
       {
         // name: now.toString(),
-        value: [this.count - 1 , p95]
+        value: [this.count - 1, p95]
       },
       {
         // name: now.toString(),
-        value: [this.count - 1 , max]
+        value: [this.count - 1, max]
       }];
   }
 

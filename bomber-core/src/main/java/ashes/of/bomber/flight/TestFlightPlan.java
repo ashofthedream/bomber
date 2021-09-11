@@ -3,19 +3,20 @@ package ashes.of.bomber.flight;
 import java.util.List;
 
 public class TestFlightPlan {
-    private final long flightId;
-    private final List<TestSuitePlan> testSuites;
+    private final Long flightId;
 
-    public TestFlightPlan(long flightId, List<TestSuitePlan> testSuites) {
+    private final List<TestAppPlan> testApps;
+
+    public TestFlightPlan(Long flightId, List<TestAppPlan> testApps) {
         this.flightId = flightId;
-        this.testSuites = testSuites;
+        this.testApps = testApps;
     }
 
-    public long getFlightId() {
+    public Long getFlightId() {
         return flightId;
     }
 
-    public List<TestSuitePlan> getTestSuites() {
-        return testSuites;
+    public List<TestAppPlan> getTestApps() {
+        return testApps;
     }
 }

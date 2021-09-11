@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { TestApp } from '../../app/models/test-app';
 import { Carrier } from '../../carrier/models/carrier';
-import { Application } from '../../main/models/application';
 import { RestService } from '../../shared/services/rest.service';
 import { Flight } from '../models/flight';
+import { TestFlight } from '../models/test-flight';
 
 @Injectable({
   providedIn: 'root'
@@ -22,11 +23,11 @@ export class FlightService {
   }
 
 
-  public startAll(): Observable<any> {
-    return this.rest.post(`flights/start`);
+  public startFlight(flight: TestFlight): Observable<any> {
+    return this.rest.post(`flights/start`, {flight});
   }
 
-  public start(carrier: Carrier, app: Application): Observable<any> {
+  public start(carrier: Carrier, app: TestApp): Observable<any> {
     return this.rest.post(`flights/${carrier.id}/applications/${app.name}/start`);
   }
 
@@ -35,7 +36,7 @@ export class FlightService {
     return this.rest.post(`flights/stop`);
   }
 
-  public stop(carrier: Carrier, app: Application): Observable<any> {
+  public stop(carrier: Carrier, app: TestApp): Observable<any> {
     return this.rest.post(`flights/${carrier.id}/applications/${app.name}/stop`);
   }
 }

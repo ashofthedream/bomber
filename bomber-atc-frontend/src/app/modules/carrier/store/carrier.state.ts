@@ -2,10 +2,10 @@ import { Carrier } from '../models/carrier';
 
 export interface CarrierState {
   active: Carrier[];
-  activeLoading: boolean;
+  loadingActive: boolean;
 }
 
 export const initialCarrierState: CarrierState = {
   active: [],
-  activeLoading: false
+  loadingActive: false
 };

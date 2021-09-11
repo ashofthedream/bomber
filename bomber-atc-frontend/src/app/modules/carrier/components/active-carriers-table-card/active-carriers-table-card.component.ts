@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { AtcState } from '../../../shared/store/atc.state';
+import { Carrier } from '../../models/carrier';
 import { activeCarriers, activeCarriersLoading, hasActiveCarriers } from '../../store/carrier.selectors';
 
 @Component({
@@ -14,5 +15,9 @@ export class ActiveCarriersTableCardComponent {
   activeCarriersLoading = this.store.select(activeCarriersLoading);
 
   constructor(private readonly store: Store<AtcState>) {
+  }
+
+  check(carrier: Carrier, event: boolean) {
+
   }
 }

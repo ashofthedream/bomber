@@ -8,21 +8,26 @@
     <ul>
       <li nz-menu-item routerLink="/carriers/active" nzMatchRouter>
         <i nz-icon nzType="fire" nzTheme="fill"></i>
-        <span>Active</span>
+        <span>Active <span *ngIf="activeCarriersCount | async let count">({{count}})</span></span>
       </li>
     </ul>
   </li>
 
   <li nz-submenu nzTitle="Test Flights" nzIcon="rocket" nzOpen="true">
     <ul>
-      <li nz-menu-item routerLink="/flights/active" nzMatchRouter>
+      <li nz-menu-item routerLink="/flights/create" nzMatchRouter>
+        <i nz-icon nzType="rocket" nzTheme="fill"></i>
+        <span>Create</span>
+      </li>
+
+      <li nz-menu-item routerLink="/flights/active" nzMatchRouter [nzDisabled]="hasNoActiveFlight | async">
         <i nz-icon nzType="rocket" nzTheme="fill"></i>
         <span>Active</span>
       </li>
 
-      <li nz-menu-item routerLink="/flights/all" nzMatchRouter>
+      <li nz-menu-item routerLink="/flights/all" nzMatchRouter nzDisabled>
         <i nz-icon nzType="rocket" nzTheme="fill"></i>
-        <span>All</span>
+        <span>History</span>
       </li>
     </ul>
   </li>

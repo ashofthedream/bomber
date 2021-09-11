@@ -3,8 +3,9 @@ package ashes.of.bomber.carrier.starter.sink;
 import ashes.of.bomber.carrier.dto.events.HistogramPointDto;
 import ashes.of.bomber.carrier.dto.events.SinkEvent;
 import ashes.of.bomber.carrier.starter.services.CarrierService;
+import ashes.of.bomber.events.TestAppFinishedEvent;
+import ashes.of.bomber.events.TestCaseFinishedEvent;
 import ashes.of.bomber.flight.TestFlightPlan;
-import ashes.of.bomber.flight.Stage;
 import ashes.of.bomber.runner.TestApp;
 import ashes.of.bomber.sink.Sink;
 import ashes.of.bomber.sink.histogram.HistogramTimelineDummyPrinter;
@@ -15,9 +16,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.cloud.zookeeper.serviceregistry.ServiceInstanceRegistration;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
 
-import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
@@ -28,8 +27,6 @@ import static ashes.of.bomber.carrier.dto.events.SinkEventType.TEST_CASE_HISTOGR
 @Component
 public class CarrierHistogramTimelineHttpSink implements Sink {
     private static final Logger log = LogManager.getLogger();
-    private final WebClient webClient = WebClient.builder()
-            .build();
 
     private final AtomicLong lastUpdate = new AtomicLong(0);
     private final HistogramTimelineSink sink;
@@ -52,7 +49,7 @@ public class CarrierHistogramTimelineHttpSink implements Sink {
         var last = lastUpdate.get();
         if (last != current && lastUpdate.compareAndSet(last, current)) {
             var it = record.getIteration();
-            var key = new MeasurementKey(it.getTestSuite(), it.getTestCase(), it.getStage());
+            var key = new MeasurementKey(it.getTestApp(), it.getTestSuite(), it.getTestCase(), it.getStage());
             sendHistogramByKey(key);
         }
     }
@@ -96,7 +93,8 @@ public class CarrierHistogramTimelineHttpSink implements Sink {
                 .setTimestamp(System.currentTimeMillis())
                 .setFlightId(Optional.ofNullable(app.getFlightPlan()).map(TestFlightPlan::getFlightId).orElse(0L))
                 .setCarrierId(registration.getServiceInstance().getId())
-                .setStage(key.getStage().name())
+                .setStage(key.getStage())
+                .setTestApp(key.getTestApp())
                 .setTestSuite(key.getTestSuite())
                 .setTestCase(key.getTestCase())
                 .setHistograms(histograms)
@@ -108,15 +106,15 @@ public class CarrierHistogramTimelineHttpSink implements Sink {
     }
 
     @Override
-    public void afterTestCase(Stage stage, String testSuite, String testCase) {
-        sink.afterTestCase(stage, testSuite, testCase);
-        var key = new MeasurementKey(testSuite, testCase, stage);
+    public void afterTestCase(TestCaseFinishedEvent event) {
+        sink.afterTestCase(event);
+        var key = new MeasurementKey(event.getTestApp(), event.getTestSuite(), event.getTestCase(), event.getStage());
         sendHistogramByKey(key);
     }
 
     @Override
-    public void shutDown(Instant timestamp) {
-        sink.shutDown(timestamp);
+    public void afterTestApp(TestAppFinishedEvent event) {
+        sink.afterTestApp(event);
     }
 
     private void send(SinkEvent event) {

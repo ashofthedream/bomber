@@ -1,12 +1,10 @@
 package ashes.of.bomber.sink;
 
-import ashes.of.bomber.flight.Iteration;
+import ashes.of.bomber.events.TestCaseAfterEachEvent;
 import ashes.of.bomber.tools.Record;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import javax.annotation.Nullable;
 
 
 public class Log4jSink implements Sink {
@@ -29,8 +27,8 @@ public class Log4jSink implements Sink {
     }
 
     @Override
-    public void afterEach(Iteration it, long elapsed, @Nullable Throwable throwable) {
-        if (throwable != null)
-            log.error("{}.{} #{}", it.getTestSuite(), it.getTestCase(), it.getNumber(), throwable);
+    public void afterEach(TestCaseAfterEachEvent event) {
+        if (event.getThrowable() != null)
+            log.error("{}.{} #{}", event.getTestSuite(), event.getTestCase(), event.getNumber(), event.getThrowable());
     }
 }

@@ -12,9 +12,13 @@ import { en_US, NZ_I18N } from 'ng-zorro-antd/i18n';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
 import { AtcRoutingModule } from './atc-routing.module';
 import { AtcComponent } from './atc.component';
+import { AppModule } from './modules/app/app.module';
+import { AppEffects } from './modules/app/store/app.effects';
+import { AuthModule } from './modules/auth/auth.module';
 import { AuthEffects } from './modules/auth/store/auth.effects';
 import { CarrierModule } from './modules/carrier/carrier.module';
 import { CarrierEffects } from './modules/carrier/store/carrier.effects';
+import { FlightModule } from './modules/flight/flight.module';
 import { FlightEffects } from './modules/flight/store/flight.effects';
 import { MainModule } from './modules/main/main.module';
 import { AuthRequiredInterceptor } from './modules/shared/interceptors/auth-required.interceptor';
@@ -31,18 +35,25 @@ registerLocaleData(en);
     AtcComponent
   ],
   imports: [
-    CarrierModule,
-    SharedModule,
-    MainModule,
     BrowserModule,
-    AtcRoutingModule,
+
     NzLayoutModule,
     FormsModule,
     HttpClientModule,
     BrowserAnimationsModule,
+
+    AppModule,
+    CarrierModule,
+    AuthModule,
+    FlightModule,
+    SharedModule,
+    MainModule,
+    AtcRoutingModule,
+
     StoreModule.forRoot(atcReducers),
     EffectsModule.forRoot([
         TraceEffects,
+        AppEffects,
         AuthEffects,
         CarrierEffects,
         FlightEffects,

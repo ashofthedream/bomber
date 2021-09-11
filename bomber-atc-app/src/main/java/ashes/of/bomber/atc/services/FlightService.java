@@ -42,7 +42,11 @@ public class FlightService {
                 .flatMap(carrierService::status)
                 .subscribe(carrier -> {
                     FlightProgress progress = flight.getOrCreateCarrierProgress(carrier.getId());
-                    progress.add(carrier.getApp().getState());
+
+                    carrier.getApps()
+                            .forEach(app -> {
+                                progress.add(app.getState());
+                            });
                 });
     }
 
@@ -80,8 +84,10 @@ public class FlightService {
 
     // todo potential race condition
     public Flight startFlight(TestFlightPlan plan) {
-        if (active != null)
-            throw new RuntimeException("Already started");
+        if (active != null) {
+            log.warn("Already stared, but today I don't cate about it");
+//            throw new RuntimeException("Already started");
+        }
 
         Flight flight = new Flight(plan);
         active = flight;

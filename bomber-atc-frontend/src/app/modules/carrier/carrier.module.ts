@@ -12,14 +12,12 @@ import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzTreeModule } from 'ng-zorro-antd/tree';
 import { NzTreeViewModule } from 'ng-zorro-antd/tree-view';
+import { AppModule } from '../app/app.module';
 import { CarrierRoutingModule } from './carrier-routing.module';
-import { ActiveAppsTreeCardComponent } from './components/active-apps-tree/active-apps-tree-card.component';
 import { ActiveCarriersListCardComponent } from './components/active-carriers-list-card/active-carriers-list-card.component';
 import { ActiveCarriersPageComponent } from './components/active-carriers-page/active-carriers-page.component';
 import { ActiveCarriersTableCardComponent } from './components/active-carriers-table-card/active-carriers-table-card.component';
-import { AppLabelComponent } from './components/app-label/app-label.component';
 import { CarrierLabelComponent } from './components/carrier-label/carrier-label.component';
-import { StageBadgeStatusPipe } from './pipes/stage-badge-status.pipe';
 
 
 registerLocaleData(en);
@@ -27,13 +25,10 @@ registerLocaleData(en);
 
 @NgModule({
   declarations: [
-    ActiveAppsTreeCardComponent,
     ActiveCarriersListCardComponent,
     ActiveCarriersTableCardComponent,
     ActiveCarriersPageComponent,
-    AppLabelComponent,
-    CarrierLabelComponent,
-    StageBadgeStatusPipe
+    CarrierLabelComponent
   ],
   imports: [
     CommonModule,
@@ -46,9 +41,11 @@ registerLocaleData(en);
     NzTableModule,
     NzTreeModule,
     NzPageHeaderModule,
-    CarrierRoutingModule,
     NzSpinModule,
-    NzTreeViewModule
+    NzTreeViewModule,
+
+    CarrierRoutingModule,
+    AppModule
   ],
   exports: [
     ActiveCarriersListCardComponent

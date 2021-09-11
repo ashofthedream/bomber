@@ -1,8 +1,8 @@
 import { ApplicationState } from './application-state';
 import { TestSuite } from './test-suite';
 
-export interface Application {
+export interface TestApp {
   name: string;
-  state: ApplicationState;
+  state?: ApplicationState;
   testSuites: TestSuite[];
 }

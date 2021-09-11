@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 
 @Component({
-  selector: 'settings-account-page',
+  selector: 'atc-settings-account',
   templateUrl: './account-settings-page.component.html'
 })
 export class AccountSettingsPageComponent {

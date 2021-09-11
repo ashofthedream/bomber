@@ -5,20 +5,24 @@
       <tr>
         <th></th>
         <th>Carrier</th>
-        <th>Test Suites</th>
+        <th>Test Applications</th>
       </tr>
       </thead>
       <tbody>
       <tr *ngFor="let carrier of activeCarriers | async">
-        <td [nzShowCheckbox]="true" [(nzChecked)]="carrier.selected"></td>
+        <td [nzShowCheckbox]="true" (nzCheckedChange)="check(carrier, $event)"></td>
         <td>
           <atc-carrier-label [carrier]="carrier"></atc-carrier-label>
         </td>
         <td>
-          <p *ngFor="let testSuite of carrier.app.testSuites">
-            <strong>{{testSuite.name}}</strong><br/>
-            <span *ngFor="let testCase of testSuite.testCases">&nbsp;&nbsp;&nbsp;&nbsp;{{testCase.name}}<br/></span>
-          </p>
+
+          <span *ngFor="let testApp of carrier.apps">
+            <strong>{{testApp.name}}</strong><br/>
+            <span *ngFor="let testSuite of testApp.testSuites">
+              <span>&nbsp;&nbsp;&nbsp;&nbsp;{{testSuite.name}}</span><br/>
+              <span *ngFor="let testCase of testSuite.testCases">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{testCase.name}}<br/></span>
+            </span>
+          </span>
         </td>
       </tr>
       </tbody>

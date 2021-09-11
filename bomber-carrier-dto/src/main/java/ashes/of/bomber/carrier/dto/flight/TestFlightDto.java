@@ -3,24 +3,32 @@ package ashes.of.bomber.carrier.dto.flight;
 import java.util.List;
 
 public class TestFlightDto {
-    private long id;
-    private List<TestSuiteDto> testSuites;
+    private Long id;
+    private List<TestAppDto> testApps;
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
-    public TestFlightDto setId(long id) {
+    public TestFlightDto setId(Long id) {
         this.id = id;
         return this;
     }
 
-    public List<TestSuiteDto> getTestSuites() {
-        return testSuites;
+    public List<TestAppDto> getTestApps() {
+        return testApps;
     }
 
-    public TestFlightDto setTestSuites(List<TestSuiteDto> testSuites) {
-        this.testSuites = testSuites;
+    public TestFlightDto setTestApps(List<TestAppDto> testApps) {
+        this.testApps = testApps;
         return this;
+    }
+
+    @Override
+    public String toString() {
+        return "TestFlightDto{" +
+                "id=" + id +
+                ", testApps=" + testApps +
+                '}';
     }
 }

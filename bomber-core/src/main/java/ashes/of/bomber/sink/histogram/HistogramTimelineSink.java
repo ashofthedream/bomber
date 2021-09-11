@@ -1,6 +1,7 @@
 package ashes.of.bomber.sink.histogram;
 
-import ashes.of.bomber.flight.Stage;
+import ashes.of.bomber.events.TestAppFinishedEvent;
+import ashes.of.bomber.events.TestCaseFinishedEvent;
 import ashes.of.bomber.sink.Sink;
 import ashes.of.bomber.tools.Record;
 import org.apache.logging.log4j.LogManager;
@@ -84,15 +85,15 @@ public class HistogramTimelineSink implements Sink {
     public void timeRecorded(Record record) {
         var it = record.getIteration();
         var ts = it.getTimestamp().truncatedTo(resolution);
-        var key = new MeasurementKey(it.getTestSuite(), it.getTestCase(), it.getStage());
+        var key = new MeasurementKey(it.getTestApp(), it.getTestSuite(), it.getTestCase(), it.getStage());
         timeline.computeIfAbsent(key, k -> new ConcurrentSkipListMap<>())
                 .computeIfAbsent(ts, timestamp -> new Measurements(key))
                 .add(record);
     }
 
     @Override
-    public void afterTestCase(Stage stage, String testSuite, String testCase) {
-        var key = new MeasurementKey(testSuite, testCase, stage);
+    public void afterTestCase(TestCaseFinishedEvent event) {
+        var key = new MeasurementKey(event.getTestApp(), event.getTestSuite(), event.getTestCase(), event.getStage());
         var measurements = timeline.get(key);
         if (measurements != null) {
             printer.print(resolution, measurements);
@@ -100,7 +101,7 @@ public class HistogramTimelineSink implements Sink {
     }
 
     @Override
-    public void shutDown(Instant timestamp) {
+    public void afterTestApp(TestAppFinishedEvent event) {
         printer.print(resolution, timeline);
 
         timeline.clear();

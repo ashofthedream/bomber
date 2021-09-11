@@ -1,14 +1,14 @@
 <nz-page-header [nzGhost]="false">
   <nz-page-header-title>Active Carriers</nz-page-header-title>
   <nz-page-header-extra>
-    <button nz-button nzType="primary" (click)="startAll()" [disabled]="isStartButtonDisabled | async">Start All</button>
-    <button nz-button nzType="default" (click)="stopAll()" [disabled]="isStopButtonDisabled | async">Stop All</button>
+    <button nz-button nzType="primary" (click)="startAll()" [disabled]="isStartDisabled | async">Start All</button>
+    <button nz-button nzType="default" (click)="stopAll()" [disabled]="isStopDisabled | async">Stop All</button>
   </nz-page-header-extra>
 </nz-page-header>
 
 <div nz-row nzGutter="10" class="lower-block">
   <div nz-col nzSpan="8">
-    <atc-applications-active-tree-card></atc-applications-active-tree-card>
+    <atc-app-active></atc-app-active>
   </div>
 
   <div nz-col nzSpan="16">

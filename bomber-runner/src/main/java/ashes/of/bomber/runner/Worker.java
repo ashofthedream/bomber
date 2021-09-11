@@ -1,6 +1,10 @@
 package ashes.of.bomber.runner;
 
 import ashes.of.bomber.descriptions.WorkerDescription;
+import ashes.of.bomber.events.TestCaseAfterEachEvent;
+import ashes.of.bomber.events.TestCaseBeforeEachEvent;
+import ashes.of.bomber.events.TestCaseFinishedEvent;
+import ashes.of.bomber.events.TestCaseStartedEvent;
 import ashes.of.bomber.flight.Iteration;
 import ashes.of.bomber.configuration.Settings;
 import ashes.of.bomber.flight.Stage;
@@ -68,14 +72,15 @@ public class Worker {
         throw new RuntimeException("Hey, you can't run task on " + thread.getName() + ". It's terrible situation and should be fixed");
     }
 
-    public void runTestCase(RunnerState state, TestSuite<Object> testSuite, TestCase<Object> testCase, Stage stage, Settings settings,
+    public void runTestCase(RunnerState state, long flightId, String testApp, TestSuite<Object> testSuite, TestCase<Object> testCase, Stage stage, Settings settings,
                             CountDownLatch startLatch, CountDownLatch endLatch, Sink sink, Barrier barrier) {
         this.state = new WorkerState(state, startLatch, endLatch, sink, barrier);
-        run(() -> runTestCase(testSuite, testCase, stage, settings, this.state));
+        run(() -> runTestCase(flightId, testApp, testSuite, testCase, stage, settings, this.state));
     }
 
-    private void runTestCase(TestSuite<Object> testSuite, TestCase<Object> testCase, Stage stage, Settings settings, WorkerState state) {
+    private void runTestCase(long flightId, String testApp, TestSuite<Object> testSuite, TestCase<Object> testCase, Stage stage, Settings settings, WorkerState state) {
 
+        ThreadContext.put("flightId", String.valueOf(flightId));
         ThreadContext.put("testSuite", testSuite.getName());
         ThreadContext.put("testCase", testCase.getName());
         ThreadContext.put("stage", stage.name());
@@ -106,7 +111,7 @@ public class Worker {
         barrier.enterCase(stage, testSuite.getName(), testCase.getName());
 
         if (runnerState.needCallSinkBeforeTestCase())
-            sink.beforeTestCase(state.getTestCaseStartTime(), stage, testSuite.getName(), testCase.getName(), settings);
+            sink.beforeTestCase(new TestCaseStartedEvent(state.getTestCaseStartTime(), flightId, testApp, testSuite.getName(), testCase.getName(), stage, settings));
 
         log.debug("Start testCase: {}", testCase.getName());
 
@@ -118,14 +123,14 @@ public class Worker {
             if (!limiter.waitForPermit())
                 throw new RuntimeException("Limiter await failed");
 
-            Iteration it = new Iteration(state.nextIterationNumber(), stage, threadName, Instant.now(), testSuite.getName(), testCase.getName());
+            Iteration it = new Iteration(state.nextIterationNumber(), stage, threadName, Instant.now(), testApp, testSuite.getName(), testCase.getName());
             if (runnerState.needUpdate()) {
                 var remainIt = runnerState.getTotalIterationsRemain();
                 log.debug("Current progress. iterations count: {}, remain count: {}, remain time: {}ms",
                         settings.getTotalIterationsCount() - remainIt, remainIt, runnerState.getCaseRemainTime());
             }
             testSuite.beforeEach(it, instance);
-            sink.beforeEach(it);
+            sink.beforeEach(new TestCaseBeforeEachEvent(it.getTimestamp(), flightId, testApp, testSuite.getName(), testCase.getName(), stage));
             Tools tools = new Tools(it, record -> {
                 sink.timeRecorded(record);
                 state.addCaughtCount(1);
@@ -144,12 +149,12 @@ public class Worker {
 
                 long expected = tools.getStopwatchCount() - (testCase.isAsync() ? 1 : 0);
                 state.addExpectedCount(expected);
-                sink.afterEach(it, stopwatch.elapsed(), null);
+                sink.afterEach(new TestCaseAfterEachEvent(it.getTimestamp(), flightId, testApp, testSuite.getName(), testCase.getName(), stage, threadName, it.getNumber(), stopwatch.elapsed(), null));
             } catch (Throwable th) {
                 if (!testCase.isAsync())
                     stopwatch.fail(th);
 
-                sink.afterEach(it, stopwatch.elapsed(), th);
+                sink.afterEach(new TestCaseAfterEachEvent(it.getTimestamp(), flightId, testApp, testSuite.getName(), testCase.getName(), stage, threadName, it.getNumber(), stopwatch.elapsed(), th));
                 log.warn("Call testCase: {} failed, it: {}", testCase.getName(), it, th);
             }
 
@@ -180,7 +185,7 @@ public class Worker {
         log.trace("Try finish testCase: {} -> barrier leave", testCase.getName());
         barrier.leaveCase(stage, testSuite.getName(), testCase.getName());
         if (runnerState.needCallSinkAfterTestCase())
-            sink.afterTestCase(stage, testSuite.getName(), testCase.getName());
+            sink.afterTestCase(new TestCaseFinishedEvent(Instant.now(), flightId, testApp, testSuite.getName(), testCase.getName(), stage));
         state.finishCase();
         testSuite.afterCase(instance);
         log.debug("Finish testCase: {}", testCase.getName());

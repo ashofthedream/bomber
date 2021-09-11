@@ -4,7 +4,7 @@ import ashes.of.bomber.carrier.dto.ApplicationDto;
 import ashes.of.bomber.carrier.dto.requests.FlightStartedResponse;
 import ashes.of.bomber.carrier.dto.requests.StartFlightRequest;
 import ashes.of.bomber.carrier.mappers.TestFlightMapper;
-import ashes.of.bomber.carrier.mappers.ApplicationMapper;
+import ashes.of.bomber.carrier.mappers.TestAppMapper;
 import ashes.of.bomber.flight.TestFlightPlan;
 import ashes.of.bomber.runner.TestApp;
 import org.apache.logging.log4j.LogManager;
@@ -28,28 +28,27 @@ public class ApplicationController {
         this.app = app;
     }
 
-    @GetMapping("/applications")
+    @GetMapping("/carrier/applications")
     public ResponseEntity<ApplicationDto> getApplications() {
         log.debug("get applications");
         var desc = app.getDescription();
 
 
-        return ResponseEntity.ok(ApplicationMapper.toDto(app.getDescription()));
+        return ResponseEntity.ok(TestAppMapper.toDto(app.getDescription()));
     }
 
-    @PostMapping("/applications/start")
+    @PostMapping("/carrier/applications/start")
     public ResponseEntity<FlightStartedResponse> start(@RequestBody StartFlightRequest request) {
-        log.info("start all applications");
-        TestFlightPlan plan = TestFlightMapper.toPlan(request.getPlan());
+        log.info("start all applications by request: {}", request);
+        TestFlightPlan plan = TestFlightMapper.toPlan(request.getFlight());
 
-        app.startAsync();
-//        app.startAsync(plan);
+        app.startAsync(plan);
 
         return ResponseEntity.ok(new FlightStartedResponse()
                 .setId(plan.getFlightId()));
     }
 
-    @PostMapping("/applications/stop")
+    @PostMapping("/carrier/applications/stop")
     public ResponseEntity<?> stop() {
         log.info("stop application");
         app.stop();

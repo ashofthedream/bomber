@@ -1,40 +1,26 @@
 import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { FlightService } from '../../../flight/services/flight.service';
+import { StartAll, StopFlight } from '../../../flight/store/flight.actions';
 import { AtcState } from '../../../shared/store/atc.state';
-import { Carrier } from '../../models/carrier';
 import { isStartDisabled, isStopDisabled } from '../../store/carrier.selectors';
 
 
 @Component({
-  selector: 'atc-carriers-active-page',
+  selector: 'atc-carriers-active',
   templateUrl: './active-carriers-page.component.html'
 })
 export class ActiveCarriersPageComponent {
-  isStartButtonDisabled = this.store.select(isStartDisabled);
-  isStopButtonDisabled = this.store.select(isStopDisabled);
+  isStartDisabled = this.store.select(isStartDisabled);
+  isStopDisabled = this.store.select(isStopDisabled);
 
-  constructor(private readonly store: Store<AtcState>,
-              private readonly flightService: FlightService) {
+  constructor(private readonly store: Store<AtcState>) {
   }
 
   startAll() {
-    this.flightService.startAll()
-        .subscribe();
-  }
-
-  start(carrier: Carrier) {
-    this.flightService.start(carrier, carrier.app)
-        .subscribe();
+    this.store.dispatch(new StartAll());
   }
 
   stopAll() {
-    this.flightService.stopAll()
-        .subscribe();
-  }
-
-  stop(carrier: Carrier) {
-    this.flightService.stop(carrier, carrier.app)
-        .subscribe();
+    this.store.dispatch(new StopFlight());
   }
 }

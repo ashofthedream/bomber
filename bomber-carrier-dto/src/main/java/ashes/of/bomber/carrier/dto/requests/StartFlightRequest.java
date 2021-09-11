@@ -3,14 +3,21 @@ package ashes.of.bomber.carrier.dto.requests;
 import ashes.of.bomber.carrier.dto.flight.TestFlightDto;
 
 public class StartFlightRequest {
-    private TestFlightDto plan;
+    private TestFlightDto flight;
 
-    public TestFlightDto getPlan() {
-        return plan;
+    public TestFlightDto getFlight() {
+        return flight;
     }
 
-    public StartFlightRequest setPlan(TestFlightDto plan) {
-        this.plan = plan;
+    public StartFlightRequest setFlight(TestFlightDto flight) {
+        this.flight = flight;
         return this;
+    }
+
+    @Override
+    public String toString() {
+        return "StartFlightRequest{" +
+                "flight=" + flight +
+                '}';
     }
 }

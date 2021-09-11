@@ -1,12 +1,12 @@
 package ashes.of.bomber.atc.services;
 
-import ashes.of.bomber.atc.dto.CarrierDto;
-import ashes.of.bomber.carrier.mappers.TestFlightMapper;
 import ashes.of.bomber.atc.model.Carrier;
 import ashes.of.bomber.atc.model.Flight;
 import ashes.of.bomber.carrier.dto.ApplicationDto;
+import ashes.of.bomber.carrier.dto.carrier.CarrierDto;
 import ashes.of.bomber.carrier.dto.requests.FlightStartedResponse;
 import ashes.of.bomber.carrier.dto.requests.StartFlightRequest;
+import ashes.of.bomber.carrier.mappers.TestFlightMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
@@ -17,6 +17,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.net.URI;
+import java.util.List;
 
 
 @Service
@@ -46,7 +47,7 @@ public class CarrierService {
     public Mono<CarrierDto> status(Carrier carrier) {
         URI uri = carrier.getInstance().getUri();
         return webClient.get()
-                .uri(uri + "/applications")
+                .uri(uri + "/carrier/applications")
                 .retrieve()
                 .bodyToMono(ApplicationDto.class)
                 .map(app -> toCarrier(carrier, app))
@@ -56,10 +57,10 @@ public class CarrierService {
     public Mono<FlightStartedResponse> start(Carrier carrier, Flight flight) {
         URI uri = carrier.getInstance().getUri();
         StartFlightRequest request = new StartFlightRequest()
-                .setPlan(TestFlightMapper.toDto(flight.getPlan()));
+                .setFlight(TestFlightMapper.toDto(flight.getPlan()));
 
         return webClient.post()
-                .uri(uri + "/applications/start")
+                .uri(uri + "/carrier/applications/start")
                 .body(BodyInserters.fromValue(request))
                 .retrieve()
                 .bodyToMono(FlightStartedResponse.class)
@@ -70,7 +71,7 @@ public class CarrierService {
     public void stop(Carrier carrier) {
         URI uri = carrier.getInstance().getUri();
         webClient.post()
-                .uri(uri + "/applications/stop")
+                .uri(uri + "/carrier/applications/stop")
                 .retrieve()
                 .toBodilessEntity()
                 .subscribe(
@@ -79,11 +80,10 @@ public class CarrierService {
     }
 
 
-
     private CarrierDto toCarrier(Carrier carrier, ApplicationDto app) {
         return new CarrierDto()
-                .setApp(app)
                 .setId(carrier.getId())
+                .setApps(List.of(app))
                 .setUri(carrier.getInstance().getUri());
     }
 }

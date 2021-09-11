@@ -1,8 +1,10 @@
 package ashes.of.bomber.runner;
 
 import ashes.of.bomber.descriptions.ConfigurationDescription;
+import ashes.of.bomber.events.TestSuiteFinishedEvent;
+import ashes.of.bomber.events.TestSuiteStartedEvent;
+import ashes.of.bomber.flight.TestAppPlan;
 import ashes.of.bomber.flight.TestCasePlan;
-import ashes.of.bomber.flight.TestFlightPlan;
 import ashes.of.bomber.configuration.Settings;
 import ashes.of.bomber.flight.Stage;
 import ashes.of.bomber.flight.TestCaseReport;
@@ -29,31 +31,33 @@ import static ashes.of.bomber.flight.Stage.IDLE;
 public class Runner {
     private static final Logger log = LogManager.getLogger();
 
+    private final String testApp;
     private final WorkerPool pool;
     private final Sink sink;
     private final List<TestSuite<?>> testSuites;
 
-    public Runner(WorkerPool pool, Sink sink, List<TestSuite<?>> testSuites) {
+    public Runner(String testApp, WorkerPool pool, Sink sink, List<TestSuite<?>> testSuites) {
+        this.testApp = testApp;
         this.pool = pool;
         this.sink = sink;
         this.testSuites = testSuites;
     }
 
-    public List<TestSuiteReport> runTestApp(RunnerState state, TestFlightPlan flightPlan) {
+    public List<TestSuiteReport> runTestApp(RunnerState state, long flightId, TestAppPlan testAppPlan) {
         Map<String, TestSuite<?>> suitesByName = testSuites.stream()
                 .collect(Collectors.toMap(TestSuite::getName, suite -> suite));
 
-        return flightPlan.getTestSuites()
+        return testAppPlan.getTestSuites()
                 .stream()
-                .map(plan -> {
-                    log.debug("Try to run test suite: {}", plan.getName());
-                    TestSuite<Object> testSuite = (TestSuite<Object>) suitesByName.get(plan.getName());
+                .map(testSuitePlan -> {
+                    log.debug("Try to run test suite: {}", testSuitePlan.getName());
+                    TestSuite<Object> testSuite = (TestSuite<Object>) suitesByName.get(testSuitePlan.getName());
                     if (testSuite == null) {
-                        log.warn("Test suite: {} not found", plan.getName());
-                        return new TestSuiteReport(plan.getName(), List.of());
+                        log.warn("Test suite: {} not found", testSuitePlan.getName());
+                        return new TestSuiteReport(testSuitePlan.getName(), List.of());
                     }
 
-                    return runTestSuite(state, plan, testSuite);
+                    return runTestSuite(state, flightId, testSuitePlan, testSuite);
                 })
                 .collect(Collectors.toList());
     }
@@ -61,7 +65,7 @@ public class Runner {
     /**
      * Runs the test case
      */
-    public TestSuiteReport runTestSuite(RunnerState state, TestSuitePlan plan, TestSuite<Object> testSuite) {
+    public TestSuiteReport runTestSuite(RunnerState state, long flightId, TestSuitePlan plan, TestSuite<Object> testSuite) {
         ThreadContext.put("stage", IDLE.name());
         ThreadContext.put("testSuite", testSuite.getName());
 
@@ -71,7 +75,7 @@ public class Runner {
         testSuite.resetBeforeAndAfterSuite();
 
         state.startSuiteIfNotStarted(testSuite.getName());
-        sink.beforeTestSuite(Instant.now(), testSuite.getName());
+        sink.beforeTestSuite(new TestSuiteStartedEvent(Instant.now(), flightId, testApp, testSuite.getName()));
 
         int threads = plan.getTestCases().stream()
                 .mapToInt(testCasePlan -> determineWorkerThreadsCount(testSuite, testCasePlan))
@@ -108,10 +112,10 @@ public class Runner {
                                         .getSettings());
 
                         if (!warmUp.isDisabled()) {
-                            runTestCase(state, testSuite, testCase, Stage.WARM_UP, warmUp);
+                            runTestCase(state, flightId, testApp, testSuite, testCase, Stage.WARM_UP, warmUp);
                         }
 
-                        var report = runTestCase(state, testSuite, testCase, Stage.TEST, settings);
+                        var report = runTestCase(state, flightId, testApp, testSuite, testCase, Stage.TEST, settings);
                         testCaseReports.add(report);
                         ThreadContext.remove("testCase");
                     });
@@ -124,7 +128,7 @@ public class Runner {
 
         pool.releaseAll();
 
-        sink.afterTestSuite(testSuite.getName());
+        sink.afterTestSuite(new TestSuiteFinishedEvent(Instant.now(), flightId, testApp, testSuite.getName()));
         state.finishSuite();
         ThreadContext.clearAll();
 
@@ -179,7 +183,7 @@ public class Runner {
         afterSuiteLatch.await();
     }
 
-    private TestCaseReport runTestCase(RunnerState state, TestSuite<Object> testSuite, TestCase<Object> testCase, Stage stage, Settings settings) {
+    private TestCaseReport runTestCase(RunnerState state, long flightId, String testApp, TestSuite<Object> testSuite, TestCase<Object> testCase, Stage stage, Settings settings) {
         ThreadContext.put("stage", stage.name());
         log.info("Start stage: {}", stage);
         state.startCaseIfNotStarted(testCase.getName(), stage, settings);
@@ -196,7 +200,7 @@ public class Runner {
         pool.getAcquired()
                 .stream()
                 .limit(settings.getThreadsCount())
-                .forEach(worker -> worker.runTestCase(state, testSuite, testCase, stage, settings, startLatch, finishLatch, sink, barrier));
+                .forEach(worker -> worker.runTestCase(state, flightId, testApp, testSuite, testCase, stage, settings, startLatch, finishLatch, sink, barrier));
 
         try {
             log.debug("Await end of stage: {}", stage);

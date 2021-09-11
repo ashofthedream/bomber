@@ -1,15 +1,18 @@
 package ashes.of.bomber.sink;
 
-import ashes.of.bomber.flight.Iteration;
-import ashes.of.bomber.configuration.Settings;
-import ashes.of.bomber.flight.Stage;
+import ashes.of.bomber.events.TestAppFinishedEvent;
+import ashes.of.bomber.events.TestAppStartedEvent;
+import ashes.of.bomber.events.TestCaseAfterEachEvent;
+import ashes.of.bomber.events.TestCaseBeforeEachEvent;
+import ashes.of.bomber.events.TestCaseFinishedEvent;
+import ashes.of.bomber.events.TestCaseStartedEvent;
+import ashes.of.bomber.events.TestSuiteFinishedEvent;
+import ashes.of.bomber.events.TestSuiteStartedEvent;
 import ashes.of.bomber.threads.BomberThreadFactory;
 import ashes.of.bomber.tools.Record;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.annotation.Nullable;
-import java.time.Instant;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -33,18 +36,23 @@ public class AsyncSink implements Sink {
 
 
     @Override
-    public void startUp(Instant timestamp) {
-        ex.execute(() -> sink.startUp(timestamp));
+    public void beforeTestApp(TestAppStartedEvent event) {
+        ex.execute(() -> sink.beforeTestApp(event));
     }
 
     @Override
-    public void beforeTestSuite(Instant timestamp, String testSuite) {
-        ex.execute(() -> sink.beforeTestSuite(timestamp, testSuite));
+    public void beforeTestSuite(TestSuiteStartedEvent event) {
+        ex.execute(() -> sink.beforeTestSuite(event));
     }
 
     @Override
-    public void beforeTestCase(Instant timestamp, Stage stage, String testSuite, String testCase, Settings settings) {
-        ex.execute(() -> sink.beforeTestCase(timestamp, stage, testSuite, testCase, settings));
+    public void beforeTestCase(TestCaseStartedEvent event) {
+        ex.execute(() -> sink.beforeTestCase(event));
+    }
+
+    @Override
+    public void beforeEach(TestCaseBeforeEachEvent event) {
+        ex.execute(() -> sink.beforeEach(event));
     }
 
     @Override
@@ -53,22 +61,22 @@ public class AsyncSink implements Sink {
     }
 
     @Override
-    public void afterEach(Iteration it, long elapsed, @Nullable Throwable throwable) {
-        ex.execute(() -> sink.afterEach(it, elapsed, throwable));
+    public void afterEach(TestCaseAfterEachEvent event) {
+        ex.execute(() -> sink.afterEach(event));
     }
 
     @Override
-    public void afterTestCase(Stage stage, String testSuite, String testCase) {
-        ex.execute(() -> sink.afterTestCase(stage, testSuite, testCase));
+    public void afterTestCase(TestCaseFinishedEvent event) {
+        ex.execute(() -> sink.afterTestCase(event));
     }
 
     @Override
-    public void afterTestSuite(String testSuite) {
-        ex.execute(() -> sink.afterTestSuite(testSuite));
+    public void afterTestSuite(TestSuiteFinishedEvent event) {
+        ex.execute(() -> sink.afterTestSuite(event));
     }
 
     @Override
-    public void shutDown(Instant timestamp) {
-        ex.execute(() -> sink.shutDown(timestamp));
+    public void afterTestApp(TestAppFinishedEvent event) {
+        ex.execute(() -> sink.afterTestApp(event));
     }
 }
