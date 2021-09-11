@@ -11,11 +11,14 @@ import { en_US, NZ_I18N } from 'ng-zorro-antd/i18n';
 import { NzPageHeaderModule } from 'ng-zorro-antd/page-header';
 import { NzProgressModule } from 'ng-zorro-antd/progress';
 import { NzTableModule } from 'ng-zorro-antd/table';
+import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NgxEchartsModule } from 'ngx-echarts';
 import { AppModule } from '../app/app.module';
 import { ActiveFlightPageComponent } from './components/active-flight-page/active-flight-page.component';
 import { AllFlightsPageComponent } from './components/all-flights-page/all-flights-page.component';
 import { CreateFlightPageComponent } from './components/create-flight-page/create-flight-page.component';
+import { FlightGraphComponent } from './components/flight-graph/flight-graph.component';
+import { FlightLogTableComponent } from './components/flight-log-table/flight-log-table.component';
 import { LatestFlightsCardComponent } from './components/latest-flights-card/latest-flights-card.component';
 import { FlightRoutingModule } from './flight-routing.module';
 
@@ -28,6 +31,8 @@ registerLocaleData(en);
     ActiveFlightPageComponent,
     AllFlightsPageComponent,
     CreateFlightPageComponent,
+    FlightGraphComponent,
+    FlightLogTableComponent,
     LatestFlightsCardComponent
   ],
   imports: [
@@ -50,7 +55,8 @@ registerLocaleData(en);
 
     FlightRoutingModule,
     NzGridModule,
-    NzWaveModule
+    NzWaveModule,
+    NzTagModule
   ],
   exports: [
     LatestFlightsCardComponent

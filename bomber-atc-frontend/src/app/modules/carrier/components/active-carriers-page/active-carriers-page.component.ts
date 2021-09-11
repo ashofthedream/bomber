@@ -6,7 +6,7 @@ import { isStartDisabled, isStopDisabled } from '../../store/carrier.selectors';
 
 
 @Component({
-  selector: 'atc-carriers-active',
+  selector: 'atc-carrier-active',
   templateUrl: './active-carriers-page.component.html'
 })
 export class ActiveCarriersPageComponent {

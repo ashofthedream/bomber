@@ -10,8 +10,6 @@ import ashes.of.bomber.events.TestCaseFinishedEvent;
 import ashes.of.bomber.events.TestCaseStartedEvent;
 import ashes.of.bomber.events.TestSuiteFinishedEvent;
 import ashes.of.bomber.events.TestSuiteStartedEvent;
-import ashes.of.bomber.flight.TestFlightPlan;
-import ashes.of.bomber.flight.Iteration;
 import ashes.of.bomber.runner.TestApp;
 import ashes.of.bomber.sink.Sink;
 import org.apache.logging.log4j.LogManager;
@@ -19,9 +17,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.cloud.zookeeper.serviceregistry.ServiceInstanceRegistration;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Nullable;
 import java.time.Instant;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static ashes.of.bomber.carrier.dto.events.SinkEventType.TEST_APP_FINISH;
@@ -33,7 +29,7 @@ import static ashes.of.bomber.carrier.dto.events.SinkEventType.TEST_SUITE_FINISH
 import static ashes.of.bomber.carrier.dto.events.SinkEventType.TEST_SUITE_START;
 
 @Component
-public class CarrierHttpSink implements Sink {
+public class CarrierFlightProgressHttpSink implements Sink {
     private static final Logger log = LogManager.getLogger();
 
     private final CarrierService carrierService;
@@ -42,7 +38,7 @@ public class CarrierHttpSink implements Sink {
 
     private final AtomicLong lastUpdate = new AtomicLong(0);
 
-    public CarrierHttpSink(CarrierService carrierService, ServiceInstanceRegistration registration, TestApp app) {
+    public CarrierFlightProgressHttpSink(CarrierService carrierService, ServiceInstanceRegistration registration, TestApp app) {
         this.carrierService = carrierService;
         this.registration = registration;
         this.app = app;

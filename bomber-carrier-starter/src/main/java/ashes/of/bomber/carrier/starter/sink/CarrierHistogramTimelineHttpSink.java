@@ -87,7 +87,7 @@ public class CarrierHistogramTimelineHttpSink implements Sink {
                 })
                 .collect(Collectors.toList());
 
-        carrierService.event(new SinkEvent()
+        send(new SinkEvent()
                 .setId(SinkEvent.nextId())
                 .setType(TEST_CASE_HISTOGRAM)
                 .setTimestamp(System.currentTimeMillis())

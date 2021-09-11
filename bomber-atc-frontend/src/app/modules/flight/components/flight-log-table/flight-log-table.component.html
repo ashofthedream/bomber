@@ -1,0 +1,41 @@
+<nz-table [nzData]="events | async" nzSize="small" [nzShowPagination]="false">
+  <thead>
+  <tr>
+    <th>Time</th>
+    <th>Carrier</th>
+    <th>Type</th>
+    <th>Test App</th>
+    <th>Test Suite</th>
+    <th>Test Case</th>
+    <th>Stage</th>
+    <th>Progress</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr *ngFor="let event of events | async">
+    <td>{{event.timestamp | date:'hh:mm:ss'}}</td>
+    <td>{{event.carrierId}}</td>
+    <td>
+      <nz-tag>{{event.type}}</nz-tag>
+    </td>
+    <td>{{event.testApp}}</td>
+    <td>{{event.testSuite}}</td>
+    <td>{{event.testCase}}</td>
+    <td>{{event.stage}}</td>
+    <td>
+      <ng-container *ngIf="event.type === 'TEST_CASE_PROGRESS'">
+        <!--        <p>-->
+        <!--          <strong>Iterations:</strong> {{currentIterations(event.state)}}-->
+        <!--          of {{event.state.settings.totalIterationsCount}}-->
+        <!--          <nz-progress [nzPercent]="iterationsProgress(event.state)"></nz-progress>-->
+        <!--        </p>-->
+
+        <!--        <p>-->
+        <!--          <strong>Time:</strong> {{currentTime(event.state)}}ms of {{event.state.settings.duration}}ms-->
+        <!--          <nz-progress [nzPercent]="timeProgress(event.state)"></nz-progress>-->
+        <!--        </p>-->
+      </ng-container>
+    </td>
+  </tr>
+  </tbody>
+</nz-table>

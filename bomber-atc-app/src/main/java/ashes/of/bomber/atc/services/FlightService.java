@@ -1,8 +1,6 @@
 package ashes.of.bomber.atc.services;
 
 import ashes.of.bomber.atc.model.Flight;
-import ashes.of.bomber.atc.model.FlightProgress;
-import ashes.of.bomber.atc.model.FlightRecord;
 import ashes.of.bomber.carrier.dto.events.SinkEvent;
 import ashes.of.bomber.flight.TestFlightPlan;
 import org.apache.logging.log4j.LogManager;
@@ -23,63 +21,12 @@ public class FlightService {
 
     private final AtomicLong flightIdSeq = new AtomicLong();
     private final Map<Long, Flight> flights = new ConcurrentHashMap<>();
-    private final CarrierService carrierService;
 
     @Nullable
     private volatile Flight active;
 
-    public FlightService(CarrierService carrierService) {
-        this.carrierService = carrierService;
-    }
-
-//    @Scheduled(fixedRate = 1000)
-    public void updateActiveFlight() {
-        Flight flight = active;
-        if (flight == null)
-            return;
-
-        carrierService.getCarriers()
-                .flatMap(carrierService::status)
-                .subscribe(carrier -> {
-                    FlightProgress progress = flight.getOrCreateCarrierProgress(carrier.getId());
-
-                    carrier.getApps()
-                            .forEach(app -> {
-                                progress.add(app.getState());
-                            });
-                });
-    }
-
-
     public Mono<Flight> getActive() {
         return Mono.justOrEmpty(active);
-    }
-
-    public void process(SinkEvent event) {
-        Flight flight = active;
-        if (flight == null) {
-            log.warn("ATC hasn't active flight, but received event from carrier: {} with flight: {}. " +
-                    "Flight will be created and marked as active. It's temporal solution",
-                    event.getCarrierId(), event.getFlightId());
-
-            var foundOrCreated = flights.computeIfAbsent(event.getFlightId(), planId -> new Flight(new TestFlightPlan(planId, List.of())));
-            active = flight = foundOrCreated;
-        }
-
-        if (flight.getPlan().getFlightId() != event.getFlightId()) {
-            log.warn("ATC received event from carrier: {} with flight: {}, bur current active flight: {}. Just ignore it",
-                    event.getCarrierId(), event.getFlightId(), flight.getPlan().getFlightId());
-            return;
-        }
-
-        FlightProgress progress = flight.getOrCreateCarrierProgress(event.getCarrierId());
-
-        FlightRecord record = new FlightRecord(event.getType().name(), event.getTimestamp(), null);
-        record.setTestSuite(event.getTestSuite());
-        record.setTestCase(event.getTestCase());
-        record.setState(event.getState());
-        record.setHistograms(event.getHistograms());
-        progress.add(record);
     }
 
     // todo potential race condition
@@ -93,6 +40,11 @@ public class FlightService {
         active = flight;
         flights.put(flight.getPlan().getFlightId(), flight);
         return flight;
+    }
+
+    public void process(SinkEvent event) {
+        var flight = flights.computeIfAbsent(event.getFlightId(), flightId -> new Flight(new TestFlightPlan(flightId, List.of())));
+        flight.add(event);
     }
 
     public Flux<Flight> getFlights() {

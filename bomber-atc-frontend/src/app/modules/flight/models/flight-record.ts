@@ -6,10 +6,10 @@ export interface FlightRecord {
   testSuite: string;
   testCase: string;
   state: ApplicationState;
-  histograms: Histogram[];
+  histograms: HistogramPoint[];
 }
 
-export interface Histogram {
+export interface HistogramPoint {
   label: string;
   timestamp: number;
   totalCount: number;

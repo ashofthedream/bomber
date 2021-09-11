@@ -5,7 +5,7 @@ import { Carrier } from '../../models/carrier';
 import { activeCarriers, activeCarriersLoading, hasActiveCarriers } from '../../store/carrier.selectors';
 
 @Component({
-  selector: 'atc-carriers-active-table-card',
+  selector: 'atc-carrier-active-table-card',
   templateUrl: './active-carriers-table-card.component.html'
 })
 export class ActiveCarriersTableCardComponent {

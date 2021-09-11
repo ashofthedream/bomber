@@ -1,7 +1,7 @@
 import {Component} from '@angular/core';
 
 @Component({
-  selector: 'atc-flights-all-page',
+  selector: 'atc-flight-all',
   templateUrl: './all-flights-page.component.html'
 })
 export class AllFlightsPageComponent {

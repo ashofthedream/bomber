@@ -4,7 +4,6 @@ import java.util.List;
 
 public class TestFlightPlan {
     private final Long flightId;
-
     private final List<TestAppPlan> testApps;
 
     public TestFlightPlan(Long flightId, List<TestAppPlan> testApps) {
