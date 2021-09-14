@@ -125,7 +125,7 @@ public class TestApp {
         ThreadContext.put("bomberApp", name);
         ThreadContext.put("flightId", String.valueOf(flightPlan.getFlightId()));
 
-        log.info("Start flight: {}", flightPlan.getFlightId());
+        log.info("Start application: {} flight: {}", name, flightPlan.getFlightId());
         var testAppPlan = flightPlan.getTestApps()
                 .stream()
                 .filter(p -> p.getName().equals(name))

@@ -126,8 +126,8 @@ public class Worker {
             Iteration it = new Iteration(state.nextIterationNumber(), stage, threadName, Instant.now(), testApp, testSuite.getName(), testCase.getName());
             if (runnerState.needUpdate()) {
                 var remainIt = runnerState.getTotalIterationsRemain();
-                log.debug("Current progress. iterations count: {}, remain count: {}, remain time: {}ms",
-                        settings.getTotalIterationsCount() - remainIt, remainIt, runnerState.getCaseRemainTime());
+                log.debug("Current progress. iterations count: {}, remain count: {}, errors count: {}, remain time: {}ms",
+                        settings.getTotalIterationsCount() - remainIt, remainIt, runnerState.getErrorCount(), runnerState.getCaseRemainTime());
             }
             testSuite.beforeEach(it, instance);
             sink.beforeEach(new TestCaseBeforeEachEvent(it.getTimestamp(), flightId, testApp, testSuite.getName(), testCase.getName(), stage));
@@ -199,7 +199,7 @@ public class Worker {
             if (this.instance != null)
                 log.error("Worker contains instance, this is looks like bug");
 
-            this.instance = testSuite.getInstance();
+            this.instance = testSuite.getContext();
             testSuite.beforeSuite(instance);
             latch.countDown();
         });

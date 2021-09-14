@@ -61,7 +61,7 @@ public class AnnotationProcessingBenchmark {
 
         TestSuiteBuilder<Test> suite = new TestSuiteBuilder<Test>()
                 .name("create-with-builder")
-                .sharedInstance(test)
+                .withContext(test)
                 .config(config -> config
                     .warmUp(SettingsBuilder.disabled())
                     .settings(settings -> settings

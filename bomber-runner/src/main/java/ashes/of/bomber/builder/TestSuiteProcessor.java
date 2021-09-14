@@ -37,9 +37,9 @@ public class TestSuiteProcessor<T> {
             builder. name(!Strings.isNullOrEmpty(suite.name()) ? suite.name() : cls.getSimpleName());
 
             if (suite.shared()) {
-                builder.sharedInstance(supplier.get());
+                builder.withContext(supplier.get());
             } else {
-                builder.instance(supplier);
+                builder.createContext(supplier);
             }
 
         } else {

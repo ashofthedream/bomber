@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration monitorInterval="30">
+
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} %highlight{%-5level [%-24t] %-30logger{1.}} - %msg%throwable{220}%n"/>
+        </Console>
+
+        <Console name="ConsoleWithContext" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} %highlight{%-5level [%-24t] %-30logger{1.}} - (%X{stage}) %X{testSuite} %X{testCase} - %msg%throwable{220}%n"/>
+        </Console>
+    </Appenders>
+
+    <Loggers>
+        <Logger name="ashes.of.bomber" level="trace"/>
+
+        <Logger name="ashes.of.bomber.runner.Runner" level="debug" additivity="false">
+            <AppenderRef ref="ConsoleWithContext" />
+        </Logger>
+
+        <Logger name="ashes.of.bomber.watcher" level="debug" additivity="false">
+            <AppenderRef ref="ConsoleWithContext" />
+        </Logger>
+
+        <Root level="info">
+            <AppenderRef ref="Console"/>
+        </Root>
+    </Loggers>
+</Configuration>

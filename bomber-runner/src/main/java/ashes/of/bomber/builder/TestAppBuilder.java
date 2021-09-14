@@ -145,12 +145,13 @@ public class TestAppBuilder {
     }
 
     public <T> TestAppBuilder testSuiteClass(Class<T> cls) {
-        return testSuiteClass(cls, b -> b.add(provider));
+        return testSuiteClass(cls, b -> b.addAll(provider));
     }
 
     public <T> TestAppBuilder testSuiteClass(Class<T> cls, Consumer<ProviderBuilder> consumer) {
         ProviderBuilder b = new ProviderBuilder()
-                .add(provider);
+                .addAll(provider);
+
         consumer.accept(b);
 
         return testSuite(cls, () -> {

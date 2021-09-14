@@ -18,16 +18,16 @@ public class LifeCycleHolder<T> implements LifeCycleMethod<T> {
     }
 
     @Override
-    public void call(T instance) throws Throwable {
+    public void call(T context) throws Throwable {
         if (!onlyOnce) {
-            method.call(instance);
+            method.call(context);
             return;
         }
 
         // first thread initializes the content, all other - wait for initialization
         synchronized (check) {
             if (check.compareAndSet(false, true))
-                method.call(instance);
+                method.call(context);
         }
     }
 

@@ -28,7 +28,7 @@ public class TestSuiteBuilder<T> {
 
     private String name;
     private ConfigurationBuilder config = new ConfigurationBuilder();
-    private Supplier<T> instance = () -> null;
+    private Supplier<T> context = () -> null;
 
     public TestSuiteBuilder<T> name(String name) {
         this.name = name;
@@ -45,16 +45,23 @@ public class TestSuiteBuilder<T> {
         return this;
     }
 
-
-    public TestSuiteBuilder<T> instance(Supplier<T> object) {
-        Objects.requireNonNull(object, "suite is null");
-        this.instance = object;
+    /**
+     * Creates context on each worker
+     *
+     * note: context should be thread safe
+     */
+    public TestSuiteBuilder<T> createContext(Supplier<T> context) {
+        Objects.requireNonNull(context, "context is null");
+        this.context = context;
         return this;
     }
 
-    public TestSuiteBuilder<T> sharedInstance(T object) {
-        Objects.requireNonNull(object, "suite is null");
-        return instance(() -> object);
+    /**
+     * Uses context for all workers
+     */
+    public TestSuiteBuilder<T> withContext(T context) {
+        Objects.requireNonNull(context, "suite is null");
+        return createContext(() -> context);
     }
 
 
@@ -166,7 +173,7 @@ public class TestSuiteBuilder<T> {
         // todo it may be useful, but not today
         Preconditions.checkArgument(!testCases.isEmpty(), "No test cases found for test suite: " + name);
 
-        return new TestSuite<>(name, instance, beforeSuite, beforeCase, beforeEach, testCases, afterEach, afterCase, afterSuite);
+        return new TestSuite<>(name, context, beforeSuite, beforeCase, beforeEach, testCases, afterEach, afterCase, afterSuite);
     }
 }
 

@@ -1,0 +1,13 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: bomber-example-gateway
+
+
+example:
+  accounts:
+    url: ${EXAMPLE_ACCOUNTS_APP_URL:http://localhost:8083}
+  users:
+    url: ${EXAMPLE_USERS_APP_URL:http://localhost:8082}

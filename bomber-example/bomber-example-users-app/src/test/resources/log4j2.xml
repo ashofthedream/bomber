@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration monitorInterval="30">
+
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} %highlight{%-5level [%-36t] %-24logger{1.}} - %msg%throwable{220}%n"/>
+        </Console>
+    </Appenders>
+
+    <Loggers>
+        <Logger name="ashes.of.bomber" level="debug" />
+        <Logger name="ashes.of.bomber.squadron" level="trace" />
+
+        <Root level="info">
+            <AppenderRef ref="Console"/>
+        </Root>
+    </Loggers>
+</Configuration>

@@ -1,6 +1,8 @@
 package ashes.of.bomber.builder;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
@@ -8,13 +10,12 @@ import java.util.function.Supplier;
 public class ProviderBuilder {
 
     public static class Context {
-
-        private final Map<Class<?>, Supplier<?>> providers;
+        private final Map<Class<?>, Supplier<?>> scope;
         private final Class<?>[] types;
         private final Object[] args;
 
-        public Context(Map<Class<?>, Supplier<?>> providers, Class<?>[] types, Object[] args) {
-            this.providers = providers;
+        public Context(Map<Class<?>, Supplier<?>> scope, Class<?>[] types, Object[] args) {
+            this.scope = scope;
             this.types = types;
             this.args = args;
         }
@@ -29,35 +30,39 @@ public class ProviderBuilder {
 
 
         public Supplier<?> getByType(Class<?> cls) {
-            return providers.get(cls);
+            return scope.get(cls);
         }
-
     }
 
-    private final Map<Class<?>, Supplier<?>> providers = new LinkedHashMap<>();
+    private final List<ProviderBuilder> other = new ArrayList<>();
+    private final Map<Class<?>, Supplier<?>> scope = new LinkedHashMap<>();
 
-    public ProviderBuilder add(ProviderBuilder builder) {
-        providers.putAll(builder.providers);
+    public ProviderBuilder addAll(ProviderBuilder builder) {
+        other.add(builder);
         return this;
     }
 
     public ProviderBuilder add(Class<?> cls, Supplier<?> supplier) {
-        providers.put(cls, supplier);
+        scope.put(cls, supplier);
         return this;
     }
 
     public Context build() {
-        Class<?>[] types = new Class[providers.size()];
-        Object[] args = new Object[providers.size()];
+        other.forEach(provider -> {
+            provider.scope.forEach(scope::putIfAbsent);
+        });
+
+        Class<?>[] types = new Class[scope.size()];
+        Object[] args = new Object[scope.size()];
 
         AtomicInteger seq = new AtomicInteger();
-        providers.forEach((type, supplier) -> {
+        scope.forEach((type, supplier) -> {
             int i = seq.getAndIncrement();
             types[i] = type;
             Object arg = supplier.get();
             args[i] = arg;
         });
 
-        return new Context(providers, types, args);
+        return new Context(scope, types, args);
     }
 }

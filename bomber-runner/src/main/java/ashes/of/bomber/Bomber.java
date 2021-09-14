@@ -7,20 +7,25 @@ import ashes.of.bomber.sink.Sink;
 import ashes.of.bomber.watcher.Watcher;
 
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 public class Bomber {
-    private final List<Sink> sinks = new CopyOnWriteArrayList<>();
-    private final List<Watcher> watchers = new CopyOnWriteArrayList<>();
-    private final List<TestApp> applications = new CopyOnWriteArrayList<>();
+    private final List<Sink> sinks;
+    private final List<Watcher> watchers;
+    private final List<TestApp> applications;
 
-    public Bomber sink(Sink sink) {
+    public Bomber(List<Sink> sinks, List<Watcher> watchers, List<TestApp> applications) {
+        this.sinks = sinks;
+        this.watchers = watchers;
+        this.applications = applications;
+    }
+
+    public Bomber addSink(Sink sink) {
         sinks.add(sink);
         return this;
     }
 
-    public Bomber watcher(Watcher watcher) {
+    public Bomber addWatcher(Watcher watcher) {
         watchers.add(watcher);
         return this;
     }
@@ -45,7 +50,7 @@ public class Bomber {
 
     public List<TestFlightReport> start() {
         return applications.stream()
-                .map(app -> app.start())
+                .map(TestApp::start)
                 .collect(Collectors.toList());
     }
 }

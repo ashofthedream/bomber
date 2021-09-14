@@ -38,6 +38,10 @@ public class Tools {
         return new Stopwatch(it, label, timeRecorded);
     }
 
+    public Stopwatch stopwatch() {
+        return stopwatch("");
+    }
+
     public long getStopwatchCount() {
         return stopwatchCount.get();
     }

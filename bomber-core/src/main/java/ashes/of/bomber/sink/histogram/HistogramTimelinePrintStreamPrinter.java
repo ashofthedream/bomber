@@ -21,8 +21,8 @@ public class HistogramTimelinePrintStreamPrinter implements HistogramTimelinePri
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss.SSS")
             .withZone(ZoneId.systemDefault());
 
-    public static final String HEAD_FORMAT = "%-12s | %-50s | %11s %11s %11s %11s %11s %11s %11s | %10s %10s%n";
-    public static final String LINE_FORMAT = "%-12s | %-50s | %11.3f %11.3f %11.3f %11.3f %11.3f %11.3f %11.3f | %,10d %,10d %n";
+    public static final String HEAD_FORMAT = "%-12s | %-75s | %11s %11s %11s %11s %11s %11s %11s | %10s %10s%n";
+    public static final String LINE_FORMAT = "%-12s | %-75s | %11.3f %11.3f %11.3f %11.3f %11.3f %11.3f %11.3f | %,10d %,10d %n";
 
 
     private final PrintStream out;
@@ -83,9 +83,7 @@ public class HistogramTimelinePrintStreamPrinter implements HistogramTimelinePri
     }
 
     private void printBorder() {
-        out.print("------------------------------------------------------------------------------------------");
-        out.print("------------------------------------------------------------------------------------------");
-        out.println();
+        out.println("-".repeat(200));
     }
 
 

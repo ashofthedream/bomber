@@ -19,7 +19,7 @@ public class BuilderLifecycleTest extends LifecycleTest {
 
         TestSuiteBuilder<AllLifecycleMethodsTest> suite = new TestSuiteBuilder<AllLifecycleMethodsTest>()
                 .name("lifecycleAll")
-                .instance(() -> new AllLifecycleMethodsTest(counters))
+                .createContext(() -> new AllLifecycleMethodsTest(counters))
                 .config(config -> config
                         .warmUp(SettingsBuilder.disabled())
                         .settings(settings -> settings

@@ -6,5 +6,5 @@ public interface LifeCycleMethod<T> {
     /**
      * One of lifecycle method
      */
-    void call(T instance) throws Throwable;
+    void call(T context) throws Throwable;
 }
