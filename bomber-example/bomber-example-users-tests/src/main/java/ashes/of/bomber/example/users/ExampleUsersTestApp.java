@@ -8,7 +8,6 @@ import ashes.of.bomber.builder.TestAppBuilder;
 import ashes.of.bomber.example.clients.UsersClient;
 import ashes.of.bomber.example.users.tests.UserControllerLoadTest;
 import ashes.of.bomber.example.utils.SleepUtils;
-import ashes.of.bomber.sink.histogram.HistogramSink;
 import ashes.of.bomber.sink.histogram.HistogramTimelinePrintStreamPrinter;
 import ashes.of.bomber.sink.histogram.HistogramTimelineSink;
 import ashes.of.bomber.squadron.BarrierBuilder;
@@ -60,7 +59,10 @@ public class ExampleUsersTestApp {
                 .build()
                 .start();
 
-        var report = reports.stream().findFirst().orElseThrow();
+        var report = reports.getTestApps()
+                .stream()
+                .findFirst()
+                .orElseThrow();
 
         log.info("test report for flight: {}", report.getPlan().getFlightId());
         report.getTestSuites()

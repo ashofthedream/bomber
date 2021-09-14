@@ -1,5 +1,6 @@
 package ashes.of.bomber.carrier.starter.sink;
 
+import ashes.of.bomber.Bomber;
 import ashes.of.bomber.carrier.dto.events.SinkEvent;
 import ashes.of.bomber.carrier.mappers.TestAppMapper;
 import ashes.of.bomber.carrier.starter.services.CarrierService;
@@ -18,6 +19,7 @@ import org.springframework.cloud.zookeeper.serviceregistry.ServiceInstanceRegist
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static ashes.of.bomber.carrier.dto.events.SinkEventType.TEST_APP_FINISH;
@@ -34,14 +36,14 @@ public class CarrierFlightProgressHttpSink implements Sink {
 
     private final CarrierService carrierService;
     private final ServiceInstanceRegistration registration;
-    private final TestApp app;
+    private final Bomber bomber;
 
     private final AtomicLong lastUpdate = new AtomicLong(0);
 
-    public CarrierFlightProgressHttpSink(CarrierService carrierService, ServiceInstanceRegistration registration, TestApp app) {
+    public CarrierFlightProgressHttpSink(CarrierService carrierService, ServiceInstanceRegistration registration, Bomber bomber) {
         this.carrierService = carrierService;
         this.registration = registration;
-        this.app = app;
+        this.bomber = bomber;
     }
 
     @Override
@@ -72,7 +74,11 @@ public class CarrierFlightProgressHttpSink implements Sink {
         var current = System.currentTimeMillis() / 1000;
         var last = lastUpdate.get();
         if (last != current && lastUpdate.compareAndSet(last, current)) {
-            var state = TestAppMapper.toDto(app.getState());
+            var testApp = bomber.getApps().stream()
+                    .filter(app -> Objects.equals(app.getName(), event.getTestApp()))
+                    .findFirst()
+                    .orElseThrow();
+            var state = TestAppMapper.toDto(testApp.getState());
             send(new SinkEvent()
                     .setId(SinkEvent.nextId())
                     .setType(TEST_CASE_PROGRESS)

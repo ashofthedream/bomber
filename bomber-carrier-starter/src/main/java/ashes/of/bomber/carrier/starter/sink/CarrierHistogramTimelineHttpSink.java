@@ -33,12 +33,10 @@ public class CarrierHistogramTimelineHttpSink implements Sink {
 
     private final CarrierService carrierService;
     private final ServiceInstanceRegistration registration;
-    private final TestApp app;
 
-    public CarrierHistogramTimelineHttpSink(CarrierService carrierService, ServiceInstanceRegistration registration, TestApp app) {
+    public CarrierHistogramTimelineHttpSink(CarrierService carrierService, ServiceInstanceRegistration registration) {
         this.carrierService = carrierService;
         this.registration = registration;
-        this.app = app;
         this.sink = new HistogramTimelineSink(ChronoUnit.SECONDS, new HistogramTimelineDummyPrinter());
     }
 
@@ -50,11 +48,11 @@ public class CarrierHistogramTimelineHttpSink implements Sink {
         if (last != current && lastUpdate.compareAndSet(last, current)) {
             var it = record.getIteration();
             var key = new MeasurementKey(it.getTestApp(), it.getTestSuite(), it.getTestCase(), it.getStage());
-            sendHistogramByKey(key);
+            sendHistogramByKey(record.getIteration().getFlightId(), key);
         }
     }
 
-    private void sendHistogramByKey(MeasurementKey key) {
+    private void sendHistogramByKey(long fligtId, MeasurementKey key) {
         var timeline = sink.getTimeline(key);
 
         var histograms = timeline.entrySet().stream()
@@ -91,7 +89,7 @@ public class CarrierHistogramTimelineHttpSink implements Sink {
                 .setId(SinkEvent.nextId())
                 .setType(TEST_CASE_HISTOGRAM)
                 .setTimestamp(System.currentTimeMillis())
-                .setFlightId(Optional.ofNullable(app.getFlightPlan()).map(TestFlightPlan::getFlightId).orElse(0L))
+                .setFlightId(fligtId)
                 .setCarrierId(registration.getServiceInstance().getId())
                 .setStage(key.getStage())
                 .setTestApp(key.getTestApp())
@@ -109,7 +107,7 @@ public class CarrierHistogramTimelineHttpSink implements Sink {
     public void afterTestCase(TestCaseFinishedEvent event) {
         sink.afterTestCase(event);
         var key = new MeasurementKey(event.getTestApp(), event.getTestSuite(), event.getTestCase(), event.getStage());
-        sendHistogramByKey(key);
+        sendHistogramByKey(event.getFlightId(), key);
     }
 
     @Override

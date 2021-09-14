@@ -3,7 +3,7 @@ server:
 
 spring:
   application:
-    name: bomber-example-gateway
+    name: bomber-example
 
 
 example:

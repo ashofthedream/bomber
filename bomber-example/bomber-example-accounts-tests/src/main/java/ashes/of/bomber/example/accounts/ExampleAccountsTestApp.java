@@ -1,20 +1,12 @@
 package ashes.of.bomber.example.accounts;
 
-import ashes.of.bomber.Bomber;
-import ashes.of.bomber.annotations.LoadTest;
-import ashes.of.bomber.annotations.LoadTestApp;
-import ashes.of.bomber.annotations.Throttle;
 import ashes.of.bomber.builder.BomberBuilder;
 import ashes.of.bomber.builder.TestAppBuilder;
-import ashes.of.bomber.configuration.Settings;
 import ashes.of.bomber.configuration.SettingsBuilder;
 import ashes.of.bomber.example.accounts.tests.AccountControllerLoadTest;
 import ashes.of.bomber.example.clients.AccountClient;
-import ashes.of.bomber.example.clients.UsersClient;
 import ashes.of.bomber.example.utils.SleepUtils;
 import ashes.of.bomber.limiter.RateLimiter;
-import ashes.of.bomber.runner.TestApp;
-import ashes.of.bomber.sink.histogram.HistogramSink;
 import ashes.of.bomber.sink.histogram.HistogramTimelinePrintStreamPrinter;
 import ashes.of.bomber.sink.histogram.HistogramTimelineSink;
 import ashes.of.bomber.squadron.BarrierBuilder;
@@ -40,7 +32,7 @@ public class ExampleAccountsTestApp {
                 new NoBarrier.Builder();
 
         return new TestAppBuilder()
-                .name("ExampleUsersTestApp")
+                .name("ExampleAccountsTestApp")
                 .config(config -> config
                         .settings(new SettingsBuilder()
                                 .setThreadsCount(2)
@@ -67,7 +59,11 @@ public class ExampleAccountsTestApp {
                 .build()
                 .start();
 
-        var report = reports.stream().findFirst().orElseThrow();
+
+        var report = reports.getTestApps()
+                .stream()
+                .findFirst()
+                .orElseThrow();
 
         log.info("test report for flight: {}", report.getPlan().getFlightId());
         report.getTestSuites()

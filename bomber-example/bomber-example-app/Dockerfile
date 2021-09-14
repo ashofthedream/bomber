@@ -1,7 +1,7 @@
 FROM adoptopenjdk/openjdk16
 
-ADD build/libs/bomber-example-gateway-app.jar /bomber-example-gateway-app.jar
+ADD build/libs/bomber-example-app.jar /bomber-example-app.jar
 
 EXPOSE 8088
 
-CMD ["java", "-jar", "/bomber-example-gateway-app.jar"]
+CMD ["java", "-jar", "/bomber-example-app.jar"]

@@ -28,7 +28,6 @@ public class Stopwatch {
         return it.getTestSuite() + "." +  it.getTestCase() + (this.label.isEmpty() ? "" : "." + this.label);
     }
 
-
     public Record success() {
         long elapsed = elapsed();
         String label = label();

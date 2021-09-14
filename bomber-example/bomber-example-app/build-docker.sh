@@ -4,5 +4,5 @@
 
 IMAGE_VERSION=$(gradle -q version)
 
-docker build -t bomber/bomber-example-gateway-app:${IMAGE_VERSION} .
-docker build -t bomber/bomber-example-gateway-app:latest .
+docker build -t bomber/bomber-example-app:${IMAGE_VERSION} .
+docker build -t bomber/bomber-example-app:latest .

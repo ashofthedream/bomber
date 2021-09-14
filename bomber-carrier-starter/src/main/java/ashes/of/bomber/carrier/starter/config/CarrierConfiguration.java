@@ -1,5 +1,6 @@
 package ashes.of.bomber.carrier.starter.config;
 
+import ashes.of.bomber.Bomber;
 import ashes.of.bomber.runner.TestApp;
 import ashes.of.bomber.sink.Sink;
 import ashes.of.bomber.watcher.Watcher;
@@ -19,14 +20,14 @@ public class CarrierConfiguration {
     private static final Logger log = LogManager.getLogger();
 
     @Autowired
-    public void configureSinks(TestApp app, List<Sink> sinks) {
+    public void configureSinks(Bomber bomber, List<Sink> sinks) {
         log.warn("CONFIGURE SINKS: {}", sinks);
-        sinks.forEach(app::add);
+        sinks.forEach(bomber::addSink);
     }
 
     @Autowired
-    public void configureWatchers(TestApp app, List<Watcher> watchers) {
+    public void configureWatchers(Bomber bomber, List<Watcher> watchers) {
         log.warn("CONFIGURE WATCHERS: {}", watchers);
-        watchers.forEach(watcher -> app.add(1000, watcher));
+        watchers.forEach(bomber::addWatcher);
     }
 }

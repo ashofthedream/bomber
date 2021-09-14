@@ -10,7 +10,7 @@ import ashes.of.bomber.descriptions.WorkerDescription;
 import ashes.of.bomber.events.TestAppFinishedEvent;
 import ashes.of.bomber.events.TestAppStartedEvent;
 import ashes.of.bomber.flight.TestAppPlan;
-import ashes.of.bomber.flight.TestFlightReport;
+import ashes.of.bomber.flight.TestAppReport;
 import ashes.of.bomber.flight.TestFlightPlan;
 import ashes.of.bomber.flight.TestCasePlan;
 import ashes.of.bomber.flight.TestSuitePlan;
@@ -93,7 +93,7 @@ public class TestApp {
      *
      * @return report
      */
-    public TestFlightReport start() {
+    public TestAppReport start() {
         var suites = getTestSuites().stream()
                 .map(testSuite -> {
                     List<TestCasePlan> testCases = testSuite.getTestCases().stream()
@@ -110,7 +110,7 @@ public class TestApp {
         return start(plan);
     }
 
-    public CompletableFuture<TestFlightReport> startAsync() {
+    public CompletableFuture<TestAppReport> startAsync() {
         return CompletableFuture.supplyAsync(this::start);
     }
 
@@ -120,7 +120,7 @@ public class TestApp {
      * @param flightPlan flight plan with list of test suites, test cases and settings
      * @return report
      */
-    public TestFlightReport start(TestFlightPlan flightPlan) {
+    public TestAppReport start(TestFlightPlan flightPlan) {
         this.plan = flightPlan;
         ThreadContext.put("bomberApp", name);
         ThreadContext.put("flightId", String.valueOf(flightPlan.getFlightId()));
@@ -195,10 +195,10 @@ public class TestApp {
 
         ThreadContext.clearAll();
         log.info("Flight is over, report is ready");
-        return new TestFlightReport(flightPlan, startTime, finishTime, testSuiteReports);
+        return new TestAppReport(flightPlan, name, startTime, finishTime, testSuiteReports);
     }
 
-    public CompletableFuture<TestFlightReport> startAsync(TestFlightPlan plan) {
+    public CompletableFuture<TestAppReport> startAsync(TestFlightPlan plan) {
         return CompletableFuture.supplyAsync(() -> start(plan));
     }
 
@@ -260,5 +260,17 @@ public class TestApp {
                         testCase.getConfiguration().getSettings()
                 )
         );
+    }
+
+    public void setSinks(List<Sink> sinks) {
+        this.sinks.clear();
+        this.sinks.addAll(sinks);
+    }
+
+    public void setWatchers(List<Watcher> watchers) {
+        this.watchers.clear();
+        this.watchers.addAll(watchers.stream()
+                .map(watcher -> new WatcherConfig(1, TimeUnit.SECONDS, watcher))
+                .collect(Collectors.toList()));
     }
 }

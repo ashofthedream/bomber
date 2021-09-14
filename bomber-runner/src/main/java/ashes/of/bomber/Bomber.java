@@ -1,12 +1,15 @@
 package ashes.of.bomber;
 
 import ashes.of.bomber.builder.TestAppBuilder;
+import ashes.of.bomber.flight.TestFlightPlan;
 import ashes.of.bomber.flight.TestFlightReport;
 import ashes.of.bomber.runner.TestApp;
 import ashes.of.bomber.sink.Sink;
 import ashes.of.bomber.watcher.Watcher;
 
+import java.time.Instant;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 public class Bomber {
@@ -30,6 +33,9 @@ public class Bomber {
         return this;
     }
 
+    public List<TestApp> getApps() {
+        return applications;
+    }
 
     public Bomber add(Class<?> app) {
         return add(TestAppBuilder.create(app));
@@ -48,9 +54,42 @@ public class Bomber {
         return this;
     }
 
-    public List<TestFlightReport> start() {
-        return applications.stream()
-                .map(TestApp::start)
+    public TestFlightReport start(TestFlightPlan plan) {
+        Instant startTime = Instant.now();
+        var reports = applications.stream()
+                .map(app -> {
+                    app.setSinks(sinks);
+                    app.setWatchers(watchers);
+
+                    return app.start(plan);
+                })
                 .collect(Collectors.toList());
+        Instant finishTime = Instant.now();
+
+        return new TestFlightReport(plan, startTime, finishTime, reports);
+    }
+
+    public TestFlightReport start() {
+        Instant startTime = Instant.now();
+        var reports = applications.stream()
+                .map(app -> {
+                    app.setSinks(sinks);
+                    app.setWatchers(watchers);
+                    return app.start();
+                })
+                .collect(Collectors.toList());
+        Instant finishTime = Instant.now();
+
+        var plan = new TestFlightPlan(System.currentTimeMillis(), List.of());
+        return new TestFlightReport(plan, startTime, finishTime, reports);
+    }
+
+
+    public CompletableFuture<TestFlightReport> startAsync(TestFlightPlan plan) {
+        return CompletableFuture.supplyAsync(() -> start(plan));
+    }
+
+    public void stop() {
+        applications.forEach(TestApp::stop);
     }
 }

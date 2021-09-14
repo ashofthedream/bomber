@@ -42,5 +42,6 @@ dependencies {
 
     testImplementation project(':bomber-core')
     testImplementation project(':bomber-runner')
+    testImplementation project(':bomber-example:bomber-example-users-tests')
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }

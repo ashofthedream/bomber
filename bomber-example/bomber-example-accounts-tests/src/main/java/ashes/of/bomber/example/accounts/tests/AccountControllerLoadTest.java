@@ -81,17 +81,18 @@ public class AccountControllerLoadTest {
                     accounts.stream()
                             .findFirst()
                             .ifPresent(createdAccount -> {
-                                var get = tools.stopwatch("get");
-                                client  .getAccount(createdAccount.getId())
-                                        .subscribe(account -> {
+                                tools.measure("get", get -> {
+                                    client  .getAccount(createdAccount.getId())
+                                            .subscribe(account -> {
 
-                                            // todo check that get returned same account
+                                                // todo check that get returned same account
 
-                                            get.success();
-                                            overall.success();
-                                        }, th -> {
-                                            get.fail(th);
-                                            overall.fail(th);
+                                                get.success();
+                                                overall.success();
+                                            }, th -> {
+                                                get.fail(th);
+                                                overall.fail(th);
+                                            });
                                         });
                             });
 

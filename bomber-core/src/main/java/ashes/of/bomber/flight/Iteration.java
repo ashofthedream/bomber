@@ -4,7 +4,7 @@ import java.time.Instant;
 
 
 public class Iteration {
-
+    private final long flightId;
     private final long number;
     private final Stage stage;
     private final String testApp;
@@ -13,7 +13,8 @@ public class Iteration {
     private final String thread;
     private final Instant timestamp;
 
-    public Iteration(long number, Stage stage, String thread, Instant timestamp, String testApp, String testSuite, String testCase) {
+    public Iteration(long flightId, long number, Stage stage, String thread, Instant timestamp, String testApp, String testSuite, String testCase) {
+        this.flightId = flightId;
         this.number = number;
         this.stage = stage;
         this.testApp = testApp;
@@ -21,6 +22,10 @@ public class Iteration {
         this.testCase = testCase;
         this.thread = thread;
         this.timestamp = timestamp;
+    }
+
+    public long getFlightId() {
+        return flightId;
     }
 
     public long getNumber() {

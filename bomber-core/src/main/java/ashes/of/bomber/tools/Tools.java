@@ -42,6 +42,15 @@ public class Tools {
         return stopwatch("");
     }
 
+    public void measure(String label, Consumer<Stopwatch> consumer) {
+        var stopwatch = stopwatch(label);
+        try {
+            consumer.accept(stopwatch);
+        } catch (Throwable th) {
+            stopwatch.fail(th);
+        }
+    }
+
     public long getStopwatchCount() {
         return stopwatchCount.get();
     }

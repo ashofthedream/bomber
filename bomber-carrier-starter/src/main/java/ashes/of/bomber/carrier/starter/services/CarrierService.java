@@ -26,7 +26,7 @@ public class CarrierService {
     private final Registration registration;
 
 
-    public CarrierService(ReactiveDiscoveryClient discoveryClient, Registration instance, TestApp app) {
+    public CarrierService(ReactiveDiscoveryClient discoveryClient, Registration instance) {
         this.discoveryClient = discoveryClient;
         this.registration = instance;
     }

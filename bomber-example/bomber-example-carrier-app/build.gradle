@@ -38,6 +38,7 @@ dependencies {
     implementation project(':bomber-runner')
     implementation project(':bomber-carrier-starter')
     implementation project(':bomber-squadron-zookeeper')
+    implementation project(':bomber-example:bomber-example-tests')
     implementation project(':bomber-example:bomber-example-accounts-tests')
     implementation project(':bomber-example:bomber-example-users-tests')
 

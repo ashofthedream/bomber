@@ -28,6 +28,7 @@ export const applications = createSelector(activeCarriers, carriers => {
 
 
 export function merge(left: AppTreeNode[], right: AppTreeNode[]): AppTreeNode[] {
+  console.log('MERGE left right', left, right);
   const keys = new Set<string>();
 
   const leftByKey = new Map<string, AppTreeNode>();

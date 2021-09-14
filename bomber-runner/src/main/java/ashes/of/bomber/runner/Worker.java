@@ -123,7 +123,7 @@ public class Worker {
             if (!limiter.waitForPermit())
                 throw new RuntimeException("Limiter await failed");
 
-            Iteration it = new Iteration(state.nextIterationNumber(), stage, threadName, Instant.now(), testApp, testSuite.getName(), testCase.getName());
+            Iteration it = new Iteration(flightId, state.nextIterationNumber(), stage, threadName, Instant.now(), testApp, testSuite.getName(), testCase.getName());
             if (runnerState.needUpdate()) {
                 var remainIt = runnerState.getTotalIterationsRemain();
                 log.debug("Current progress. iterations count: {}, remain count: {}, errors count: {}, remain time: {}ms",

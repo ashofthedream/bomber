@@ -16,6 +16,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -29,8 +30,8 @@ public class TestAppBuilder {
 
     private String name;
 
-    private final List<Sink> sinks = new ArrayList<>();
-    private final List<WatcherConfig> watchers = new ArrayList<>();
+    private final List<Sink> sinks = new CopyOnWriteArrayList<>();
+    private final List<WatcherConfig> watchers = new CopyOnWriteArrayList<>();
 
     private ProviderBuilder provider = new ProviderBuilder();
     private ConfigurationBuilder configuration = new ConfigurationBuilder();

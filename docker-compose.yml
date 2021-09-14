@@ -30,20 +30,20 @@ services:
     environment:
       EXAMPLE_ACCOUNTS_APP_URL: "bomber-example-accounts:8083"
 
-  bomber-example-gateway-app:
+  bomber-example-app:
     build:
-      context: ./bomber-example/bomber-example-gateway-app
+      context: ./bomber-example/bomber-example-app
       dockerfile: Dockerfile
-    container_name: bomber-example-gateway
+    container_name: bomber-example
     depends_on:
       - bomber-example-accounts-app
       - bomber-example-users-app
-    image: bomber/bomber-example-gateway-app
+    image: bomber/bomber-example-app
     ports:
       - "8081:8081"
     environment:
       EXAMPLE_ACCOUNTS_APP_URL: "bomber-example-accounts:8083"
-      EXAMPLE_USERS_APP_URL: "bomber-example-accounts:8082"
+      EXAMPLE_USERS_APP_URL: "bomber-example-users:8082"
 
   bomber-atc-app:
     build:
@@ -81,7 +81,7 @@ services:
       - "9001:9000"
     environment:
       ZOOKEEPER_URL: "bomber-zookeeper:2181"
-      EXAMPLE_GATEWAY_APP_URL: "bomber-example-gateway:8081"
+      EXAMPLE_APP_URL: "bomber-example:8081"
 
   bomber-carrier-app-9002:
     build:
@@ -97,4 +97,4 @@ services:
       - "9002:9000"
     environment:
       ZOOKEEPER_URL: "bomber-zookeeper:2181"
-      EXAMPLE_GATEWAY_APP_URL: "bomber-example-gateway:8081"
+      EXAMPLE_APP_URL: "bomber-example:8081"
