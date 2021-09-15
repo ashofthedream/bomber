@@ -1,37 +1,35 @@
-package ashes.of.bomber.runner;
+package ashes.of.bomber.core;
 
-import ashes.of.bomber.descriptions.ConfigurationDescription;
+import ashes.of.bomber.configuration.Configuration;
 import ashes.of.bomber.configuration.Settings;
 import ashes.of.bomber.descriptions.TestAppStateDescription;
-import ashes.of.bomber.descriptions.TestAppDescription;
-import ashes.of.bomber.descriptions.TestCaseDescription;
-import ashes.of.bomber.descriptions.TestSuiteDescription;
 import ashes.of.bomber.descriptions.WorkerDescription;
 import ashes.of.bomber.events.TestAppFinishedEvent;
 import ashes.of.bomber.events.TestAppStartedEvent;
-import ashes.of.bomber.flight.TestAppPlan;
-import ashes.of.bomber.flight.TestAppReport;
-import ashes.of.bomber.flight.TestFlightPlan;
-import ashes.of.bomber.flight.TestCasePlan;
-import ashes.of.bomber.flight.TestSuitePlan;
-import ashes.of.bomber.flight.TestSuiteReport;
+import ashes.of.bomber.plan.TestAppPlan;
+import ashes.of.bomber.report.TestAppReport;
+import ashes.of.bomber.plan.TestFlightPlan;
+import ashes.of.bomber.plan.TestCasePlan;
+import ashes.of.bomber.plan.TestSuitePlan;
+import ashes.of.bomber.report.TestSuiteReport;
+import ashes.of.bomber.runner.Runner;
+import ashes.of.bomber.runner.RunnerState;
+import ashes.of.bomber.runner.Worker;
+import ashes.of.bomber.runner.WorkerPool;
 import ashes.of.bomber.sink.AsyncSink;
 import ashes.of.bomber.sink.MultiSink;
 import ashes.of.bomber.sink.Sink;
 import ashes.of.bomber.threads.BomberThreadFactory;
 import ashes.of.bomber.watcher.Watcher;
-import ashes.of.bomber.watcher.WatcherConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 
 import javax.annotation.Nullable;
-import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -49,7 +47,7 @@ public class TestApp {
     private final WorkerPool pool;
     private final List<TestSuite<?>> testSuites;
     private final List<Sink> sinks;
-    private final List<WatcherConfig> watchers;
+    private final List<Watcher> watchers;
 
     @Nullable
     private volatile TestFlightPlan plan;
@@ -57,7 +55,7 @@ public class TestApp {
     private volatile RunnerState state = IDLE;
     private volatile CountDownLatch endLatch = new CountDownLatch(1);
 
-    public TestApp(String name, WorkerPool pool, List<TestSuite<?>> testSuites, List<Sink> sinks, List<WatcherConfig> watchers) {
+    public TestApp(String name, WorkerPool pool, List<TestSuite<?>> testSuites, List<Sink> sinks, List<Watcher> watchers) {
         this.name = name;
         this.pool = pool;
         this.testSuites = testSuites;
@@ -69,21 +67,12 @@ public class TestApp {
         return name;
     }
 
+    public List<TestSuite<?>> getTestSuites() {
+        return testSuites;
+    }
+
     public TestFlightPlan getFlightPlan() {
         return plan;
-    }
-
-
-    public void add(Sink sink) {
-        sinks.add(sink);
-    }
-
-    public void add(long ms, Watcher watcher) {
-        watchers.add(new WatcherConfig(ms, TimeUnit.MILLISECONDS, watcher));
-    }
-
-    void add(Duration duration, Watcher watcher) {
-        add(duration.toMillis(), watcher);
     }
 
 
@@ -110,10 +99,6 @@ public class TestApp {
         return start(plan);
     }
 
-    public CompletableFuture<TestAppReport> startAsync() {
-        return CompletableFuture.supplyAsync(this::start);
-    }
-
     /**
      * Start application with specified flight plan
      *
@@ -138,7 +123,7 @@ public class TestApp {
                     testSuite.getTestCases().forEach(testCase -> {
                         log.debug("Planned test case: {}.{}, settings: {}", testSuite.getName(), testCase.getName(),
                                 Optional.ofNullable(testCase.getConfiguration())
-                                        .map(ConfigurationDescription::getSettings)
+                                        .map(Configuration::getSettings)
                                         .orElse(null));
                     });
                 });
@@ -146,17 +131,14 @@ public class TestApp {
         ScheduledExecutorService watcherEx = Executors.newSingleThreadScheduledExecutor(BomberThreadFactory.watcher());
 
         List<ScheduledFuture<?>> wfs = watchers.stream()
-                .map(config -> {
-                    Watcher watcher = config.getWatcher();
-                    return watcherEx.scheduleAtFixedRate(() -> watcher.watch(getDescription()), 0, config.getPeriod(), config.getTimeUnit());
+                .map(watcher -> {
+                    watcher.startUp();
+                    return watcherEx.scheduleAtFixedRate(() -> watcher.watch(this), 0, 1, TimeUnit.SECONDS);
                 })
                 .collect(Collectors.toList());
 
         Instant startTime = Instant.now();
 
-        watchers.stream()
-                .map(WatcherConfig::getWatcher)
-                .forEach(Watcher::startUp);
 
         Sink sink = new AsyncSink(new MultiSink(sinks));
 
@@ -180,9 +162,7 @@ public class TestApp {
         log.debug("Shutdown for each sink and watcher");
         sink.afterTestApp(new TestAppFinishedEvent(finishTime, flightPlan.getFlightId(), name));
 
-        watchers.stream()
-                .map(WatcherConfig::getWatcher)
-                .forEach(Watcher::shutDown);
+        watchers.forEach(Watcher::shutDown);
 
         log.debug("Shutdown wait each sink and watcher");
         wfs.forEach(wf -> wf.cancel(false));
@@ -196,10 +176,6 @@ public class TestApp {
         ThreadContext.clearAll();
         log.info("Flight is over, report is ready");
         return new TestAppReport(flightPlan, name, startTime, finishTime, testSuiteReports);
-    }
-
-    public CompletableFuture<TestAppReport> startAsync(TestFlightPlan plan) {
-        return CompletableFuture.supplyAsync(() -> start(plan));
     }
 
     private boolean isStopped() {
@@ -217,11 +193,18 @@ public class TestApp {
         endLatch.countDown();
     }
 
-
-
-    public TestAppDescription getDescription() {
-        return new TestAppDescription(name, plan, getState(), getTestSuites());
+    @Deprecated
+    public void setSinks(List<Sink> sinks) {
+        this.sinks.clear();
+        this.sinks.addAll(sinks);
     }
+
+    @Deprecated
+    public void setWatchers(List<Watcher> watchers) {
+        this.watchers.clear();
+        this.watchers.addAll(watchers);
+    }
+
 
 
     public TestAppStateDescription getState() {
@@ -237,40 +220,5 @@ public class TestApp {
                 settings.getThreadIterationsCount() - remain, state.getTotalIterationsRemain(), state.getErrorCount(),
                 Instant.EPOCH, Instant.EPOCH, state.getCaseElapsedTime(),
                 state.getCaseRemainTime(), workerStates);
-    }
-
-    public List<TestSuiteDescription> getTestSuites() {
-        return testSuites.stream()
-                .map(this::toTestSuite)
-                .collect(Collectors.toList());
-    }
-
-    private TestSuiteDescription toTestSuite(TestSuite<?> suite) {
-        List<TestCaseDescription> testCases = suite.getTestCases().stream()
-                .map(this::toTestCase)
-                .collect(Collectors.toList());
-
-        return new TestSuiteDescription(suite.getName(), testCases);
-    }
-
-    private TestCaseDescription toTestCase(TestCase<?> testCase) {
-        return new TestCaseDescription(testCase.getName(),
-                new ConfigurationDescription(
-                        testCase.getConfiguration().getWarmUp(),
-                        testCase.getConfiguration().getSettings()
-                )
-        );
-    }
-
-    public void setSinks(List<Sink> sinks) {
-        this.sinks.clear();
-        this.sinks.addAll(sinks);
-    }
-
-    public void setWatchers(List<Watcher> watchers) {
-        this.watchers.clear();
-        this.watchers.addAll(watchers.stream()
-                .map(watcher -> new WatcherConfig(1, TimeUnit.SECONDS, watcher))
-                .collect(Collectors.toList()));
     }
 }

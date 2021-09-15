@@ -1,7 +1,6 @@
 package ashes.of.bomber.builder;
 
 import ashes.of.bomber.Bomber;
-import ashes.of.bomber.runner.TestApp;
 import ashes.of.bomber.sink.Sink;
 import ashes.of.bomber.watcher.Watcher;
 import com.google.common.base.Preconditions;
@@ -45,11 +44,6 @@ public class BomberBuilder {
         Preconditions.checkArgument(!applications.isEmpty(), "No applications found");
 
         var apps = applications.stream()
-                .peek(app -> {
-                    // todo temp
-                    sinks.forEach(app::sink);
-                    watchers.forEach(app::watcher);
-                })
                 .map(TestAppBuilder::build)
                 .collect(Collectors.toList());
 

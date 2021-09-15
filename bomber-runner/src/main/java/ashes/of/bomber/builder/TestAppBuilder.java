@@ -1,11 +1,8 @@
 package ashes.of.bomber.builder;
 
-import ashes.of.bomber.runner.TestApp;
-import ashes.of.bomber.runner.TestSuite;
+import ashes.of.bomber.core.TestApp;
+import ashes.of.bomber.core.TestSuite;
 import ashes.of.bomber.runner.WorkerPool;
-import ashes.of.bomber.sink.Sink;
-import ashes.of.bomber.watcher.Watcher;
-import ashes.of.bomber.watcher.WatcherConfig;
 import com.google.common.base.Preconditions;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -17,7 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -30,11 +26,8 @@ public class TestAppBuilder {
 
     private String name;
 
-    private final List<Sink> sinks = new CopyOnWriteArrayList<>();
-    private final List<WatcherConfig> watchers = new CopyOnWriteArrayList<>();
-
     private ProviderBuilder provider = new ProviderBuilder();
-    private ConfigurationBuilder configuration = new ConfigurationBuilder();
+    private ConfigurationBuilder config = new ConfigurationBuilder();
 
     /**
      * Test suites for run
@@ -54,51 +47,13 @@ public class TestAppBuilder {
     }
 
     public TestAppBuilder config(Consumer<ConfigurationBuilder> consumer) {
-        consumer.accept(configuration);
+        consumer.accept(config);
         return this;
     }
 
     public TestAppBuilder config(ConfigurationBuilder config) {
-        this.configuration = config;
+        this.config = config;
         return this;
-    }
-
-
-    public TestAppBuilder sink(Sink sink) {
-        this.sinks.add(sink);
-        return this;
-    }
-
-    public TestAppBuilder sinks(List<Sink> sinks) {
-        this.sinks.addAll(sinks);
-        return this;
-    }
-
-
-    public TestAppBuilder watcher(long period, TimeUnit unit, Watcher watcher) {
-        this.watchers.add(new WatcherConfig(period, unit, watcher));
-        return this;
-    }
-
-    public TestAppBuilder watcher(long ms, Watcher watcher) {
-        return watcher(ms, TimeUnit.MILLISECONDS, watcher);
-    }
-
-    public TestAppBuilder watcher(Watcher watcher) {
-        return watcher(1000, watcher);
-    }
-
-    public TestAppBuilder watchers(long period, TimeUnit unit, List<Watcher> watchers) {
-        watchers.forEach(watcher -> watcher(period, unit, watcher));
-        return this;
-    }
-
-    public TestAppBuilder watchers(long ms, List<Watcher> watchers) {
-        return watchers(ms, TimeUnit.MILLISECONDS, watchers);
-    }
-
-    public TestAppBuilder watchers(List<Watcher> watchers) {
-        return watchers(1000, watchers);
     }
 
 
@@ -115,7 +70,7 @@ public class TestAppBuilder {
 
     private <T> TestSuiteBuilder<T> newSuiteBuilder() {
         return new TestSuiteBuilder<T>()
-                .config(new ConfigurationBuilder(configuration));
+                .config(new ConfigurationBuilder(config));
     }
 
     public <T> TestAppBuilder createSuite(Consumer<TestSuiteBuilder<T>> consumer) {
@@ -239,6 +194,6 @@ public class TestAppBuilder {
                 .map(TestSuiteBuilder::build)
                 .collect(Collectors.toList());
 
-        return new TestApp(name, pool, suites, sinks, watchers);
+        return new TestApp(name, pool, suites, new CopyOnWriteArrayList<>(), new CopyOnWriteArrayList<>());
     }
 }

@@ -1,12 +1,12 @@
 package ashes.of.bomber.watcher;
 
-import ashes.of.bomber.descriptions.TestAppDescription;
+import ashes.of.bomber.core.TestApp;
 
 public interface Watcher {
 
     default void startUp() {}
 
-    void watch(TestAppDescription app);
+    void watch(TestApp app);
 
     default void shutDown() {}
 }

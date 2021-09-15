@@ -1,9 +1,9 @@
 package ashes.of.bomber.builder;
 
-import ashes.of.bomber.annotations.AfterEachIteration;
+import ashes.of.bomber.annotations.AfterEach;
 import ashes.of.bomber.annotations.AfterTestCase;
 import ashes.of.bomber.annotations.AfterTestSuite;
-import ashes.of.bomber.annotations.BeforeEachIteration;
+import ashes.of.bomber.annotations.BeforeEach;
 import ashes.of.bomber.annotations.BeforeTestCase;
 import ashes.of.bomber.annotations.BeforeTestSuite;
 import ashes.of.bomber.annotations.LoadTestCase;
@@ -63,7 +63,7 @@ public class TestSuiteProcessor<T> {
                 if (beforeCase != null)
                     buildBeforeCase(method, beforeCase);
 
-                BeforeEachIteration beforeEach = method.getAnnotation(BeforeEachIteration.class);
+                BeforeEach beforeEach = method.getAnnotation(BeforeEach.class);
                 if (beforeEach != null)
                     buildBeforeEach(method, beforeEach);
 
@@ -71,7 +71,7 @@ public class TestSuiteProcessor<T> {
                 if (testCase != null)
                     buildTestCase(method, testCase);
 
-                AfterEachIteration afterEach = method.getAnnotation(AfterEachIteration.class);
+                AfterEach afterEach = method.getAnnotation(AfterEach.class);
                 if (afterEach != null)
                     buildAfterEach(method, afterEach);
 
@@ -116,13 +116,13 @@ public class TestSuiteProcessor<T> {
         builder.beforeCase(beforeAll.onlyOnce(), instance -> mh.bindTo(instance).invoke());
     }
     
-    private void buildBeforeEach(Method method, BeforeEachIteration beforeEach) throws Exception {
+    private void buildBeforeEach(Method method, BeforeEach beforeEach) throws Exception {
         log.debug("Found @BeforeEachIteration method: {}", method.getName());
         MethodHandle mh = MethodHandles.lookup().unreflect(method);
         builder.beforeEach(instance -> mh.bindTo(instance).invoke());
     }
 
-    private void buildAfterEach(Method method, AfterEachIteration afterEach) throws Exception {
+    private void buildAfterEach(Method method, AfterEach afterEach) throws Exception {
         log.debug("Found @AfterEachIteration method: {}", method.getName());
         MethodHandle mh = MethodHandles.lookup().unreflect(method);
         builder.afterEach(instance -> mh.bindTo(instance).invoke());

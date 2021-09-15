@@ -1,4 +1,4 @@
-package ashes.of.bomber.flight;
+package ashes.of.bomber.report;
 
 import ashes.of.bomber.configuration.Settings;
 

@@ -1,8 +1,8 @@
 package ashes.of.bomber.runner;
 
 import ashes.of.bomber.builder.TestAppBuilder;
-import ashes.of.bomber.tests.AllLifecycleMethodsTest;
-import ashes.of.bomber.tests.Counters;
+import ashes.of.bomber.runner.tests.AllLifecycleMethodsTest;
+import ashes.of.bomber.runner.tests.Counters;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeEach;

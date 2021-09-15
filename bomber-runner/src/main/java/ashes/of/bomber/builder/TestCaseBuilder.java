@@ -1,7 +1,7 @@
 package ashes.of.bomber.builder;
 
 import ashes.of.bomber.methods.TestCaseMethod;
-import ashes.of.bomber.runner.TestCase;
+import ashes.of.bomber.core.TestCase;
 
 import java.util.Objects;
 import java.util.function.Consumer;

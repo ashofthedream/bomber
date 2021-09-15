@@ -1,10 +1,8 @@
-package ashes.of.bomber.carrier.dto;
-
-import ashes.of.bomber.carrier.dto.flight.SettingsDto;
+package ashes.of.bomber.carrier.dto.flight;
 
 import java.util.List;
 
-public class ApplicationStateDto {
+public class AppStateDto {
     private String stage;
     private SettingsDto settings;
     private String testSuite;
@@ -21,7 +19,7 @@ public class ApplicationStateDto {
         return stage;
     }
 
-    public ApplicationStateDto setStage(String stage) {
+    public AppStateDto setStage(String stage) {
         this.stage = stage;
         return this;
     }
@@ -30,7 +28,7 @@ public class ApplicationStateDto {
         return settings;
     }
 
-    public ApplicationStateDto setSettings(SettingsDto settings) {
+    public AppStateDto setSettings(SettingsDto settings) {
         this.settings = settings;
         return this;
     }
@@ -39,7 +37,7 @@ public class ApplicationStateDto {
         return testSuite;
     }
 
-    public ApplicationStateDto setTestSuite(String testSuite) {
+    public AppStateDto setTestSuite(String testSuite) {
         this.testSuite = testSuite;
         return this;
     }
@@ -48,7 +46,7 @@ public class ApplicationStateDto {
         return testCase;
     }
 
-    public ApplicationStateDto setTestCase(String testCase) {
+    public AppStateDto setTestCase(String testCase) {
         this.testCase = testCase;
         return this;
     }
@@ -57,7 +55,7 @@ public class ApplicationStateDto {
         return testSuiteStart;
     }
 
-    public ApplicationStateDto setTestSuiteStart(long testSuiteStart) {
+    public AppStateDto setTestSuiteStart(long testSuiteStart) {
         this.testSuiteStart = testSuiteStart;
         return this;
     }
@@ -66,7 +64,7 @@ public class ApplicationStateDto {
         return testCaseStart;
     }
 
-    public ApplicationStateDto setTestCaseStart(long testCaseStart) {
+    public AppStateDto setTestCaseStart(long testCaseStart) {
         this.testCaseStart = testCaseStart;
         return this;
     }
@@ -75,7 +73,7 @@ public class ApplicationStateDto {
         return remainTotalIterations;
     }
 
-    public ApplicationStateDto setRemainTotalIterations(long remainTotalIterations) {
+    public AppStateDto setRemainTotalIterations(long remainTotalIterations) {
         this.remainTotalIterations = remainTotalIterations;
         return this;
     }
@@ -84,7 +82,7 @@ public class ApplicationStateDto {
         return elapsedTime;
     }
 
-    public ApplicationStateDto setElapsedTime(long elapsedTime) {
+    public AppStateDto setElapsedTime(long elapsedTime) {
         this.elapsedTime = elapsedTime;
         return this;
     }
@@ -93,7 +91,7 @@ public class ApplicationStateDto {
         return remainTime;
     }
 
-    public ApplicationStateDto setRemainTime(long remainTime) {
+    public AppStateDto setRemainTime(long remainTime) {
         this.remainTime = remainTime;
         return this;
     }
@@ -102,7 +100,7 @@ public class ApplicationStateDto {
         return errorsCount;
     }
 
-    public ApplicationStateDto setErrorsCount(long errorsCount) {
+    public AppStateDto setErrorsCount(long errorsCount) {
         this.errorsCount = errorsCount;
         return this;
     }
@@ -111,7 +109,7 @@ public class ApplicationStateDto {
         return workers;
     }
 
-    public ApplicationStateDto setWorkers(List<WorkerStateDto> workers) {
+    public AppStateDto setWorkers(List<WorkerStateDto> workers) {
         this.workers = workers;
         return this;
     }

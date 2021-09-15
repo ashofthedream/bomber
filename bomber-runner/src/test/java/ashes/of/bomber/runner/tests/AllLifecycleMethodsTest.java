@@ -1,9 +1,9 @@
-package ashes.of.bomber.tests;
+package ashes.of.bomber.runner.tests;
 
-import ashes.of.bomber.annotations.AfterEachIteration;
+import ashes.of.bomber.annotations.AfterEach;
 import ashes.of.bomber.annotations.AfterTestCase;
 import ashes.of.bomber.annotations.AfterTestSuite;
-import ashes.of.bomber.annotations.BeforeEachIteration;
+import ashes.of.bomber.annotations.BeforeEach;
 import ashes.of.bomber.annotations.BeforeTestCase;
 import ashes.of.bomber.annotations.BeforeTestSuite;
 import ashes.of.bomber.annotations.LoadTest;
@@ -50,7 +50,7 @@ public class AllLifecycleMethodsTest {
         counters.beforeCaseOnce.incrementAndGet();
     }
 
-    @BeforeEachIteration
+    @BeforeEach
     public void beforeEachCall() {
         log.trace("beforeEach should be invoked before each test invocation");
         counters.beforeEach.incrementAndGet();
@@ -70,7 +70,7 @@ public class AllLifecycleMethodsTest {
         counters.testB.incrementAndGet();
     }
 
-    @AfterEachIteration
+    @AfterEach
     public void afterEachCall() {
         log.trace("afterEach should be invoked after each test invocation");
         counters.afterEach.incrementAndGet();

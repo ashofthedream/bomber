@@ -1,7 +1,6 @@
 package ashes.of.bomber.carrier.starter.config;
 
 import ashes.of.bomber.Bomber;
-import ashes.of.bomber.runner.TestApp;
 import ashes.of.bomber.sink.Sink;
 import ashes.of.bomber.watcher.Watcher;
 import org.apache.logging.log4j.LogManager;

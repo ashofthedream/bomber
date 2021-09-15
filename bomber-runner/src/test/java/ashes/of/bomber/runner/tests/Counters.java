@@ -1,4 +1,4 @@
-package ashes.of.bomber.tests;
+package ashes.of.bomber.runner.tests;
 
 import java.util.concurrent.atomic.AtomicInteger;
 

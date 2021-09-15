@@ -3,8 +3,8 @@ package ashes.of.bomber.runner;
 import ashes.of.bomber.builder.TestAppBuilder;
 import ashes.of.bomber.builder.TestSuiteBuilder;
 import ashes.of.bomber.configuration.SettingsBuilder;
-import ashes.of.bomber.tests.AllLifecycleMethodsTest;
-import ashes.of.bomber.tests.Counters;
+import ashes.of.bomber.runner.tests.AllLifecycleMethodsTest;
+import ashes.of.bomber.runner.tests.Counters;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,7 +31,7 @@ public class BuilderLifecycleTest extends LifecycleTest {
                 .beforeCase(AllLifecycleMethodsTest::beforeCase)
                 .beforeCase(true, AllLifecycleMethodsTest::beforeCaseOnlyOnce)
                 .beforeEach(AllLifecycleMethodsTest::beforeEachCall)
-                .testCase("testA", (s, tools) -> s.testA())
+                .testCase("testA", (context, tools) -> context.testA())
                 .testCase("testB", AllLifecycleMethodsTest::testB)
                 .afterEach(AllLifecycleMethodsTest::afterEachCall)
                 .afterCase(AllLifecycleMethodsTest::afterCase)

@@ -5,8 +5,6 @@ import ashes.of.bomber.carrier.dto.events.SinkEvent;
 import ashes.of.bomber.carrier.starter.services.CarrierService;
 import ashes.of.bomber.events.TestAppFinishedEvent;
 import ashes.of.bomber.events.TestCaseFinishedEvent;
-import ashes.of.bomber.flight.TestFlightPlan;
-import ashes.of.bomber.runner.TestApp;
 import ashes.of.bomber.sink.Sink;
 import ashes.of.bomber.sink.histogram.HistogramTimelineDummyPrinter;
 import ashes.of.bomber.sink.histogram.HistogramTimelineSink;
@@ -18,7 +16,6 @@ import org.springframework.cloud.zookeeper.serviceregistry.ServiceInstanceRegist
 import org.springframework.stereotype.Component;
 
 import java.time.temporal.ChronoUnit;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 

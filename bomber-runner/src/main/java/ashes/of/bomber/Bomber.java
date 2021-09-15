@@ -1,9 +1,9 @@
 package ashes.of.bomber;
 
 import ashes.of.bomber.builder.TestAppBuilder;
-import ashes.of.bomber.flight.TestFlightPlan;
-import ashes.of.bomber.flight.TestFlightReport;
-import ashes.of.bomber.runner.TestApp;
+import ashes.of.bomber.plan.TestFlightPlan;
+import ashes.of.bomber.report.TestFlightReport;
+import ashes.of.bomber.core.TestApp;
 import ashes.of.bomber.sink.Sink;
 import ashes.of.bomber.watcher.Watcher;
 
@@ -47,10 +47,6 @@ public class Bomber {
 
     public Bomber add(TestApp app) {
         applications.add(app);
-
-        // todo temp
-        sinks.forEach(app::add);
-        watchers.forEach(watcher -> app.add(1000, watcher));
         return this;
     }
 

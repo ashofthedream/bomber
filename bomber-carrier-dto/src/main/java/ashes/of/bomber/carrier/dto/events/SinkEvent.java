@@ -1,6 +1,6 @@
 package ashes.of.bomber.carrier.dto.events;
 
-import ashes.of.bomber.carrier.dto.ApplicationStateDto;
+import ashes.of.bomber.carrier.dto.flight.AppStateDto;
 import ashes.of.bomber.flight.Stage;
 
 import javax.annotation.Nullable;
@@ -30,7 +30,7 @@ public class SinkEvent {
     @Nullable
     private Stage stage;
 
-    private ApplicationStateDto state;
+    private AppStateDto state;
     private List<HistogramPointDto> histograms = new ArrayList<>();
 
     public static long nextId() {
@@ -121,11 +121,11 @@ public class SinkEvent {
         return this;
     }
 
-    public ApplicationStateDto getState() {
+    public AppStateDto getState() {
         return state;
     }
 
-    public SinkEvent setState(ApplicationStateDto state) {
+    public SinkEvent setState(AppStateDto state) {
         this.state = state;
         return this;
     }

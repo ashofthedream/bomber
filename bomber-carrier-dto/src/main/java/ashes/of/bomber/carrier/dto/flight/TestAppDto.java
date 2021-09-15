@@ -4,6 +4,7 @@ import java.util.List;
 
 public class TestAppDto {
     private String name;
+    private AppStateDto state;
     private List<TestSuiteDto> testSuites;
 
     public String getName() {
@@ -12,6 +13,15 @@ public class TestAppDto {
 
     public TestAppDto setName(String name) {
         this.name = name;
+        return this;
+    }
+
+    public AppStateDto getState() {
+        return state;
+    }
+
+    public TestAppDto setState(AppStateDto state) {
+        this.state = state;
         return this;
     }
 

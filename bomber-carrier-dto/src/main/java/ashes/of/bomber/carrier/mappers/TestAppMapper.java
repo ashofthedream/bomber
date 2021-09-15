@@ -1,20 +1,19 @@
 package ashes.of.bomber.carrier.mappers;
 
-import ashes.of.bomber.carrier.dto.ApplicationDto;
-import ashes.of.bomber.carrier.dto.ApplicationStateDto;
-import ashes.of.bomber.carrier.dto.WorkerStateDto;
+import ashes.of.bomber.carrier.dto.flight.AppStateDto;
+import ashes.of.bomber.carrier.dto.flight.WorkerStateDto;
 import ashes.of.bomber.carrier.dto.flight.TestAppDto;
-import ashes.of.bomber.descriptions.TestAppDescription;
+import ashes.of.bomber.core.TestApp;
 import ashes.of.bomber.descriptions.TestAppStateDescription;
 import ashes.of.bomber.descriptions.WorkerDescription;
-import ashes.of.bomber.flight.TestAppPlan;
+import ashes.of.bomber.plan.TestAppPlan;
 
 import java.util.stream.Collectors;
 
 public class TestAppMapper {
 
-    public static ApplicationStateDto toDto(TestAppStateDescription state) {
-        return new ApplicationStateDto()
+    public static AppStateDto toDto(TestAppStateDescription state) {
+        return new AppStateDto()
                 .setStage(state.getStage().name())
                 .setSettings(SettingsMapper.toDto(state.getSettings()))
                 .setTestSuite(state.getTestSuite())
@@ -38,14 +37,14 @@ public class TestAppMapper {
                 .setErrorsCount(state.getErrorsCount());
     }
 
-    public static ApplicationDto toDto(TestAppDescription desc) {
-        var testSuites = desc.getTestSuites().stream()
+    public static TestAppDto toDto(TestApp app) {
+        var testSuites = app.getTestSuites().stream()
                 .map(TestSuiteMapper::toDto)
                 .collect(Collectors.toList());
 
-        return new ApplicationDto()
-                .setName(desc.getName())
-                .setState(toDto(desc.getState()))
+        return new TestAppDto()
+                .setName(app.getName())
+                .setState(toDto(app.getState()))
                 .setTestSuites(testSuites);
     }
 

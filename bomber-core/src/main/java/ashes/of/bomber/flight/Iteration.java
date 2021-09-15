@@ -2,7 +2,7 @@ package ashes.of.bomber.flight;
 
 import java.time.Instant;
 
-
+@Deprecated
 public class Iteration {
     private final long flightId;
     private final long number;

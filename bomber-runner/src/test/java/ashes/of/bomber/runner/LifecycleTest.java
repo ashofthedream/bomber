@@ -1,6 +1,7 @@
 package ashes.of.bomber.runner;
 
-import ashes.of.bomber.tests.Counters;
+import ashes.of.bomber.core.TestApp;
+import ashes.of.bomber.runner.tests.Counters;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

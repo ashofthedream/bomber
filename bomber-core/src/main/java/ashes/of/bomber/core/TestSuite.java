@@ -1,4 +1,4 @@
-package ashes.of.bomber.runner;
+package ashes.of.bomber.core;
 
 import ashes.of.bomber.flight.Iteration;
 import ashes.of.bomber.methods.LifeCycleHolder;

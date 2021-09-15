@@ -1,15 +1,17 @@
 package ashes.of.bomber.runner;
 
-import ashes.of.bomber.descriptions.ConfigurationDescription;
+import ashes.of.bomber.configuration.Configuration;
+import ashes.of.bomber.core.TestCase;
+import ashes.of.bomber.core.TestSuite;
 import ashes.of.bomber.events.TestSuiteFinishedEvent;
 import ashes.of.bomber.events.TestSuiteStartedEvent;
-import ashes.of.bomber.flight.TestAppPlan;
-import ashes.of.bomber.flight.TestCasePlan;
+import ashes.of.bomber.plan.TestAppPlan;
+import ashes.of.bomber.plan.TestCasePlan;
 import ashes.of.bomber.configuration.Settings;
 import ashes.of.bomber.flight.Stage;
-import ashes.of.bomber.flight.TestCaseReport;
-import ashes.of.bomber.flight.TestSuitePlan;
-import ashes.of.bomber.flight.TestSuiteReport;
+import ashes.of.bomber.report.TestCaseReport;
+import ashes.of.bomber.plan.TestSuitePlan;
+import ashes.of.bomber.report.TestSuiteReport;
 import ashes.of.bomber.sink.Sink;
 import ashes.of.bomber.squadron.Barrier;
 import org.apache.logging.log4j.LogManager;
@@ -104,10 +106,10 @@ public class Runner {
                         log.debug("Run test case: {}", testCasePlan.getName());
                         var config = Optional.ofNullable(testCasePlan.getConfiguration());
                         Settings warmUp = config
-                                .map(ConfigurationDescription::getWarmUp)
+                                .map(Configuration::getWarmUp)
                                 .orElse(testCase.getConfiguration().getWarmUp());
 
-                        Settings settings = config.map(ConfigurationDescription::getSettings)
+                        Settings settings = config.map(Configuration::getSettings)
                                 .orElse(testCase.getConfiguration()
                                         .getSettings());
 
@@ -137,11 +139,11 @@ public class Runner {
 
     private int determineWorkerThreadsCount(TestSuite<Object> testSuite, TestCasePlan testCasePlan) {
         var warmUp = Optional.ofNullable(testCasePlan.getConfiguration())
-                .map(ConfigurationDescription::getWarmUp)
+                .map(Configuration::getWarmUp)
                 .stream();
 
         var settings = Optional.ofNullable(testCasePlan.getConfiguration())
-                .map(ConfigurationDescription::getSettings)
+                .map(Configuration::getSettings)
                 .stream();
 
         return Stream.concat(warmUp, settings)

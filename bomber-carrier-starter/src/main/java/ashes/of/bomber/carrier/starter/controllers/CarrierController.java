@@ -23,6 +23,7 @@ public class CarrierController {
 
     @GetMapping("/carrier")
     public Mono<CarrierDto> getCarrier() {
+        log.debug("get carrier");
         var registration = carrierService.getRegistration();
 
         var dto = new CarrierDto()

@@ -1,7 +1,7 @@
 package ashes.of.bomber.carrier.starter.watcher;
 
 import ashes.of.bomber.carrier.starter.services.CarrierService;
-import ashes.of.bomber.descriptions.TestAppDescription;
+import ashes.of.bomber.core.TestApp;
 import ashes.of.bomber.watcher.Watcher;
 import org.springframework.stereotype.Component;
 
@@ -15,7 +15,7 @@ public class CarrierWatcher implements Watcher {
     }
 
     @Override
-    public void watch(TestAppDescription app) {
+    public void watch(TestApp app) {
 
     }
 }

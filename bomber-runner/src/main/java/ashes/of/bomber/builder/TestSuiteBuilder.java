@@ -3,8 +3,8 @@ package ashes.of.bomber.builder;
 import ashes.of.bomber.methods.LifeCycleHolder;
 import ashes.of.bomber.methods.LifeCycleMethod;
 import ashes.of.bomber.methods.TestCaseMethod;
-import ashes.of.bomber.runner.TestCase;
-import ashes.of.bomber.runner.TestSuite;
+import ashes.of.bomber.core.TestCase;
+import ashes.of.bomber.core.TestSuite;
 import com.google.common.base.Preconditions;
 
 import java.util.ArrayList;

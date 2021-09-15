@@ -1,29 +1,25 @@
-package ashes.of.bomber.flight;
+package ashes.of.bomber.report;
+
+import ashes.of.bomber.plan.TestFlightPlan;
 
 import java.time.Instant;
 import java.util.List;
 
-public class TestAppReport {
+public class TestFlightReport {
     private final TestFlightPlan plan;
-    private final String name;
     private final Instant startTime;
     private final Instant finishTime;
-    private final List<TestSuiteReport> testSuites;
+    private final List<TestAppReport> testApps;
 
-    public TestAppReport(TestFlightPlan plan, String name, Instant startTime, Instant finishTime, List<TestSuiteReport> testSuites) {
+    public TestFlightReport(TestFlightPlan plan, Instant startTime, Instant finishTime, List<TestAppReport> testApps) {
         this.plan = plan;
-        this.name = name;
         this.startTime = startTime;
         this.finishTime = finishTime;
-        this.testSuites = testSuites;
+        this.testApps = testApps;
     }
 
     public TestFlightPlan getPlan() {
         return plan;
-    }
-
-    public String getName() {
-        return name;
     }
 
     public Instant getStartTime() {
@@ -34,7 +30,7 @@ public class TestAppReport {
         return finishTime;
     }
 
-    public List<TestSuiteReport> getTestSuites() {
-        return testSuites;
+    public List<TestAppReport> getTestApps() {
+        return testApps;
     }
 }

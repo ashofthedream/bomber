@@ -1,15 +1,12 @@
 package ashes.of.bomber.carrier.starter.controllers;
 
 import ashes.of.bomber.Bomber;
-import ashes.of.bomber.carrier.dto.ApplicationDto;
 import ashes.of.bomber.carrier.dto.requests.FlightStartedResponse;
 import ashes.of.bomber.carrier.dto.requests.GetApplicationsResponse;
 import ashes.of.bomber.carrier.dto.requests.StartFlightRequest;
 import ashes.of.bomber.carrier.mappers.TestFlightMapper;
 import ashes.of.bomber.carrier.mappers.TestAppMapper;
-import ashes.of.bomber.descriptions.TestAppDescription;
-import ashes.of.bomber.flight.TestFlightPlan;
-import ashes.of.bomber.runner.TestApp;
+import ashes.of.bomber.plan.TestFlightPlan;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.ResponseEntity;
@@ -40,25 +37,24 @@ public class ApplicationController {
 
         var apps = bomber.getApps()
                 .stream()
-                .map(TestApp::getDescription)
                 .map(TestAppMapper::toDto)
                 .collect(Collectors.toList());
 
 
         var response = new GetApplicationsResponse()
-                .setApplications(apps);
+                .setTestApps(apps);
 
         return Mono.just(response);
     }
 
     @PostMapping("/carrier/applications/start")
-    public ResponseEntity<FlightStartedResponse> start(@RequestBody StartFlightRequest request) {
+    public Mono<FlightStartedResponse> start(@RequestBody StartFlightRequest request) {
         log.info("start all applications by request: {}", request);
         TestFlightPlan plan = TestFlightMapper.toPlan(request.getFlight());
 
         bomber.startAsync(plan);
 
-        return ResponseEntity.ok(new FlightStartedResponse()
+        return Mono.just(new FlightStartedResponse()
                 .setId(plan.getFlightId()));
     }
 
@@ -69,5 +65,4 @@ public class ApplicationController {
 
         return ResponseEntity.ok().build();
     }
-
 }

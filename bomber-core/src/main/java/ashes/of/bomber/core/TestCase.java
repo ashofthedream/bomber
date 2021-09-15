@@ -1,4 +1,4 @@
-package ashes.of.bomber.runner;
+package ashes.of.bomber.core;
 
 import ashes.of.bomber.configuration.Configuration;
 import ashes.of.bomber.methods.TestCaseMethod;

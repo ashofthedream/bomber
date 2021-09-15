@@ -1,9 +1,9 @@
 package ashes.of.bomber.watcher;
 
-import ashes.of.bomber.descriptions.TestAppDescription;
-import ashes.of.bomber.flight.Stage;
 import ashes.of.bomber.descriptions.TestAppStateDescription;
 import ashes.of.bomber.descriptions.WorkerDescription;
+import ashes.of.bomber.flight.Stage;
+import ashes.of.bomber.core.TestApp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
@@ -44,7 +44,7 @@ public class Log4jWatcher implements Watcher {
 
 
     @Override
-    public void watch(TestAppDescription app) {
+    public void watch(TestApp app) {
         TestAppStateDescription state = app.getState();
         ThreadContext.put("stage", state.getStage().name());
         ThreadContext.put("testSuite", state.getTestSuite());

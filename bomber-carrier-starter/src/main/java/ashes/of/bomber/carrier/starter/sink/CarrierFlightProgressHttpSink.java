@@ -11,7 +11,6 @@ import ashes.of.bomber.events.TestCaseFinishedEvent;
 import ashes.of.bomber.events.TestCaseStartedEvent;
 import ashes.of.bomber.events.TestSuiteFinishedEvent;
 import ashes.of.bomber.events.TestSuiteStartedEvent;
-import ashes.of.bomber.runner.TestApp;
 import ashes.of.bomber.sink.Sink;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

@@ -2,8 +2,8 @@ package ashes.of.bomber.atc.services;
 
 import ashes.of.bomber.atc.model.Carrier;
 import ashes.of.bomber.atc.model.Flight;
-import ashes.of.bomber.carrier.dto.ApplicationDto;
 import ashes.of.bomber.carrier.dto.carrier.CarrierDto;
+import ashes.of.bomber.carrier.dto.flight.TestAppDto;
 import ashes.of.bomber.carrier.dto.requests.FlightStartedResponse;
 import ashes.of.bomber.carrier.dto.requests.GetApplicationsResponse;
 import ashes.of.bomber.carrier.dto.requests.StartFlightRequest;
@@ -51,7 +51,7 @@ public class CarrierService {
                 .uri(uri + "/carrier/applications")
                 .retrieve()
                 .bodyToMono(GetApplicationsResponse.class)
-                .map(response -> toCarrier(carrier, response.getApplications()))
+                .map(response -> toCarrier(carrier, response.getTestApps()))
                 .onErrorContinue((throwable, o) -> log.warn("Can't get status of carrier: {}", carrier.getId(), throwable));
     }
 
@@ -81,7 +81,7 @@ public class CarrierService {
     }
 
 
-    private CarrierDto toCarrier(Carrier carrier, List<ApplicationDto> apps) {
+    private CarrierDto toCarrier(Carrier carrier, List<TestAppDto> apps) {
         return new CarrierDto()
                 .setId(carrier.getId())
                 .setApps(apps)

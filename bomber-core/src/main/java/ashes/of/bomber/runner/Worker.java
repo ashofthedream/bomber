@@ -1,5 +1,7 @@
 package ashes.of.bomber.runner;
 
+import ashes.of.bomber.core.TestCase;
+import ashes.of.bomber.core.TestSuite;
 import ashes.of.bomber.descriptions.WorkerDescription;
 import ashes.of.bomber.events.TestCaseAfterEachEvent;
 import ashes.of.bomber.events.TestCaseBeforeEachEvent;
@@ -42,15 +44,16 @@ public class Worker {
         this.thread = thread;
     }
 
+    public String getName() {
+        return thread.getName();
+    }
+
     public WorkerDescription getDescription() {
         return new WorkerDescription(getName(),
                 state.getCurrentIterationsCount(), state.getRemainIterationsCount(), state.getErrorsCount(),
                 state.getExpectedRecordsCount(), state.getCaughtRecordsCount());
     }
 
-    public String getName() {
-        return thread.getName();
-    }
 
     public boolean isActive() {
         return thread.isAlive();
