@@ -48,10 +48,14 @@ public class Worker {
         return thread.getName();
     }
 
-    public WorkerSnapshot getDescription() {
+    public WorkerSnapshot getSnapshot() {
         return new WorkerSnapshot(getName(),
-                state.getCurrentIterationsCount(), state.getRemainIterationsCount(), state.getErrorsCount(),
-                state.getExpectedRecordsCount(), state.getCaughtRecordsCount());
+                state.getCurrentIterationsCount(),
+                state.getRemainIterationsCount(),
+                state.getErrorsCount(),
+                state.getExpectedRecordsCount(),
+                state.getCaughtRecordsCount()
+        );
     }
 
 
@@ -88,8 +92,8 @@ public class Worker {
         ThreadContext.put("testCase", testCase.getName());
         ThreadContext.put("stage", stage.name());
 
-        Limiter limiter = testCase.getConfiguration().getLimiter().get();
-        Delayer delayer = testCase.getConfiguration().getDelayer().get();
+        Limiter limiter = testCase.getConfiguration().getLimiter().build();
+        Delayer delayer = testCase.getConfiguration().getDelayer().build();
 
         var startLatch = state.getStartLatch();
         startLatch.countDown();

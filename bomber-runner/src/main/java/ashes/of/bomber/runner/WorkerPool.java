@@ -95,6 +95,10 @@ public class WorkerPool {
     public void shutdown() {
         log.info("Shutdown WorkerPool, {} workers ({} available) will receive a stop signal", workers.size(), available.size());
         available.clear();
+        if (acquired.isEmpty()) {
+            log.warn("Some threads still acquired: {}. Doesn't matter", acquired);
+        }
+
         workers.forEach(Worker::stop);
         workers.clear();
     }

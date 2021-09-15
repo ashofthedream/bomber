@@ -7,9 +7,9 @@ public class ConfigurationMapper {
 
     public static Configuration toConfiguration(ConfigurationDto dto) {
         return new Configuration(
-                () -> {throw new RuntimeException("Not supported yet"); },
-                () -> {throw new RuntimeException("Not supported yet"); },
-                null,
+                () -> { throw new RuntimeException("Not supported yet"); },
+                () -> { throw new RuntimeException("Not supported yet"); },
+                () -> { throw new RuntimeException("Not supported yet"); },
                 SettingsMapper.toSettingsOrNull(dto.getWarmUp()),
                 SettingsMapper.toSettingsOrNull(dto.getSettings())
         );

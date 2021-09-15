@@ -5,17 +5,22 @@ import ashes.of.bomber.annotations.LoadTest;
 import ashes.of.bomber.annotations.Throttle;
 import ashes.of.bomber.annotations.WarmUp;
 import ashes.of.bomber.delayer.Delayer;
+import ashes.of.bomber.delayer.DelayerBuilder;
 import ashes.of.bomber.delayer.NoDelayDelayer;
 import ashes.of.bomber.delayer.RandomDelayer;
 import ashes.of.bomber.configuration.Settings;
 import ashes.of.bomber.configuration.SettingsBuilder;
 import ashes.of.bomber.limiter.Limiter;
 import ashes.of.bomber.configuration.Configuration;
+import ashes.of.bomber.limiter.LimiterBuilder;
+import ashes.of.bomber.limiter.OneAnswerLimiter;
+import ashes.of.bomber.limiter.RateLimiter;
 import ashes.of.bomber.squadron.BarrierBuilder;
 import ashes.of.bomber.squadron.NoBarrier;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Method;
+import java.time.Duration;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -23,9 +28,9 @@ import java.util.function.Supplier;
 
 public class ConfigurationBuilder {
 
-    private BarrierBuilder barrier = new NoBarrier.Builder();
-    private Supplier<Delayer> delayer = NoDelayDelayer::new;
-    private Supplier<Limiter> limiter = Limiter::alwaysPermit;
+    private BarrierBuilder barrier = NoBarrier::new;
+    private DelayerBuilder delayer = NoDelayDelayer::new;
+    private LimiterBuilder limiter = OneAnswerLimiter::alwaysPermit;
     private Settings warmUp = SettingsBuilder.disabled();
     private Settings settings = SettingsBuilder.disabled();
 
@@ -100,7 +105,7 @@ public class ConfigurationBuilder {
         return delayer(() -> delayer);
     }
 
-    public ConfigurationBuilder delayer(Supplier<Delayer> delayer) {
+    public ConfigurationBuilder delayer(DelayerBuilder delayer) {
         this.delayer = delayer;
         return this;
     }
@@ -130,20 +135,21 @@ public class ConfigurationBuilder {
      * @param limiter shared request limiter
      * @return builder
      */
-    public ConfigurationBuilder limiter(Supplier<Limiter> limiter) {
+    public ConfigurationBuilder limiter(LimiterBuilder limiter) {
         this.limiter = limiter;
         return this;
     }
 
     public ConfigurationBuilder limiter(@Nullable Throttle throttle) {
         if (throttle != null) {
-            Supplier<Limiter> limiter = () -> Limiter.withRate(throttle.threshold(), throttle.time(), throttle.timeUnit());
+            Supplier<Limiter> limiter = () -> RateLimiter.withRate(throttle.threshold(), throttle.time(), throttle.timeUnit());
             if (throttle.shared()) {
                 limiter(limiter.get());
             } else {
-                limiter(limiter);
+                limiter(limiter::get);
             }
         }
+
         return this;
     }
 

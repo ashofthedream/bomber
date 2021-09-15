@@ -28,8 +28,7 @@ public class ExampleAccountsTestApp {
 
     public static TestAppBuilder create(String appUrl, int membersCount) {
         BarrierBuilder barrier = membersCount > 1 ?
-                new ZookeeperBarrierBuilder().members(membersCount) :
-                new NoBarrier.Builder();
+                new ZookeeperBarrierBuilder().members(membersCount) : NoBarrier::new;
 
         return new TestAppBuilder()
                 .name("ExampleAccountsTestApp")

@@ -19,7 +19,6 @@ public class WorkerState {
     private final Barrier barrier;
 
     private final AtomicLong iterationsCountSeq = new AtomicLong();
-
     private final AtomicLong expectedRecordsCount = new AtomicLong();
     private final AtomicLong caughtRecordsCount = new AtomicLong();
     private final AtomicLong errorsCount = new AtomicLong();

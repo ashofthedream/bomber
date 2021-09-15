@@ -81,11 +81,11 @@ public class TestSuite<T> {
     }
 
     private void beforeSuite(T object, LifeCycleMethod<T> l) {
-        log.trace("Call beforeSuite instance: {}", object);
+        log.trace("Call beforeSuite context: {}", object);
         try {
             l.call(object);
         } catch (Throwable th) {
-            log.warn("Call beforeSuite instance: {}, failed", object, th);
+            log.warn("Call beforeSuite context: {}, failed", object, th);
         }
     }
 
@@ -96,10 +96,10 @@ public class TestSuite<T> {
 
     private void beforeCase(T object, LifeCycleMethod<T> l) {
         try {
-            log.trace("Call beforeCase instance: {}", object);
+            log.trace("Call beforeCase context: {}", object);
             l.call(object);
         } catch (Throwable th) {
-            log.warn("Call beforeCase instance: {}, failed", object, th);
+            log.warn("Call beforeCase context: {}, failed", object, th);
         }
     }    
 
@@ -110,10 +110,10 @@ public class TestSuite<T> {
 
     private void beforeEach(Iteration it, T object, LifeCycleMethod<T> method) {
         try {
-            log.trace("Call beforeEach instance: {}, it: {}", object, it);
+            log.trace("Call beforeEach context: {}, it: {}", object, it);
             method.call(object);
         } catch (Throwable th) {
-            log.trace("Call beforeEach instance: {}, it: {} failed", object, it, th);
+            log.trace("Call beforeEach context: {}, it: {} failed", object, it, th);
         }
     }
 
@@ -124,10 +124,10 @@ public class TestSuite<T> {
 
     private void afterEach(Iteration it, T object, LifeCycleMethod<T> method) {
         try {
-            log.trace("Call afterEach instance: {}, it: {}", object, it);
+            log.trace("Call afterEach context: {}, it: {}", object, it);
             method.call(object);
         } catch (Throwable th) {
-            log.trace("Call afterEach instance: {}, it: {} failed", object, it, th);
+            log.trace("Call afterEach context: {}, it: {} failed", object, it, th);
         }
     }
 
@@ -138,10 +138,10 @@ public class TestSuite<T> {
 
     private void afterCase(T object, LifeCycleMethod<T> method) {
         try {
-            log.trace("Call afterCase instance: {}", object);
+            log.trace("Call afterCase context: {}", object);
             method.call(object);
         } catch (Throwable th) {
-            log.warn("Call afterCase instance: {}, failed", object, th);
+            log.warn("Call afterCase context: {}, failed", object, th);
         }
     }
 
@@ -152,10 +152,10 @@ public class TestSuite<T> {
 
     private void afterSuite(T object, LifeCycleMethod<T> method) {
         try {
-            log.trace("Call afterSuite instance: {}", object);
+            log.trace("Call afterSuite context: {}", object);
             method.call(object);
         } catch (Throwable th) {
-            log.warn("Call afterSuite instance: {}, failed", object, th);
+            log.warn("Call afterSuite context: {}, failed", object, th);
         }
     }
 }

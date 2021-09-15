@@ -1,5 +1,7 @@
 package ashes.of.bomber.sink;
 
+import ashes.of.bomber.events.FlightFinishedEvent;
+import ashes.of.bomber.events.FlightStartedEvent;
 import ashes.of.bomber.events.TestAppFinishedEvent;
 import ashes.of.bomber.events.TestAppStartedEvent;
 import ashes.of.bomber.events.TestCaseAfterEachEvent;
@@ -34,6 +36,10 @@ public class AsyncSink implements Sink {
         this(sink, defaultExecutor);
     }
 
+    @Override
+    public void beforeFlight(FlightStartedEvent event) {
+        ex.execute(() -> sink.beforeFlight(event));
+    }
 
     @Override
     public void beforeTestApp(TestAppStartedEvent event) {
@@ -78,5 +84,10 @@ public class AsyncSink implements Sink {
     @Override
     public void afterTestApp(TestAppFinishedEvent event) {
         ex.execute(() -> sink.afterTestApp(event));
+    }
+
+    @Override
+    public void afterFlight(FlightFinishedEvent event) {
+        ex.execute(() -> sink.afterFlight(event));
     }
 }

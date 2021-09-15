@@ -33,8 +33,7 @@ public class ExampleUsersTestApp {
 
     public static TestAppBuilder create(String appUrl, int membersCount) {
         BarrierBuilder barrier = membersCount > 1 ?
-                new ZookeeperBarrierBuilder().members(membersCount) :
-                new NoBarrier.Builder();
+                new ZookeeperBarrierBuilder().members(membersCount) : NoBarrier::new;
 
         return TestAppBuilder.create(ExampleUsersTestApp.class)
                 .config(config -> config.barrier(barrier))
