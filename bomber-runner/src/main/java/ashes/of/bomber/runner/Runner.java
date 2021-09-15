@@ -5,13 +5,13 @@ import ashes.of.bomber.core.TestCase;
 import ashes.of.bomber.core.TestSuite;
 import ashes.of.bomber.events.TestSuiteFinishedEvent;
 import ashes.of.bomber.events.TestSuiteStartedEvent;
-import ashes.of.bomber.plan.TestAppPlan;
-import ashes.of.bomber.plan.TestCasePlan;
+import ashes.of.bomber.flight.plan.TestAppPlan;
+import ashes.of.bomber.flight.plan.TestCasePlan;
 import ashes.of.bomber.configuration.Settings;
-import ashes.of.bomber.flight.Stage;
-import ashes.of.bomber.report.TestCaseReport;
-import ashes.of.bomber.plan.TestSuitePlan;
-import ashes.of.bomber.report.TestSuiteReport;
+import ashes.of.bomber.configuration.Stage;
+import ashes.of.bomber.flight.report.TestCaseReport;
+import ashes.of.bomber.flight.plan.TestSuitePlan;
+import ashes.of.bomber.flight.report.TestSuiteReport;
 import ashes.of.bomber.sink.Sink;
 import ashes.of.bomber.squadron.Barrier;
 import org.apache.logging.log4j.LogManager;
@@ -27,7 +27,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static ashes.of.bomber.flight.Stage.IDLE;
+import static ashes.of.bomber.configuration.Stage.IDLE;
 
 
 public class Runner {

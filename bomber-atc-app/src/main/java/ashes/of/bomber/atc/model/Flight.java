@@ -2,7 +2,7 @@ package ashes.of.bomber.atc.model;
 
 import ashes.of.bomber.carrier.dto.events.HistogramPointDto;
 import ashes.of.bomber.carrier.dto.events.SinkEvent;
-import ashes.of.bomber.plan.TestFlightPlan;
+import ashes.of.bomber.flight.plan.TestFlightPlan;
 
 import java.util.Comparator;
 import java.util.List;

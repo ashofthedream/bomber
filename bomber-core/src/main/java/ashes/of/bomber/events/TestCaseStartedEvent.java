@@ -1,7 +1,7 @@
 package ashes.of.bomber.events;
 
 import ashes.of.bomber.configuration.Settings;
-import ashes.of.bomber.flight.Stage;
+import ashes.of.bomber.configuration.Stage;
 
 import java.time.Instant;
 

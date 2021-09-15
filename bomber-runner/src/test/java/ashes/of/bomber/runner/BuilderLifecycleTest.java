@@ -1,10 +1,12 @@
 package ashes.of.bomber.runner;
 
+import ashes.of.bomber.builder.BomberBuilder;
 import ashes.of.bomber.builder.TestAppBuilder;
 import ashes.of.bomber.builder.TestSuiteBuilder;
 import ashes.of.bomber.configuration.SettingsBuilder;
 import ashes.of.bomber.runner.tests.AllLifecycleMethodsTest;
 import ashes.of.bomber.runner.tests.Counters;
+import ashes.of.bomber.sink.Log4jSink;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,19 +32,21 @@ public class BuilderLifecycleTest extends LifecycleTest {
                 .beforeSuite(true, AllLifecycleMethodsTest::beforeSuiteOnlyOnce)
                 .beforeCase(AllLifecycleMethodsTest::beforeCase)
                 .beforeCase(true, AllLifecycleMethodsTest::beforeCaseOnlyOnce)
-                .beforeEach(AllLifecycleMethodsTest::beforeEachCall)
+                .beforeEach(AllLifecycleMethodsTest::beforeEach)
                 .testCase("testA", (context, tools) -> context.testA())
                 .testCase("testB", AllLifecycleMethodsTest::testB)
-                .afterEach(AllLifecycleMethodsTest::afterEachCall)
+                .afterEach(AllLifecycleMethodsTest::afterEach)
                 .afterCase(AllLifecycleMethodsTest::afterCase)
                 .afterCase(true, AllLifecycleMethodsTest::afterCaseOnlyOnce)
                 .afterSuite(AllLifecycleMethodsTest::afterSuite)
                 .afterSuite(true, AllLifecycleMethodsTest::afterSuiteOnlyOnce);
 
-        app = new TestAppBuilder()
-                .name("testAllLifecycleMethods")
-//                .sink(new Log4jSink())
-                .addSuite(suite)
+
+        bomber = new BomberBuilder()
+                .sink(new Log4jSink())
+                .add(new TestAppBuilder()
+                        .name("testAllLifecycleMethods")
+                        .addSuite(suite))
                 .build();
     }
 }

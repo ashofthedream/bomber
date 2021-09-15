@@ -1,6 +1,6 @@
 package ashes.of.bomber.events;
 
-import ashes.of.bomber.flight.Stage;
+import ashes.of.bomber.configuration.Stage;
 
 import javax.annotation.Nullable;
 import java.time.Instant;

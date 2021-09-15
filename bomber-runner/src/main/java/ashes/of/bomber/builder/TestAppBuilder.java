@@ -185,15 +185,14 @@ public class TestAppBuilder {
     }
 
     public TestApp build() {
-        Objects.requireNonNull(name,     "name is null");
+        Objects.requireNonNull(name, "name is null");
         Preconditions.checkArgument(!testSuites.isEmpty(), "No test suites found");
 
-        WorkerPool pool = new WorkerPool();
         List<TestSuite<?>> suites = this.testSuites.stream()
                 .filter(TestSuiteBuilder::hasTestCases)
                 .map(TestSuiteBuilder::build)
                 .collect(Collectors.toList());
 
-        return new TestApp(name, pool, suites, new CopyOnWriteArrayList<>(), new CopyOnWriteArrayList<>());
+        return new TestApp(name, suites);
     }
 }

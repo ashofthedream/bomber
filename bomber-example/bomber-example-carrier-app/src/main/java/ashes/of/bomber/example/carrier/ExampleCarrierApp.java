@@ -1,7 +1,7 @@
 package ashes.of.bomber.example.carrier;
 
 import ashes.of.bomber.carrier.starter.config.CarrierConfiguration;
-import ashes.of.bomber.plan.TestFlightPlan;
+import ashes.of.bomber.flight.plan.TestFlightPlan;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;

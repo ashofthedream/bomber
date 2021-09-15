@@ -1,6 +1,6 @@
 package ashes.of.bomber.sink.histogram;
 
-import ashes.of.bomber.flight.Stage;
+import ashes.of.bomber.configuration.Stage;
 
 import java.util.Objects;
 

@@ -3,9 +3,11 @@ package ashes.of.bomber.benchmark;
 import ashes.of.bomber.annotations.LoadTest;
 import ashes.of.bomber.annotations.LoadTestCase;
 import ashes.of.bomber.annotations.LoadTestSuite;
+import ashes.of.bomber.builder.BomberBuilder;
 import ashes.of.bomber.builder.TestSuiteBuilder;
 import ashes.of.bomber.builder.TestAppBuilder;
 import ashes.of.bomber.configuration.SettingsBuilder;
+import ashes.of.bomber.sink.Log4jSink;
 import ashes.of.bomber.tools.Tools;
 import org.HdrHistogram.ConcurrentHistogram;
 import org.HdrHistogram.Histogram;
@@ -60,7 +62,7 @@ public class AnnotationProcessingBenchmark {
         Test test = new Test();
 
         TestSuiteBuilder<Test> suite = new TestSuiteBuilder<Test>()
-                .name("create-with-builder")
+                .name("suite-with-builder")
                 .withContext(test)
                 .config(config -> config
                     .warmUp(SettingsBuilder.disabled())
@@ -69,10 +71,11 @@ public class AnnotationProcessingBenchmark {
                             .setThreadIterationsCount(1_000_000)))
                 .testCase("test", Test::test);
 
-        new TestAppBuilder()
-                .name("build-and-run")
-//                .app(app -> app.sink(new Log4jSink()))
-                .addSuite(suite)
+        new BomberBuilder()
+                .sink(new Log4jSink())
+                .add(new TestAppBuilder()
+                        .name("application-with-builder")
+                        .addSuite(suite))
                 .build()
                 .start();
 
@@ -82,10 +85,11 @@ public class AnnotationProcessingBenchmark {
     private static Histogram createWithAnnotations() {
         Test test = new Test();
 
-        new TestAppBuilder()
-                .name("create-with-annotations")
-//                .app(app -> app.sink(new Log4jSink()))
-                .testSuiteObject(test)
+        new BomberBuilder()
+                .sink(new Log4jSink())
+                .add(new TestAppBuilder()
+                        .name("application-with-annotations")
+                        .testSuiteObject(test))
                 .build()
                 .start();
 

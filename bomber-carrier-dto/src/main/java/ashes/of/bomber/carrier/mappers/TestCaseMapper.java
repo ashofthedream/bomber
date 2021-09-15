@@ -2,7 +2,7 @@ package ashes.of.bomber.carrier.mappers;
 
 import ashes.of.bomber.carrier.dto.flight.TestCaseDto;
 import ashes.of.bomber.core.TestCase;
-import ashes.of.bomber.plan.TestCasePlan;
+import ashes.of.bomber.flight.plan.TestCasePlan;
 
 import java.util.Optional;
 

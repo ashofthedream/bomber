@@ -1,4 +1,4 @@
-package ashes.of.bomber.plan;
+package ashes.of.bomber.flight.plan;
 
 import java.util.List;
 

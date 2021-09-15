@@ -2,14 +2,14 @@ package ashes.of.bomber.runner;
 
 import ashes.of.bomber.core.TestCase;
 import ashes.of.bomber.core.TestSuite;
-import ashes.of.bomber.descriptions.WorkerDescription;
+import ashes.of.bomber.snapshots.WorkerSnapshot;
 import ashes.of.bomber.events.TestCaseAfterEachEvent;
 import ashes.of.bomber.events.TestCaseBeforeEachEvent;
 import ashes.of.bomber.events.TestCaseFinishedEvent;
 import ashes.of.bomber.events.TestCaseStartedEvent;
 import ashes.of.bomber.flight.Iteration;
 import ashes.of.bomber.configuration.Settings;
-import ashes.of.bomber.flight.Stage;
+import ashes.of.bomber.configuration.Stage;
 import ashes.of.bomber.delayer.Delayer;
 import ashes.of.bomber.limiter.Limiter;
 import ashes.of.bomber.sink.Sink;
@@ -48,8 +48,8 @@ public class Worker {
         return thread.getName();
     }
 
-    public WorkerDescription getDescription() {
-        return new WorkerDescription(getName(),
+    public WorkerSnapshot getDescription() {
+        return new WorkerSnapshot(getName(),
                 state.getCurrentIterationsCount(), state.getRemainIterationsCount(), state.getErrorsCount(),
                 state.getExpectedRecordsCount(), state.getCaughtRecordsCount());
     }

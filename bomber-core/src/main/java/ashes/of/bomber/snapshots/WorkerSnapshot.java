@@ -1,6 +1,6 @@
-package ashes.of.bomber.descriptions;
+package ashes.of.bomber.snapshots;
 
-public class WorkerDescription {
+public class WorkerSnapshot {
     private final String worker;
 
     private final long currentIterationsCount;
@@ -9,7 +9,7 @@ public class WorkerDescription {
     private final long expectedRecordsCount;
     private final long caughtRecordsCount;
 
-    public WorkerDescription(String worker, long currentIterationsCount, long remainIterationsCount, long errorsCount, long expectedRecordsCount, long caughtRecordsCount) {
+    public WorkerSnapshot(String worker, long currentIterationsCount, long remainIterationsCount, long errorsCount, long expectedRecordsCount, long caughtRecordsCount) {
         this.worker = worker;
         this.currentIterationsCount = currentIterationsCount;
         this.remainIterationsCount = remainIterationsCount;

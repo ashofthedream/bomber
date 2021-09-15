@@ -2,7 +2,7 @@ package ashes.of.bomber.atc.services;
 
 import ashes.of.bomber.atc.model.Flight;
 import ashes.of.bomber.carrier.dto.events.SinkEvent;
-import ashes.of.bomber.plan.TestFlightPlan;
+import ashes.of.bomber.flight.plan.TestFlightPlan;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;

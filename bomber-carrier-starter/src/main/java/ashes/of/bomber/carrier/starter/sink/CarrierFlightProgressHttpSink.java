@@ -77,7 +77,7 @@ public class CarrierFlightProgressHttpSink implements Sink {
                     .filter(app -> Objects.equals(app.getName(), event.getTestApp()))
                     .findFirst()
                     .orElseThrow();
-            var state = TestAppMapper.toDto(testApp.getState());
+            var state = TestAppMapper.toDto(bomber.getState());
             send(new SinkEvent()
                     .setId(SinkEvent.nextId())
                     .setType(TEST_CASE_PROGRESS)

@@ -6,7 +6,7 @@ import ashes.of.bomber.carrier.dto.requests.GetApplicationsResponse;
 import ashes.of.bomber.carrier.dto.requests.StartFlightRequest;
 import ashes.of.bomber.carrier.mappers.TestFlightMapper;
 import ashes.of.bomber.carrier.mappers.TestAppMapper;
-import ashes.of.bomber.plan.TestFlightPlan;
+import ashes.of.bomber.flight.plan.TestFlightPlan;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.ResponseEntity;

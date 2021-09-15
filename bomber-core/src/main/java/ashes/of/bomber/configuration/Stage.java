@@ -1,4 +1,4 @@
-package ashes.of.bomber.flight;
+package ashes.of.bomber.configuration;
 
 
 public enum Stage {

@@ -1,9 +1,8 @@
 package ashes.of.bomber.watcher;
 
-import ashes.of.bomber.descriptions.TestAppStateDescription;
-import ashes.of.bomber.descriptions.WorkerDescription;
-import ashes.of.bomber.flight.Stage;
-import ashes.of.bomber.core.TestApp;
+import ashes.of.bomber.snapshots.FlightSnapshot;
+import ashes.of.bomber.snapshots.WorkerSnapshot;
+import ashes.of.bomber.configuration.Stage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
@@ -44,37 +43,36 @@ public class Log4jWatcher implements Watcher {
 
 
     @Override
-    public void watch(TestApp app) {
-        TestAppStateDescription state = app.getState();
-        ThreadContext.put("stage", state.getStage().name());
-        ThreadContext.put("testSuite", state.getTestSuite());
-        ThreadContext.put("testCase", state.getTestCase());
+    public void watch(FlightSnapshot snapshot) {
+        ThreadContext.put("stage", snapshot.getStage().name());
+        ThreadContext.put("testSuite", snapshot.getTestSuite());
+        ThreadContext.put("testCase", snapshot.getTestCase());
 
-        if (state.getStage() == Stage.IDLE || state.getTestCase() == null) {
+        if (snapshot.getStage() == Stage.IDLE || snapshot.getTestCase() == null) {
             log.info("waiting...");
             return;
         }
 
-        long totalInv = state.getSettings().getTotalIterationsCount();
-        long currentInv = totalInv - state.getRemainIterationsCount();
+        long totalInv = snapshot.getSettings().getTotalIterationsCount();
+        long currentInv = totalInv - snapshot.getRemainIterationsCount();
 
-        long expectedCount = state.getWorkers()
+        long expectedCount = snapshot.getWorkers()
                 .stream()
-                .mapToLong(WorkerDescription::getExpectedRecordsCount)
+                .mapToLong(WorkerSnapshot::getExpectedRecordsCount)
                 .sum();
 
-        long caughtCount = state.getWorkers()
+        long caughtCount = snapshot.getWorkers()
                 .stream()
-                .mapToLong(WorkerDescription::getCaughtRecordsCount)
+                .mapToLong(WorkerSnapshot::getCaughtRecordsCount)
                 .sum();
 
-        long watcherErrorCount = state.getWorkers()
+        long watcherErrorCount = snapshot.getWorkers()
                 .stream()
-                .mapToLong(WorkerDescription::getErrorsCount)
+                .mapToLong(WorkerSnapshot::getErrorsCount)
                 .sum();
 
-        double totalSecs = state.getSettings().getTime().getSeconds();
-        double elapsedSecs = (state.getCaseElapsedTime() / 100) / 10.0;
+        double totalSecs = snapshot.getSettings().getTime().getSeconds();
+        double elapsedSecs = (snapshot.getCaseElapsedTime() / 100) / 10.0;
 
         StringBuilder tp = new StringBuilder();
         StringBuilder ip = new StringBuilder();

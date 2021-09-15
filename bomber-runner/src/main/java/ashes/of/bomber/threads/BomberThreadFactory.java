@@ -16,7 +16,7 @@ public class BomberThreadFactory implements ThreadFactory {
     private final AtomicInteger threadNumberSeq = new AtomicInteger();
     private final String threadName;
 
-    private BomberThreadFactory(String threadName) {
+    public BomberThreadFactory(String threadName) {
         this.threadName = threadName;
     }
 

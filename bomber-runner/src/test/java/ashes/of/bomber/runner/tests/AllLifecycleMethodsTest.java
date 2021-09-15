@@ -51,7 +51,7 @@ public class AllLifecycleMethodsTest {
     }
 
     @BeforeEach
-    public void beforeEachCall() {
+    public void beforeEach() {
         log.trace("beforeEach should be invoked before each test invocation");
         counters.beforeEach.incrementAndGet();
     }
@@ -71,7 +71,7 @@ public class AllLifecycleMethodsTest {
     }
 
     @AfterEach
-    public void afterEachCall() {
+    public void afterEach() {
         log.trace("afterEach should be invoked after each test invocation");
         counters.afterEach.incrementAndGet();
     }

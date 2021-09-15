@@ -4,15 +4,15 @@ import ashes.of.bomber.carrier.dto.flight.AppStateDto;
 import ashes.of.bomber.carrier.dto.flight.WorkerStateDto;
 import ashes.of.bomber.carrier.dto.flight.TestAppDto;
 import ashes.of.bomber.core.TestApp;
-import ashes.of.bomber.descriptions.TestAppStateDescription;
-import ashes.of.bomber.descriptions.WorkerDescription;
-import ashes.of.bomber.plan.TestAppPlan;
+import ashes.of.bomber.snapshots.FlightSnapshot;
+import ashes.of.bomber.snapshots.WorkerSnapshot;
+import ashes.of.bomber.flight.plan.TestAppPlan;
 
 import java.util.stream.Collectors;
 
 public class TestAppMapper {
 
-    public static AppStateDto toDto(TestAppStateDescription state) {
+    public static AppStateDto toDto(FlightSnapshot state) {
         return new AppStateDto()
                 .setStage(state.getStage().name())
                 .setSettings(SettingsMapper.toDto(state.getSettings()))
@@ -29,7 +29,7 @@ public class TestAppMapper {
                         .collect(Collectors.toList()));
     }
 
-    public static WorkerStateDto toDto(WorkerDescription state) {
+    public static WorkerStateDto toDto(WorkerSnapshot state) {
         return new WorkerStateDto()
                 .setName(state.getWorker())
                 .setIterationsCount(state.getCurrentIterationsCount())
@@ -44,7 +44,6 @@ public class TestAppMapper {
 
         return new TestAppDto()
                 .setName(app.getName())
-                .setState(toDto(app.getState()))
                 .setTestSuites(testSuites);
     }
 

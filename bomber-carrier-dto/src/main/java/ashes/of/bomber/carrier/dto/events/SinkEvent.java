@@ -1,7 +1,7 @@
 package ashes.of.bomber.carrier.dto.events;
 
 import ashes.of.bomber.carrier.dto.flight.AppStateDto;
-import ashes.of.bomber.flight.Stage;
+import ashes.of.bomber.configuration.Stage;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;

@@ -1,6 +1,6 @@
-package ashes.of.bomber.report;
+package ashes.of.bomber.flight.report;
 
-import ashes.of.bomber.plan.TestFlightPlan;
+import ashes.of.bomber.flight.plan.TestFlightPlan;
 
 import java.time.Instant;
 import java.util.List;

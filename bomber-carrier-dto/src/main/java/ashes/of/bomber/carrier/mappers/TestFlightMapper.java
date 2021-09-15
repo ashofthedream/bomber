@@ -1,7 +1,7 @@
 package ashes.of.bomber.carrier.mappers;
 
 import ashes.of.bomber.carrier.dto.flight.TestFlightDto;
-import ashes.of.bomber.plan.TestFlightPlan;
+import ashes.of.bomber.flight.plan.TestFlightPlan;
 
 import java.util.stream.Collectors;
 

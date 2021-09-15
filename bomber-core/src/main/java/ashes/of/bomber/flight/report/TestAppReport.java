@@ -1,18 +1,18 @@
-package ashes.of.bomber.report;
+package ashes.of.bomber.flight.report;
 
-import ashes.of.bomber.plan.TestFlightPlan;
+import ashes.of.bomber.flight.plan.TestAppPlan;
 
 import java.time.Instant;
 import java.util.List;
 
 public class TestAppReport {
-    private final TestFlightPlan plan;
+    private final TestAppPlan plan;
     private final String name;
     private final Instant startTime;
     private final Instant finishTime;
     private final List<TestSuiteReport> testSuites;
 
-    public TestAppReport(TestFlightPlan plan, String name, Instant startTime, Instant finishTime, List<TestSuiteReport> testSuites) {
+    public TestAppReport(TestAppPlan plan, String name, Instant startTime, Instant finishTime, List<TestSuiteReport> testSuites) {
         this.plan = plan;
         this.name = name;
         this.startTime = startTime;
@@ -20,7 +20,7 @@ public class TestAppReport {
         this.testSuites = testSuites;
     }
 
-    public TestFlightPlan getPlan() {
+    public TestAppPlan getPlan() {
         return plan;
     }
 

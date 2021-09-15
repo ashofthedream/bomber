@@ -1,7 +1,6 @@
 package ashes.of.bomber.watcher;
 
-import ashes.of.bomber.core.TestApp;
-import ashes.of.bomber.descriptions.TestAppStateDescription;
+import ashes.of.bomber.snapshots.FlightSnapshot;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
@@ -13,11 +12,10 @@ public class GarbageCollectorWatcher implements Watcher {
     private static final Logger log = LogManager.getLogger(new StringFormatterMessageFactory());
 
     @Override
-    public void watch(TestApp app) {
-        TestAppStateDescription state = app.getState();
-        ThreadContext.put("stage", state.getStage().name());
-        ThreadContext.put("testSuite", state.getTestSuite());
-        ThreadContext.put("testCase", state.getTestCase());
+    public void watch(FlightSnapshot snapshot) {
+        ThreadContext.put("stage", snapshot.getStage().name());
+        ThreadContext.put("testSuite", snapshot.getTestSuite());
+        ThreadContext.put("testCase", snapshot.getTestCase());
 
         ManagementFactory.getGarbageCollectorMXBeans()
                 .forEach(gc -> log.info("%-24s %,16d count, %,16dms", gc.getName(), gc.getCollectionCount(), gc.getCollectionTime()));

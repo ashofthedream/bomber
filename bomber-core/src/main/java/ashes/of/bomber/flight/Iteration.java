@@ -1,5 +1,7 @@
 package ashes.of.bomber.flight;
 
+import ashes.of.bomber.configuration.Stage;
+
 import java.time.Instant;
 
 @Deprecated

@@ -65,7 +65,7 @@ public class ExampleAccountsTestApp {
                 .findFirst()
                 .orElseThrow();
 
-        log.info("test report for flight: {}", report.getPlan().getFlightId());
+        log.info("test report for flight: {}", -1);
         report.getTestSuites()
                 .forEach(testSuite -> {
                     log.debug("TestSuite name: {}", testSuite.getName());

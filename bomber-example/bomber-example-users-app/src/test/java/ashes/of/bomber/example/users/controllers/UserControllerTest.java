@@ -2,7 +2,6 @@ package ashes.of.bomber.example.users.controllers;
 
 import ashes.of.bomber.builder.BomberBuilder;
 import ashes.of.bomber.builder.TestAppBuilder;
-import ashes.of.bomber.report.TestAppReport;
 import ashes.of.bomber.example.users.tests.UserControllerLoadTest;
 import ashes.of.bomber.sink.Sink;
 import ashes.of.bomber.sink.histogram.HistogramSink;
