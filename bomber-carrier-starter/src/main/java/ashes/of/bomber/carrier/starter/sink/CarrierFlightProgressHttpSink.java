@@ -2,7 +2,7 @@ package ashes.of.bomber.carrier.starter.sink;
 
 import ashes.of.bomber.Bomber;
 import ashes.of.bomber.carrier.dto.events.SinkEvent;
-import ashes.of.bomber.carrier.mappers.TestAppMapper;
+import ashes.of.bomber.carrier.mappers.TestFlightMapper;
 import ashes.of.bomber.carrier.starter.services.CarrierService;
 import ashes.of.bomber.events.TestAppFinishedEvent;
 import ashes.of.bomber.events.TestAppStartedEvent;
@@ -18,7 +18,6 @@ import org.springframework.cloud.zookeeper.serviceregistry.ServiceInstanceRegist
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static ashes.of.bomber.carrier.dto.events.SinkEventType.TEST_APP_FINISH;
@@ -73,11 +72,7 @@ public class CarrierFlightProgressHttpSink implements Sink {
         var current = System.currentTimeMillis() / 1000;
         var last = lastUpdate.get();
         if (last != current && lastUpdate.compareAndSet(last, current)) {
-            var testApp = bomber.getApps().stream()
-                    .filter(app -> Objects.equals(app.getName(), event.getTestApp()))
-                    .findFirst()
-                    .orElseThrow();
-            var state = TestAppMapper.toDto(bomber.getState());
+            var state = TestFlightMapper.toDto(bomber.getState());
             send(new SinkEvent()
                     .setId(SinkEvent.nextId())
                     .setType(TEST_CASE_PROGRESS)
@@ -87,7 +82,6 @@ public class CarrierFlightProgressHttpSink implements Sink {
                     .setTestApp(event.getTestApp())
                     .setTestSuite(event.getTestSuite())
                     .setTestCase(event.getTestCase())
-                    .setStage(event.getStage())
                     .setState(state));
         }
     }
@@ -102,8 +96,7 @@ public class CarrierFlightProgressHttpSink implements Sink {
                 .setFlightId(event.getFlightId())
                 .setTestApp(event.getTestApp())
                 .setTestSuite(event.getTestSuite())
-                .setTestCase(event.getTestCase())
-                .setStage(event.getStage()));
+                .setTestCase(event.getTestCase()) );
     }
 
     @Override
@@ -116,9 +109,7 @@ public class CarrierFlightProgressHttpSink implements Sink {
                 .setFlightId(event.getFlightId())
                 .setTestApp(event.getTestApp())
                 .setTestSuite(event.getTestSuite())
-                .setTestCase(event.getTestCase())
-                .setStage(event.getStage())
-                .setState(null));
+                .setTestCase(event.getTestCase()) );
     }
 
     @Override

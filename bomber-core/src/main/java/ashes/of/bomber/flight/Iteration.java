@@ -1,24 +1,20 @@
 package ashes.of.bomber.flight;
 
-import ashes.of.bomber.configuration.Stage;
-
 import java.time.Instant;
 
 @Deprecated
 public class Iteration {
     private final long flightId;
     private final long number;
-    private final Stage stage;
     private final String testApp;
     private final String testSuite;
     private final String testCase;
     private final String thread;
     private final Instant timestamp;
 
-    public Iteration(long flightId, long number, Stage stage, String thread, Instant timestamp, String testApp, String testSuite, String testCase) {
+    public Iteration(long flightId, long number, String thread, Instant timestamp, String testApp, String testSuite, String testCase) {
         this.flightId = flightId;
         this.number = number;
-        this.stage = stage;
         this.testApp = testApp;
         this.testSuite = testSuite;
         this.testCase = testCase;
@@ -32,10 +28,6 @@ public class Iteration {
 
     public long getNumber() {
         return number;
-    }
-
-    public Stage getStage() {
-        return stage;
     }
 
     public String getTestApp() {
@@ -62,7 +54,6 @@ public class Iteration {
     public String toString() {
         return "Iteration{" +
                 "number=" + number +
-                ", stage=" + stage +
                 ", testApp='" + testApp + '\'' +
                 ", testSuite='" + testSuite + '\'' +
                 ", testCase='" + testCase + '\'' +

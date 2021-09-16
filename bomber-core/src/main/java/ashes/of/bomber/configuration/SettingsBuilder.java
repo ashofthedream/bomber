@@ -6,14 +6,9 @@ import java.util.concurrent.TimeUnit;
 public class SettingsBuilder {
 
     /**
-     * This flag indicates that stage may be disabled
-     */
-    private boolean disabled;
-
-    /**
      * Stage duration time
      */
-    private Duration time = Duration.ofMinutes(1);;
+    private Duration time = Duration.ofMinutes(1);
 
     /**
      * Threads count
@@ -32,20 +27,10 @@ public class SettingsBuilder {
 
     public static SettingsBuilder of(Settings settings) {
         return new SettingsBuilder()
-                .setDisabled(settings.isDisabled())
-                .setTime(settings.getTime())
+                .setTime(settings.getDuration())
                 .setThreadsCount(settings.getThreadsCount())
                 .setThreadIterationsCount(settings.getThreadIterationsCount())
                 .setTotalIterationsCount(settings.getTotalIterationsCount());
-    }
-
-    public static Settings disabled() {
-        return new Settings(true, Duration.ZERO, 0, 0, 0);
-    }
-
-    public SettingsBuilder setDisabled(boolean disabled) {
-        this.disabled = disabled;
-        return this;
     }
 
     public SettingsBuilder setTime(Duration time) {
@@ -77,6 +62,6 @@ public class SettingsBuilder {
     }
 
     public Settings build() {
-        return new Settings(disabled, time, threadsCount, threadIterationsCount, totalIterationsCount);
+        return new Settings(time, threadsCount, threadIterationsCount, totalIterationsCount);
     }
 }

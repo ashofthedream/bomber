@@ -60,11 +60,7 @@ public class HistogramTimelinePrintStreamPrinter implements HistogramTimelinePri
 
         printBorder();
         var key = timeline.firstEntry().getValue().getKey();
-        out.printf("%s.%s (%s)%n",
-                key.getTestSuite(),
-                key.getTestCase(),
-                key.getStage());
-
+        out.printf("%s -> %s -> %s%n", key.getTestSuite(), key.getTestSuite(), key.getTestCase());
         out.printf("rows: %s, duration: %4.3fs%n",
                 timeline.size(),
                 (end.toEpochMilli() - time.toEpochMilli()) / 1000.0 );

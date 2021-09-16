@@ -10,7 +10,6 @@ public class ConfigurationMapper {
                 () -> { throw new RuntimeException("Not supported yet"); },
                 () -> { throw new RuntimeException("Not supported yet"); },
                 () -> { throw new RuntimeException("Not supported yet"); },
-                SettingsMapper.toSettingsOrNull(dto.getWarmUp()),
                 SettingsMapper.toSettingsOrNull(dto.getSettings())
         );
     }
@@ -18,7 +17,6 @@ public class ConfigurationMapper {
 
     public static ConfigurationDto toDto(Configuration config) {
         return new ConfigurationDto()
-                .setSettings(SettingsMapper.toDto(config.getSettings()))
-                .setWarmUp(SettingsMapper.toDto(config.getWarmUp()));
+                .setSettings(SettingsMapper.toDto(config.getSettings()));
     }
 }

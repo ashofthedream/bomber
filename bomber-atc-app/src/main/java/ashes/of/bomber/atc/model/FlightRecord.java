@@ -1,6 +1,6 @@
 package ashes.of.bomber.atc.model;
 
-import ashes.of.bomber.carrier.dto.flight.AppStateDto;
+import ashes.of.bomber.carrier.dto.flight.FlightSnapshotDto;
 import ashes.of.bomber.carrier.dto.events.HistogramPointDto;
 
 import java.util.List;
@@ -12,10 +12,10 @@ public class FlightRecord {
     private String testSuite;
     private String testCase;
 
-    private AppStateDto state;
+    private FlightSnapshotDto state;
     private List<HistogramPointDto> histograms;
 
-    public FlightRecord(String type, long timestamp, AppStateDto state) {
+    public FlightRecord(String type, long timestamp, FlightSnapshotDto state) {
         this.type = type;
         this.timestamp = timestamp;
         this.state = state;
@@ -45,11 +45,11 @@ public class FlightRecord {
         this.testCase = testCase;
     }
 
-    public AppStateDto getState() {
+    public FlightSnapshotDto getState() {
         return state;
     }
 
-    public void setState(AppStateDto state) {
+    public void setState(FlightSnapshotDto state) {
         this.state = state;
     }
 

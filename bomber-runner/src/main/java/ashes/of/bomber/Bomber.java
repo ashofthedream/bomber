@@ -7,14 +7,15 @@ import ashes.of.bomber.flight.report.TestFlightReport;
 import ashes.of.bomber.runner.Runner;
 import ashes.of.bomber.runner.RunnerState;
 import ashes.of.bomber.sink.Sink;
+import ashes.of.bomber.snapshots.FlightSnapshot;
 import ashes.of.bomber.watcher.Watcher;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 
-import java.time.Instant;
+
+import javax.annotation.Nullable;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
@@ -23,6 +24,7 @@ public class Bomber {
     private static final Logger log = LogManager.getLogger();
 
     private volatile CountDownLatch endLatch = new CountDownLatch(1);
+    private volatile Runner runner;
 
     private final List<Sink> sinks;
     private final List<Watcher> watchers;
@@ -68,7 +70,7 @@ public class Bomber {
 
         log.info("Init runner");
         RunnerState state = new RunnerState(() -> endLatch.getCount() == 0);
-        Runner runner = new Runner(state, sinks, watchers, apps);
+        runner = new Runner(state, sinks, watchers, apps);
 
         try {
             return runner.run(flightPlan);
@@ -77,6 +79,7 @@ public class Bomber {
             ThreadContext.clearAll();
             endLatch.countDown();
             endLatch = null;
+            runner = null;
         }
     }
 
@@ -107,5 +110,16 @@ public class Bomber {
         if (latch != null) {
             latch.await();
         }
+    }
+
+    @Nullable
+    @Deprecated
+    public FlightSnapshot getState() {
+        var runner = this.runner;
+        if (runner != null) {
+            return runner.getState();
+        }
+
+        return null;
     }
 }

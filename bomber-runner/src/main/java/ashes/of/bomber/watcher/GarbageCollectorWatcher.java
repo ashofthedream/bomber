@@ -13,7 +13,7 @@ public class GarbageCollectorWatcher implements Watcher {
 
     @Override
     public void watch(FlightSnapshot snapshot) {
-        ThreadContext.put("stage", snapshot.getStage().name());
+        ThreadContext.put("testApp", snapshot.getTestApp());
         ThreadContext.put("testSuite", snapshot.getTestSuite());
         ThreadContext.put("testCase", snapshot.getTestCase());
 

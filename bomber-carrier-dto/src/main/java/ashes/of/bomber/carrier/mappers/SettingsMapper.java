@@ -15,7 +15,6 @@ public class SettingsMapper {
             return null;
 
         return new SettingsBuilder()
-                .setDisabled(settings.isDisabled())
                 .setTime(settings.getDuration(), TimeUnit.MILLISECONDS)
                 .setThreadsCount(settings.getThreadsCount())
                 .setThreadIterationsCount(settings.getThreadIterationsCount())
@@ -29,8 +28,7 @@ public class SettingsMapper {
             return null;
 
         return new SettingsDto()
-                .setDisabled(settings.isDisabled())
-                .setDuration(settings.getTime().toMillis())
+                .setDuration(settings.getDuration().toMillis())
                 .setThreadsCount(settings.getThreadsCount())
                 .setThreadIterationsCount(settings.getThreadIterationsCount())
                 .setTotalIterationsCount(settings.getTotalIterationsCount());

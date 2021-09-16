@@ -1,8 +1,6 @@
 package ashes.of.bomber.runner;
 
 import ashes.of.bomber.configuration.Settings;
-import ashes.of.bomber.configuration.SettingsBuilder;
-import ashes.of.bomber.configuration.Stage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -16,9 +14,9 @@ import java.util.function.BooleanSupplier;
 public class RunnerState {
     private static final Logger log = LogManager.getLogger();
 
-    private volatile Stage stage = Stage.IDLE;
-    private volatile Settings settings = SettingsBuilder.disabled();
+    private volatile Settings settings = null;
 
+    private volatile String testApp;
     private volatile String testSuite;
     private volatile String testCase;
 
@@ -38,16 +36,16 @@ public class RunnerState {
         this.shutdown = shutdown;
     }
 
+    public String getTestApp() {
+        return testApp;
+    }
+
     public String getTestSuite() {
         return testSuite;
     }
 
     public String getTestCase() {
         return testCase;
-    }
-
-    public Stage getStage() {
-        return stage;
     }
 
     public Settings getSettings() {
@@ -86,12 +84,11 @@ public class RunnerState {
         return !testCaseStartTime.equals(Instant.EPOCH);
     }
 
-    public void startCaseIfNotStarted(String testCase, Stage stage, Settings settings) {
+    public void startCaseIfNotStarted(String testCase, Settings settings) {
         if (!isCaseStated()) {
             this.needCallSinkBeforeTestCase.set(true);
             this.needCallSinkAfterTestCase.set(true);
             this.testCase = testCase;
-            this.stage = stage;
             this.settings = settings;
             this.testCaseStartTime = Instant.now();
             this.remainItCount.set(settings.getTotalIterationsCount());
@@ -100,8 +97,7 @@ public class RunnerState {
 
     public void finishCase() {
         testCase = "";
-        stage = Stage.IDLE;
-        settings = SettingsBuilder.disabled();
+        settings = null;
         testCaseStartTime = Instant.EPOCH;
     }
 
@@ -116,7 +112,7 @@ public class RunnerState {
 
     public long getCaseRemainTime() {
         long now = System.currentTimeMillis();
-        return ((isCaseStated() ? testCaseStartTime.toEpochMilli() : now) + settings.getTime().toMillis()) - now;
+        return ((isCaseStated() ? testCaseStartTime.toEpochMilli() : now) + settings.getDuration().toMillis()) - now;
     }
 
     public long getCaseElapsedTime() {

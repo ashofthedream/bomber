@@ -36,7 +36,7 @@ public class InfluxDbSink implements Sink {
 
         db.write(Point.measurement(callCollectionName)
                 .time(it.getTimestamp().toEpochMilli(), TimeUnit.MILLISECONDS)
-                .tag("stage",           it.getStage().name())
+                .tag("testApp",         it.getTestApp())
                 .tag("testSuite",       it.getTestSuite())
                 .tag("testCase",        it.getTestCase())
                 .tag("thread",          it.getThread())
@@ -55,7 +55,7 @@ public class InfluxDbSink implements Sink {
 
         db.write(Point.measurement(testCollectionName)
                 .time(event.getTimestamp().toEpochMilli(), TimeUnit.MILLISECONDS)
-                .tag("stage",           event.getStage().name())
+                .tag("testApp",         event.getTestApp())
                 .tag("testSuite",       event.getTestSuite())
                 .tag("testCase",        event.getTestCase())
                 .tag("thread",          event.getWorker())

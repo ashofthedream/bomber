@@ -1,7 +1,6 @@
 package ashes.of.bomber.squadron.zookeeper;
 
 import ashes.of.bomber.squadron.Barrier;
-import ashes.of.bomber.configuration.Stage;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.recipes.barriers.DistributedDoubleBarrier;
 import org.apache.curator.framework.recipes.nodes.PersistentNode;
@@ -32,10 +31,10 @@ public class ZookeeperBarrier implements Barrier {
     }
 
     @Override
-    public void enterCase(Stage stage, String testSuite, String testCase) {
+    public void enterCase(String testApp, String testSuite, String testCase) {
         try {
             log.trace("enterCase testSuite: {}, testCase: {}", testSuite, testCase);
-            getOrCreateBarrier(testCase, testCase)
+            getOrCreateBarrier(testApp, testCase, testCase)
                     .enter(awaitTime.toMillis(), TimeUnit.MILLISECONDS);
         } catch (Exception e) {
             log.error("enterCase failed. testSuite: {}, testCase: {}", testSuite, testCase, e);
@@ -43,17 +42,17 @@ public class ZookeeperBarrier implements Barrier {
     }
 
     @Override
-    public void leaveCase(Stage stage, String testSuite, String testCase) {
+    public void leaveCase(String testApp, String testSuite, String testCase) {
         try {
             log.trace("leaveCase testSuite: {}, testCase: {}", testSuite, testCase);
-            getOrCreateBarrier(testCase, testCase)
+            getOrCreateBarrier(testApp, testCase, testCase)
                     .leave(awaitTime.toMillis(), TimeUnit.MILLISECONDS);
         } catch (Exception e) {
             log.error("leaveCase failed. testSuite: {}, testCase: {}", testSuite, testCase, e);
         }
     }
 
-    private DistributedDoubleBarrier getOrCreateBarrier(String testSuite, String testCase) {
-        return barriers.computeIfAbsent(testSuite + "." + testCase, name -> new DistributedDoubleBarrier(cf, "/bomber/barriers/" + name, members));
+    private DistributedDoubleBarrier getOrCreateBarrier(String testApp, String testSuite, String testCase) {
+        return barriers.computeIfAbsent("%s.%s.%s".formatted(testApp, testSuite, testCase), name -> new DistributedDoubleBarrier(cf, "/bomber/barriers/" + name, members));
     }
 }

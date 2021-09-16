@@ -6,7 +6,7 @@ import ashes.of.bomber.annotations.AfterTestSuite;
 import ashes.of.bomber.annotations.BeforeEach;
 import ashes.of.bomber.annotations.BeforeTestCase;
 import ashes.of.bomber.annotations.BeforeTestSuite;
-import ashes.of.bomber.annotations.LoadTest;
+import ashes.of.bomber.annotations.LoadTestSettings;
 import ashes.of.bomber.annotations.LoadTestCase;
 import ashes.of.bomber.annotations.LoadTestSuite;
 import ashes.of.bomber.tools.Stopwatch;
@@ -15,7 +15,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 @LoadTestSuite(name = "lifecycleAll")
-@LoadTest(time = 20, threadIterations = 10, threads = 2)
+@LoadTestSettings(time = 20, threadIterations = 10, threads = 2)
 public class AllLifecycleMethodsTest {
     private static final Logger log = LogManager.getLogger();
 

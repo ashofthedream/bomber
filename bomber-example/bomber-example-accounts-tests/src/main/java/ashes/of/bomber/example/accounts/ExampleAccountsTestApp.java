@@ -35,8 +35,7 @@ public class ExampleAccountsTestApp {
                 .config(config -> config
                         .settings(new SettingsBuilder()
                                 .setThreadsCount(2)
-                                .setSeconds(10)
-                                .build())
+                                .setSeconds(10))
                         .barrier(barrier)
                         .limiter(new RateLimiter(10, Duration.ofSeconds(1))))
                 .createSuite(AccountControllerLoadTest::create, new AccountClient(appUrl));

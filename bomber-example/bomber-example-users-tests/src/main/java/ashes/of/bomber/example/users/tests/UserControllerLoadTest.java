@@ -1,8 +1,7 @@
 package ashes.of.bomber.example.users.tests;
 
-import ashes.of.bomber.annotations.AfterTestSuite;
 import ashes.of.bomber.annotations.BeforeTestSuite;
-import ashes.of.bomber.annotations.LoadTest;
+import ashes.of.bomber.annotations.LoadTestSettings;
 import ashes.of.bomber.annotations.LoadTestCase;
 import ashes.of.bomber.annotations.LoadTestSuite;
 import ashes.of.bomber.annotations.Throttle;
@@ -16,7 +15,7 @@ import org.apache.logging.log4j.Logger;
 import java.util.Random;
 
 @LoadTestSuite(name = "UserController")
-@LoadTest(time = 10)
+@LoadTestSettings(time = 10)
 @Throttle(threshold = 10, shared = true)
 public class UserControllerLoadTest {
     private static final Logger log = LogManager.getLogger();

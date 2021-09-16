@@ -9,14 +9,9 @@ import java.time.Duration;
 public class Settings {
 
     /**
-     * This flag indicates that stage may be disabled
-     */
-    private final boolean disabled;
-
-    /**
      * Stage duration time
      */
-    private final Duration time;
+    private final Duration duration;
 
     /**
      * Threads count
@@ -33,21 +28,15 @@ public class Settings {
      */
     private final long totalIterationsCount;
 
-    public Settings(boolean disabled, Duration time, int threadsCount, long threadIterationsCount, long totalIterationsCount) {
-        this.disabled = disabled;
-        this.time = time;
+    public Settings(Duration duration, int threadsCount, long threadIterationsCount, long totalIterationsCount) {
+        this.duration = duration;
         this.threadsCount = threadsCount;
         this.threadIterationsCount = threadIterationsCount;
         this.totalIterationsCount = totalIterationsCount;
     }
 
-
-    public boolean isDisabled() {
-        return disabled;
-    }
-
-    public Duration getTime() {
-        return time;
+    public Duration getDuration() {
+        return duration;
     }
 
     public int getThreadsCount() {
@@ -65,8 +54,7 @@ public class Settings {
     @Override
     public String toString() {
         return "Settings{" +
-                "disabled=" + disabled +
-                ", time=" + time +
+                ", duration=" + duration +
                 ", threadsCount=" + threadsCount +
                 ", threadIterationsCount=" + threadIterationsCount +
                 ", totalIterationsCount=" + totalIterationsCount +

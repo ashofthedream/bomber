@@ -4,7 +4,7 @@ import java.util.List;
 
 public class TestAppDto {
     private String name;
-    private AppStateDto state;
+    private FlightSnapshotDto state;
     private List<TestSuiteDto> testSuites;
 
     public String getName() {
@@ -16,11 +16,11 @@ public class TestAppDto {
         return this;
     }
 
-    public AppStateDto getState() {
+    public FlightSnapshotDto getState() {
         return state;
     }
 
-    public TestAppDto setState(AppStateDto state) {
+    public TestAppDto setState(FlightSnapshotDto state) {
         this.state = state;
         return this;
     }

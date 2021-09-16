@@ -1,12 +1,11 @@
 package ashes.of.bomber.benchmark;
 
-import ashes.of.bomber.annotations.LoadTest;
+import ashes.of.bomber.annotations.LoadTestSettings;
 import ashes.of.bomber.annotations.LoadTestCase;
 import ashes.of.bomber.annotations.LoadTestSuite;
 import ashes.of.bomber.builder.BomberBuilder;
 import ashes.of.bomber.builder.TestSuiteBuilder;
 import ashes.of.bomber.builder.TestAppBuilder;
-import ashes.of.bomber.configuration.SettingsBuilder;
 import ashes.of.bomber.sink.Log4jSink;
 import ashes.of.bomber.tools.Tools;
 import org.HdrHistogram.ConcurrentHistogram;
@@ -20,7 +19,7 @@ import java.util.function.Supplier;
 public class AnnotationProcessingBenchmark {
 
     @LoadTestSuite
-    @LoadTest(time = 20, threadIterations = 1_000_000)
+    @LoadTestSettings(time = 20, threadIterations = 1_000_000)
     public static class Test {
 
         private final Histogram histogram = new ConcurrentHistogram(2);
@@ -65,7 +64,6 @@ public class AnnotationProcessingBenchmark {
                 .name("suite-with-builder")
                 .withContext(test)
                 .config(config -> config
-                    .warmUp(SettingsBuilder.disabled())
                     .settings(settings -> settings
                             .setThreadsCount(1)
                             .setThreadIterationsCount(1_000_000)))

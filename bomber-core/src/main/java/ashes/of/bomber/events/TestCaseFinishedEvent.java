@@ -1,7 +1,5 @@
 package ashes.of.bomber.events;
 
-import ashes.of.bomber.configuration.Stage;
-
 import java.time.Instant;
 
 public class TestCaseFinishedEvent {
@@ -10,15 +8,13 @@ public class TestCaseFinishedEvent {
     private final String testApp;
     private final String testSuite;
     private final String testCase;
-    private final Stage stage;
 
-    public TestCaseFinishedEvent(Instant timestamp, long flightId, String testApp, String testSuite, String testCase, Stage stage) {
+    public TestCaseFinishedEvent(Instant timestamp, long flightId, String testApp, String testSuite, String testCase) {
         this.timestamp = timestamp;
         this.flightId = flightId;
         this.testApp = testApp;
         this.testSuite = testSuite;
         this.testCase = testCase;
-        this.stage = stage;
     }
 
     public Instant getTimestamp() {
@@ -39,9 +35,5 @@ public class TestCaseFinishedEvent {
 
     public String getTestCase() {
         return testCase;
-    }
-
-    public Stage getStage() {
-        return stage;
     }
 }

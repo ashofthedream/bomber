@@ -37,6 +37,7 @@ public class BomberBuilder {
     }
 
     public BomberBuilder add(TestAppBuilder app) {
+        // todo check app with same name
         this.applications.add(app);
         return this;
     }

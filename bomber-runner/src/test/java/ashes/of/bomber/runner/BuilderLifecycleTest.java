@@ -23,7 +23,6 @@ public class BuilderLifecycleTest extends LifecycleTest {
                 .name("lifecycleAll")
                 .createContext(() -> new AllLifecycleMethodsTest(counters))
                 .config(config -> config
-                        .warmUp(SettingsBuilder.disabled())
                         .settings(settings -> settings
                                 .setSeconds(20)
                                 .setThreadsCount(2)

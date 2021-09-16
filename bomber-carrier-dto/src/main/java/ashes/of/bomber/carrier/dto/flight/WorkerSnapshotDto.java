@@ -1,6 +1,6 @@
 package ashes.of.bomber.carrier.dto.flight;
 
-public class WorkerStateDto {
+public class WorkerSnapshotDto {
     private String name;
     private long iterationsCount;
     private long remainIterationsCount;
@@ -10,7 +10,7 @@ public class WorkerStateDto {
         return name;
     }
 
-    public WorkerStateDto setName(String name) {
+    public WorkerSnapshotDto setName(String name) {
         this.name = name;
         return this;
     }
@@ -19,7 +19,7 @@ public class WorkerStateDto {
         return iterationsCount;
     }
 
-    public WorkerStateDto setIterationsCount(long iterationsCount) {
+    public WorkerSnapshotDto setIterationsCount(long iterationsCount) {
         this.iterationsCount = iterationsCount;
         return this;
     }
@@ -28,7 +28,7 @@ public class WorkerStateDto {
         return remainIterationsCount;
     }
 
-    public WorkerStateDto setRemainIterationsCount(long remainIterationsCount) {
+    public WorkerSnapshotDto setRemainIterationsCount(long remainIterationsCount) {
         this.remainIterationsCount = remainIterationsCount;
         return this;
     }
@@ -37,7 +37,7 @@ public class WorkerStateDto {
         return errorsCount;
     }
 
-    public WorkerStateDto setErrorsCount(long errorsCount) {
+    public WorkerSnapshotDto setErrorsCount(long errorsCount) {
         this.errorsCount = errorsCount;
         return this;
     }

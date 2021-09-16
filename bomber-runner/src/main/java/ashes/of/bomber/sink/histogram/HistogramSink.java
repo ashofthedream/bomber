@@ -28,13 +28,13 @@ public class HistogramSink implements Sink {
     public void timeRecorded(Record record) {
         var it = record.getIteration();
         measurements
-                .computeIfAbsent(new MeasurementKey(it.getTestApp(), it.getTestSuite(), it.getTestCase(), it.getStage()), Measurements::new)
+                .computeIfAbsent(new MeasurementKey(it.getTestApp(), it.getTestSuite(), it.getTestCase()), Measurements::new)
                 .add(record);
     }
 
     @Override
     public void afterTestCase(TestCaseFinishedEvent event) {
-        var key = new MeasurementKey(event.getTestApp(), event.getTestSuite(), event.getTestCase(), event.getStage());
+        var key = new MeasurementKey(event.getTestApp(), event.getTestSuite(), event.getTestCase());
         var measurements = this.measurements.get(key);
         if (measurements != null) {
             printer.print(key, measurements);

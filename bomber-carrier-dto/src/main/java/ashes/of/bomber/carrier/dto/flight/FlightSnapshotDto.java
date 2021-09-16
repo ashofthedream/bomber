@@ -2,9 +2,9 @@ package ashes.of.bomber.carrier.dto.flight;
 
 import java.util.List;
 
-public class AppStateDto {
-    private String stage;
+public class FlightSnapshotDto {
     private SettingsDto settings;
+    private String testApp;
     private String testSuite;
     private String testCase;
     private long testSuiteStart;
@@ -13,23 +13,24 @@ public class AppStateDto {
     private long elapsedTime;
     private long remainTime;
     private long errorsCount;
-    private List<WorkerStateDto> workers;
+    private List<WorkerSnapshotDto> workers;
 
-    public String getStage() {
-        return stage;
-    }
-
-    public AppStateDto setStage(String stage) {
-        this.stage = stage;
-        return this;
-    }
 
     public SettingsDto getSettings() {
         return settings;
     }
 
-    public AppStateDto setSettings(SettingsDto settings) {
+    public FlightSnapshotDto setSettings(SettingsDto settings) {
         this.settings = settings;
+        return this;
+    }
+
+    public String getTestApp() {
+        return testApp;
+    }
+
+    public FlightSnapshotDto setTestApp(String testApp) {
+        this.testApp = testApp;
         return this;
     }
 
@@ -37,7 +38,7 @@ public class AppStateDto {
         return testSuite;
     }
 
-    public AppStateDto setTestSuite(String testSuite) {
+    public FlightSnapshotDto setTestSuite(String testSuite) {
         this.testSuite = testSuite;
         return this;
     }
@@ -46,7 +47,7 @@ public class AppStateDto {
         return testCase;
     }
 
-    public AppStateDto setTestCase(String testCase) {
+    public FlightSnapshotDto setTestCase(String testCase) {
         this.testCase = testCase;
         return this;
     }
@@ -55,7 +56,7 @@ public class AppStateDto {
         return testSuiteStart;
     }
 
-    public AppStateDto setTestSuiteStart(long testSuiteStart) {
+    public FlightSnapshotDto setTestSuiteStart(long testSuiteStart) {
         this.testSuiteStart = testSuiteStart;
         return this;
     }
@@ -64,7 +65,7 @@ public class AppStateDto {
         return testCaseStart;
     }
 
-    public AppStateDto setTestCaseStart(long testCaseStart) {
+    public FlightSnapshotDto setTestCaseStart(long testCaseStart) {
         this.testCaseStart = testCaseStart;
         return this;
     }
@@ -73,7 +74,7 @@ public class AppStateDto {
         return remainTotalIterations;
     }
 
-    public AppStateDto setRemainTotalIterations(long remainTotalIterations) {
+    public FlightSnapshotDto setRemainTotalIterations(long remainTotalIterations) {
         this.remainTotalIterations = remainTotalIterations;
         return this;
     }
@@ -82,7 +83,7 @@ public class AppStateDto {
         return elapsedTime;
     }
 
-    public AppStateDto setElapsedTime(long elapsedTime) {
+    public FlightSnapshotDto setElapsedTime(long elapsedTime) {
         this.elapsedTime = elapsedTime;
         return this;
     }
@@ -91,7 +92,7 @@ public class AppStateDto {
         return remainTime;
     }
 
-    public AppStateDto setRemainTime(long remainTime) {
+    public FlightSnapshotDto setRemainTime(long remainTime) {
         this.remainTime = remainTime;
         return this;
     }
@@ -100,16 +101,16 @@ public class AppStateDto {
         return errorsCount;
     }
 
-    public AppStateDto setErrorsCount(long errorsCount) {
+    public FlightSnapshotDto setErrorsCount(long errorsCount) {
         this.errorsCount = errorsCount;
         return this;
     }
 
-    public List<WorkerStateDto> getWorkers() {
+    public List<WorkerSnapshotDto> getWorkers() {
         return workers;
     }
 
-    public AppStateDto setWorkers(List<WorkerStateDto> workers) {
+    public FlightSnapshotDto setWorkers(List<WorkerSnapshotDto> workers) {
         this.workers = workers;
         return this;
     }

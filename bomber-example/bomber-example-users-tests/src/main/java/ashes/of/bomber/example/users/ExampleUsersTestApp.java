@@ -1,6 +1,6 @@
 package ashes.of.bomber.example.users;
 
-import ashes.of.bomber.annotations.LoadTest;
+import ashes.of.bomber.annotations.LoadTestSettings;
 import ashes.of.bomber.annotations.LoadTestApp;
 import ashes.of.bomber.annotations.Throttle;
 import ashes.of.bomber.builder.BomberBuilder;
@@ -26,7 +26,7 @@ import java.time.temporal.ChronoUnit;
 @LoadTestApp(testSuites = {
         UserControllerLoadTest.class
 })
-@LoadTest(threads = 2)
+@LoadTestSettings(threads = 2)
 @Throttle(time = 20)
 public class ExampleUsersTestApp {
     private static final Logger log = LogManager.getLogger();

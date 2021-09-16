@@ -1,14 +1,13 @@
 package ashes.of.bomber.snapshots;
 
 import ashes.of.bomber.configuration.Settings;
-import ashes.of.bomber.configuration.Stage;
 
 import java.time.Instant;
 import java.util.List;
 
 public class FlightSnapshot {
-    private final Stage stage;
     private final Settings settings;
+    private final String testApp;
     private final String testSuite;
     private final String testCase;
 
@@ -23,13 +22,13 @@ public class FlightSnapshot {
     private final List<WorkerSnapshot> workers;
 
 
-    public FlightSnapshot(Stage stage, Settings settings, String testSuite, String testCase,
+    public FlightSnapshot(Settings settings, String testApp, String testSuite, String testCase,
                           long iterationsCount, long remainIterationsCount, long errorCount,
                           Instant testSuiteStartTime, Instant testCaseStartTime,
                           long caseElapsedTime, long caseRemainTime,
                           List<WorkerSnapshot> workers) {
-        this.stage = stage;
         this.settings = settings;
+        this.testApp = testApp;
         this.testSuite = testSuite;
         this.testCase = testCase;
         this.iterationsCount = iterationsCount;
@@ -42,12 +41,12 @@ public class FlightSnapshot {
         this.workers = workers;
     }
 
-    public Stage getStage() {
-        return stage;
-    }
-
     public Settings getSettings() {
         return settings;
+    }
+
+    public String getTestApp() {
+        return testApp;
     }
 
     public String getTestSuite() {

@@ -2,7 +2,6 @@ package ashes.of.bomber.watcher;
 
 import ashes.of.bomber.snapshots.FlightSnapshot;
 import ashes.of.bomber.snapshots.WorkerSnapshot;
-import ashes.of.bomber.configuration.Stage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
@@ -44,11 +43,11 @@ public class Log4jWatcher implements Watcher {
 
     @Override
     public void watch(FlightSnapshot snapshot) {
-        ThreadContext.put("stage", snapshot.getStage().name());
+        ThreadContext.put("testApp", snapshot.getTestApp());
         ThreadContext.put("testSuite", snapshot.getTestSuite());
         ThreadContext.put("testCase", snapshot.getTestCase());
 
-        if (snapshot.getStage() == Stage.IDLE || snapshot.getTestCase() == null) {
+        if (snapshot.getTestCase() == null) {
             log.info("waiting...");
             return;
         }
@@ -71,7 +70,7 @@ public class Log4jWatcher implements Watcher {
                 .mapToLong(WorkerSnapshot::getErrorsCount)
                 .sum();
 
-        double totalSecs = snapshot.getSettings().getTime().getSeconds();
+        double totalSecs = snapshot.getSettings().getDuration().getSeconds();
         double elapsedSecs = (snapshot.getCaseElapsedTime() / 100) / 10.0;
 
         StringBuilder tp = new StringBuilder();

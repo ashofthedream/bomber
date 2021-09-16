@@ -19,10 +19,7 @@ public class HistogramPrintStreamPrinter implements HistogramPrinter {
     @Override
     public void print(MeasurementKey key, Measurements measurements) {
         out.println("--------------------------------------------------------------------------------");
-        out.printf("%s.%s (%s)%n",
-                key.getTestSuite(),
-                key.getTestCase(),
-                key.getStage());
+        out.printf("%s -> %s -> %s%n", key.getTestSuite(), key.getTestSuite(), key.getTestCase());
 
         measurements.getHistograms().forEach((label, hae) -> {
             out.printf("label: %s, errors: %,12d%n", label, hae.getErrorsCount());

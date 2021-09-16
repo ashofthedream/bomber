@@ -1,13 +1,6 @@
-<p>
-    <strong>{{title}}: </strong>
-    <span *ngIf="!settings.disabled; else disabled">
-        Threads: {{settings.threadsCount}},
-        Thread iterations: {{settings.threadIterationsCount}},
-        Total iterations: {{settings.totalIterationsCount}},
-        Time: {{settings.duration}}ms
-    </span>
-</p>
-
-<ng-template #disabled>
-    <span>Disabled</span>
-</ng-template>
+<nz-descriptions>
+    <nz-descriptions-item nzTitle="Threads">{{settings.threadsCount}}</nz-descriptions-item>
+    <nz-descriptions-item nzTitle="Duration">{{settings.duration}}ms</nz-descriptions-item>
+    <nz-descriptions-item nzTitle="Thread Iterations">{{settings.threadIterationsCount}}</nz-descriptions-item>
+    <nz-descriptions-item nzTitle="Total Iterations">{{settings.totalIterationsCount}}</nz-descriptions-item>
+</nz-descriptions>

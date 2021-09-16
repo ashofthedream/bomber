@@ -8,6 +8,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NzBadgeModule } from 'ng-zorro-antd/badge';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzCardModule } from 'ng-zorro-antd/card';
+import { NzDescriptionsModule } from 'ng-zorro-antd/descriptions';
 import { NzGridModule } from 'ng-zorro-antd/grid';
 import { en_US, NZ_I18N } from 'ng-zorro-antd/i18n';
 import { NzPageHeaderModule } from 'ng-zorro-antd/page-header';
@@ -50,6 +51,7 @@ registerLocaleData(en);
     NzTreeViewModule,
 
     SharedModule,
+    NzDescriptionsModule,
   ],
   exports: [
     ActiveAppsTreeCardComponent,

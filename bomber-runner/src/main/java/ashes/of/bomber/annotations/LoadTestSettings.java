@@ -8,18 +8,17 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.concurrent.TimeUnit;
 
-
 /**
- * Enable warm-up stage and defines settings for it
+ * Setting for load test
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Inherited
-public @interface WarmUp {
+public @interface LoadTestSettings {
 
     /**
-     * @return warm up stage time
+     * @return load test stage time
      */
     long time() default 60;
 

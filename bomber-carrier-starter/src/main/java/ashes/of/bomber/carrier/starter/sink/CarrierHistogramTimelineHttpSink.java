@@ -44,7 +44,7 @@ public class CarrierHistogramTimelineHttpSink implements Sink {
         var last = lastUpdate.get();
         if (last != current && lastUpdate.compareAndSet(last, current)) {
             var it = record.getIteration();
-            var key = new MeasurementKey(it.getTestApp(), it.getTestSuite(), it.getTestCase(), it.getStage());
+            var key = new MeasurementKey(it.getTestApp(), it.getTestSuite(), it.getTestCase());
             sendHistogramByKey(record.getIteration().getFlightId(), key);
         }
     }
@@ -88,7 +88,6 @@ public class CarrierHistogramTimelineHttpSink implements Sink {
                 .setTimestamp(System.currentTimeMillis())
                 .setFlightId(fligtId)
                 .setCarrierId(registration.getServiceInstance().getId())
-                .setStage(key.getStage())
                 .setTestApp(key.getTestApp())
                 .setTestSuite(key.getTestSuite())
                 .setTestCase(key.getTestCase())
@@ -103,7 +102,7 @@ public class CarrierHistogramTimelineHttpSink implements Sink {
     @Override
     public void afterTestCase(TestCaseFinishedEvent event) {
         sink.afterTestCase(event);
-        var key = new MeasurementKey(event.getTestApp(), event.getTestSuite(), event.getTestCase(), event.getStage());
+        var key = new MeasurementKey(event.getTestApp(), event.getTestSuite(), event.getTestCase());
         sendHistogramByKey(event.getFlightId(), key);
     }
 

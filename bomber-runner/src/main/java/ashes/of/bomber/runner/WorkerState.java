@@ -1,9 +1,7 @@
 package ashes.of.bomber.runner;
 
 import ashes.of.bomber.configuration.Settings;
-import ashes.of.bomber.configuration.Stage;
 import ashes.of.bomber.sink.Sink;
-import ashes.of.bomber.squadron.Barrier;
 
 import java.time.Instant;
 import java.util.concurrent.CountDownLatch;
@@ -16,7 +14,6 @@ public class WorkerState {
     private final CountDownLatch startLatch;
     private final CountDownLatch endLatch;
     private final Sink sink;
-    private final Barrier barrier;
 
     private final AtomicLong iterationsCountSeq = new AtomicLong();
     private final AtomicLong expectedRecordsCount = new AtomicLong();
@@ -25,12 +22,11 @@ public class WorkerState {
 
     private final AtomicLong remainIterationsCount = new AtomicLong();
 
-    public WorkerState(RunnerState state, CountDownLatch startLatch, CountDownLatch endLatch, Sink sink, Barrier barrier) {
+    public WorkerState(RunnerState state, CountDownLatch startLatch, CountDownLatch endLatch, Sink sink) {
         this.runnerState = state;
         this.startLatch = startLatch;
         this.endLatch = endLatch;
         this.sink = sink;
-        this.barrier = barrier;
     }
 
     public RunnerState getRunnerState() {
@@ -47,10 +43,6 @@ public class WorkerState {
 
     public Sink getSink() {
         return sink;
-    }
-
-    public Barrier getBarrier() {
-        return barrier;
     }
 
     public long nextIterationNumber() {
@@ -73,17 +65,13 @@ public class WorkerState {
         return runnerState.getTestSuite();
     }
 
-    public Stage getStage() {
-        return runnerState.getStage();
-    }
-
     public Instant getTestCaseStartTime() {
         return runnerState.getTestCaseStartTime();
     }
 
-    public void startCaseIfNotStarted(String name, Stage stage, Settings settings) {
+    public void startCaseIfNotStarted(String name, Settings settings) {
         remainIterationsCount.set(settings.getThreadIterationsCount());
-        runnerState.startCaseIfNotStarted(name, stage, settings);
+        runnerState.startCaseIfNotStarted(name, settings);
     }
 
     public void finishCase() {
