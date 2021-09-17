@@ -1,32 +1,26 @@
 package ashes.of.bomber.runner;
 
-import ashes.of.bomber.core.TestApp;
-import ashes.of.bomber.core.TestCase;
+import ashes.of.bomber.configuration.Settings;
 import ashes.of.bomber.core.TestSuite;
 import ashes.of.bomber.snapshots.WorkerSnapshot;
 import ashes.of.bomber.events.TestCaseAfterEachEvent;
 import ashes.of.bomber.events.TestCaseBeforeEachEvent;
-import ashes.of.bomber.events.TestCaseFinishedEvent;
-import ashes.of.bomber.events.TestCaseStartedEvent;
-import ashes.of.bomber.flight.Iteration;
-import ashes.of.bomber.configuration.Settings;
 import ashes.of.bomber.delayer.Delayer;
 import ashes.of.bomber.limiter.Limiter;
 import ashes.of.bomber.sink.Sink;
 import ashes.of.bomber.squadron.Barrier;
 import ashes.of.bomber.tools.Stopwatch;
 import ashes.of.bomber.tools.Tools;
+import ashes.of.bomber.watcher.Watcher;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 
 import javax.annotation.Nullable;
-import java.time.Instant;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.function.BooleanSupplier;
-
-import static java.util.concurrent.TimeUnit.SECONDS;
 
 public class Worker {
     private static final Logger log = LogManager.getLogger();
@@ -50,7 +44,7 @@ public class Worker {
 
     public WorkerSnapshot getSnapshot() {
         return new WorkerSnapshot(getName(),
-                state.getCurrentIterationsCount(),
+                state.getIterationsCount(),
                 state.getRemainIterationsCount(),
                 state.getErrorsCount(),
                 state.getExpectedRecordsCount(),
@@ -91,78 +85,85 @@ public class Worker {
         });
     }
 
-    public void runTestCase(RunnerState state, long flightId, TestApp testApp, TestSuite<Object> testSuite, TestCase<Object> testCase, Settings settings,
-                            CountDownLatch startLatch, CountDownLatch endLatch, Sink sink) {
-        this.state = new WorkerState(state, startLatch, endLatch, sink);
-        run(() -> runTestCase(flightId, testApp, testSuite, testCase, settings));
+    public void run(TestCaseState state, Sink sink, List<Watcher> watchers) {
+        this.state = new WorkerState(state);
+        run(() -> run(this.state, sink, watchers));
     }
 
-    private void runTestCase(long flightId, TestApp testApp, TestSuite<Object> testSuite, TestCase<Object> testCase, Settings settings) {
-        ThreadContext.put("flightId", String.valueOf(flightId));
+    private void run(WorkerState state, Sink sink, List<Watcher> watchers) {
+        var parent = state.getParent();
+        var testCase = parent.getTestCase();
+        var testSuite = parent.getParent().getTestSuite();
+        var testApp = parent.getParent().getParent().getTestApp();
+
+        ThreadContext.put("flightId", String.valueOf(parent.getFlightId()));
         ThreadContext.put("testApp", testApp.getName());
         ThreadContext.put("testSuite", testSuite.getName());
         ThreadContext.put("testCase", testCase.getName());
 
 
-        Limiter limiter = testCase.getConfiguration().getLimiter().build();
-        Delayer delayer = testCase.getConfiguration().getDelayer().build();
+        Limiter limiter = parent.getConfiguration().getLimiter().build();
+        Delayer delayer = parent.getConfiguration().getDelayer().build();
 
         // todo it's not working, ha-ha
-        Barrier barrier = testCase.getConfiguration().getBarrier().build();
+        Barrier barrier = parent.getConfiguration().getBarrier().build();
 
-        var startLatch = state.getStartLatch();
-        startLatch.countDown();
+        state.start();
 
         try {
-            log.trace("Await start test case: {}", testCase.getName());
-            if (!startLatch.await(60, SECONDS))
+            log.trace("Await other workers to start test case: {}", testCase.getName());
+            if (!state.awaitStart(60))
                 log.warn("After 60s of waiting, worker started without all other workers (this isn't acceptable situation)");
 
         } catch (Throwable th) {
             log.warn("Run testCase: {} failed", testCase.getName(), th);
         }
 
-        String threadName = Thread.currentThread().getName();
-
         testSuite.beforeCase(context);
 
-        var runnerState = state.getRunnerState();
-        var sink = state.getSink();
-
-        log.trace("Try start testCase: {} -> barrier enter", testCase.getName());
+        log.trace("Try start test case -> barrier enter");
         barrier.enterCase(testApp.getName(), testSuite.getName(), testCase.getName());
 
-        if (runnerState.needCallSinkBeforeTestCase())
-            sink.beforeTestCase(new TestCaseStartedEvent(state.getTestCaseStartTime(), flightId, testApp.getName(), testSuite.getName(), testCase.getName(), settings));
+        log.info("Start test case: {}", testCase.getName());
 
-        log.debug("Start testCase: {}", testCase.getName());
-
-        state.startCaseIfNotStarted(testCase.getName(), settings);
-        BooleanSupplier checker = state.createChecker();
-        while (checker.getAsBoolean()) {
+        BooleanSupplier condition = state.createCondition();
+        while (condition.getAsBoolean()) {
             delayer.delay();
 
             if (!limiter.waitForPermit())
                 throw new RuntimeException("Limiter await failed");
 
-            Iteration it = new Iteration(flightId, state.nextIterationNumber(), threadName, Instant.now(), testApp.getName(), testSuite.getName(), testCase.getName());
-            if (runnerState.needUpdate()) {
-                var remainIt = runnerState.getTotalIterationsRemain();
-                log.debug("Current progress. iterations count: {}, remain count: {}, errors count: {}, remain time: {}ms",
-                        settings.getTotalIterationsCount() - remainIt, remainIt, runnerState.getErrorCount(), runnerState.getCaseRemainTime());
+            if (parent.needUpdate()) {
+                var totalCount = parent.getTotalIterationsCount();
+                var settings = parent.getConfiguration().getSettings();
+                log.debug("Current progress. total iterations count: {}, remain count: {}, errors count: {}, remain time: {}ms",
+                        totalCount,
+                        settings.getTotalIterationsCount() - totalCount,
+                        parent.getErrorCount(),
+                        settings.getDuration().toMillis() - (System.currentTimeMillis() - parent.getStartTime().toEpochMilli())
+                );
             }
 
+            var it = state.createIteration();
             testSuite.beforeEach(it, context);
-            sink.beforeEach(new TestCaseBeforeEachEvent(it.getTimestamp(), flightId, testApp.getName(), testSuite.getName(), testCase.getName()));
+
+            send(sink, watchers, new TestCaseBeforeEachEvent(
+                    it.getTimestamp(),
+                    it.getFlightId(),
+                    it.getTestApp(),
+                    it.getTestSuite(),
+                    it.getTestCase()
+            ));
+
             Tools tools = new Tools(it, record -> {
                 sink.timeRecorded(record);
                 state.addCaughtCount(1);
 
                 if (!record.isSuccess())
-                    state.incError();
+                    state.addError();
             });
 
-            Stopwatch stopwatch = tools.stopwatch("");
+            Stopwatch stopwatch = tools.stopwatch();
             try {
                 // test
                 testCase.run(context, tools);
@@ -172,20 +173,41 @@ public class Worker {
 
                 long expected = tools.getStopwatchCount() - (testCase.isAsync() ? 1 : 0);
                 state.addExpectedCount(expected);
-                sink.afterEach(new TestCaseAfterEachEvent(it.getTimestamp(), flightId, testApp.getName(), testSuite.getName(), testCase.getName(), threadName, it.getNumber(), stopwatch.elapsed(), null));
+                send(sink, watchers, new TestCaseAfterEachEvent(
+                        it.getTimestamp(),
+                        it.getFlightId(),
+                        it.getTestApp(),
+                        it.getTestSuite(),
+                        it.getTestCase(),
+                        it.getThread(),
+                        it.getNumber(),
+                        stopwatch.elapsed(),
+                        null
+                ));
             } catch (Throwable th) {
                 if (!testCase.isAsync())
                     stopwatch.fail(th);
 
-                sink.afterEach(new TestCaseAfterEachEvent(it.getTimestamp(), flightId, testApp.getName(), testSuite.getName(), testCase.getName(), threadName, it.getNumber(), stopwatch.elapsed(), th));
-                log.warn("Call testCase: {} failed, it: {}", testCase.getName(), it, th);
+                send(sink, watchers, new TestCaseAfterEachEvent(
+                        it.getTimestamp(),
+                        it.getFlightId(),
+                        it.getTestApp(),
+                        it.getTestSuite(),
+                        it.getTestCase(),
+                        it.getThread(),
+                        it.getNumber(),
+                        stopwatch.elapsed(),
+                        th
+                ));
+
+                log.warn("Call test case: {} failed, it: {}", testCase.getName(), it, th);
             }
 
             testSuite.afterEach(it, context);
         }
 
         log.debug("Test case finished, total its: {}, expected records: {}, caught records: {}, errors; {}",
-                state.getCurrentIterationsCount(), state.getExpectedRecordsCount(), state.getCaughtRecordsCount(), state.getErrorsCount());
+                state.getIterationsCount(), state.getExpectedRecordsCount(), state.getCaughtRecordsCount(), state.getErrorsCount());
 
         try {
             // just wait a second, for async events
@@ -209,16 +231,24 @@ public class Worker {
             log.warn("Something is wrong", e);
         }
 
-        log.trace("Try finish testCase: {} -> barrier leave", testCase.getName());
+        log.trace("Try finish test case -> barrier leave");
         barrier.leaveCase(testApp.getName(), testSuite.getName(), testCase.getName());
-        if (runnerState.needCallSinkAfterTestCase())
-            sink.afterTestCase(new TestCaseFinishedEvent(Instant.now(), flightId, testApp.getName(), testSuite.getName(), testCase.getName()));
-        state.finishCase();
-        testSuite.afterCase(context);
-        log.debug("Finish testCase: {}", testCase.getName());
 
-        state.getEndLatch().countDown();
+        testSuite.afterCase(context);
+
+        log.debug("Finish test case: {}", testCase.getName());
+        state.finish();
         ThreadContext.clearAll();
+    }
+
+    private void send(Sink sink, List<Watcher> watchers, TestCaseBeforeEachEvent event) {
+        sink.beforeEach(event);
+        watchers.forEach(watcher -> watcher.beforeEach(event));
+    }
+
+    private void send(Sink sink, List<Watcher> watchers, TestCaseAfterEachEvent event) {
+        sink.afterEach(event);
+        watchers.forEach(watcher -> watcher.afterEach(event));
     }
 
     public void runAfterSuite(TestSuite<Object> testSuite, CountDownLatch latch) {

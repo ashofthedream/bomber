@@ -5,9 +5,8 @@ import ashes.of.bomber.core.TestApp;
 import ashes.of.bomber.flight.plan.TestFlightPlan;
 import ashes.of.bomber.flight.report.TestFlightReport;
 import ashes.of.bomber.runner.Runner;
-import ashes.of.bomber.runner.RunnerState;
 import ashes.of.bomber.sink.Sink;
-import ashes.of.bomber.snapshots.FlightSnapshot;
+import ashes.of.bomber.snapshots.TestFlightSnapshot;
 import ashes.of.bomber.watcher.Watcher;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -69,11 +68,10 @@ public class Bomber {
         endLatch = new CountDownLatch(1);
 
         log.info("Init runner");
-        RunnerState state = new RunnerState(() -> endLatch.getCount() == 0);
-        runner = new Runner(state, sinks, watchers, apps);
+        runner = new Runner(sinks, watchers, apps);
 
         try {
-            return runner.run(flightPlan);
+            return runner.run(flightPlan, () -> endLatch.getCount() > 0);
         } finally {
             log.info("Flight is over, report is ready");
             ThreadContext.clearAll();
@@ -114,10 +112,10 @@ public class Bomber {
 
     @Nullable
     @Deprecated
-    public FlightSnapshot getState() {
+    public TestFlightSnapshot getState() {
         var runner = this.runner;
         if (runner != null) {
-            return runner.getState();
+            return runner.getFlight();
         }
 
         return null;

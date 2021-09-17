@@ -1,6 +1,9 @@
 package ashes.of.bomber.watcher;
 
-import ashes.of.bomber.snapshots.FlightSnapshot;
+import ashes.of.bomber.configuration.Settings;
+import ashes.of.bomber.snapshots.TestAppSnapshot;
+import ashes.of.bomber.snapshots.TestFlightSnapshot;
+import ashes.of.bomber.snapshots.TestSuiteSnapshot;
 import ashes.of.bomber.snapshots.WorkerSnapshot;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -42,47 +45,64 @@ public class Log4jWatcher implements Watcher {
 
 
     @Override
-    public void watch(FlightSnapshot snapshot) {
-        ThreadContext.put("testApp", snapshot.getTestApp());
-        ThreadContext.put("testSuite", snapshot.getTestSuite());
-        ThreadContext.put("testCase", snapshot.getTestCase());
-
-        if (snapshot.getTestCase() == null) {
-            log.info("waiting...");
+    public void watch(TestFlightSnapshot flight) {
+        var testApp = flight.getCurrent();
+        if (testApp == null) {
+            log.info("No test app running...");
             return;
         }
 
-        long totalInv = snapshot.getSettings().getTotalIterationsCount();
-        long currentInv = totalInv - snapshot.getRemainIterationsCount();
+        ThreadContext.put("testApp", testApp.getName());
 
-        long expectedCount = snapshot.getWorkers()
+        var testSuite = testApp.getCurrent();
+        if (testSuite == null) {
+            log.info("No test suite running...");
+            return;
+        }
+
+        ThreadContext.put("testSuite", testSuite.getName());
+
+        var testCase = testSuite.getCurrent();
+        if (testCase == null) {
+            log.info("No test case running...");
+            return;
+        }
+
+        ThreadContext.put("testCase", testCase.getName());
+
+
+        var settings = testCase.getSettings();
+        long totalIterationsCount = settings.getTotalIterationsCount();
+        long currentIterationsCount = testCase.getCurrentIterationsCount();
+
+        long expectedCount = flight.getWorkers()
                 .stream()
                 .mapToLong(WorkerSnapshot::getExpectedRecordsCount)
                 .sum();
 
-        long caughtCount = snapshot.getWorkers()
+        long caughtCount = flight.getWorkers()
                 .stream()
                 .mapToLong(WorkerSnapshot::getCaughtRecordsCount)
                 .sum();
 
-        long watcherErrorCount = snapshot.getWorkers()
+        long watcherErrorCount = flight.getWorkers()
                 .stream()
                 .mapToLong(WorkerSnapshot::getErrorsCount)
                 .sum();
 
-        double totalSecs = snapshot.getSettings().getDuration().getSeconds();
-        double elapsedSecs = (snapshot.getCaseElapsedTime() / 100) / 10.0;
+        double totalSecs = settings.getDuration().getSeconds();
+        double elapsedSecs = (testCase.getStartTime() / 1000.0);
 
         StringBuilder tp = new StringBuilder();
         StringBuilder ip = new StringBuilder();
 
         double count = 50;
         for (int i = 0; i < count; i++) {
-            ip.append(currentInv > (i / count * totalInv) ? 'x' : '.');
+            ip.append(currentIterationsCount > (i / count * totalIterationsCount) ? 'x' : '.');
             tp.append(elapsedSecs > (i / count * totalSecs) ? 'x' : '.');
         }
 
-        RpsMeter itRps = this.its.updateAndGet(current -> new RpsMeter(currentInv, current));
+        RpsMeter itRps = this.its.updateAndGet(current -> new RpsMeter(currentIterationsCount, current));
         RpsMeter recRps = this.recs.updateAndGet(current -> new RpsMeter(caughtCount, current));
 
         log.info("%n%-12s %12.1fs [%s] %12.1fs " +
@@ -94,9 +114,9 @@ public class Log4jWatcher implements Watcher {
                 totalSecs,
 
                 "iterations",
-                currentInv,
+                currentIterationsCount,
                 ip.toString(),
-                totalInv,
+                totalIterationsCount,
                 watcherErrorCount,
 
                 "meta",

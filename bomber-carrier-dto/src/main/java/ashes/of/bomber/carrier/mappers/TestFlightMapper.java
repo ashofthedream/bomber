@@ -4,7 +4,7 @@ import ashes.of.bomber.carrier.dto.flight.FlightSnapshotDto;
 import ashes.of.bomber.carrier.dto.flight.TestFlightDto;
 import ashes.of.bomber.carrier.dto.flight.WorkerSnapshotDto;
 import ashes.of.bomber.flight.plan.TestFlightPlan;
-import ashes.of.bomber.snapshots.FlightSnapshot;
+import ashes.of.bomber.snapshots.TestFlightSnapshot;
 import ashes.of.bomber.snapshots.WorkerSnapshot;
 
 import javax.annotation.Nullable;
@@ -33,14 +33,14 @@ public class TestFlightMapper {
     }
 
     @Nullable
-    public static FlightSnapshotDto toDto(@Nullable FlightSnapshot snapshot) {
+    public static FlightSnapshotDto toDto(@Nullable TestFlightSnapshot snapshot) {
         if (snapshot == null) {
             return null;
         }
 
         return new FlightSnapshotDto()
                 .setSettings(SettingsMapper.toDto(snapshot.getSettings()))
-                .setTestApp(snapshot.getTestApp())
+                .setTestApp(snapshot.getCurrent())
                 .setTestSuite(snapshot.getTestSuite())
                 .setTestCase(snapshot.getTestCase())
                 .setTestSuiteStart(snapshot.getTestSuiteStartTime().toEpochMilli())

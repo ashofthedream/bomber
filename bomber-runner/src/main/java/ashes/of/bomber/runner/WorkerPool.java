@@ -57,7 +57,7 @@ public class WorkerPool {
         Worker worker = new Worker(queue, thread);
 
         workers.add(worker);
-        log.debug("created new worker: {}", worker.getName());
+        log.debug("Created new worker: {}", worker.getName());
         return worker;
     }
 

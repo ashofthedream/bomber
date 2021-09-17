@@ -1,18 +1,16 @@
 package ashes.of.bomber.runner;
 
 import ashes.of.bomber.configuration.Configuration;
-import ashes.of.bomber.configuration.Settings;
 import ashes.of.bomber.core.TestApp;
-import ashes.of.bomber.core.TestCase;
 import ashes.of.bomber.core.TestSuite;
 import ashes.of.bomber.events.FlightFinishedEvent;
 import ashes.of.bomber.events.FlightStartedEvent;
 import ashes.of.bomber.events.TestAppFinishedEvent;
 import ashes.of.bomber.events.TestAppStartedEvent;
+import ashes.of.bomber.events.TestCaseFinishedEvent;
+import ashes.of.bomber.events.TestCaseStartedEvent;
 import ashes.of.bomber.events.TestSuiteFinishedEvent;
 import ashes.of.bomber.events.TestSuiteStartedEvent;
-import ashes.of.bomber.flight.plan.TestAppPlan;
-import ashes.of.bomber.flight.plan.TestCasePlan;
 import ashes.of.bomber.flight.plan.TestFlightPlan;
 import ashes.of.bomber.flight.plan.TestSuitePlan;
 import ashes.of.bomber.flight.report.TestAppReport;
@@ -22,14 +20,14 @@ import ashes.of.bomber.flight.report.TestSuiteReport;
 import ashes.of.bomber.sink.AsyncSink;
 import ashes.of.bomber.sink.MultiSink;
 import ashes.of.bomber.sink.Sink;
-import ashes.of.bomber.snapshots.FlightSnapshot;
-import ashes.of.bomber.snapshots.WorkerSnapshot;
+import ashes.of.bomber.snapshots.TestFlightSnapshot;
 import ashes.of.bomber.threads.BomberThreadFactory;
 import ashes.of.bomber.watcher.Watcher;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 
+import javax.annotation.Nullable;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +38,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BooleanSupplier;
 import java.util.stream.Collectors;
 
 
@@ -47,14 +46,15 @@ public class Runner {
     private static final Logger log = LogManager.getLogger();
 
     private final WorkerPool pool = new WorkerPool();
-    private final RunnerState state;
     private final List<Sink> sinks;
     private final Sink sink;
     private final List<Watcher> watchers;
     private final List<TestApp> apps;
 
-    public Runner(RunnerState state, List<Sink> sinks, List<Watcher> watchers, List<TestApp> apps) {
-        this.state = state;
+    @Nullable
+    private volatile TestFlightState state;
+
+    public Runner(List<Sink> sinks, List<Watcher> watchers, List<TestApp> apps) {
         this.sinks = sinks;
         this.sink = new AsyncSink(new MultiSink(sinks));
         this.watchers = watchers;
@@ -65,65 +65,74 @@ public class Runner {
     /**
      * Runs the test flight
      */
-    public TestFlightReport run(TestFlightPlan flightPlan) {
-        ThreadContext.put("flightId", String.valueOf(flightPlan.getFlightId()));
-        log.info("Start flight: {}", flightPlan.getFlightId());
+    public TestFlightReport run(TestFlightPlan flightPlan, BooleanSupplier condition) {
+        var current = this.state;
+        if (current != null) {
+            throw new IllegalStateException("Invalid runner state: already exists for flightId: " + current.getPlan().getFlightId());
+        }
 
-        flightPlan.getTestApps().forEach(testAppPlan -> {
-            log.debug("App: {}", testAppPlan.getName());
-            testAppPlan.getTestSuites().forEach(testSuite -> {
-                log.debug("    Test suite: {}", testSuite.getName());
+        log.trace("Create flight state for flight: {}", flightPlan.getFlightId());
+        var state = new TestFlightState(flightPlan, condition);
+        this.state = state;
+
+
+        ThreadContext.put("flightId", String.valueOf(flightPlan.getFlightId()));
+        log.info("Start flight: {} with plan:", flightPlan.getFlightId());
+
+        flightPlan.getTestApps().forEach(testApp -> {
+            log.info("Test app: {}", testApp.getName());
+            testApp.getTestSuites().forEach(testSuite -> {
+                log.info("    Test suite: {}", testSuite.getName());
                 testSuite.getTestCases().forEach(testCase -> {
                     var settings = Optional.ofNullable(testCase.getConfiguration())
                             .map(Configuration::getSettings)
                             .orElse(null);
 
-                    log.debug("        Test case: {}, with: {}", testCase.getName(), settings);
+                    log.info("        Test case: {}, with: {}", testCase.getName(), settings);
                 });
             });
         });
 
+
         log.debug("Start watchers, watch every {}s", 1);
         ScheduledExecutorService watcherEx = Executors.newSingleThreadScheduledExecutor(BomberThreadFactory.watcher());
         List<ScheduledFuture<?>> wfs = watchers.stream()
-                .map(watcher -> watcherEx.scheduleAtFixedRate(() -> watcher.watch(getState()), 0, 1, TimeUnit.SECONDS))
+                .map(watcher -> watcherEx.scheduleAtFixedRate(() -> watcher.watch(getFlight()), 0, 1, TimeUnit.SECONDS))
                 .collect(Collectors.toList());
 
-
-        Instant flightStartTime = Instant.now();
-        sendFlightStartedEvent(new FlightStartedEvent(flightStartTime, flightPlan.getFlightId()));
+        
+        sendFlightStartedEvent(new FlightStartedEvent(state.getStartTime(), flightPlan.getFlightId()));
 
         try {
             var appsByName = apps.stream()
                     .collect(Collectors.toMap(TestApp::getName, app -> app));
 
             var reports = flightPlan.getTestApps().stream()
-                    .map(testAppPlan -> {
-                        var testApp = appsByName.get(testAppPlan.getName());
+                    .map(plan -> {
+                        var testApp = appsByName.get(plan.getName());
                         if (testApp == null) {
-                            log.warn("Bomber has no app with name: {}", testAppPlan.getName());
-                            return new TestAppReport(testAppPlan, testAppPlan.getName(), Instant.now(), Instant.now(), List.of());
+                            log.warn("Bomber has no app with name: {}", plan.getName());
+                            return new TestAppReport(plan, Instant.now(), Instant.now(), List.of());
                         }
 
-                        try {
-                            return runTestApp(flightPlan.getFlightId(), testAppPlan, testApp);
-                        } catch (Throwable th) {
-                            log.error("Unexpected throwable", th);
-                            throw th;
-                        }
+                        // todo return report with error? but now fail fast approach used
 
-                        // todo return report with error?
+                        var testAppState = new TestAppState(state, plan, testApp);
+                        state.attach(testAppState);
+
+                        return runTestApp(testAppState);
                     })
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
 
 
             Instant flightFinishTime = Instant.now();
+            state.setFinishTime(flightFinishTime);
             sendFlightFinishedEvent(new FlightFinishedEvent(flightFinishTime, flightPlan.getFlightId()));
 
             ThreadContext.clearAll();
             log.info("Flight finished: {}", flightPlan.getFlightId());
-            return new TestFlightReport(flightPlan, flightStartTime, flightFinishTime, reports);
+            return new TestFlightReport(flightPlan, state.getStartTime(), state.getFinishTime(), reports);
         } finally {
             log.debug("Stop watchers");
             wfs.forEach(wf -> wf.cancel(false));
@@ -149,89 +158,106 @@ public class Runner {
     /**
      * Runs the test app
      */
-    public TestAppReport runTestApp(long flightId, TestAppPlan testAppPlan, TestApp testApp) {
+    public TestAppReport runTestApp(TestAppState state) {
+        var testApp = state.getTestApp();
         ThreadContext.put("testApp", testApp.getName());
+        log.info("Start app: {}", testApp.getName());
 
-        Instant startTime = Instant.now();
-        sendAppStartedEvent(new TestAppStartedEvent(startTime, flightId, testApp.getName()));
+        send(new TestAppStartedEvent(state.getStartTime(), state.getFlightId(), testApp.getName()));
 
         try {
             Map<String, TestSuite<?>> suitesByName = testApp.getTestSuitesByName();
 
-            var testSuiteReports = testAppPlan.getTestSuites()
+            var testSuiteReports = state.getPlan().getTestSuites()
                     .stream()
-                    .map(testSuitePlan -> {
-                        log.debug("Try to run test suite: {}", testSuitePlan.getName());
-                        TestSuite<Object> testSuite = (TestSuite<Object>) suitesByName.get(testSuitePlan.getName());
+                    .map(plan -> {
+                        log.debug("Try to run test suite: {}", plan.getName());
+                        TestSuite<Object> testSuite = (TestSuite<Object>) suitesByName.get(plan.getName());
                         if (testSuite == null) {
-                            log.warn("Test suite: {} not found", testSuitePlan.getName());
-                            return new TestSuiteReport(testSuitePlan.getName(), List.of());
+                            log.warn("Test suite: {} not found", plan.getName());
+                            return new TestSuiteReport(plan.getName(), List.of());
                         }
 
-                        return runTestSuite(flightId, testSuitePlan, testApp, testSuite);
+                        var testSuiteState = new TestSuiteState(state, plan, testSuite);
+                        state.attach(testSuiteState);
+                        return runTestSuite(testSuiteState);
                     })
                     .collect(Collectors.toList());
 
-            log.info("Finish application: {} flight: {}", testApp.getName(), flightId);
-            Instant finishTime = Instant.now();
+            log.info("Finish application: {}", testApp.getName());
+            state.finish();
+            send(new TestAppFinishedEvent(state.getFinishTime(), state.getFlightId(), testApp.getName()));
 
-            sendAppFinishedEvent(new TestAppFinishedEvent(finishTime, flightId, testApp.getName()));
-
-            return new TestAppReport(testAppPlan, testApp.getName(), startTime, finishTime, testSuiteReports);
+            return new TestAppReport(state.getPlan(), state.getStartTime(), state.getFinishTime(), testSuiteReports);
         } finally {
             ThreadContext.remove("testApp");
         }
     }
 
-    private void sendAppStartedEvent(TestAppStartedEvent event) {
+    private void send(TestAppStartedEvent event) {
         sink.beforeTestApp(event);
         watchers.forEach(watcher -> watcher.beforeTestApp(event));
     }
 
-    private void sendAppFinishedEvent(TestAppFinishedEvent event) {
+    private void send(TestAppFinishedEvent event) {
         sink.afterTestApp(event);
         watchers.forEach(watcher -> watcher.afterTestApp(event));
     }
 
 
     /**
-     * Runs the test case
+     * Runs the test suite
      */
-    private TestSuiteReport runTestSuite(long flightId, TestSuitePlan plan, TestApp testApp, TestSuite<Object> testSuite) {
+    private TestSuiteReport runTestSuite(TestSuiteState state) {
+        var testSuite = state.getTestSuite();
         ThreadContext.put("testSuite", testSuite.getName());
-        log.info("Run test suite: {}", testSuite.getName());
+        log.info("Start test suite: {}", testSuite.getName());
 
         log.trace("Reset before & after test suite lifecycle methods");
         testSuite.resetBeforeAndAfterSuite();
-        var startTime = Instant.now();
-        state.startSuiteIfNotStarted(testSuite.getName());
 
-        sendSuiteStartedEvent(new TestSuiteStartedEvent(startTime, flightId, testApp.getName(), testSuite.getName()));
+        send(new TestSuiteStartedEvent(state.getStartTime(), state.getFlightId(), state.getParent().getTestApp().getName(), testSuite.getName()));
 
-        int threads = determineWorkerThreadsCount(plan, testSuite);
+        int threads = determineWorkerThreadsCount(state.getPlan(), testSuite);
         pool.acquire(threads);
 
         try {
-            awaitBeforeSuite(testSuite);
+            callBeforeSuite(testSuite);
 
-            List<TestCaseReport> reports = plan.getTestCases()
+            List<TestCaseReport> reports = state.getPlan().getTestCases()
                     .stream()
-                    .map(testCasePlan -> {
-                        var testCase = testSuite.getTestCase(testCasePlan.getName());
+                    .map(plan -> {
+                        var testCase = testSuite.getTestCase(plan.getName());
                         if (testCase == null) {
                             log.warn("Test case: {} not found in test suite: {}, but it exists in the plan",
-                                    testCasePlan.getName(), testSuite.getName());
+                                    plan.getName(), testSuite.getName());
                             return null;
                         }
 
-                        return runTestCase(flightId, testApp, testSuite, testCase, testCasePlan);
+                        // merge configuration
+                        var initial = testCase.getConfiguration();
+                        Configuration configuration = Optional.ofNullable(plan.getConfiguration())
+                                .map(actual -> new Configuration(
+                                        // todo get these properties from actual
+                                        initial.getDelayer(),
+                                        initial.getLimiter(),
+                                        initial.getBarrier(),
+                                        actual.getSettings()
+                                ))
+                                .orElse(initial);
+
+                        var testCaseState = new TestCaseState(state, plan, testCase, configuration);
+                        state.attach(testCaseState);
+                        return runTestCase(testCaseState);
                     })
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
 
-            awaitAfterSuite(testSuite);
+            callAfterSuite(testSuite);
 
-            sendSuiteFinishedEvent(new TestSuiteFinishedEvent(Instant.now(), flightId, testApp.getName(), testSuite.getName()));
+            log.info("Finish test suite: {}", testSuite.getName());
+            state.finish();
+            send(new TestSuiteFinishedEvent(state.getFinishTime(), state.getFlightId(), state.getParent().getTestApp().getName(), testSuite.getName()));
 
             return new TestSuiteReport(testSuite.getName(), reports);
         } catch (Throwable throwable) {
@@ -239,7 +265,6 @@ public class Runner {
             return new TestSuiteReport(testSuite.getName(), List.of());
         } finally {
             pool.releaseAll();
-            state.finishSuite();
             ThreadContext.remove("testSuite");
         }
     }
@@ -263,64 +288,65 @@ public class Runner {
                 .orElseThrow(() -> new RuntimeException("Can't determine thread count for test suite: " + testSuite.getName()));
     }
 
-    private void sendSuiteStartedEvent(TestSuiteStartedEvent event) {
+    private void send(TestSuiteStartedEvent event) {
         sink.beforeTestSuite(event);
         watchers.forEach(watcher -> watcher.beforeTestSuite(event));
     }
 
-    private void sendSuiteFinishedEvent(TestSuiteFinishedEvent event) {
+    private void send(TestSuiteFinishedEvent event) {
         sink.afterTestSuite(event);
         watchers.forEach(watcher -> watcher.afterTestSuite(event));
     }
 
-    private void awaitBeforeSuite(TestSuite<Object> testSuite) throws InterruptedException {
+    private void callBeforeSuite(TestSuite<Object> testSuite) throws InterruptedException {
         var acquired = pool.getAcquired();
         log.debug("Call beforeSuite for all workers: {}", acquired.size());
         CountDownLatch latch = new CountDownLatch(acquired.size());
         acquired.forEach(worker -> worker.runBeforeSuite(testSuite, latch));
 
-        log.debug("Await workers beforeSuite");
+        log.debug("Await {} workers beforeSuite", acquired.size());
         latch.await();
     }
 
-    private void awaitAfterSuite(TestSuite<Object> testSuite) throws InterruptedException {
+    private void callAfterSuite(TestSuite<Object> testSuite) throws InterruptedException {
         var acquired = pool.getAcquired();
         log.debug("Call afterSuite for all workers: {}", acquired.size());
         CountDownLatch latch = new CountDownLatch(acquired.size());
         acquired.forEach(worker -> worker.runAfterSuite(testSuite, latch));
 
-        log.debug("Await workers afterSuite");
+        log.debug("Await {} workers afterSuite", acquired.size());
         latch.await();
     }
 
-    private TestCaseReport runTestCase(long flightId, TestApp testApp, TestSuite<Object> testSuite, TestCase<Object> testCase, TestCasePlan testCasePlan) {
+
+    /**
+     * Runs the test case
+     */
+    private TestCaseReport runTestCase(TestCaseState state) {
+        var testCase = state.getTestCase();
+        var testSuite = state.getTestSuite();
+        var testApp = state.getTestApp();
+        var settings = state.getConfiguration().getSettings();
+
         ThreadContext.put("testCase", testCase.getName());
-        log.debug("Run TestCase: {}", testCase.getName());
+        log.debug("Start test case: {}", testCase.getName());
 
-        var config = Optional.ofNullable(testCasePlan.getConfiguration());
-
-        Settings settings = config.map(Configuration::getSettings)
-                .orElse(testCase.getConfiguration()
-                        .getSettings());
-
-        log.trace("Reset before & after test case lifecycle methods");
+        log.trace("Reset beforeCase & afterCase lifecycle methods");
         testSuite.resetBeforeAndAfterCase();
 
-        state.startCaseIfNotStarted(testCase.getName(), settings);
 
-        CountDownLatch startLatch = new CountDownLatch(settings.getThreadsCount());
-        CountDownLatch finishLatch = new CountDownLatch(settings.getThreadsCount());
+        send(new TestCaseStartedEvent(state.getStartTime(), state.getFlightId(), testApp.getName(), testSuite.getName(), testCase.getName(), settings));
 
         log.debug("Run {} workers", settings.getThreadsCount());
 
         pool.getAcquired()
                 .stream()
                 .limit(settings.getThreadsCount())
-                .forEach(worker -> worker.runTestCase(state, flightId, testApp, testSuite, testCase, settings, startLatch, finishLatch, sink));
+                .forEach(worker -> worker.run(state, sink, watchers));
 
         try {
             log.debug("Await end of test case: {}", testCase.getName());
-            finishLatch.await();
+            state.awaitFinish();
 
             log.debug("All workers done, 1s cooldown");
             Thread.sleep(1000);
@@ -329,33 +355,46 @@ public class Runner {
             log.error("We've been interrupted", e);
         }
 
-        log.info("Finish test case: {}, elapsed time: {}ms", testCase.getName(), state.getCaseElapsedTime());
-        state.finishCase();
 
+        log.info("Finish test case: {}", testCase.getName());
+        state.finish();
+
+        send(new TestCaseFinishedEvent(state.getFinishTime(), state.getFlightId(), testApp.getName(), testSuite.getName(), testCase.getName()));
+
+        var elapsed = state.getFinishTime().toEpochMilli() - state.getStartTime().toEpochMilli();
         ThreadContext.remove("testCase");
         return new TestCaseReport(
                 testCase.getName(),
                 settings,
-                settings.getTotalIterationsCount() - state.getTotalIterationsRemain(),
+                state.getTotalIterationsCount(),
                 state.getErrorCount(),
-                state.getCaseElapsedTime()
+                elapsed
         );
+    }
+
+    private void send(TestCaseStartedEvent event) {
+        sink.beforeTestCase(event);
+        watchers.forEach(watcher -> watcher.beforeTestCase(event));
+    }
+
+    private void send(TestCaseFinishedEvent event) {
+        sink.afterTestCase(event);
+        watchers.forEach(watcher -> watcher.afterTestCase(event));
     }
 
 
     @Deprecated
-    public FlightSnapshot getState() {
-        RunnerState state = this.state;
+    public TestFlightSnapshot getFlight() {
 
-        List<WorkerSnapshot> workerStates = pool.getAcquired().stream()
-                .map(Worker::getSnapshot)
-                .collect(Collectors.toList());
+        TestFlightState state = this.state;
+        if (state == null) {
+            return new TestFlightSnapshot()
+                    .setWorkers(List.of());
+        }
 
-        Settings settings = state.getSettings();
-        long remain = state.getTotalIterationsRemain();
-        return new FlightSnapshot(settings, state.getTestApp(), state.getTestSuite(), state.getTestCase(),
-                settings.getThreadIterationsCount() - remain, state.getTotalIterationsRemain(), state.getErrorCount(),
-                Instant.EPOCH, Instant.EPOCH, state.getCaseElapsedTime(),
-                state.getCaseRemainTime(), workerStates);
+        return new TestFlightSnapshot()
+                .setWorkers(pool.getAcquired().stream()
+                        .map(Worker::getSnapshot)
+                        .collect(Collectors.toList()));
     }
 }

@@ -2,7 +2,9 @@ package ashes.of.bomber.flight;
 
 import java.time.Instant;
 
-@Deprecated
+/**
+ * todo rename it, an make it as part of TestCaseBeforeEachEvent and TestCaseAfterEachEvent
+ */
 public class Iteration {
     private final long flightId;
     private final long number;
