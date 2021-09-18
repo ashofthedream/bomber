@@ -47,6 +47,10 @@ public class TestSuiteState {
         return parent.getFlightId();
     }
 
+    public TestCaseState getCurrent() {
+        return current;
+    }
+
     public void finish() {
         this.finishTime = Instant.now();
     }

@@ -50,6 +50,10 @@ public class TestAppState {
         return parent.getPlan().getFlightId();
     }
 
+    public TestSuiteState getCurrent() {
+        return current;
+    }
+
     public void finish() {
         this.finishTime = Instant.now();
     }

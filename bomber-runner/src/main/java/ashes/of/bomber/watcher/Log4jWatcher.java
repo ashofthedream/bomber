@@ -91,7 +91,7 @@ public class Log4jWatcher implements Watcher {
                 .sum();
 
         double totalSecs = settings.getDuration().getSeconds();
-        double elapsedSecs = (testCase.getStartTime() / 1000.0);
+        double elapsedSecs = (testCase.getStartTime().toEpochMilli() / 1000.0);
 
         StringBuilder tp = new StringBuilder();
         StringBuilder ip = new StringBuilder();

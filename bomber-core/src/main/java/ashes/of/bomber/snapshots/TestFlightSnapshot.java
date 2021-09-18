@@ -2,37 +2,33 @@ package ashes.of.bomber.snapshots;
 
 import ashes.of.bomber.flight.plan.TestFlightPlan;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 public class TestFlightSnapshot {
-    private TestFlightPlan plan;
-    private TestAppSnapshot current;
-    private List<WorkerSnapshot> workers;
+    private final TestFlightPlan plan;
+
+    @Nullable
+    private final TestAppSnapshot current;
+
+    private final List<WorkerSnapshot> workers;
+
+    public TestFlightSnapshot(TestFlightPlan plan, @Nullable TestAppSnapshot current, List<WorkerSnapshot> workers) {
+        this.plan = plan;
+        this.current = current;
+        this.workers = workers;
+    }
 
     public TestFlightPlan getPlan() {
         return plan;
     }
 
-    public TestFlightSnapshot setPlan(TestFlightPlan plan) {
-        this.plan = plan;
-        return this;
-    }
-
+    @Nullable
     public TestAppSnapshot getCurrent() {
         return current;
     }
 
-    public TestFlightSnapshot setCurrent(TestAppSnapshot current) {
-        this.current = current;
-        return this;
-    }
-
     public List<WorkerSnapshot> getWorkers() {
         return workers;
-    }
-
-    public TestFlightSnapshot setWorkers(List<WorkerSnapshot> workers) {
-        this.workers = workers;
-        return this;
     }
 }

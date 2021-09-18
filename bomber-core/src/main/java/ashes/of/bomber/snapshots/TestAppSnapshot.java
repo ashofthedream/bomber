@@ -1,24 +1,24 @@
 package ashes.of.bomber.snapshots;
 
+import javax.annotation.Nullable;
+
 public class TestAppSnapshot {
-    private String name;
-    private TestSuiteSnapshot current;
+    private final String name;
+
+    @Nullable
+    private final TestSuiteSnapshot current;
+
+    public TestAppSnapshot(String name, @Nullable TestSuiteSnapshot current) {
+        this.name = name;
+        this.current = current;
+    }
 
     public String getName() {
         return name;
     }
 
-    public TestAppSnapshot setName(String name) {
-        this.name = name;
-        return this;
-    }
-
+    @Nullable
     public TestSuiteSnapshot getCurrent() {
         return current;
-    }
-
-    public TestAppSnapshot setCurrent(TestSuiteSnapshot current) {
-        this.current = current;
-        return this;
     }
 }

@@ -20,7 +20,11 @@ import ashes.of.bomber.flight.report.TestSuiteReport;
 import ashes.of.bomber.sink.AsyncSink;
 import ashes.of.bomber.sink.MultiSink;
 import ashes.of.bomber.sink.Sink;
+import ashes.of.bomber.snapshots.TestAppSnapshot;
+import ashes.of.bomber.snapshots.TestCaseSnapshot;
 import ashes.of.bomber.snapshots.TestFlightSnapshot;
+import ashes.of.bomber.snapshots.TestSuiteSnapshot;
+import ashes.of.bomber.snapshots.WorkerSnapshot;
 import ashes.of.bomber.threads.BomberThreadFactory;
 import ashes.of.bomber.watcher.Watcher;
 import org.apache.logging.log4j.LogManager;
@@ -384,17 +388,58 @@ public class Runner {
 
 
     @Deprecated
+    @Nullable
     public TestFlightSnapshot getFlight() {
-
-        TestFlightState state = this.state;
+        var state = this.state;
         if (state == null) {
-            return new TestFlightSnapshot()
-                    .setWorkers(List.of());
+            return null;
         }
 
-        return new TestFlightSnapshot()
-                .setWorkers(pool.getAcquired().stream()
-                        .map(Worker::getSnapshot)
-                        .collect(Collectors.toList()));
+        List<WorkerSnapshot> workers = pool.getAcquired().stream()
+                .map(Worker::getSnapshot)
+                .collect(Collectors.toList());
+
+        return new TestFlightSnapshot(
+                state.getPlan(),
+                toSnapshot(state.getCurrent()),
+                workers
+        );
+    }
+
+    private TestAppSnapshot toSnapshot(TestAppState state) {
+        if (state == null) {
+            return null;
+        }
+
+        return new TestAppSnapshot(
+                state.getTestApp().getName(),
+                toSnapshot(state.getCurrent())
+        );
+    }
+
+    private TestSuiteSnapshot toSnapshot(TestSuiteState state) {
+        if (state == null) {
+            return null;
+        }
+
+        return new TestSuiteSnapshot(
+                state.getTestSuite().getName(),
+                toSnapshot(state.getCurrent())
+        );
+    }
+
+    private TestCaseSnapshot toSnapshot(TestCaseState state) {
+        if (state == null) {
+            return null;
+        }
+
+        return new TestCaseSnapshot(
+                state.getTestCase().getName(),
+                state.getConfiguration().getSettings(),
+                state.getStartTime(),
+                state.getFinishTime(),
+                state.getTotalIterationsCount(),
+                state.getErrorCount()
+        );
     }
 }

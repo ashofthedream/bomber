@@ -2,43 +2,49 @@ package ashes.of.bomber.snapshots;
 
 import ashes.of.bomber.configuration.Settings;
 
+import javax.annotation.Nullable;
+import java.time.Instant;
+
 public class TestCaseSnapshot {
-    private String name;
-    private Settings settings;
-    private long startTime;
-    private long currentIterationsCount;
+    private final String name;
+    private final Settings settings;
+    private final Instant startTime;
+    @Nullable
+    private final Instant finishTime;
+    private final long currentIterationsCount;
+    private final long errorsCount;
+
+    public TestCaseSnapshot(String name, Settings settings, Instant startTime, @Nullable Instant finishTime, long currentIterationsCount, long errorsCount) {
+        this.name = name;
+        this.settings = settings;
+        this.startTime = startTime;
+        this.finishTime = finishTime;
+        this.currentIterationsCount = currentIterationsCount;
+        this.errorsCount = errorsCount;
+    }
 
     public String getName() {
         return name;
-    }
-
-    public TestCaseSnapshot setName(String name) {
-        this.name = name;
-        return this;
     }
 
     public Settings getSettings() {
         return settings;
     }
 
-    public TestCaseSnapshot setSettings(Settings settings) {
-        this.settings = settings;
-        return this;
+    public Instant getStartTime() {
+        return startTime;
+    }
+
+    @Nullable
+    public Instant getFinishTime() {
+        return finishTime;
     }
 
     public long getCurrentIterationsCount() {
         return currentIterationsCount;
     }
 
-    public void setCurrentIterationsCount(long currentIterationsCount) {
-        this.currentIterationsCount = currentIterationsCount;
-    }
-
-    public long getStartTime() {
-        return startTime;
-    }
-
-    public void setStartTime(long startTime) {
-        this.startTime = startTime;
+    public long getErrorsCount() {
+        return errorsCount;
     }
 }

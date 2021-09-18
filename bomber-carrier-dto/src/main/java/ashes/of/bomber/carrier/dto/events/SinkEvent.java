@@ -1,6 +1,6 @@
 package ashes.of.bomber.carrier.dto.events;
 
-import ashes.of.bomber.carrier.dto.flight.FlightSnapshotDto;
+import ashes.of.bomber.carrier.dto.flight.TestFlightSnapshotDto;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -25,7 +25,7 @@ public class SinkEvent {
     @Nullable
     private String testCase;
 
-    private FlightSnapshotDto state;
+    private TestFlightSnapshotDto state;
     private List<HistogramPointDto> histograms = new ArrayList<>();
 
     public static long nextId() {
@@ -107,11 +107,11 @@ public class SinkEvent {
         return this;
     }
 
-    public FlightSnapshotDto getState() {
+    public TestFlightSnapshotDto getState() {
         return state;
     }
 
-    public SinkEvent setState(FlightSnapshotDto state) {
+    public SinkEvent setState(TestFlightSnapshotDto state) {
         this.state = state;
         return this;
     }
