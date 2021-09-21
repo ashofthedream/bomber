@@ -1,5 +1,6 @@
 package ashes.of.bomber.sink.histogram;
 
+import ashes.of.bomber.core.Test;
 import ashes.of.bomber.events.TestAppFinishedEvent;
 import ashes.of.bomber.events.TestCaseFinishedEvent;
 import ashes.of.bomber.sink.Sink;
@@ -13,7 +14,7 @@ public class HistogramSink implements Sink {
     /**
      * Measurements by testSuite and testCase
      */
-    private final Map<MeasurementKey, Measurements> measurements = new ConcurrentHashMap<>();
+    private final Map<Test, Measurements> measurements = new ConcurrentHashMap<>();
 
     private final HistogramPrinter printer;
 
@@ -28,16 +29,16 @@ public class HistogramSink implements Sink {
     public void timeRecorded(Record record) {
         var it = record.getIteration();
         measurements
-                .computeIfAbsent(new MeasurementKey(it.getTestApp(), it.getTestSuite(), it.getTestCase()), Measurements::new)
+                .computeIfAbsent(record.getIteration().getTest(), Measurements::new)
                 .add(record);
     }
 
     @Override
     public void afterTestCase(TestCaseFinishedEvent event) {
-        var key = new MeasurementKey(event.getTestApp(), event.getTestSuite(), event.getTestCase());
-        var measurements = this.measurements.get(key);
+
+        var measurements = this.measurements.get(event.getTest());
         if (measurements != null) {
-            printer.print(key, measurements);
+            printer.print(event.getTest(), measurements);
         }
     }
 

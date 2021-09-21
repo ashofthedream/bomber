@@ -18,13 +18,13 @@ import java.util.List;
 public class CarrierConfiguration {
     private static final Logger log = LogManager.getLogger();
 
-    @Autowired
+    @Autowired(required = false)
     public void configureSinks(Bomber bomber, List<Sink> sinks) {
         log.warn("CONFIGURE SINKS: {}", sinks);
         sinks.forEach(bomber::addSink);
     }
 
-    @Autowired
+    @Autowired(required = false)
     public void configureWatchers(Bomber bomber, List<Watcher> watchers) {
         log.warn("CONFIGURE WATCHERS: {}", watchers);
         watchers.forEach(bomber::addWatcher);

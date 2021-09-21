@@ -3,12 +3,12 @@ package ashes.of.bomber.carrier.starter.sink;
 import ashes.of.bomber.carrier.dto.events.HistogramPointDto;
 import ashes.of.bomber.carrier.dto.events.SinkEvent;
 import ashes.of.bomber.carrier.starter.services.CarrierService;
+import ashes.of.bomber.core.Test;
 import ashes.of.bomber.events.TestAppFinishedEvent;
 import ashes.of.bomber.events.TestCaseFinishedEvent;
 import ashes.of.bomber.sink.Sink;
 import ashes.of.bomber.sink.histogram.HistogramTimelineDummyPrinter;
 import ashes.of.bomber.sink.histogram.HistogramTimelineSink;
-import ashes.of.bomber.sink.histogram.MeasurementKey;
 import ashes.of.bomber.tools.Record;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -44,13 +44,12 @@ public class CarrierHistogramTimelineHttpSink implements Sink {
         var last = lastUpdate.get();
         if (last != current && lastUpdate.compareAndSet(last, current)) {
             var it = record.getIteration();
-            var key = new MeasurementKey(it.getTestApp(), it.getTestSuite(), it.getTestCase());
-            sendHistogramByKey(record.getIteration().getFlightId(), key);
+            sendHistogramByTest(record.getIteration().getFlightId(), it.getTest());
         }
     }
 
-    private void sendHistogramByKey(long fligtId, MeasurementKey key) {
-        var timeline = sink.getTimeline(key);
+    private void sendHistogramByTest(long flightId, Test test) {
+        var timeline = sink.getTimeline(test);
 
         var histograms = timeline.entrySet().stream()
                 .flatMap(entry -> {
@@ -86,11 +85,11 @@ public class CarrierHistogramTimelineHttpSink implements Sink {
                 .setId(SinkEvent.nextId())
                 .setType(TEST_CASE_HISTOGRAM)
                 .setTimestamp(System.currentTimeMillis())
-                .setFlightId(fligtId)
+                .setFlightId(flightId)
                 .setCarrierId(registration.getServiceInstance().getId())
-                .setTestApp(key.getTestApp())
-                .setTestSuite(key.getTestSuite())
-                .setTestCase(key.getTestCase())
+                .setTestApp(test.getTestApp())
+                .setTestSuite(test.getTestSuite())
+                .setTestCase(test.getTestCase())
                 .setHistograms(histograms)
         );
     }
@@ -102,8 +101,7 @@ public class CarrierHistogramTimelineHttpSink implements Sink {
     @Override
     public void afterTestCase(TestCaseFinishedEvent event) {
         sink.afterTestCase(event);
-        var key = new MeasurementKey(event.getTestApp(), event.getTestSuite(), event.getTestCase());
-        sendHistogramByKey(event.getFlightId(), key);
+        sendHistogramByTest(event.getFlightId(), event.getTest());
     }
 
     @Override

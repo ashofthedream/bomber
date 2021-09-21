@@ -1,6 +1,7 @@
 package ashes.of.bomber.runner;
 
 import ashes.of.bomber.configuration.Configuration;
+import ashes.of.bomber.core.Test;
 import ashes.of.bomber.core.TestApp;
 import ashes.of.bomber.core.TestSuite;
 import ashes.of.bomber.events.FlightFinishedEvent;
@@ -338,8 +339,8 @@ public class Runner {
         log.trace("Reset beforeCase & afterCase lifecycle methods");
         testSuite.resetBeforeAndAfterCase();
 
-
-        send(new TestCaseStartedEvent(state.getStartTime(), state.getFlightId(), testApp.getName(), testSuite.getName(), testCase.getName(), settings));
+        var test = new Test(testApp.getName(), testSuite.getName(), testCase.getName());
+        send(new TestCaseStartedEvent(state.getStartTime(), state.getFlightId(), test, settings));
 
         log.debug("Run {} workers", settings.getThreadsCount());
 
@@ -363,7 +364,7 @@ public class Runner {
         log.info("Finish test case: {}", testCase.getName());
         state.finish();
 
-        send(new TestCaseFinishedEvent(state.getFinishTime(), state.getFlightId(), testApp.getName(), testSuite.getName(), testCase.getName()));
+        send(new TestCaseFinishedEvent(state.getFinishTime(), state.getFlightId(), test));
 
         var elapsed = state.getFinishTime().toEpochMilli() - state.getStartTime().toEpochMilli();
         ThreadContext.remove("testCase");

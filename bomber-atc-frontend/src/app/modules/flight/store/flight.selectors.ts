@@ -1,6 +1,6 @@
 import { createSelector } from '@ngrx/store';
+import { applications } from '../../app/store/app.selectors';
 import { AppTreeNode } from '../../app/store/app.state';
-import { applications } from '../../carrier/store/carrier.selectors';
 import { AtcState } from '../../shared/store/atc.state';
 import { TestFlight } from '../models/test-flight';
 
@@ -34,3 +34,8 @@ export const flightAll = createSelector(applications, (apps: AppTreeNode[]): Tes
     })
   };
 });
+
+
+export const createPlanState = createSelector(flightsState, state => state.createPlan);
+export const currentPlan = createSelector(createPlanState, state => state.plan);
+export const currentTestApps = createSelector(currentPlan, plan => plan.testApps);

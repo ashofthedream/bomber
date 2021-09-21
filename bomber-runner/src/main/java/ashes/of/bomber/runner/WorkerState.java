@@ -1,5 +1,6 @@
 package ashes.of.bomber.runner;
 
+import ashes.of.bomber.core.Test;
 import ashes.of.bomber.flight.Iteration;
 
 import java.time.Instant;
@@ -35,14 +36,17 @@ public class WorkerState {
 
     public Iteration createIteration() {
         String threadName = Thread.currentThread().getName();
+        var test = new Test(
+                parent.getTestApp().getName(),
+                parent.getTestSuite().getName(),
+                parent.getTestCase().getName());
+
         return new Iteration(
                 parent.getFlightId(),
                 iterationsCount.get(),
                 threadName,
                 Instant.now(),
-                parent.getTestApp().getName(),
-                parent.getTestSuite().getName(),
-                parent.getTestCase().getName());
+                test);
     }
 
 

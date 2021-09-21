@@ -1,5 +1,7 @@
 package ashes.of.bomber.flight;
 
+import ashes.of.bomber.core.Test;
+
 import java.time.Instant;
 
 /**
@@ -8,18 +10,14 @@ import java.time.Instant;
 public class Iteration {
     private final long flightId;
     private final long number;
-    private final String testApp;
-    private final String testSuite;
-    private final String testCase;
+    private final Test test;
     private final String thread;
     private final Instant timestamp;
 
-    public Iteration(long flightId, long number, String thread, Instant timestamp, String testApp, String testSuite, String testCase) {
+    public Iteration(long flightId, long number, String thread, Instant timestamp, Test test) {
         this.flightId = flightId;
         this.number = number;
-        this.testApp = testApp;
-        this.testSuite = testSuite;
-        this.testCase = testCase;
+        this.test = test;
         this.thread = thread;
         this.timestamp = timestamp;
     }
@@ -32,16 +30,8 @@ public class Iteration {
         return number;
     }
 
-    public String getTestApp() {
-        return testApp;
-    }
-
-    public String getTestSuite() {
-        return testSuite;
-    }
-
-    public String getTestCase() {
-        return testCase;
+    public Test getTest() {
+        return test;
     }
 
     public String getThread() {
@@ -56,9 +46,7 @@ public class Iteration {
     public String toString() {
         return "Iteration{" +
                 "number=" + number +
-                ", testApp='" + testApp + '\'' +
-                ", testSuite='" + testSuite + '\'' +
-                ", testCase='" + testCase + '\'' +
+                ", test=" + test +
                 ", thread='" + thread + '\'' +
                 ", timestamp=" + timestamp +
                 '}';

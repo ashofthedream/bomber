@@ -1,26 +1,24 @@
 package ashes.of.bomber.events;
 
+import ashes.of.bomber.core.Test;
+
 import javax.annotation.Nullable;
 import java.time.Instant;
 
 public class TestCaseAfterEachEvent {
     private final Instant timestamp;
     private final long flightId;
-    private final String testApp;
-    private final String testSuite;
-    private final String testCase;
+    private final Test test;
     private final String worker;
     private final long number;
     private final long elapsed;
     @Nullable
     private final Throwable throwable;
 
-    public TestCaseAfterEachEvent(Instant timestamp, long flightId, String testApp, String testSuite, String testCase, String worker, long number, long elapsed, @Nullable Throwable throwable) {
+    public TestCaseAfterEachEvent(Instant timestamp, long flightId, Test test, String worker, long number, long elapsed, @Nullable Throwable throwable) {
         this.timestamp = timestamp;
         this.flightId = flightId;
-        this.testApp = testApp;
-        this.testSuite = testSuite;
-        this.testCase = testCase;
+        this.test = test;
         this.worker = worker;
         this.number = number;
         this.elapsed = elapsed;
@@ -35,16 +33,8 @@ public class TestCaseAfterEachEvent {
         return flightId;
     }
 
-    public String getTestApp() {
-        return testApp;
-    }
-
-    public String getTestSuite() {
-        return testSuite;
-    }
-
-    public String getTestCase() {
-        return testCase;
+    public Test getTest() {
+        return test;
     }
 
     public String getWorker() {

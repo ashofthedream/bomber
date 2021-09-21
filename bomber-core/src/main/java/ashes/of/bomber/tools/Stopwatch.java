@@ -25,7 +25,7 @@ public class Stopwatch {
     }
 
     private String label() {
-        return it.getTestSuite() + "." +  it.getTestCase() + (this.label.isEmpty() ? "" : "." + this.label);
+        return it.getTest().getName() + (this.label.isEmpty() ? "" : "." + this.label);
     }
 
     public Record success() {

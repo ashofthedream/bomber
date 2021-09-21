@@ -1,20 +1,18 @@
 package ashes.of.bomber.events;
 
+import ashes.of.bomber.core.Test;
+
 import java.time.Instant;
 
 public class TestCaseFinishedEvent {
     private final Instant timestamp;
     private final long flightId;
-    private final String testApp;
-    private final String testSuite;
-    private final String testCase;
+    private final Test test;
 
-    public TestCaseFinishedEvent(Instant timestamp, long flightId, String testApp, String testSuite, String testCase) {
+    public TestCaseFinishedEvent(Instant timestamp, long flightId, Test test) {
         this.timestamp = timestamp;
         this.flightId = flightId;
-        this.testApp = testApp;
-        this.testSuite = testSuite;
-        this.testCase = testCase;
+        this.test = test;
     }
 
     public Instant getTimestamp() {
@@ -25,15 +23,7 @@ public class TestCaseFinishedEvent {
         return flightId;
     }
 
-    public String getTestApp() {
-        return testApp;
-    }
-
-    public String getTestSuite() {
-        return testSuite;
-    }
-
-    public String getTestCase() {
-        return testCase;
+    public Test getTest() {
+        return test;
     }
 }

@@ -1,5 +1,7 @@
 package ashes.of.bomber.sink.histogram;
 
+import ashes.of.bomber.core.Test;
+
 public interface HistogramPrinter {
-    void print(MeasurementKey key, Measurements measurements);
+    void print(Test test, Measurements measurements);
 }

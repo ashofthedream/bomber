@@ -25,9 +25,9 @@ public class DatadogSink implements Sink {
                 .orElse("");
 
         client.timer("bomber_stopwatch_records")
-                .tag("testApp",     it.getTestApp())
-                .tag("testSuite",   it.getTestSuite())
-                .tag("testCase",    it.getTestCase())
+                .tag("testApp",     it.getTest().getTestApp())
+                .tag("testSuite",   it.getTest().getTestSuite())
+                .tag("testCase",    it.getTest().getTestCase())
                 .tag("thread",      it.getThread())
                 .tag("error",       error)
                 .tag("label",       record.getLabel())
@@ -41,9 +41,9 @@ public class DatadogSink implements Sink {
                 .orElse("");
 
         client.timer("bomber_tests")
-                .tag("testApp",     event.getTestApp())
-                .tag("testSuite",   event.getTestSuite())
-                .tag("testCase",    event.getTestCase())
+                .tag("testApp",     event.getTest().getTestApp())
+                .tag("testSuite",   event.getTest().getTestSuite())
+                .tag("testCase",    event.getTest().getTestCase())
                 .tag("thread",      event.getWorker())
                 .tag("error",       error)
                 .nanos(event.getElapsed());

@@ -57,7 +57,7 @@ export class FlightEffects {
 
   @Effect()
   public getActiveFlightTimer(): Observable<GetActiveFlight> {
-    return timer(0, 3_000)
+    return timer(0, 300_000)
         .pipe(
             switchMap(n => this.store.select(isAuthenticated)),
             filter(auth => auth),

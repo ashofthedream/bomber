@@ -29,6 +29,6 @@ public class Log4jSink implements Sink {
     @Override
     public void afterEach(TestCaseAfterEachEvent event) {
         if (event.getThrowable() != null)
-            log.error("{}.{} #{}", event.getTestSuite(), event.getTestCase(), event.getNumber(), event.getThrowable());
+            log.error("{} #{}", event.getTest().getName(), event.getNumber(), event.getThrowable());
     }
 }

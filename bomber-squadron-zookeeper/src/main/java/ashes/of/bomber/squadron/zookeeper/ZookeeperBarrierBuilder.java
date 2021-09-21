@@ -15,7 +15,7 @@ public class ZookeeperBarrierBuilder implements BarrierBuilder {
 
     private String url = "localhost:2181";
     private int members = 1;
-    protected int workers = 1;
+    private int workers = 1;
     private Duration awaitTime = Duration.ofMinutes(1);
 
 
@@ -41,7 +41,7 @@ public class ZookeeperBarrierBuilder implements BarrierBuilder {
 
     @Override
     public Barrier build() {
-        Preconditions.checkArgument(members > 0, "Nodes should be greater than 0");
+        Preconditions.checkArgument(members > 0, "members should be greater than 0");
         Preconditions.checkNotNull(awaitTime, "awaitTime should not be null");
 
         CuratorFramework cf = CuratorFrameworkFactory.builder()

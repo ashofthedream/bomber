@@ -79,9 +79,9 @@ public class CarrierFlightProgressHttpSink implements Sink {
                     .setTimestamp(Instant.now().toEpochMilli())
                     .setCarrierId(registration.getServiceInstance().getId())
                     .setFlightId(event.getFlightId())
-                    .setTestApp(event.getTestApp())
-                    .setTestSuite(event.getTestSuite())
-                    .setTestCase(event.getTestCase())
+                    .setTestApp(event.getTest().getTestApp())
+                    .setTestSuite(event.getTest().getTestSuite())
+                    .setTestCase(event.getTest().getTestCase())
                     .setState(state));
         }
     }
@@ -94,9 +94,9 @@ public class CarrierFlightProgressHttpSink implements Sink {
                 .setCarrierId(registration.getServiceInstance().getId())
                 .setTimestamp(event.getTimestamp().toEpochMilli())
                 .setFlightId(event.getFlightId())
-                .setTestApp(event.getTestApp())
-                .setTestSuite(event.getTestSuite())
-                .setTestCase(event.getTestCase()) );
+                .setTestApp(event.getTest().getTestApp())
+                .setTestSuite(event.getTest().getTestSuite())
+                .setTestCase(event.getTest().getTestCase()) );
     }
 
     @Override
@@ -107,9 +107,9 @@ public class CarrierFlightProgressHttpSink implements Sink {
                 .setCarrierId(registration.getServiceInstance().getId())
                 .setTimestamp(event.getTimestamp().toEpochMilli())
                 .setFlightId(event.getFlightId())
-                .setTestApp(event.getTestApp())
-                .setTestSuite(event.getTestSuite())
-                .setTestCase(event.getTestCase()) );
+                .setTestApp(event.getTest().getTestApp())
+                .setTestSuite(event.getTest().getTestSuite())
+                .setTestCase(event.getTest().getTestCase()) );
     }
 
     @Override

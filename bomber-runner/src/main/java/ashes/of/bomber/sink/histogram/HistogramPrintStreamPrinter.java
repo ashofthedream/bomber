@@ -1,5 +1,6 @@
 package ashes.of.bomber.sink.histogram;
 
+import ashes.of.bomber.core.Test;
 import org.HdrHistogram.Histogram;
 
 import java.io.PrintStream;
@@ -17,9 +18,9 @@ public class HistogramPrintStreamPrinter implements HistogramPrinter {
     }
 
     @Override
-    public void print(MeasurementKey key, Measurements measurements) {
+    public void print(Test test, Measurements measurements) {
         out.println("--------------------------------------------------------------------------------");
-        out.printf("%s -> %s -> %s%n", key.getTestSuite(), key.getTestSuite(), key.getTestCase());
+        out.printf("%s -> %s -> %s%n", test.getTestSuite(), test.getTestSuite(), test.getTestCase());
 
         measurements.getHistograms().forEach((label, hae) -> {
             out.printf("label: %s, errors: %,12d%n", label, hae.getErrorsCount());

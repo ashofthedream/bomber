@@ -1,5 +1,6 @@
 package ashes.of.bomber.sink.histogram;
 
+import ashes.of.bomber.core.Test;
 import ashes.of.bomber.events.TestAppFinishedEvent;
 import ashes.of.bomber.events.TestCaseFinishedEvent;
 import ashes.of.bomber.sink.Sink;
@@ -63,7 +64,7 @@ public class HistogramTimelineSink implements Sink {
         }
     }
 
-    private final Map<MeasurementKey, NavigableMap<Instant, Measurements>> timeline = new ConcurrentHashMap<>();
+    private final Map<Test, NavigableMap<Instant, Measurements>> timeline = new ConcurrentHashMap<>();
     private final TemporalUnit resolution;
     private final HistogramTimelinePrinter printer;
 
@@ -85,16 +86,15 @@ public class HistogramTimelineSink implements Sink {
     public void timeRecorded(Record record) {
         var it = record.getIteration();
         var ts = it.getTimestamp().truncatedTo(resolution);
-        var key = new MeasurementKey(it.getTestApp(), it.getTestSuite(), it.getTestCase());
-        timeline.computeIfAbsent(key, k -> new ConcurrentSkipListMap<>())
-                .computeIfAbsent(ts, timestamp -> new Measurements(key))
+        var test = record.getIteration().getTest();
+        timeline.computeIfAbsent(test, k -> new ConcurrentSkipListMap<>())
+                .computeIfAbsent(ts, timestamp -> new Measurements(test))
                 .add(record);
     }
 
     @Override
     public void afterTestCase(TestCaseFinishedEvent event) {
-        var key = new MeasurementKey(event.getTestApp(), event.getTestSuite(), event.getTestCase());
-        var measurements = timeline.get(key);
+        var measurements = timeline.get(event.getTest());
         if (measurements != null) {
             printer.print(resolution, measurements);
         }
@@ -108,8 +108,8 @@ public class HistogramTimelineSink implements Sink {
     }
 
 
-    public NavigableMap<Instant, Measurements> getTimeline(MeasurementKey key) {
-        var measurements = timeline.get(key);
+    public NavigableMap<Instant, Measurements> getTimeline(Test test) {
+        var measurements = timeline.get(test);
         if (measurements != null) {
             return measurements;
         }

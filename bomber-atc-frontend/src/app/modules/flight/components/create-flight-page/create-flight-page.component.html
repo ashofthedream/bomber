@@ -11,12 +11,35 @@
 
 <div nz-row nzGutter="10" class="lower-block">
   <div nz-col nzSpan="8">
-    <atc-app-active></atc-app-active>
+    <atc-app-active editable="true"></atc-app-active>
   </div>
 
   <div nz-col nzSpan="16">
     <nz-card nzTitle="Flight Plan">
-
+      <nz-table [nzData]="testApps | async" nzSize="small" [nzShowPagination]="false">
+        <thead>
+        <tr>
+          <th>Test App</th>
+          <th>Test Suite</th>
+          <th>Test Case</th>
+          <th>Settings</th>
+        </tr>
+        </thead>
+        <tbody>
+        <ng-container *ngFor="let testApp of testApps | async">
+          <ng-container *ngFor="let testSuite of testApp.testSuites">
+            <ng-container *ngFor="let testCase of testSuite.testCases">
+              <tr>
+                <td>{{testApp.name}}</td>
+                <td>{{testSuite.name}}</td>
+                <td>{{testCase.name}}</td>
+                <td></td>
+              </tr>
+            </ng-container>
+          </ng-container>
+        </ng-container>
+        </tbody>
+      </nz-table>
     </nz-card>
   </div>
 </div>

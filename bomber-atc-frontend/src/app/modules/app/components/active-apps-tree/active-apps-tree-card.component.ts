@@ -1,16 +1,17 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { activeCarriersLoading, applications } from '../../../carrier/store/carrier.selectors';
+import { activeCarriersLoading } from '../../../carrier/store/carrier.selectors';
+import { AddToFlight } from '../../../flight/store/flight.actions';
 import { AtcState } from '../../../shared/store/atc.state';
-import { AppTreeNode } from '../../store/app.state';
+import { applications } from '../../store/app.selectors';
+import { AppTreeNode, NodeType } from '../../store/app.state';
 
 
 @Component({
   selector: 'atc-app-active',
   templateUrl: './active-apps-tree-card.component.html'
 })
-export class ActiveAppsTreeCardComponent implements OnInit {
-  apps: AppTreeNode[] = [];
+export class ActiveAppsTreeCardComponent {
   selected: AppTreeNode;
 
   activeCarriersLoading = this.store.select(activeCarriersLoading);
@@ -22,20 +23,19 @@ export class ActiveAppsTreeCardComponent implements OnInit {
   constructor(private readonly store: Store<AtcState>) {
   }
 
-  ngOnInit(): void {
-    this.applications.subscribe(apps => this.apps = apps);
-  }
-
   select(node: AppTreeNode) {
-    console.log(node);
     this.selected = this.selected?.key !== node.key ? node : null;
   }
 
-  private showChecked(tree: AppTreeNode[]) {
-    tree.filter(n => n.checked)
-        .forEach(n => {
-          console.log('checked: {}', n.key);
-          this.showChecked(n.children);
-        });
+  add(node: AppTreeNode) {
+    if (node.type === NodeType.TEST_APP) {
+      node.children.forEach(testSuite => this.add(testSuite));
+    }
+
+    if (node.type === NodeType.TEST_SUITE) {
+      node.children.forEach(testCase => this.add(testCase));
+    }
+
+    this.store.dispatch(new AddToFlight(node));
   }
 }

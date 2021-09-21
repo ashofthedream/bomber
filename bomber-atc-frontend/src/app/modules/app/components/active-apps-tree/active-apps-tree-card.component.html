@@ -1,7 +1,7 @@
 <nz-card nzTitle="Applications">
   <nz-spin [nzSpinning]="activeCarriersLoading | async">
-    <ng-container *ngIf="apps.length; else noApplications">
-      <nz-tree [nzData]="apps" [nzCheckable]="editable" (nzClick)="select($event.node.origin)"></nz-tree>
+    <ng-container *ngIf="(applications | async).length; else noApplications">
+      <nz-tree [nzTreeTemplate]="node" [nzData]="applications | async" (nzClick)="select($event.node.origin)"></nz-tree>
 
       <br/>
       <div *ngIf="selected">
@@ -13,6 +13,15 @@
       </div>
     </ng-container>
   </nz-spin>
+
+  <ng-template #node let-node let-origin="origin">
+      <span>
+        {{ node.title }} ({{origin.carriers.length}})
+      </span>
+    <ng-container *ngIf="editable">
+      <a (click)="add(node.origin)">add</a>
+    </ng-container>
+  </ng-template>
 
   <ng-template #noApplications>
     <p>No Applications</p>

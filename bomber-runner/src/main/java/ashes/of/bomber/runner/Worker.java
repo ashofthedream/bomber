@@ -1,6 +1,7 @@
 package ashes.of.bomber.runner;
 
 import ashes.of.bomber.configuration.Settings;
+import ashes.of.bomber.core.Test;
 import ashes.of.bomber.core.TestSuite;
 import ashes.of.bomber.snapshots.WorkerSnapshot;
 import ashes.of.bomber.events.TestCaseAfterEachEvent;
@@ -121,8 +122,9 @@ public class Worker {
 
         testSuite.beforeCase(context);
 
+        var test = new Test(testApp.getName(), testSuite.getName(), testCase.getName());
         log.trace("Try start test case -> barrier enter");
-        barrier.enterCase(testApp.getName(), testSuite.getName(), testCase.getName());
+        barrier.enterCase(test);
 
         log.info("Start test case: {}", testCase.getName());
 
@@ -150,9 +152,7 @@ public class Worker {
             send(sink, watchers, new TestCaseBeforeEachEvent(
                     it.getTimestamp(),
                     it.getFlightId(),
-                    it.getTestApp(),
-                    it.getTestSuite(),
-                    it.getTestCase()
+                    it.getTest()
             ));
 
             Tools tools = new Tools(it, record -> {
@@ -176,9 +176,7 @@ public class Worker {
                 send(sink, watchers, new TestCaseAfterEachEvent(
                         it.getTimestamp(),
                         it.getFlightId(),
-                        it.getTestApp(),
-                        it.getTestSuite(),
-                        it.getTestCase(),
+                        it.getTest(),
                         it.getThread(),
                         it.getNumber(),
                         stopwatch.elapsed(),
@@ -191,9 +189,7 @@ public class Worker {
                 send(sink, watchers, new TestCaseAfterEachEvent(
                         it.getTimestamp(),
                         it.getFlightId(),
-                        it.getTestApp(),
-                        it.getTestSuite(),
-                        it.getTestCase(),
+                        it.getTest(),
                         it.getThread(),
                         it.getNumber(),
                         stopwatch.elapsed(),
@@ -232,7 +228,7 @@ public class Worker {
         }
 
         log.trace("Try finish test case -> barrier leave");
-        barrier.leaveCase(testApp.getName(), testSuite.getName(), testCase.getName());
+        barrier.leaveCase(test);
 
         testSuite.afterCase(context);
 

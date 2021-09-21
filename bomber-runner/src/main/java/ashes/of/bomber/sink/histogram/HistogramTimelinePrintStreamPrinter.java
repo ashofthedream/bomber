@@ -1,5 +1,6 @@
 package ashes.of.bomber.sink.histogram;
 
+import ashes.of.bomber.core.Test;
 import org.HdrHistogram.Histogram;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -36,7 +37,7 @@ public class HistogramTimelinePrintStreamPrinter implements HistogramTimelinePri
     }
 
     @Override
-    public void print(TemporalUnit resolution, Map<MeasurementKey, NavigableMap<Instant, Measurements>> timeline) {
+    public void print(TemporalUnit resolution, Map<Test, NavigableMap<Instant, Measurements>> timeline) {
         out.printf("Histogram Timeline, resolution: %s%n", resolution.getDuration());
         if (timeline.isEmpty()) {
             log.warn("Nothing to print, timeline is empty");
@@ -59,7 +60,7 @@ public class HistogramTimelinePrintStreamPrinter implements HistogramTimelinePri
         Instant end = timeline.lastKey();
 
         printBorder();
-        var key = timeline.firstEntry().getValue().getKey();
+        var key = timeline.firstEntry().getValue().getTest();
         out.printf("%s -> %s -> %s%n", key.getTestSuite(), key.getTestSuite(), key.getTestCase());
         out.printf("rows: %s, duration: %4.3fs%n",
                 timeline.size(),

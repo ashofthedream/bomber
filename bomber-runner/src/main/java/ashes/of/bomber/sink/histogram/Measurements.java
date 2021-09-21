@@ -1,20 +1,21 @@
 package ashes.of.bomber.sink.histogram;
 
+import ashes.of.bomber.core.Test;
 import ashes.of.bomber.tools.Record;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Measurements {
-    private final MeasurementKey key;
-    public final Map<String, HistogramAndErrors> byLabel = new ConcurrentHashMap<>();
+    private final Test test;
+    private final Map<String, HistogramAndErrors> byLabel = new ConcurrentHashMap<>();
 
-    public Measurements(MeasurementKey key) {
-        this.key = key;
+    public Measurements(Test test) {
+        this.test = test;
     }
 
-    public MeasurementKey getKey() {
-        return key;
+    public Test getTest() {
+        return test;
     }
 
     public Map<String, HistogramAndErrors> getHistograms() {
