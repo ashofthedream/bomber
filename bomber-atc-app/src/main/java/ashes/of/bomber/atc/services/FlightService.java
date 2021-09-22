@@ -31,9 +31,9 @@ public class FlightService {
 
     // todo potential race condition
     public Flight startFlight(TestFlightPlan plan) {
-        if (active != null) {
-            log.warn("Already stared, but today I don't cate about it");
-//            throw new RuntimeException("Already started");
+        var current = this.active;
+        if (current != null && !current.isOver()) {
+            log.warn("Already has active flight and it's not over, but today I don't cate about it");
         }
 
         Flight flight = new Flight(plan);
@@ -47,7 +47,8 @@ public class FlightService {
         flight.add(event);
 
         if (flight.isOver()) {
-            active = null;
+            log.info("Looks like flight: {} is over, remove from active", flight.getPlan().getFlightId());
+//            active = null;
         }
     }
 

@@ -1,6 +1,5 @@
-import { testAppNode } from '../../app/store/app.selectors';
 import { HistogramPoint } from '../models/flight-record';
-import { CancelCreatedFlight, FlightAction, FlightActions } from './flight.actions';
+import { FlightAction, FlightActions } from './flight.actions';
 import { FlightState, initialFlightState } from './flight.state';
 
 export const flightReducers = (state = initialFlightState, action: FlightActions): FlightState => {
@@ -55,7 +54,7 @@ export const flightReducers = (state = initialFlightState, action: FlightActions
 
       foundTestSuite = {
         ...foundTestSuite,
-        testCases: [...foundTestSuite.testCases, {name: action.testCase.testCase, configuration: null}]
+        testCases: [...foundTestSuite.testCases, { name: action.testCase.testCase, configuration: null }]
       };
 
       foundApp = {
