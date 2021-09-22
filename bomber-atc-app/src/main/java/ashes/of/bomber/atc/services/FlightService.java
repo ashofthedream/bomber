@@ -45,6 +45,10 @@ public class FlightService {
     public void process(SinkEvent event) {
         var flight = flights.computeIfAbsent(event.getFlightId(), flightId -> new Flight(new TestFlightPlan(flightId, List.of())));
         flight.add(event);
+
+        if (flight.isOver()) {
+            active = null;
+        }
     }
 
     public Flux<Flight> getFlights() {

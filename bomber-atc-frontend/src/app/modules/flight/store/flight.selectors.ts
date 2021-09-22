@@ -13,8 +13,11 @@ export const hasNoActiveFlight = createSelector(hasActiveFlight, has => !has);
 
 export const activeFlightHistogram = createSelector(flightsState, state => state.histogram);
 
-export const flightAll = createSelector(applications, (apps: AppTreeNode[]): TestFlight => {
 
+export const createPlanState = createSelector(flightsState, state => state.createPlan);
+
+export const createdFlightPlan = createSelector(createPlanState, state => state.plan);
+export const defaultFlightPlan = createSelector(applications, (apps: AppTreeNode[]): TestFlight => {
   return {
     testApps: apps.map(app => {
       return {
@@ -35,7 +38,6 @@ export const flightAll = createSelector(applications, (apps: AppTreeNode[]): Tes
   };
 });
 
-
-export const createPlanState = createSelector(flightsState, state => state.createPlan);
-export const currentPlan = createSelector(createPlanState, state => state.plan);
-export const currentTestApps = createSelector(currentPlan, plan => plan.testApps);
+export const createdFlightPlanApps = createSelector(createdFlightPlan, plan => plan.testApps);
+export const flightCanBeStarted = createSelector(createPlanState, state => state.plan.testApps.length > 0);
+export const flightCanNotBeStarted = createSelector(flightCanBeStarted, state => !state);

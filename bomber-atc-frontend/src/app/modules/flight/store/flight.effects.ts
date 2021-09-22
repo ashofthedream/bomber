@@ -4,9 +4,11 @@ import { Store } from '@ngrx/store';
 import { Observable, timer } from 'rxjs';
 import { filter, map, switchMap, withLatestFrom } from 'rxjs/operators';
 import { isAuthenticated } from '../../auth/store/auth.selectors';
+import { activeCarrierIds, activeCarriers } from '../../carrier/store/carrier.selectors';
 import { AtcState } from '../../shared/store/atc.state';
 import { FlightService } from '../services/flight.service';
 import {
+  StartCreatedFlight,
   FlightAction,
   GetActiveFlight,
   GetActiveFlightSuccess,
@@ -15,7 +17,7 @@ import {
   StopFlight,
   StopFlightSuccess
 } from './flight.actions';
-import { flightAll } from './flight.selectors';
+import { createdFlightPlan, defaultFlightPlan } from './flight.selectors';
 
 @Injectable()
 export class FlightEffects {
@@ -26,11 +28,21 @@ export class FlightEffects {
   }
 
   @Effect()
-  public startAll(): Observable<StartFlight> {
+  public startFlightWithDefaultPlan(): Observable<StartFlight> {
     return this.actions
         .pipe(
-            ofType(FlightAction.StartAll),
-            withLatestFrom(this.store.select(flightAll)),
+            ofType(FlightAction.StartDefaultFlight),
+            withLatestFrom(this.store.select(defaultFlightPlan)),
+            map(([action, flight]) => new StartFlight(flight)),
+        );
+  }
+
+  @Effect()
+  public startFlightWithCreatedPlan(): Observable<StartFlight> {
+    return this.actions
+        .pipe(
+            ofType(FlightAction.StartCreatedFlight),
+            withLatestFrom(this.store.select(createdFlightPlan)),
             map(([action, flight]) => new StartFlight(flight)),
         );
   }
@@ -40,7 +52,8 @@ export class FlightEffects {
     return this.actions
         .pipe(
             ofType<StartFlight>(FlightAction.StartFlight),
-            switchMap(action => this.flightService.startFlight(action.flight)),
+            withLatestFrom(this.store.select(activeCarrierIds)),
+            switchMap(([action, carriers]) => this.flightService.startFlight(carriers, action.flight)),
             map(response => new StartFlightSuccess(response.flightId))
         );
   }
@@ -57,7 +70,7 @@ export class FlightEffects {
 
   @Effect()
   public getActiveFlightTimer(): Observable<GetActiveFlight> {
-    return timer(0, 300_000)
+    return timer(0, 5_000)
         .pipe(
             switchMap(n => this.store.select(isAuthenticated)),
             filter(auth => auth),

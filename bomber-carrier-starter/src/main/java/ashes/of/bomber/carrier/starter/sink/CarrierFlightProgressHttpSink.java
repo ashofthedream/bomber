@@ -4,6 +4,8 @@ import ashes.of.bomber.Bomber;
 import ashes.of.bomber.carrier.dto.events.SinkEvent;
 import ashes.of.bomber.carrier.mappers.TestFlightMapper;
 import ashes.of.bomber.carrier.starter.services.CarrierService;
+import ashes.of.bomber.events.FlightFinishedEvent;
+import ashes.of.bomber.events.FlightStartedEvent;
 import ashes.of.bomber.events.TestAppFinishedEvent;
 import ashes.of.bomber.events.TestAppStartedEvent;
 import ashes.of.bomber.events.TestCaseAfterEachEvent;
@@ -25,6 +27,8 @@ import static ashes.of.bomber.carrier.dto.events.SinkEventType.TEST_APP_START;
 import static ashes.of.bomber.carrier.dto.events.SinkEventType.TEST_CASE_FINISH;
 import static ashes.of.bomber.carrier.dto.events.SinkEventType.TEST_CASE_PROGRESS;
 import static ashes.of.bomber.carrier.dto.events.SinkEventType.TEST_CASE_START;
+import static ashes.of.bomber.carrier.dto.events.SinkEventType.TEST_FLIGHT_FINISH;
+import static ashes.of.bomber.carrier.dto.events.SinkEventType.TEST_FLIGHT_START;
 import static ashes.of.bomber.carrier.dto.events.SinkEventType.TEST_SUITE_FINISH;
 import static ashes.of.bomber.carrier.dto.events.SinkEventType.TEST_SUITE_START;
 
@@ -42,6 +46,26 @@ public class CarrierFlightProgressHttpSink implements Sink {
         this.carrierService = carrierService;
         this.registration = registration;
         this.bomber = bomber;
+    }
+
+    @Override
+    public void beforeFlight(FlightStartedEvent event) {
+        send(new SinkEvent()
+                .setId(SinkEvent.nextId())
+                .setType(TEST_FLIGHT_START)
+                .setCarrierId(registration.getServiceInstance().getId())
+                .setTimestamp(event.getTimestamp().toEpochMilli())
+                .setFlightId(event.getFlightId()));
+    }
+
+    @Override
+    public void afterFlight(FlightFinishedEvent event) {
+        send(new SinkEvent()
+                .setId(SinkEvent.nextId())
+                .setType(TEST_FLIGHT_FINISH)
+                .setCarrierId(registration.getServiceInstance().getId())
+                .setTimestamp(event.getTimestamp().toEpochMilli())
+                .setFlightId(event.getFlightId()));
     }
 
     @Override

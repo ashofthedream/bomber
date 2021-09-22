@@ -3,45 +3,54 @@
     Create Flight
   </nz-page-header-title>
   <nz-page-header-extra>
-    <button nz-button nzType="primary" [disabled]="true">Start</button>
+    <button nz-button nzType="primary" [disabled]="flightCanNotBeStarted | async" (click)="startFlight()">Start</button>
     <button nz-button nzType="default" [disabled]="true">Save</button>
-    <button nz-button nzType="default" [disabled]="true">Cancel</button>
+    <button nz-button nzType="default" [disabled]="flightCanNotBeStarted | async" (click)="cancelFlight()">Cancel</button>
   </nz-page-header-extra>
 </nz-page-header>
 
-<div nz-row nzGutter="10" class="lower-block">
-  <div nz-col nzSpan="8">
-    <atc-app-active editable="true"></atc-app-active>
-  </div>
+<div class="lower-block">
+  <div nz-row [nzGutter]="[20, 20]">
+    <div nz-col nzSpan="8">
+      <atc-app-active editable="true"></atc-app-active>
+    </div>
 
-  <div nz-col nzSpan="16">
-    <nz-card nzTitle="Flight Plan">
-      <nz-table [nzData]="testApps | async" nzSize="small" [nzShowPagination]="false">
-        <thead>
-        <tr>
-          <th>Test App</th>
-          <th>Test Suite</th>
-          <th>Test Case</th>
-          <th>Settings</th>
-        </tr>
-        </thead>
-        <tbody>
-        <ng-container *ngFor="let testApp of testApps | async">
-          <ng-container *ngFor="let testSuite of testApp.testSuites">
-            <ng-container *ngFor="let testCase of testSuite.testCases">
-              <tr>
-                <td>{{testApp.name}}</td>
-                <td>{{testSuite.name}}</td>
-                <td>{{testCase.name}}</td>
-                <td></td>
-              </tr>
+    <div nz-col nzSpan="16">
+      <nz-card nzTitle="Flight Plan">
+        <nz-table [nzData]="testApps | async" nzSize="small" [nzShowPagination]="false">
+          <thead>
+          <tr>
+            <th>Test App</th>
+            <th>Test Suite</th>
+            <th>Test Case</th>
+            <th>Settings</th>
+          </tr>
+          </thead>
+          <tbody>
+          <ng-container *ngFor="let testApp of testApps | async">
+            <ng-container *ngFor="let testSuite of testApp.testSuites">
+              <ng-container *ngFor="let testCase of testSuite.testCases">
+                <tr>
+                  <td>{{testApp.name}}</td>
+                  <td>{{testSuite.name}}</td>
+                  <td>{{testCase.name}}</td>
+                  <td></td>
+                </tr>
+              </ng-container>
             </ng-container>
           </ng-container>
-        </ng-container>
-        </tbody>
-      </nz-table>
-    </nz-card>
+          </tbody>
+        </nz-table>
+      </nz-card>
+    </div>
+
+    <div nz-col nzSpan="8">
+      <nz-card nzTitle="Carriers">
+        <p *ngFor="let carrier of carriers | async">
+          {{carrier.id}}
+        </p>
+      </nz-card>
+    </div>
   </div>
 </div>
-
 

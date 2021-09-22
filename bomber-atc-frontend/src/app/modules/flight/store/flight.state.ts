@@ -3,6 +3,7 @@ import { HistogramPoint } from '../models/flight-record';
 import { TestFlightPlan } from '../models/test-flight-plan';
 
 export interface CreatePlanState {
+  carriers: string[];
   plan: TestFlightPlan;
 }
 
@@ -19,6 +20,7 @@ export const initialFlightState: FlightState = {
   active: null,
   all: [],
   createPlan: {
+    carriers: [],
     plan: {
       testApps: []
     }

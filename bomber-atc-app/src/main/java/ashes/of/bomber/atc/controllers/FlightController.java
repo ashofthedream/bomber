@@ -9,7 +9,6 @@ import ashes.of.bomber.atc.services.FlightService;
 import ashes.of.bomber.carrier.dto.requests.StartFlightRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -54,10 +53,12 @@ public class FlightController {
 
         var flight = flightService.startFlight(TestFlightMapper.toPlan(plan));
         return carrierService.getCarriers()
+                .filter(carrier -> request.getCarriers().isEmpty() || request.getCarriers().contains(carrier.getId()))
                 .flatMap(carrier -> carrierService.start(carrier, flight))
                 .collectList()
                 .map(flights -> {
 
+                    flight.setCarriersCount(flights.size());
                     var flightIds = flights.stream()
                             .map(FlightStartedResponse::getId)
                             .distinct()
@@ -74,22 +75,6 @@ public class FlightController {
                     return new FlightStartedResponse()
                             .setId(flightId);
                 });
-    }
-
-    @PostMapping("/atc/flights/{carrierId}/applications/{appId}/start")
-    public Mono<FlightStartedResponse> startApplicationOnCarrierById(
-            @PathVariable("carrierId") String carrierId,
-            @PathVariable("appId") String appId,
-            @RequestBody StartFlightRequest request) {
-        log.debug("start application: {} on carrier: {}", appId, carrierId);
-
-        var plan = request.getFlight()
-                .setId(flightService.getNextFlightId());
-
-        var flight = flightService.startFlight(TestFlightMapper.toPlan(plan));
-
-        return carrierService.getCarrier(carrierId)
-                .flatMap(carrier -> carrierService.start(carrier, flight));
     }
 
     private FlightDto toDto(Flight flight) {

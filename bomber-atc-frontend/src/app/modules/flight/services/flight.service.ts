@@ -23,8 +23,8 @@ export class FlightService {
   }
 
 
-  public startFlight(flight: TestFlight): Observable<any> {
-    return this.rest.post(`flights/start`, {flight});
+  public startFlight(carriers: string[], flight: TestFlight): Observable<any> {
+    return this.rest.post(`flights/start`, {carriers, flight});
   }
 
   public start(carrier: Carrier, app: TestApp): Observable<any> {

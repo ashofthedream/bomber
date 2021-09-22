@@ -30,10 +30,12 @@ export class ActiveAppsTreeCardComponent {
   add(node: AppTreeNode) {
     if (node.type === NodeType.TEST_APP) {
       node.children.forEach(testSuite => this.add(testSuite));
+      return;
     }
 
     if (node.type === NodeType.TEST_SUITE) {
       node.children.forEach(testCase => this.add(testCase));
+      return;
     }
 
     this.store.dispatch(new AddToFlight(node));

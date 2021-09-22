@@ -1,6 +1,6 @@
 import { testAppNode } from '../../app/store/app.selectors';
 import { HistogramPoint } from '../models/flight-record';
-import { FlightAction, FlightActions } from './flight.actions';
+import { CancelCreatedFlight, FlightAction, FlightActions } from './flight.actions';
 import { FlightState, initialFlightState } from './flight.state';
 
 export const flightReducers = (state = initialFlightState, action: FlightActions): FlightState => {
@@ -33,7 +33,6 @@ export const flightReducers = (state = initialFlightState, action: FlightActions
       };
 
     case FlightAction.AddToFlight:
-
       let plan = state.createPlan.plan;
 
       const otherApps = plan.testApps.filter(testApp => testApp.name !== action.testCase.testApp);
@@ -71,6 +70,17 @@ export const flightReducers = (state = initialFlightState, action: FlightActions
           plan: {
             ...plan,
             testApps: [...otherApps, foundApp]
+          },
+        }
+      };
+
+    case FlightAction.CancelCreatedFlight:
+      return {
+        ...state,
+        createPlan: {
+          ...state.createPlan,
+          plan: {
+            testApps: []
           },
         }
       };
