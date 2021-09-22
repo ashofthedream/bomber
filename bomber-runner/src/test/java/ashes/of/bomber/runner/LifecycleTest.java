@@ -1,6 +1,7 @@
 package ashes.of.bomber.runner;
 
-import ashes.of.bomber.tests.Counters;
+import ashes.of.bomber.Bomber;
+import ashes.of.bomber.runner.tests.Counters;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -9,21 +10,21 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public abstract class LifecycleTest {
 
     protected Counters counters;
-    protected TestApp app;
+    protected Bomber bomber;
 
     @Test
     public void testAllLifecycleMethods() {
-        app.start();
+        bomber.start();
         assertCounters(counters);
     }
 
     @Test
     public void testAllLifecycleMethodsWhenAppRunsTwice() {
-        app.start();
+        bomber.start();
         assertCounters(counters);
 
         counters.reset();
-        app.start();
+        bomber.start();
         assertCounters(counters);
     }
 

@@ -1,6 +1,6 @@
 package ashes.of.bomber.example.users;
 
-import ashes.of.bomber.annotations.LoadTest;
+import ashes.of.bomber.annotations.LoadTestSettings;
 import ashes.of.bomber.annotations.LoadTestApp;
 import ashes.of.bomber.annotations.Throttle;
 import ashes.of.bomber.builder.BomberBuilder;
@@ -26,15 +26,14 @@ import java.time.temporal.ChronoUnit;
 @LoadTestApp(testSuites = {
         UserControllerLoadTest.class
 })
-@LoadTest(threads = 2)
+@LoadTestSettings(threads = 2)
 @Throttle(time = 20)
 public class ExampleUsersTestApp {
     private static final Logger log = LogManager.getLogger();
 
     public static TestAppBuilder create(String appUrl, int membersCount) {
         BarrierBuilder barrier = membersCount > 1 ?
-                new ZookeeperBarrierBuilder().members(membersCount) :
-                new NoBarrier.Builder();
+                new ZookeeperBarrierBuilder().members(membersCount) : NoBarrier::new;
 
         return TestAppBuilder.create(ExampleUsersTestApp.class)
                 .config(config -> config.barrier(barrier))
@@ -64,7 +63,7 @@ public class ExampleUsersTestApp {
                 .findFirst()
                 .orElseThrow();
 
-        log.info("test report for flight: {}", report.getPlan().getFlightId());
+        log.info("test report for flight: {}", -1);
         report.getTestSuites()
                 .forEach(testSuite -> {
                     log.debug("TestSuite name: {}", testSuite.getName());

@@ -42,7 +42,7 @@ public class ExampleTestApp {
 
         report.getTestApps()
                 .forEach(testApp -> {
-                    log.info("test report for flight: {}", testApp.getPlan().getFlightId());
+                    log.info("test report for flight: {}", -1);
                     testApp.getTestSuites()
                             .forEach(testSuite -> {
                                 log.debug("TestSuite name: {}", testSuite.getName());

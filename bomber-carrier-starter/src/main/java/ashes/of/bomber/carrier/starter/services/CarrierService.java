@@ -1,7 +1,6 @@
 package ashes.of.bomber.carrier.starter.services;
 
 import ashes.of.bomber.carrier.dto.events.SinkEvent;
-import ashes.of.bomber.runner.TestApp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.cloud.client.ServiceInstance;

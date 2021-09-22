@@ -1,6 +1,6 @@
 package ashes.of.bomber.carrier.dto.carrier;
 
-import ashes.of.bomber.carrier.dto.ApplicationDto;
+import ashes.of.bomber.carrier.dto.flight.TestAppDto;
 
 import java.net.URI;
 import java.util.List;
@@ -8,7 +8,7 @@ import java.util.List;
 public class CarrierDto {
     private String id;
     private URI uri;
-    private List<ApplicationDto> apps;
+    private List<TestAppDto> apps;
 
     public String getId() {
         return id;
@@ -28,11 +28,11 @@ public class CarrierDto {
         return this;
     }
 
-    public List<ApplicationDto> getApps() {
+    public List<TestAppDto> getApps() {
         return apps;
     }
 
-    public CarrierDto setApps(List<ApplicationDto> apps) {
+    public CarrierDto setApps(List<TestAppDto> apps) {
         this.apps = apps;
         return this;
     }

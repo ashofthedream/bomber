@@ -1,10 +1,9 @@
 package ashes.of.bomber.squadron.zookeeper;
 
+import ashes.of.bomber.core.Test;
 import ashes.of.bomber.squadron.Barrier;
-import ashes.of.bomber.flight.Stage;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.recipes.barriers.DistributedDoubleBarrier;
-import org.apache.curator.framework.recipes.nodes.PersistentNode;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -17,13 +16,11 @@ import java.util.concurrent.TimeUnit;
 public class ZookeeperBarrier implements Barrier {
     private static final Logger log = LogManager.getLogger();
 
-    private final Map<String, DistributedDoubleBarrier> barriers = new ConcurrentHashMap<>();
+    private final Map<Test, DistributedDoubleBarrier> barriers = new ConcurrentHashMap<>();
 
     private final CuratorFramework cf;
     private final Duration awaitTime;
     private final int members;
-
-    private volatile PersistentNode node;
 
     public ZookeeperBarrier(CuratorFramework cf, int members, Duration awaitTime) {
         this.cf = cf;
@@ -32,28 +29,28 @@ public class ZookeeperBarrier implements Barrier {
     }
 
     @Override
-    public void enterCase(Stage stage, String testSuite, String testCase) {
+    public void enterCase(Test test) {
         try {
-            log.trace("enterCase testSuite: {}, testCase: {}", testSuite, testCase);
-            getOrCreateBarrier(testCase, testCase)
+            log.trace("enterCase test: {}", test.getName());
+            getOrCreateBarrier(test)
                     .enter(awaitTime.toMillis(), TimeUnit.MILLISECONDS);
         } catch (Exception e) {
-            log.error("enterCase failed. testSuite: {}, testCase: {}", testSuite, testCase, e);
+            log.error("enterCase failed. test: {}", test.getName(), e);
         }
     }
 
     @Override
-    public void leaveCase(Stage stage, String testSuite, String testCase) {
+    public void leaveCase(Test test) {
         try {
-            log.trace("leaveCase testSuite: {}, testCase: {}", testSuite, testCase);
-            getOrCreateBarrier(testCase, testCase)
+            log.trace("leaveCase test: {}", test.getName());
+            getOrCreateBarrier(test)
                     .leave(awaitTime.toMillis(), TimeUnit.MILLISECONDS);
         } catch (Exception e) {
-            log.error("leaveCase failed. testSuite: {}, testCase: {}", testSuite, testCase, e);
+            log.error("leaveCase failed. test: {}", test.getName(), e);
         }
     }
 
-    private DistributedDoubleBarrier getOrCreateBarrier(String testSuite, String testCase) {
-        return barriers.computeIfAbsent(testSuite + "." + testCase, name -> new DistributedDoubleBarrier(cf, "/bomber/barriers/" + name, members));
+    private DistributedDoubleBarrier getOrCreateBarrier(Test test) {
+        return barriers.computeIfAbsent(test, t -> new DistributedDoubleBarrier(cf, "/bomber/barriers/" + t.getName(), members));
     }
 }

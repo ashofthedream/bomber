@@ -4,6 +4,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzCardModule } from 'ng-zorro-antd/card';
+import { NzCheckboxModule } from 'ng-zorro-antd/checkbox';
 import { NzWaveModule } from 'ng-zorro-antd/core/wave';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
 import { NzGridModule } from 'ng-zorro-antd/grid';
@@ -56,7 +57,8 @@ registerLocaleData(en);
     FlightRoutingModule,
     NzGridModule,
     NzWaveModule,
-    NzTagModule
+    NzTagModule,
+    NzCheckboxModule
   ],
   exports: [
     LatestFlightsCardComponent

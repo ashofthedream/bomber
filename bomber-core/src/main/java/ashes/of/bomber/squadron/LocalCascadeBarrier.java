@@ -1,6 +1,6 @@
 package ashes.of.bomber.squadron;
 
-import ashes.of.bomber.flight.Stage;
+import ashes.of.bomber.core.Test;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -14,27 +14,23 @@ public class LocalCascadeBarrier implements Barrier {
 
 
     private static class NamedCascadeBarrier {
-        private final Stage stage;
-        private final String testSuite;
-        private final String testCase;
+        private final Test test;
 
         private final CyclicBarrier enter;
         private final CyclicBarrier leave;
 
-        public NamedCascadeBarrier(Stage stage, String testSuite, String testCase, int members, Barrier next) {
-            this.stage = stage;
-            this.testSuite = testSuite;
-            this.testCase = testCase;
+        public NamedCascadeBarrier(Test test, int members, Barrier next) {
+            this.test = test;
 
-            this.enter = new CyclicBarrier(members, () -> next.enterCase(stage, testSuite, testCase));
-            this.leave = new CyclicBarrier(members, () -> next.leaveCase(stage, testSuite, testCase));
+            this.enter = new CyclicBarrier(members, () -> next.enterCase(test));
+            this.leave = new CyclicBarrier(members, () -> next.leaveCase(test));
         }
 
         public void enter() {
             try {
                 enter.await();
             } catch (Exception e) {
-                log.error("Can't enter stage: {}, testSuite: {}, testCase: {}", stage, testSuite, testCase, e);
+                log.error("Can't enter test: {}", test, e);
             }
         }
 
@@ -42,13 +38,13 @@ public class LocalCascadeBarrier implements Barrier {
             try {
                 leave.await();
             } catch (Exception e) {
-                log.error("Can't leave stage: {}, testSuite: {}, testCase: {}", stage, testSuite, testCase, e);
+                log.error("Can't leave test: {}", test, e);
             }
         }
     }
 
 
-    private final Map<String, NamedCascadeBarrier> barriers = new ConcurrentHashMap<>();
+    private final Map<Test, NamedCascadeBarrier> barriers = new ConcurrentHashMap<>();
     private final int members;
     private final Barrier next;
 
@@ -64,24 +60,24 @@ public class LocalCascadeBarrier implements Barrier {
 
 
     @Override
-    public void enterCase(Stage stage, String testSuite, String testCase) {
-        NamedCascadeBarrier barrier = getOrCreateBarrier(stage, testSuite, testCase);
+    public void enterCase(Test test) {
+        NamedCascadeBarrier barrier = getOrCreateBarrier(test);
         String thread = Thread.currentThread().getName();
-        log.trace("enterCase testCase: {}, thread: {} try to start test barrier", testCase, thread);
+        log.trace("enterCase test: {}, thread: {} try to start test barrier", test.getName(), thread);
         barrier.enter();
     }
 
     @Override
-    public void leaveCase(Stage stage, String testSuite, String testCase) {
-        NamedCascadeBarrier barrier = getOrCreateBarrier(stage, testSuite, testCase);
+    public void leaveCase(Test test) {
+        NamedCascadeBarrier barrier = getOrCreateBarrier(test);
         String thread = Thread.currentThread().getName();
-        log.trace("enterCase testCase: {}, thread: {} try to finish test barrier", testCase, thread);
+        log.trace("enterCase test: {}, thread: {} try to finish test barrier", test.getName(), thread);
         barrier.leave();
     }
 
 
-    private NamedCascadeBarrier getOrCreateBarrier(Stage stage, String testSuite, String testCase) {
-        return barriers.computeIfAbsent(testSuite + "." + testCase,
-                k -> new NamedCascadeBarrier(stage, testSuite, testCase, members, next));
+    private NamedCascadeBarrier getOrCreateBarrier(Test test) {
+        return barriers.computeIfAbsent(test,
+                k -> new NamedCascadeBarrier(test, members, next));
     }
 }

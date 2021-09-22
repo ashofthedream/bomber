@@ -1,19 +1,19 @@
 package ashes.of.bomber.builder;
 
 import ashes.of.bomber.Bomber;
-import ashes.of.bomber.runner.TestApp;
 import ashes.of.bomber.sink.Sink;
 import ashes.of.bomber.watcher.Watcher;
 import com.google.common.base.Preconditions;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 public class BomberBuilder {
 
-    private final List<Sink> sinks = new ArrayList<>();
-    private final List<Watcher> watchers = new ArrayList<>();
+    private final List<Sink> sinks = new CopyOnWriteArrayList<>();
+    private final List<Watcher> watchers = new CopyOnWriteArrayList<>();
     private final List<TestAppBuilder> applications = new ArrayList<>();
 
 
@@ -37,6 +37,7 @@ public class BomberBuilder {
     }
 
     public BomberBuilder add(TestAppBuilder app) {
+        // todo check app with same name
         this.applications.add(app);
         return this;
     }
@@ -45,13 +46,8 @@ public class BomberBuilder {
         Preconditions.checkArgument(!applications.isEmpty(), "No applications found");
 
         var apps = applications.stream()
-                .peek(app -> {
-                    // todo temp
-                    sinks.forEach(app::sink);
-                    watchers.forEach(app::watcher);
-                })
                 .map(TestAppBuilder::build)
-                .collect(Collectors.toList());
+                .collect(Collectors.toCollection(CopyOnWriteArrayList::new));
 
         return new Bomber(sinks, watchers, apps);
     }

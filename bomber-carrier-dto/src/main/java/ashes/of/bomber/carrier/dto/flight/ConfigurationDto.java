@@ -2,7 +2,6 @@ package ashes.of.bomber.carrier.dto.flight;
 
 public class ConfigurationDto {
     private SettingsDto settings;
-    private SettingsDto warmUp;
 
     public SettingsDto getSettings() {
         return settings;
@@ -10,15 +9,6 @@ public class ConfigurationDto {
 
     public ConfigurationDto setSettings(SettingsDto settings) {
         this.settings = settings;
-        return this;
-    }
-
-    public SettingsDto getWarmUp() {
-        return warmUp;
-    }
-
-    public ConfigurationDto setWarmUp(SettingsDto warmUp) {
-        this.warmUp = warmUp;
         return this;
     }
 }

@@ -1,12 +1,8 @@
 package ashes.of.bomber.watcher;
 
-import ashes.of.bomber.descriptions.TestAppDescription;
+import ashes.of.bomber.events.EventHandler;
+import ashes.of.bomber.snapshots.TestFlightSnapshot;
 
-public interface Watcher {
-
-    default void startUp() {}
-
-    void watch(TestAppDescription app);
-
-    default void shutDown() {}
+public interface Watcher extends EventHandler {
+    void watch(TestFlightSnapshot flight);
 }

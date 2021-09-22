@@ -1,20 +1,10 @@
 package ashes.of.bomber.carrier.dto.flight;
 
 public class SettingsDto {
-    private boolean disabled;
     private long duration;
     private int threadsCount;
     private long threadIterationsCount;
     private long totalIterationsCount;
-
-    public boolean isDisabled() {
-        return disabled;
-    }
-
-    public SettingsDto setDisabled(boolean disabled) {
-        this.disabled = disabled;
-        return this;
-    }
 
     public long getDuration() {
         return duration;

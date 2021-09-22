@@ -1,7 +1,6 @@
 package ashes.of.bomber.carrier.dto.events;
 
-import ashes.of.bomber.carrier.dto.ApplicationStateDto;
-import ashes.of.bomber.flight.Stage;
+import ashes.of.bomber.carrier.dto.flight.TestFlightSnapshotDto;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -17,7 +16,6 @@ public class SinkEvent {
     private long flightId;
     private String carrierId;
 
-
     @Nullable
     private String testApp;
 
@@ -27,10 +25,7 @@ public class SinkEvent {
     @Nullable
     private String testCase;
 
-    @Nullable
-    private Stage stage;
-
-    private ApplicationStateDto state;
+    private TestFlightSnapshotDto state;
     private List<HistogramPointDto> histograms = new ArrayList<>();
 
     public static long nextId() {
@@ -82,15 +77,6 @@ public class SinkEvent {
         return this;
     }
 
-    public Stage getStage() {
-        return stage;
-    }
-
-    public SinkEvent setStage(Stage stage) {
-        this.stage = stage;
-        return this;
-    }
-
     @Nullable
     public String getTestApp() {
         return testApp;
@@ -121,11 +107,11 @@ public class SinkEvent {
         return this;
     }
 
-    public ApplicationStateDto getState() {
+    public TestFlightSnapshotDto getState() {
         return state;
     }
 
-    public SinkEvent setState(ApplicationStateDto state) {
+    public SinkEvent setState(TestFlightSnapshotDto state) {
         this.state = state;
         return this;
     }
@@ -147,7 +133,7 @@ public class SinkEvent {
                 ", type=" + type +
                 ", flightId=" + flightId +
                 ", carrierId='" + carrierId + '\'' +
-                ", stage='" + stage + '\'' +
+                ", testApp='" + testApp + '\'' +
                 ", testSuite='" + testSuite + '\'' +
                 ", testCase='" + testCase + '\'' +
                 ", state=" + state +

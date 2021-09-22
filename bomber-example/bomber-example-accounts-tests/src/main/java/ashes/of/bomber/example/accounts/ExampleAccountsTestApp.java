@@ -28,16 +28,14 @@ public class ExampleAccountsTestApp {
 
     public static TestAppBuilder create(String appUrl, int membersCount) {
         BarrierBuilder barrier = membersCount > 1 ?
-                new ZookeeperBarrierBuilder().members(membersCount) :
-                new NoBarrier.Builder();
+                new ZookeeperBarrierBuilder().members(membersCount) : NoBarrier::new;
 
         return new TestAppBuilder()
                 .name("ExampleAccountsTestApp")
                 .config(config -> config
                         .settings(new SettingsBuilder()
                                 .setThreadsCount(2)
-                                .setSeconds(10)
-                                .build())
+                                .setSeconds(10))
                         .barrier(barrier)
                         .limiter(new RateLimiter(10, Duration.ofSeconds(1))))
                 .createSuite(AccountControllerLoadTest::create, new AccountClient(appUrl));
@@ -65,7 +63,7 @@ public class ExampleAccountsTestApp {
                 .findFirst()
                 .orElseThrow();
 
-        log.info("test report for flight: {}", report.getPlan().getFlightId());
+        log.info("test report for flight: {}", -1);
         report.getTestSuites()
                 .forEach(testSuite -> {
                     log.debug("TestSuite name: {}", testSuite.getName());

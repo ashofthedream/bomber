@@ -7,7 +7,7 @@
         </Console>
 
         <Console name="ConsoleWithContext" target="SYSTEM_OUT">
-            <PatternLayout pattern="%d{HH:mm:ss.SSS} %highlight{%-5level [%-24t] %-30logger{1.}} - (%X{stage}) %X{testSuite} %X{testCase} - %msg%throwable{220}%n"/>
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} %highlight{%-5level [%-24t] %-30logger{1.}} - (%X{flightId} : %X{testApp}.%X{testSuite}.%X{testCase}) - %msg%throwable{220}%n"/>
         </Console>
     </Appenders>
 

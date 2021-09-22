@@ -7,7 +7,6 @@
     <th>Test App</th>
     <th>Test Suite</th>
     <th>Test Case</th>
-    <th>Stage</th>
     <th>Progress</th>
   </tr>
   </thead>
@@ -21,7 +20,6 @@
     <td>{{event.testApp}}</td>
     <td>{{event.testSuite}}</td>
     <td>{{event.testCase}}</td>
-    <td>{{event.stage}}</td>
     <td>
       <ng-container *ngIf="event.type === 'TEST_CASE_PROGRESS'">
         <!--        <p>-->

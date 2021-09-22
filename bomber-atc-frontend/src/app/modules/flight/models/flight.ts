@@ -17,7 +17,6 @@ export interface SinkEvent {
   testApp: string;
   testSuite: string;
   testCase: string;
-  stage: string;
-  state: ApplicationState;
+  state?: ApplicationState;
   histograms?: HistogramPoint[];
 }

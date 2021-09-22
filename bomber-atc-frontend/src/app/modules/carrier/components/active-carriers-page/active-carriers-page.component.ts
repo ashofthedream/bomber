@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { StartAll, StopFlight } from '../../../flight/store/flight.actions';
+import { StartDefaultFlight, StopFlight } from '../../../flight/store/flight.actions';
 import { AtcState } from '../../../shared/store/atc.state';
 import { isStartDisabled, isStopDisabled } from '../../store/carrier.selectors';
 
@@ -17,7 +17,7 @@ export class ActiveCarriersPageComponent {
   }
 
   startAll() {
-    this.store.dispatch(new StartAll());
+    this.store.dispatch(new StartDefaultFlight());
   }
 
   stopAll() {

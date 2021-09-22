@@ -2,7 +2,7 @@ package ashes.of.bomber.atc.services;
 
 import ashes.of.bomber.atc.model.Flight;
 import ashes.of.bomber.carrier.dto.events.SinkEvent;
-import ashes.of.bomber.flight.TestFlightPlan;
+import ashes.of.bomber.flight.plan.TestFlightPlan;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
@@ -31,9 +31,9 @@ public class FlightService {
 
     // todo potential race condition
     public Flight startFlight(TestFlightPlan plan) {
-        if (active != null) {
-            log.warn("Already stared, but today I don't cate about it");
-//            throw new RuntimeException("Already started");
+        var current = this.active;
+        if (current != null && !current.isOver()) {
+            log.warn("Already has active flight and it's not over, but today I don't cate about it");
         }
 
         Flight flight = new Flight(plan);
@@ -45,6 +45,11 @@ public class FlightService {
     public void process(SinkEvent event) {
         var flight = flights.computeIfAbsent(event.getFlightId(), flightId -> new Flight(new TestFlightPlan(flightId, List.of())));
         flight.add(event);
+
+        if (flight.isOver()) {
+            log.info("Looks like flight: {} is over, remove from active", flight.getPlan().getFlightId());
+//            active = null;
+        }
     }
 
     public Flux<Flight> getFlights() {

@@ -37,7 +37,7 @@ public class AccountControllerLoadTest {
     public static void create(TestSuiteBuilder<AccountControllerLoadTest> builder, AccountClient accountClient) {
         builder .name("AccountControllerLoadTest")
                 .withContext(new AccountControllerLoadTest(accountClient))
-//                .beforeSuite(true, AccountControllerLoadTest::beforeSuite)
+                .beforeSuite(true, AccountControllerLoadTest::beforeSuite)
                 .testCase(testCase -> testCase
                         .name("createAccountAndThenGetIt")
                         .async(true)

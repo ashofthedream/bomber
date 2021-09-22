@@ -1,6 +1,8 @@
 package ashes.of.bomber.carrier.dto.events;
 
 public enum SinkEventType {
+    TEST_FLIGHT_START,
+    TEST_FLIGHT_FINISH,
     TEST_APP_START,
     TEST_APP_FINISH,
     TEST_SUITE_START,

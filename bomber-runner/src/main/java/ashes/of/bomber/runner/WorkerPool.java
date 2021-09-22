@@ -57,7 +57,7 @@ public class WorkerPool {
         Worker worker = new Worker(queue, thread);
 
         workers.add(worker);
-        log.debug("created new worker: {}", worker.getName());
+        log.debug("Created new worker: {}", worker.getName());
         return worker;
     }
 
@@ -83,8 +83,12 @@ public class WorkerPool {
 
     public void release(Worker worker) {
         log.debug("Release worker: {}", worker.getName());
+        if (!acquired.remove(worker)) {
+            log.warn("woker: {} not in acquired workers, looks like bug", worker.getName());
+            return;
+        }
+
         available.add(worker);
-        acquired.remove(worker);
     }
 
     public void releaseAll() {
@@ -95,6 +99,10 @@ public class WorkerPool {
     public void shutdown() {
         log.info("Shutdown WorkerPool, {} workers ({} available) will receive a stop signal", workers.size(), available.size());
         available.clear();
+        if (acquired.isEmpty()) {
+            log.warn("Some threads still acquired: {}. Doesn't matter", acquired);
+        }
+
         workers.forEach(Worker::stop);
         workers.clear();
     }

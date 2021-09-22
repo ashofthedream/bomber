@@ -26,25 +26,4 @@ public interface Limiter {
 
     boolean tryPermit();
 
-
-    static Limiter withRate(int count, Duration duration) {
-        return new RateLimiter(count, duration);
-    }
-
-    static Limiter withRate(int count, long millis) {
-        return withRate(count, Duration.ofMillis(millis));
-    }
-
-    static Limiter withRate(int count, long time, TimeUnit unit) {
-        return withRate(count, unit.toMillis(time));
-    }
-
-
-    static Limiter alwaysPermit() {
-        return new OneAnswerLimiter(true);
-    }
-
-    static Limiter neverPermit() {
-        return new OneAnswerLimiter(false);
-    }
 }

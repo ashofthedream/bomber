@@ -1,26 +1,38 @@
 package ashes.of.bomber;
 
 import ashes.of.bomber.builder.TestAppBuilder;
-import ashes.of.bomber.flight.TestFlightPlan;
-import ashes.of.bomber.flight.TestFlightReport;
-import ashes.of.bomber.runner.TestApp;
+import ashes.of.bomber.core.TestApp;
+import ashes.of.bomber.flight.plan.TestFlightPlan;
+import ashes.of.bomber.flight.report.TestFlightReport;
+import ashes.of.bomber.runner.Runner;
 import ashes.of.bomber.sink.Sink;
+import ashes.of.bomber.snapshots.TestFlightSnapshot;
 import ashes.of.bomber.watcher.Watcher;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 
-import java.time.Instant;
+
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
 
 public class Bomber {
+    private static final Logger log = LogManager.getLogger();
+
+    private volatile CountDownLatch endLatch = new CountDownLatch(1);
+    private volatile Runner runner;
+
     private final List<Sink> sinks;
     private final List<Watcher> watchers;
-    private final List<TestApp> applications;
+    private final List<TestApp> apps;
 
-    public Bomber(List<Sink> sinks, List<Watcher> watchers, List<TestApp> applications) {
+    public Bomber(List<Sink> sinks, List<Watcher> watchers, List<TestApp> apps) {
         this.sinks = sinks;
         this.watchers = watchers;
-        this.applications = applications;
+        this.apps = apps;
     }
 
     public Bomber addSink(Sink sink) {
@@ -34,7 +46,7 @@ public class Bomber {
     }
 
     public List<TestApp> getApps() {
-        return applications;
+        return apps;
     }
 
     public Bomber add(Class<?> app) {
@@ -46,42 +58,37 @@ public class Bomber {
     }
 
     public Bomber add(TestApp app) {
-        applications.add(app);
-
-        // todo temp
-        sinks.forEach(app::add);
-        watchers.forEach(watcher -> app.add(1000, watcher));
+        apps.add(app);
         return this;
     }
 
-    public TestFlightReport start(TestFlightPlan plan) {
-        Instant startTime = Instant.now();
-        var reports = applications.stream()
-                .map(app -> {
-                    app.setSinks(sinks);
-                    app.setWatchers(watchers);
+    public TestFlightReport start(TestFlightPlan flightPlan) {
+        // todo check that application isn't idle
 
-                    return app.start(plan);
-                })
-                .collect(Collectors.toList());
-        Instant finishTime = Instant.now();
+        endLatch = new CountDownLatch(1);
 
-        return new TestFlightReport(plan, startTime, finishTime, reports);
+        log.info("Init runner");
+        runner = new Runner(sinks, watchers, apps);
+
+        try {
+            return runner.run(flightPlan, () -> endLatch.getCount() > 0);
+        } finally {
+            log.info("Flight is over, report is ready");
+            ThreadContext.clearAll();
+            endLatch.countDown();
+            endLatch = null;
+            runner = null;
+        }
     }
 
     public TestFlightReport start() {
-        Instant startTime = Instant.now();
-        var reports = applications.stream()
-                .map(app -> {
-                    app.setSinks(sinks);
-                    app.setWatchers(watchers);
-                    return app.start();
-                })
+        var apps = this.apps.stream()
+                .map(TestApp::createDefaultAppPlan)
                 .collect(Collectors.toList());
-        Instant finishTime = Instant.now();
 
-        var plan = new TestFlightPlan(System.currentTimeMillis(), List.of());
-        return new TestFlightReport(plan, startTime, finishTime, reports);
+        var plan = new TestFlightPlan(System.currentTimeMillis() - 1630454400000L, apps);
+
+        return start(plan);
     }
 
 
@@ -90,6 +97,27 @@ public class Bomber {
     }
 
     public void stop() {
-        applications.forEach(TestApp::stop);
+        var latch = this.endLatch;
+        if (latch != null) {
+            latch.countDown();
+        }
+    }
+
+    public void await() throws InterruptedException {
+        var latch = this.endLatch;
+        if (latch != null) {
+            latch.await();
+        }
+    }
+
+    @Nullable
+    @Deprecated
+    public TestFlightSnapshot getState() {
+        var runner = this.runner;
+        if (runner != null) {
+            return runner.getFlight();
+        }
+
+        return null;
     }
 }

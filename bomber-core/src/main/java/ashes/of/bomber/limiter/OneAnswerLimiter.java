@@ -8,6 +8,14 @@ public class OneAnswerLimiter implements Limiter {
         this.permit = permit;
     }
 
+    public static Limiter alwaysPermit() {
+        return new OneAnswerLimiter(true);
+    }
+
+    public static Limiter neverPermit() {
+        return new OneAnswerLimiter(false);
+    }
+
     @Override
     public boolean waitForPermit(long ms) {
         if (!permit) {

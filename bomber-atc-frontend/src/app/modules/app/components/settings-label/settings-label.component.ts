@@ -8,8 +8,5 @@ import { Settings } from '../../models/settings';
 export class SettingsLabelComponent {
 
   @Input()
-  title: string;
-
-  @Input()
   settings: Settings;
 }

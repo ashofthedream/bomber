@@ -1,8 +1,10 @@
 package ashes.of.bomber.runner;
 
+import ashes.of.bomber.builder.BomberBuilder;
 import ashes.of.bomber.builder.TestAppBuilder;
-import ashes.of.bomber.tests.AllLifecycleMethodsTest;
-import ashes.of.bomber.tests.Counters;
+import ashes.of.bomber.runner.tests.AllLifecycleMethodsTest;
+import ashes.of.bomber.runner.tests.Counters;
+import ashes.of.bomber.sink.Log4jSink;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,11 +16,12 @@ public class AnnotationLifecycleTest extends LifecycleTest {
     @BeforeEach
     public void setUp() {
         counters = new Counters();
-        app = new TestAppBuilder()
-                .name("testAllLifecycleMethods")
-                .provide(Counters.class, () -> counters)
-//                .sink(new Log4jSink())
-                .testSuiteClass(AllLifecycleMethodsTest.class)
+        bomber = new BomberBuilder()
+                .sink(new Log4jSink())
+                .add(new TestAppBuilder()
+                        .name("testAllLifecycleMethods")
+                        .provide(Counters.class, () -> counters)
+                        .testSuiteClass(AllLifecycleMethodsTest.class))
                 .build();
     }
 }

@@ -1,12 +1,12 @@
 package ashes.of.bomber.limiter;
 
 import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReferenceArray;
 import java.util.concurrent.locks.LockSupport;
 
 
 public class RateLimiter implements Limiter {
-
 
     private final long tryouts = 20;
     private final long duration;
@@ -19,9 +19,24 @@ public class RateLimiter implements Limiter {
         this.duration = duration.toNanos();
         this.permits = new AtomicReferenceArray<>(count);
 
-        for (int i = 0; i < permits.length(); i++)
-            permits.set(i, new Permit(System.nanoTime() - duration.toNanos(), 0));
+        for (int i = 0; i < permits.length(); i++) {
+            var time = System.nanoTime();
+            permits.set(i, new Permit(time - duration.toNanos(), 0));
+        }
     }
+
+    public static Limiter withRate(int count, Duration duration) {
+        return new RateLimiter(count, duration);
+    }
+
+    public static Limiter withRate(int count, long millis) {
+        return withRate(count, Duration.ofMillis(millis));
+    }
+
+    public static Limiter withRate(int count, long time, TimeUnit unit) {
+        return withRate(count, unit.toMillis(time));
+    }
+
 
     @Override
     public boolean waitForPermit(long ms) {
@@ -72,7 +87,6 @@ public class RateLimiter implements Limiter {
                     continue;
 
                 position = next;
-
                 return timeAwait;
             }
 
