@@ -5,12 +5,23 @@
 </nz-page-header>
 
 <div class="lower-block">
-  <nz-card nzTitle="Flight Graph" class="lower-block">
-    <atc-flight-graph></atc-flight-graph>
-  </nz-card>
+  <div nz-row [nzGutter]="[20, 20]">
+    <div nz-col nzSpan="24">
+      <nz-card nzTitle="Flight Graph" class="lower-block">
+        <atc-flight-graph></atc-flight-graph>
+      </nz-card>
+    </div>
 
+    <div nz-col nzSpan="24">
+      <nz-card nzTitle="Flight Progress">
+        <atc-flight-progress></atc-flight-progress>
+      </nz-card>
+    </div>
 
-  <nz-card nzTitle="Flight Log">
-    <atc-flight-log-table></atc-flight-log-table>
-  </nz-card>
+    <div nz-col nzSpan="24">
+      <nz-card nzTitle="Flight Log">
+        <atc-flight-log-table></atc-flight-log-table>
+      </nz-card>
+    </div>
+  </div>
 </div>

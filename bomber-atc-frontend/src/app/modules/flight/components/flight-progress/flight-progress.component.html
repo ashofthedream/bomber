@@ -1,0 +1,16 @@
+<div nz-row nzGutter="40">
+  <ng-container *ngIf="progress | async; let p">
+    <div nz-col nzSpan="12">
+      <strong>Iterations:</strong> {{p.currentIterationsCount}} of {{p.totalIterationsCount}} with {{p.errorsCount}} errors
+      <nz-progress
+          [nzPercent]="(p.currentIterationsCount / p.totalIterationsCount) * 100"
+          [nzSuccessPercent]="((p.currentIterationsCount - p.errorsCount) / p.totalIterationsCount) * 100">
+      </nz-progress>
+    </div>
+
+    <div nz-col nzSpan="12">
+      <strong>Time:</strong> {{p.timeElapsed | date:'HH:mm:ss':'UTC'}} of {{p.timeTotal | date:'HH:mm:ss':'UTC'}}
+      <nz-progress [nzPercent]="(p.timeElapsed / p.timeTotal) * 100"></nz-progress>
+    </div>
+  </ng-container>
+</div>

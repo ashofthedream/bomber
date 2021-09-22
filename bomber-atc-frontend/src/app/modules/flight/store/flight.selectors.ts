@@ -7,11 +7,12 @@ import { TestFlight } from '../models/test-flight';
 const flightsState = (state: AtcState) => state.flights;
 
 export const activeFlight = createSelector(flightsState, state => state.active);
-export const activeFlightLog = createSelector(activeFlight, flight => flight.events);
+export const activeFlightLog = createSelector(activeFlight, flight => flight?.events ? flight.events : []);
 export const hasActiveFlight = createSelector(activeFlight, flight => !!flight);
 export const hasNoActiveFlight = createSelector(hasActiveFlight, has => !has);
 
 export const activeFlightHistogram = createSelector(flightsState, state => state.histogram);
+export const activeFlightProgress = createSelector(flightsState, state => state.progress);
 
 
 export const createPlanState = createSelector(flightsState, state => state.createPlan);

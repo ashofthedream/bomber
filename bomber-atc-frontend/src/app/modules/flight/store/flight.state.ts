@@ -1,5 +1,4 @@
-import { Flight } from '../models/flight';
-import { HistogramPoint } from '../models/flight-record';
+import { Flight, FlightProgress, HistogramPoint } from '../models/flight';
 import { TestFlightPlan } from '../models/test-flight-plan';
 
 export interface CreatePlanState {
@@ -12,6 +11,7 @@ export interface FlightState {
   all: Flight[];
   createPlan: CreatePlanState;
   histogram: HistogramPoint[];
+  progress: FlightProgress;
 }
 
 
@@ -25,5 +25,6 @@ export const initialFlightState: FlightState = {
       testApps: []
     }
   },
-  histogram: []
+  histogram: [],
+  progress: null
 };

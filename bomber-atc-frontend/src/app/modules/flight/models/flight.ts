@@ -1,12 +1,22 @@
-import { ApplicationState } from '../../app/models/application-state';
-import { HistogramPoint } from './flight-record';
 import { TestFlight } from './test-flight';
+
+export type HistogramPointByTime = {
+  [key: number]: HistogramPoint[];
+};
+
+export type HistogramByCarrier = {
+  [key: string]: FlightProgress;
+};
+
+export type ProgressByCarrier = {
+  [key: string]: FlightProgress;
+};
 
 export interface Flight {
   plan: TestFlight;
   events: SinkEvent[];
-  progress: Map<string, SinkEvent>;
-  histogram: Map<string, Map<number, HistogramPoint[]>>;
+  progress: ProgressByCarrier;
+  histogram: HistogramPointByTime;
 }
 
 export interface SinkEvent {
@@ -17,6 +27,23 @@ export interface SinkEvent {
   testApp: string;
   testSuite: string;
   testCase: string;
-  state?: ApplicationState;
-  histograms?: HistogramPoint[];
+}
+
+export interface FlightProgress {
+  testApp: string;
+  testSuite: string;
+  testCase: string;
+  timeElapsed: number;
+  timeTotal: number;
+  currentIterationsCount: number;
+  totalIterationsCount: number;
+  errorsCount: number;
+}
+
+export interface HistogramPoint {
+  label: string;
+  timestamp: number;
+  totalCount: number;
+  errorsCount: number;
+  percentiles: number[];
 }

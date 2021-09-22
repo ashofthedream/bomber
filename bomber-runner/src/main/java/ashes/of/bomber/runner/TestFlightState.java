@@ -6,8 +6,6 @@ import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nullable;
 import java.time.Instant;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.BooleanSupplier;
 
 
@@ -19,7 +17,7 @@ public class TestFlightState {
     private final Instant startTime = Instant.now();
     private volatile Instant finishTime;
 
-    private final List<TestAppState> testApps = new CopyOnWriteArrayList<>();
+//    private final List<TestAppState> testApps = new CopyOnWriteArrayList<>();
 
     @Nullable
     private volatile TestAppState current;
@@ -52,7 +50,7 @@ public class TestFlightState {
 
 
     public void attach(TestAppState state) {
-        testApps.add(state);
+//        testApps.add(state);
         current = state;
     }
 

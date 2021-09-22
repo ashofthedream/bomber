@@ -1,4 +1,4 @@
-import { HistogramPoint } from '../models/flight-record';
+import { FlightProgress, HistogramPoint } from '../models/flight';
 import { FlightAction, FlightActions } from './flight.actions';
 import { FlightState, initialFlightState } from './flight.state';
 
@@ -6,23 +6,27 @@ export const flightReducers = (state = initialFlightState, action: FlightActions
   switch (action.type) {
     case FlightAction.GetActiveFlightSuccess:
 
-      let onlyHistograms: HistogramPoint[] = [];
+      let histogram: HistogramPoint[] = [];
+      let progress: FlightProgress = null;
+
       if (action.flight) {
         //   console.log(action.flight.data);
         Object.values(action.flight.histogram)
-            .forEach((byTime: Map<number, HistogramPoint[]>) => {
+            .forEach(byCarrier => {
+              histogram = Object.values(byCarrier);
+            });
 
-              Object.values(byTime)
-                  .forEach(value => {
-                    onlyHistograms.push(value);
-                  });
+        Object.values(action.flight.progress)
+            .forEach(byCarrier => {
+              progress = byCarrier;
             });
       }
 
       return {
         ...state,
         active: action.flight,
-        histogram: onlyHistograms
+        histogram,
+        progress
       };
 
     case FlightAction.GetAllFlightsSuccess:

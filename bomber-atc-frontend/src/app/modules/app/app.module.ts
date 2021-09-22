@@ -20,7 +20,6 @@ import { SharedModule } from '../shared/shared.module';
 import { ActiveAppsTreeCardComponent } from './components/active-apps-tree/active-apps-tree-card.component';
 import { AppLabelComponent } from './components/app-label/app-label.component';
 import { SettingsLabelComponent } from './components/settings-label/settings-label.component';
-import { StageBadgeStatusPipe } from './pipes/stage-badge-status.pipe';
 
 registerLocaleData(en);
 
@@ -29,8 +28,7 @@ registerLocaleData(en);
   declarations: [
     ActiveAppsTreeCardComponent,
     AppLabelComponent,
-    SettingsLabelComponent,
-    StageBadgeStatusPipe
+    SettingsLabelComponent
   ],
   imports: [
     CommonModule,
@@ -43,6 +41,7 @@ registerLocaleData(en);
     NzBadgeModule,
     NzButtonModule,
     NzCardModule,
+    NzDescriptionsModule,
     NzGridModule,
     NzTableModule,
     NzTreeModule,
@@ -51,7 +50,7 @@ registerLocaleData(en);
     NzTreeViewModule,
 
     SharedModule,
-    NzDescriptionsModule,
+
   ],
   exports: [
     ActiveAppsTreeCardComponent,

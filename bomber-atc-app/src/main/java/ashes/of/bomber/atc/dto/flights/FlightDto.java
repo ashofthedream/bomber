@@ -1,5 +1,6 @@
 package ashes.of.bomber.atc.dto.flights;
 
+import ashes.of.bomber.atc.model.FlightProgress;
 import ashes.of.bomber.carrier.dto.events.HistogramPointDto;
 import ashes.of.bomber.carrier.dto.events.SinkEvent;
 import ashes.of.bomber.carrier.dto.flight.TestFlightDto;
@@ -11,7 +12,7 @@ import java.util.NavigableMap;
 public class FlightDto {
     private TestFlightDto plan;
     private List<SinkEvent> events;
-    private Map<String, SinkEvent> progress;
+    private Map<String, FlightProgress> progress;
     private Map<String, NavigableMap<Long, HistogramPointDto>> histogram;
 
     public TestFlightDto getPlan() {
@@ -32,11 +33,11 @@ public class FlightDto {
         return this;
     }
 
-    public Map<String, SinkEvent> getProgress() {
+    public Map<String, FlightProgress> getProgress() {
         return progress;
     }
 
-    public FlightDto setProgress(Map<String, SinkEvent> progress) {
+    public FlightDto setProgress(Map<String, FlightProgress> progress) {
         this.progress = progress;
         return this;
     }

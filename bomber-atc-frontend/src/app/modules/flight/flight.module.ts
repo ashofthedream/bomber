@@ -20,6 +20,7 @@ import { AllFlightsPageComponent } from './components/all-flights-page/all-fligh
 import { CreateFlightPageComponent } from './components/create-flight-page/create-flight-page.component';
 import { FlightGraphComponent } from './components/flight-graph/flight-graph.component';
 import { FlightLogTableComponent } from './components/flight-log-table/flight-log-table.component';
+import { FlightProgressComponent } from './components/flight-progress/flight-progress.component';
 import { LatestFlightsCardComponent } from './components/latest-flights-card/latest-flights-card.component';
 import { FlightRoutingModule } from './flight-routing.module';
 
@@ -34,6 +35,7 @@ registerLocaleData(en);
     CreateFlightPageComponent,
     FlightGraphComponent,
     FlightLogTableComponent,
+    FlightProgressComponent,
     LatestFlightsCardComponent
   ],
   imports: [

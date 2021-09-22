@@ -2,12 +2,17 @@ package ashes.of.bomber.atc.model;
 
 import ashes.of.bomber.carrier.dto.events.HistogramPointDto;
 import ashes.of.bomber.carrier.dto.events.SinkEvent;
+import ashes.of.bomber.carrier.dto.flight.SettingsDto;
+import ashes.of.bomber.carrier.dto.flight.TestAppSnapshotDto;
+import ashes.of.bomber.carrier.dto.flight.TestFlightSnapshotDto;
+import ashes.of.bomber.carrier.dto.flight.TestSuiteSnapshotDto;
 import ashes.of.bomber.flight.plan.TestFlightPlan;
 
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
+import java.util.Optional;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -27,7 +32,7 @@ public class Flight {
     private final TestFlightPlan plan;
     private final Queue<SinkEvent> events = new PriorityQueue<>(Comparator.comparingLong(SinkEvent::getTimestamp));
 
-    private final Map<String, SinkEvent> progress = new ConcurrentHashMap<>();
+    private final Map<String, FlightProgress> progress = new ConcurrentHashMap<>();
     private final Map<String, NavigableMap<Long, HistogramPointDto>> histogram = new ConcurrentHashMap<>();
 
     public Flight(TestFlightPlan plan) {
@@ -40,14 +45,33 @@ public class Flight {
 
     public void add(SinkEvent event) {
         if (event.getType() == TEST_CASE_PROGRESS) {
-            progress.put(event.getCarrierId(), event);
+            Optional.ofNullable(event.getState())
+                    .map(TestFlightSnapshotDto::getCurrent)
+                    .map(TestAppSnapshotDto::getCurrent)
+                    .map(TestSuiteSnapshotDto::getCurrent)
+                    .ifPresent(snapshot -> {
+                        var settings = snapshot.getSettings();
+
+                        progress.put(event.getCarrierId(), new FlightProgress()
+                                .setTestApp(event.getTestApp())
+                                .setTestSuite(event.getTestSuite())
+                                .setTestCase(event.getTestCase())
+                                .setTimeElapsed(System.currentTimeMillis() - snapshot.getStartTime())
+                                .setTimeTotal(settings.getDuration())
+                                .setCurrentIterationsCount(snapshot.getCurrentIterationsCount())
+                                .setTotalIterationsCount(settings.getTotalIterationsCount())
+                                .setErrorsCount(snapshot.getErrorsCount())
+                        );
+                    });
+
+            return;
         }
 
         if (event.getType() == TEST_CASE_HISTOGRAM) {
             var byCarrier = histogram.computeIfAbsent(event.getCarrierId(), ts -> new ConcurrentSkipListMap<>());
             event.getHistograms()
                     .forEach(point -> byCarrier.put(point.getTimestamp(), point));
-
+            return;
         }
 
         if (event.getType() == TEST_FLIGHT_START) {
@@ -65,7 +89,7 @@ public class Flight {
         return List.copyOf(events);
     }
 
-    public Map<String, SinkEvent> getProgress() {
+    public Map<String, FlightProgress> getProgress() {
         return progress;
     }
 

@@ -7,7 +7,6 @@
     <th>Test App</th>
     <th>Test Suite</th>
     <th>Test Case</th>
-    <th>Progress</th>
   </tr>
   </thead>
   <tbody>
@@ -20,20 +19,6 @@
     <td>{{event.testApp}}</td>
     <td>{{event.testSuite}}</td>
     <td>{{event.testCase}}</td>
-    <td>
-      <ng-container *ngIf="event.type === 'TEST_CASE_PROGRESS'">
-        <!--        <p>-->
-        <!--          <strong>Iterations:</strong> {{currentIterations(event.state)}}-->
-        <!--          of {{event.state.settings.totalIterationsCount}}-->
-        <!--          <nz-progress [nzPercent]="iterationsProgress(event.state)"></nz-progress>-->
-        <!--        </p>-->
-
-        <!--        <p>-->
-        <!--          <strong>Time:</strong> {{currentTime(event.state)}}ms of {{event.state.settings.duration}}ms-->
-        <!--          <nz-progress [nzPercent]="timeProgress(event.state)"></nz-progress>-->
-        <!--        </p>-->
-      </ng-container>
-    </td>
   </tr>
   </tbody>
 </nz-table>
