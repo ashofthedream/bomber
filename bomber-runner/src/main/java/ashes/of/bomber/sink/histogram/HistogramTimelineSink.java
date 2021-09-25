@@ -79,7 +79,7 @@ public class HistogramTimelineSink implements Sink {
     }
 
     public HistogramTimelineSink() {
-        this(ChronoUnit.MINUTES, new HistogramTimelinePrintStreamPrinter());
+        this(ChronoUnit.SECONDS, new HistogramTimelinePrintStreamPrinter());
     }
 
     @Override

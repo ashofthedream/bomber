@@ -1,9 +1,6 @@
 package ashes.of.bomber.watcher;
 
-import ashes.of.bomber.configuration.Settings;
-import ashes.of.bomber.snapshots.TestAppSnapshot;
 import ashes.of.bomber.snapshots.TestFlightSnapshot;
-import ashes.of.bomber.snapshots.TestSuiteSnapshot;
 import ashes.of.bomber.snapshots.WorkerSnapshot;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -106,8 +103,8 @@ public class Log4jWatcher implements Watcher {
         RpsMeter recRps = this.recs.updateAndGet(current -> new RpsMeter(caughtCount, current));
 
         log.info("%n%-12s %12.1fs [%s] %12.1fs " +
-                "%n%-12s %,12d  [%s] %,12d  %,12d " +
-                "%n%-12s %12.2f rq/s %12.2f rec/s (%8d, %8d)",
+                        "%n%-12s %,12d  [%s] %,12d  %,12d " +
+                        "%n%-12s %12.2f rq/s %12.2f rec/s (%8d, %8d)",
                 "time",
                 elapsedSecs,
                 tp.toString(),

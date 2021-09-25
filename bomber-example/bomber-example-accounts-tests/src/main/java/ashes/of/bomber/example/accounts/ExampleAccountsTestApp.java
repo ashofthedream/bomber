@@ -18,12 +18,13 @@ import org.apache.logging.log4j.Logger;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.function.Supplier;
 
 
 /**
  * Example test application with some test cases built via builder
  */
-public class ExampleAccountsTestApp {
+public class ExampleAccountsTestApp implements Supplier<TestAppBuilder> {
     private static final Logger log = LogManager.getLogger();
 
     public static TestAppBuilder create(String appUrl, int membersCount) {
@@ -41,11 +42,16 @@ public class ExampleAccountsTestApp {
                 .createSuite(AccountControllerLoadTest::create, new AccountClient(appUrl));
     }
 
-    public static void main(String... args) {
+    @Override
+    public TestAppBuilder get() {
         var url = System.getenv().getOrDefault("EXAMPLE_ACCOUNTS_APP_URL", "http://localhost:8083");
         var membersCount = System.getenv().get("EXAMPLE_BARRIER_MEMBERS");
 
-        var app = create(url, membersCount != null ? Integer.parseInt(membersCount) : 0);
+        return create(url, membersCount != null ? Integer.parseInt(membersCount) : 0);
+    }
+
+    public static void main(String... args) {
+        var app = new ExampleAccountsTestApp().get();
 
         var reports = new BomberBuilder()
                 // log all times to console via log4j and HdrHistogram

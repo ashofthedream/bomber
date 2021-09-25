@@ -69,7 +69,7 @@ services:
 
   bomber-carrier-app-9001:
     build:
-      context: ./bomber-example/bomber-example-carrier-app
+      context: ./bomber-carrier-app
       dockerfile: Dockerfile
     container_name: bomber-carrier-9001
     depends_on:
@@ -82,10 +82,11 @@ services:
     environment:
       ZOOKEEPER_URL: "bomber-zookeeper:2181"
       EXAMPLE_APP_URL: "bomber-example:8081"
+      spring_profiles_active: "bomber-example"
 
   bomber-carrier-app-9002:
     build:
-      context: ./bomber-example/bomber-example-carrier-app
+      context: ./bomber-carrier-app
       dockerfile: Dockerfile
     container_name: bomber-carrier-9002
     depends_on:
@@ -98,3 +99,4 @@ services:
     environment:
       ZOOKEEPER_URL: "bomber-zookeeper:2181"
       EXAMPLE_APP_URL: "bomber-example:8081"
+      spring_profiles_active: "bomber-example"

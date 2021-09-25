@@ -1,0 +1,28 @@
+server:
+  port: 9000
+
+spring:
+  application:
+    name: bomber-carrier
+
+  cloud:
+    zookeeper:
+      connect-string: ${ZOOKEEPER_URL:localhost:2181}
+
+env:
+  target:
+    url: ${EXAMPLE_APP_URL:http://localhost:8081}
+  squadron:
+    members: 1
+
+
+bomber:
+  sinks:
+    - ashes.of.bomber.sink.histogram.HistogramTimelineSink
+  watchers:
+    - ashes.of.bomber.watcher.Log4jWatcher
+  apps:
+    include:
+      - ashes.of.bomber.example.users.ExampleUsersTestApp
+    build:
+      - ashes.of.bomber.example.accounts.ExampleAccountsTestApp
