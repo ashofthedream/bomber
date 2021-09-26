@@ -2,27 +2,32 @@ package ashes.of.bomber.limiter;
 
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReferenceArray;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.LockSupport;
 
 
 public class RateLimiter implements Limiter {
 
-    private final long tryouts = 20;
-    private final long duration;
-    private final AtomicReferenceArray<Permit> permits;
+    private static class State {
+        private final long remain;
+        private final long timestamp;
 
-    private volatile int position;
+        public State(long remain, long timestamp) {
+            this.remain = remain;
+            this.timestamp = timestamp;
+        }
+    }
+
+    private final long tryouts = 5;
+    private final long duration;
+    private final long count;
+    private final AtomicReference<State> state;
 
 
     public RateLimiter(int count, Duration duration) {
+        this.count = count;
         this.duration = duration.toNanos();
-        this.permits = new AtomicReferenceArray<>(count);
-
-        for (int i = 0; i < permits.length(); i++) {
-            var time = System.nanoTime();
-            permits.set(i, new Permit(time - duration.toNanos(), 0));
-        }
+        this.state = new AtomicReference<>(new State(count, System.nanoTime()));
     }
 
     public static Limiter withRate(int count, Duration duration) {
@@ -39,11 +44,11 @@ public class RateLimiter implements Limiter {
 
 
     @Override
-    public boolean waitForPermit(long ms) {
+    public boolean waitForPermit(int count, long ms) {
         long timeUntil = System.currentTimeMillis() + ms;
         while (timeUntil > System.currentTimeMillis()) {
-            long timeAwait = permit();
-            if (timeAwait < 0)
+            long timeAwait = permit(count);
+            if (timeAwait <= 0)
                 return true;
 
             LockSupport.parkUntil(Math.min(timeUntil, System.currentTimeMillis() + timeAwait / 1_000_000));
@@ -53,10 +58,10 @@ public class RateLimiter implements Limiter {
     }
 
     @Override
-    public boolean waitForPermit() {
+    public boolean waitForPermit(int count) {
         while (true) {
-            long timeAwait = permit();
-            if (timeAwait < 0)
+            long timeAwait = permit(count);
+            if (timeAwait <= 0)
                 return true;
 
             LockSupport.parkNanos(timeAwait);
@@ -64,33 +69,31 @@ public class RateLimiter implements Limiter {
     }
 
     @Override
-    public boolean tryPermit() {
-        long timeAwait = permit();
-        return timeAwait < 0;
+    public boolean tryPermit(int count) {
+        long timeAwait = permit(count);
+        return timeAwait <= 0;
     }
 
 
-    private long permit() {
-        long now = System.nanoTime();
+    private long permit(int count) {
         for (int t = 0; t < tryouts; t++) {
-            int current = position;
-            int next = Math.max(current + 1, 0);
-            int index = next % permits.length();
-            Permit tail = permits.get(index);
+            var now = System.nanoTime();
+            var current = this.state.get();
 
-            if (current < tail.position && tail.position - current < permits.length())
+            var opd = duration / this.count;
+            var timeLeft = (System.nanoTime() - current.timestamp);
+            var additional = timeLeft / opd;
+
+            if (current.remain + additional >= count) {
+                var newRemain = Math.min(this.count, current.remain + additional) - count;
+                if (this.state.compareAndSet(current, new State(newRemain, now))) {
+                    return -1;
+                }
+
                 continue;
-
-            long timeAwait = (tail.time + duration) - now;
-            if (timeAwait < 0) {
-                if (!permits.compareAndSet(index, tail, new Permit(now, next)))
-                    continue;
-
-                position = next;
-                return timeAwait;
             }
 
-            return timeAwait;
+            return opd * (count - (current.remain + additional));
         }
 
         return duration;

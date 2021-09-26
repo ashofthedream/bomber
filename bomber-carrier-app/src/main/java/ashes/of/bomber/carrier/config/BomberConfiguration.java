@@ -8,11 +8,8 @@ import ashes.of.bomber.sink.Sink;
 import ashes.of.bomber.watcher.Watcher;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.util.ClassUtils;
 
 import java.lang.reflect.Constructor;
 import java.util.function.Supplier;
@@ -23,10 +20,7 @@ public class BomberConfiguration {
     private static final Logger log = LogManager.getLogger();
 
     @Bean
-    public Bomber bomberApp(BomberProperties properties,
-                            @Value("${env.target.url}") String url,
-                            @Value("${env.squadron.members}") int members) {
-
+    public Bomber bomberApp(BomberProperties properties) {
         log.debug("Create bomber with properties: {}", properties);
 
         var builder = new BomberBuilder();

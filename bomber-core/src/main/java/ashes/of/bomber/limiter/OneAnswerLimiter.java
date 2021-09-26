@@ -17,7 +17,7 @@ public class OneAnswerLimiter implements Limiter {
     }
 
     @Override
-    public boolean waitForPermit(long ms) {
+    public boolean waitForPermit(int count, long ms) {
         if (!permit) {
             try {
                 Thread.sleep(ms);
@@ -30,12 +30,12 @@ public class OneAnswerLimiter implements Limiter {
     }
 
     @Override
-    public boolean waitForPermit() {
-        return waitForPermit(Long.MAX_VALUE);
+    public boolean waitForPermit(int count) {
+        return waitForPermit(count, Long.MAX_VALUE);
     }
 
     @Override
-    public boolean tryPermit() {
+    public boolean tryPermit(int count) {
         return permit;
     }
 }

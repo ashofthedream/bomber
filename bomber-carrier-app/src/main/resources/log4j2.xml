@@ -10,7 +10,7 @@
     <Loggers>
         <Logger name="ashes.of.bomber.carrier" level="debug" />
 
-        <Root level="DEBUG">
+        <Root level="INFO">
             <AppenderRef ref="Console"/>
         </Root>
     </Loggers>
