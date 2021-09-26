@@ -9,10 +9,10 @@ import java.util.concurrent.locks.LockSupport;
 public class RateLimiter implements Limiter {
 
     private static class State {
-        private final long remain;
+        private final double remain;
         private final long timestamp;
 
-        public State(long remain, long timestamp) {
+        public State(double remain, long timestamp) {
             this.remain = remain;
             this.timestamp = timestamp;
         }
@@ -20,26 +20,26 @@ public class RateLimiter implements Limiter {
 
     private final long tryouts = 5;
     private final long duration;
-    private final long count;
+    private final long limit;
     private final AtomicReference<State> state;
 
 
-    public RateLimiter(int count, Duration duration) {
-        this.count = count;
+    public RateLimiter(int limit, Duration duration) {
+        this.limit = limit;
         this.duration = duration.toNanos();
-        this.state = new AtomicReference<>(new State(count, System.nanoTime()));
+        this.state = new AtomicReference<>(new State(limit, System.nanoTime()));
     }
 
-    public static Limiter withRate(int count, Duration duration) {
-        return new RateLimiter(count, duration);
+    public static Limiter withRate(int limit, Duration duration) {
+        return new RateLimiter(limit, duration);
     }
 
-    public static Limiter withRate(int count, long millis) {
-        return withRate(count, Duration.ofMillis(millis));
+    public static Limiter withRate(int limit, long millis) {
+        return withRate(limit, Duration.ofMillis(millis));
     }
 
-    public static Limiter withRate(int count, long time, TimeUnit unit) {
-        return withRate(count, unit.toMillis(time));
+    public static Limiter withRate(int limit, long time, TimeUnit unit) {
+        return withRate(limit, unit.toMillis(time));
     }
 
 
@@ -47,11 +47,14 @@ public class RateLimiter implements Limiter {
     public boolean waitForPermit(int count, long ms) {
         long timeUntil = System.currentTimeMillis() + ms;
         while (timeUntil > System.currentTimeMillis()) {
-            long timeAwait = permit(count);
-            if (timeAwait <= 0)
+            Permit permit = permit(count);
+            if (permit.isAllowed())
                 return true;
 
-            LockSupport.parkUntil(Math.min(timeUntil, System.currentTimeMillis() + timeAwait / 1_000_000));
+            if (permit.getTimeAwait() == 0)
+                return false;
+
+            LockSupport.parkUntil(Math.min(timeUntil, System.currentTimeMillis() + permit.getTimeAwait() / 1_000_000));
         }
 
         return false;
@@ -60,42 +63,47 @@ public class RateLimiter implements Limiter {
     @Override
     public boolean waitForPermit(int count) {
         while (true) {
-            long timeAwait = permit(count);
-            if (timeAwait <= 0)
+            Permit permit = permit(count);
+            if (permit.isAllowed())
                 return true;
 
-            LockSupport.parkNanos(timeAwait);
+            if (permit.getTimeAwait() == 0)
+                return false;
+
+            LockSupport.parkNanos(permit.getTimeAwait());
         }
     }
 
     @Override
     public boolean tryPermit(int count) {
-        long timeAwait = permit(count);
-        return timeAwait <= 0;
+        Permit permit = permit(count);
+        return permit.isAllowed();
     }
 
 
-    private long permit(int count) {
+    private Permit permit(int count) {
+        // todo what if count will be greater than limit?
         for (int t = 0; t < tryouts; t++) {
             var now = System.nanoTime();
             var current = this.state.get();
 
-            var opd = duration / this.count;
-            var timeLeft = (System.nanoTime() - current.timestamp);
-            var additional = timeLeft / opd;
+            var opd = duration / (limit * 1.0);
+            var elapsed = now - current.timestamp;
+            var additional = elapsed / opd;
+            var remain = Math.min(limit, current.remain + additional);
 
-            if (current.remain + additional >= count) {
-                var newRemain = Math.min(this.count, current.remain + additional) - count;
-                if (this.state.compareAndSet(current, new State(newRemain, now))) {
-                    return -1;
+            if (remain >= count) {
+                if (this.state.compareAndSet(current, new State(remain - count, now))) {
+                    return new Permit(count, count,0);
                 }
 
                 continue;
             }
 
-            return opd * (count - (current.remain + additional));
+
+            return new Permit(count, 0, Math.round(opd * (count - remain)));
         }
 
-        return duration;
+        return new Permit(count, 0, 0);
     }
 }

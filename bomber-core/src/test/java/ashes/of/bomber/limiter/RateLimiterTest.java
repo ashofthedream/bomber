@@ -58,7 +58,7 @@ class RateLimiterTest {
     }
 
     @Test
-    public void tryPermitReturnTrueAfterTimePeriodForOnePermit1() throws InterruptedException {
+    public void tryPermitTimelineTest() throws InterruptedException {
         RateLimiter limiter = new RateLimiter(10, Duration.ofMillis(100));
 
         Map<Long, AtomicLong> map = new TreeMap<>();
@@ -66,7 +66,7 @@ class RateLimiterTest {
         while (map.size() < 10) {
             var now = System.currentTimeMillis() / 100;
             var current = map.computeIfAbsent(now, ts -> {
-                System.out.println();
+//                System.out.println();
                 return new AtomicLong(0);
             });
 
