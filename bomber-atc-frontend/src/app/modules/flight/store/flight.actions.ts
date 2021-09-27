@@ -1,7 +1,8 @@
 import { Action } from '@ngrx/store';
 import { AppTreeNode } from '../../app/store/app.state';
-import { Flight } from '../models/flight';
+import { Flight, FlightProgress, HistogramPoint, SinkEvent } from '../models/flight';
 import { TestFlight } from '../models/test-flight';
+import { TestFlightPlan } from '../models/test-flight-plan';
 
 
 export enum FlightAction {
@@ -22,7 +23,12 @@ export enum FlightAction {
 
   AddToFlight = '[Flight] Add to Flight',
   RemoveFromFlight = '[Flight] Remove From Flight',
-  ToggleCarrier = '[Flight] Toggle Carrier'
+  ToggleCarrier = '[Flight] Toggle Carrier',
+
+  FlightProgressUpdated = '[Flight] Flight Progress Updated',
+  FlightHistogramUpdated = '[Flight] Flight Histogram Updated',
+  FlightLogUpdated = '[Flight] Flight Loo Updated',
+  ActiveFlightUpdated = '[Flight] Flight Updated'
 }
 
 export type FlightActions =
@@ -30,7 +36,8 @@ export type FlightActions =
     StopFlight | StopFlightSuccess |
     GetActiveFlight | GetActiveFlightSuccess |
     GetAllFlights | GetAllFlightsSuccess |
-    AddToFlight | RemoveFromFlight;
+    AddToFlight | RemoveFromFlight |
+    ActiveFlightUpdated | FlightProgressUpdated | FlightHistogramUpdated | FlightLogUpdated;
 
 
 export class StartDefaultFlight implements Action {
@@ -112,5 +119,34 @@ export class ToggleCarrier implements Action {
   public readonly type = FlightAction.ToggleCarrier;
 
   public constructor(public readonly id: string) {
+  }
+}
+
+
+export class FlightProgressUpdated implements Action {
+  public readonly type = FlightAction.FlightProgressUpdated;
+
+  public constructor(public readonly progress: FlightProgress) {
+  }
+}
+
+export class FlightHistogramUpdated implements Action {
+  public readonly type = FlightAction.FlightHistogramUpdated;
+
+  public constructor(public readonly points: HistogramPoint[]) {
+  }
+}
+
+export class FlightLogUpdated implements Action {
+  public readonly type = FlightAction.FlightLogUpdated;
+
+  public constructor(public readonly event: SinkEvent) {
+  }
+}
+
+export class ActiveFlightUpdated implements Action {
+  public readonly type = FlightAction.ActiveFlightUpdated;
+
+  public constructor(public readonly plan: TestFlightPlan) {
   }
 }
