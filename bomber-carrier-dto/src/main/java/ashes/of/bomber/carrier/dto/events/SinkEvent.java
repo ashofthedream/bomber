@@ -25,7 +25,7 @@ public class SinkEvent {
     @Nullable
     private String testCase;
 
-    private TestFlightSnapshotDto state;
+    private TestFlightSnapshotDto snapshot;
     private List<HistogramPointDto> histograms = new ArrayList<>();
 
     public static long nextId() {
@@ -107,12 +107,12 @@ public class SinkEvent {
         return this;
     }
 
-    public TestFlightSnapshotDto getState() {
-        return state;
+    public TestFlightSnapshotDto getSnapshot() {
+        return snapshot;
     }
 
-    public SinkEvent setState(TestFlightSnapshotDto state) {
-        this.state = state;
+    public SinkEvent setSnapshot(TestFlightSnapshotDto snapshot) {
+        this.snapshot = snapshot;
         return this;
     }
 
@@ -136,7 +136,7 @@ public class SinkEvent {
                 ", testApp='" + testApp + '\'' +
                 ", testSuite='" + testSuite + '\'' +
                 ", testCase='" + testCase + '\'' +
-                ", state=" + state +
+                ", state=" + snapshot +
                 '}';
     }
 }

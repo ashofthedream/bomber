@@ -106,7 +106,7 @@ public class CarrierFlightProgressHttpSink implements Sink {
                     .setTestApp(event.getTest().getTestApp())
                     .setTestSuite(event.getTest().getTestSuite())
                     .setTestCase(event.getTest().getTestCase())
-                    .setState(state));
+                    .setSnapshot(state));
         }
     }
 

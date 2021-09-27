@@ -3,12 +3,13 @@ package ashes.of.bomber.atc.controllers;
 import ashes.of.bomber.atc.dto.flights.FlightDto;
 import ashes.of.bomber.carrier.dto.requests.FlightStartedResponse;
 import ashes.of.bomber.carrier.mappers.TestFlightMapper;
-import ashes.of.bomber.atc.model.Flight;
+import ashes.of.bomber.atc.models.Flight;
 import ashes.of.bomber.atc.services.CarrierService;
 import ashes.of.bomber.atc.services.FlightService;
 import ashes.of.bomber.carrier.dto.requests.StartFlightRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -44,6 +45,12 @@ public class FlightController {
                 .map(this::toDto);
     }
 
+    @RequestMapping("/atc/flights/{flightId}")
+    public Mono<FlightDto> getFlight(@PathVariable("flightId") long flightId) {
+        return flightService.getFlight(flightId)
+                .map(this::toDto);
+    }
+
     // start with flight plan
     @PostMapping("/atc/flights/start")
     public Mono<FlightStartedResponse> start(@RequestBody StartFlightRequest request) {
@@ -57,7 +64,6 @@ public class FlightController {
                 .flatMap(carrier -> carrierService.start(carrier, flight))
                 .collectList()
                 .map(flights -> {
-
                     flight.setCarriersCount(flights.size());
                     var flightIds = flights.stream()
                             .map(FlightStartedResponse::getId)

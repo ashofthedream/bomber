@@ -1,6 +1,6 @@
 package ashes.of.bomber.atc.dto.flights;
 
-import ashes.of.bomber.atc.model.FlightProgress;
+import ashes.of.bomber.atc.models.FlightProgress;
 import ashes.of.bomber.carrier.dto.events.HistogramPointDto;
 import ashes.of.bomber.carrier.dto.events.SinkEvent;
 import ashes.of.bomber.carrier.dto.flight.TestFlightDto;

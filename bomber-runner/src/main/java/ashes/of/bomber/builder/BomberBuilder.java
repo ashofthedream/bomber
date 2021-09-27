@@ -43,7 +43,7 @@ public class BomberBuilder {
     }
 
     public Bomber build() {
-//        Preconditions.checkArgument(!applications.isEmpty(), "No applications found");
+        Preconditions.checkArgument(!applications.isEmpty(), "No applications found");
 
         var apps = applications.stream()
                 .map(TestAppBuilder::build)

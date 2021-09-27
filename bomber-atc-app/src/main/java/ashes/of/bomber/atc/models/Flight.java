@@ -1,8 +1,7 @@
-package ashes.of.bomber.atc.model;
+package ashes.of.bomber.atc.models;
 
 import ashes.of.bomber.carrier.dto.events.HistogramPointDto;
 import ashes.of.bomber.carrier.dto.events.SinkEvent;
-import ashes.of.bomber.carrier.dto.flight.SettingsDto;
 import ashes.of.bomber.carrier.dto.flight.TestAppSnapshotDto;
 import ashes.of.bomber.carrier.dto.flight.TestFlightSnapshotDto;
 import ashes.of.bomber.carrier.dto.flight.TestSuiteSnapshotDto;
@@ -44,33 +43,7 @@ public class Flight {
     }
 
     public void add(SinkEvent event) {
-        if (event.getType() == TEST_CASE_PROGRESS) {
-            Optional.ofNullable(event.getState())
-                    .map(TestFlightSnapshotDto::getCurrent)
-                    .map(TestAppSnapshotDto::getCurrent)
-                    .map(TestSuiteSnapshotDto::getCurrent)
-                    .ifPresent(snapshot -> {
-                        var settings = snapshot.getSettings();
-
-                        progress.put(event.getCarrierId(), new FlightProgress()
-                                .setTestApp(event.getTestApp())
-                                .setTestSuite(event.getTestSuite())
-                                .setTestCase(event.getTestCase())
-                                .setTimeElapsed(System.currentTimeMillis() - snapshot.getStartTime())
-                                .setTimeTotal(settings.getDuration())
-                                .setCurrentIterationsCount(snapshot.getCurrentIterationsCount())
-                                .setTotalIterationsCount(settings.getTotalIterationsCount())
-                                .setErrorsCount(snapshot.getErrorsCount())
-                        );
-                    });
-
-            return;
-        }
-
-        if (event.getType() == TEST_CASE_HISTOGRAM) {
-            var byCarrier = histogram.computeIfAbsent(event.getCarrierId(), ts -> new ConcurrentSkipListMap<>());
-            event.getHistograms()
-                    .forEach(point -> byCarrier.put(point.getTimestamp(), point));
+        if (event.getType() == TEST_CASE_PROGRESS || event.getType() == TEST_CASE_HISTOGRAM) {
             return;
         }
 
@@ -105,5 +78,15 @@ public class Flight {
     public boolean isOver() {
         var started = carriersStarted.get();
         return started > 0 && started == carriersFinished.get();
+    }
+
+    public void addProgress(String carrierId, FlightProgress progress) {
+        this.progress.put(carrierId, progress);
+    }
+
+    public void addHistogramPoints(String carrierId, List<HistogramPointDto> histograms) {
+        var byCarrier = histogram.computeIfAbsent(carrierId, ts -> new ConcurrentSkipListMap<>());
+        histograms
+                .forEach(point -> byCarrier.put(point.getTimestamp(), point));
     }
 }

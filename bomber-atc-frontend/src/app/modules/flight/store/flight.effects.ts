@@ -1,16 +1,18 @@
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { Observable, timer } from 'rxjs';
-import { filter, map, switchMap, withLatestFrom } from 'rxjs/operators';
-import { isAuthenticated } from '../../auth/store/auth.selectors';
-import { activeCarrierIds, activeCarriers } from '../../carrier/store/carrier.selectors';
+import { Observable } from 'rxjs';
+import { map, switchMap, withLatestFrom } from 'rxjs/operators';
+import { activeCarrierIds } from '../../carrier/store/carrier.selectors';
+import { WebSocketService } from '../../shared/services/web-socket.service';
 import { AtcState } from '../../shared/store/atc.state';
 import { FlightService } from '../services/flight.service';
 import {
-  StartCreatedFlight,
+  ActiveFlightUpdated,
   FlightAction,
-  GetActiveFlight,
+  FlightHistogramUpdated,
+  FlightLogUpdated,
+  FlightProgressUpdated,
   GetActiveFlightSuccess,
   StartFlight,
   StartFlightSuccess,
@@ -22,7 +24,8 @@ import { createdFlightPlan, defaultFlightPlan } from './flight.selectors';
 @Injectable()
 export class FlightEffects {
 
-  constructor(private readonly flightService: FlightService,
+  constructor(private readonly webSocketService: WebSocketService,
+              private readonly flightService: FlightService,
               private readonly actions: Actions,
               private readonly store: Store<AtcState>) {
   }
@@ -69,12 +72,34 @@ export class FlightEffects {
   }
 
   @Effect()
-  public getActiveFlightTimer(): Observable<GetActiveFlight> {
-    return timer(0, 5_000)
+  public getActiveFlightByWebSocket(): Observable<ActiveFlightUpdated> {
+    return this.webSocketService.activeFlight()
         .pipe(
-            switchMap(n => this.store.select(isAuthenticated)),
-            filter(auth => auth),
-            map(n => new GetActiveFlight())
+            map(plan => new ActiveFlightUpdated(plan))
+        );
+  }
+
+  @Effect()
+  public getActiveFlightProgressByWebSocket(): Observable<FlightProgressUpdated> {
+    return this.webSocketService.activeFlightProgress()
+        .pipe(
+            map(progress => new FlightProgressUpdated(progress))
+        );
+  }
+
+  @Effect()
+  public getActiveFlightHistogramByWebSocket(): Observable<FlightHistogramUpdated> {
+    return this.webSocketService.activeFlightHistogram()
+        .pipe(
+            map(points => new FlightHistogramUpdated(points))
+        );
+  }
+
+  @Effect()
+  public getActiveFlightLogByWebSocket(): Observable<FlightLogUpdated> {
+    return this.webSocketService.activeFlightLog()
+        .pipe(
+            map(logs => new FlightLogUpdated(logs))
         );
   }
 

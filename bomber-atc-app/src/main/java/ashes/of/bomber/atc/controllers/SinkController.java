@@ -23,6 +23,6 @@ public class SinkController {
     @PostMapping("/atc/sink")
     public void sink(@RequestBody SinkEvent event) {
         log.debug("received event: event: {}", event);
-        flightService.process(event);
+        flightService.handle(event);
     }
 }

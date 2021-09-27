@@ -1,4 +1,4 @@
-package ashes.of.bomber.atc.model;
+package ashes.of.bomber.atc.models;
 
 public class FlightProgress {
     private String testApp;

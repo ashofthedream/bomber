@@ -7,7 +7,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -46,16 +45,6 @@ public class CarrierController {
         log.debug("stop all applications on all active carriers");
 
         carrierService.getCarriers()
-                .subscribe(carrierService::stop);
-
-        return ResponseEntities.ok();
-    }
-
-    @PostMapping("/atc/carriers/{carrierId}/applications/{appId}/stop")
-    public ResponseEntity<?> stopApplicationOnCarrierById(@PathVariable("carrierId") String carrierId, @PathVariable("appId") String appId) {
-        log.debug("stop application: {} on carrier: {}", appId, carrierId);
-
-        carrierService.getCarrier(carrierId)
                 .subscribe(carrierService::stop);
 
         return ResponseEntities.ok();
