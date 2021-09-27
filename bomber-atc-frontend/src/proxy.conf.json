@@ -3,6 +3,11 @@
     "target": "http://localhost:8088",
     "secure": false,
     "changeOrigin": true
+  },
+  "/atc/socket": {
+    "target": "http://localhost:8088/atc/socket",
+    "secure": false,
+    "ws": true
   }
 }
 

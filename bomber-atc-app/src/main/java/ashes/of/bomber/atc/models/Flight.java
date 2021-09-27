@@ -1,8 +1,7 @@
-package ashes.of.bomber.atc.model;
+package ashes.of.bomber.atc.models;
 
 import ashes.of.bomber.carrier.dto.events.HistogramPointDto;
 import ashes.of.bomber.carrier.dto.events.SinkEvent;
-import ashes.of.bomber.carrier.dto.flight.SettingsDto;
 import ashes.of.bomber.carrier.dto.flight.TestAppSnapshotDto;
 import ashes.of.bomber.carrier.dto.flight.TestFlightSnapshotDto;
 import ashes.of.bomber.carrier.dto.flight.TestSuiteSnapshotDto;
@@ -45,7 +44,7 @@ public class Flight {
 
     public void add(SinkEvent event) {
         if (event.getType() == TEST_CASE_PROGRESS) {
-            Optional.ofNullable(event.getState())
+            Optional.ofNullable(event.getSnapshot())
                     .map(TestFlightSnapshotDto::getCurrent)
                     .map(TestAppSnapshotDto::getCurrent)
                     .map(TestSuiteSnapshotDto::getCurrent)

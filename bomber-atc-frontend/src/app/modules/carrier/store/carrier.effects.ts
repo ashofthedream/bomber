@@ -1,30 +1,40 @@
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
-import { CarrierService } from '../services/carrier.service';
-import { AtcState } from '../../shared/store/atc.state';
 import { Store } from '@ngrx/store';
-import { CarrierAction, GetActiveCarriers, GetActiveCarriersSuccess } from './carrier.actions';
-import { filter, map, switchMap, tap } from 'rxjs/operators';
 import { Observable, timer } from 'rxjs';
+import { filter, map, switchMap } from 'rxjs/operators';
 import { AuthService } from '../../auth/services/auth.service';
 import { isAuthenticated } from '../../auth/store/auth.selectors';
+import { WebSocketService } from '../../shared/services/web-socket.service';
+import { AtcState } from '../../shared/store/atc.state';
+import { CarrierService } from '../services/carrier.service';
+import { CarrierAction, GetActiveCarriers, GetActiveCarriersSuccess } from './carrier.actions';
 
 @Injectable()
 export class CarrierEffects {
 
-  constructor(private readonly carrierService: CarrierService,
+  constructor(private readonly webSocketService: WebSocketService,
+              private readonly carrierService: CarrierService,
               private readonly authService: AuthService,
               private readonly actions: Actions,
               private readonly store: Store<AtcState>) {
   }
 
-  @Effect()
+  // @Effect()
   public getActiveCarriersTimer(): Observable<GetActiveCarriers> {
     return timer(0, 10_000)
         .pipe(
             switchMap(n => this.store.select(isAuthenticated)),
             filter(auth => auth),
             map(n => new GetActiveCarriers())
+        );
+  }
+
+  @Effect()
+  public getActiveCarriersByWebSocket(): Observable<GetActiveCarriersSuccess> {
+    return this.webSocketService.getCarriers()
+        .pipe(
+            map(carriers => new GetActiveCarriersSuccess(carriers))
         );
   }
 

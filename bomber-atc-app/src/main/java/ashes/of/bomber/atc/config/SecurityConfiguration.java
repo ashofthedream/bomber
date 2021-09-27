@@ -146,6 +146,7 @@ public class SecurityConfiguration {
                 .authorizeExchange()
                 .pathMatchers("/atc/login").permitAll()
                 .pathMatchers("/atc/sink").permitAll()
+                .pathMatchers("/atc/socket").permitAll()
                 .anyExchange().authenticated()
 
                 .and()

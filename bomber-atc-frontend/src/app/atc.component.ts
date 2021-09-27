@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { Store } from "@ngrx/store";
-import { AtcState } from "./modules/shared/store/atc.state";
-import { GetUser } from "./modules/shared/store/user.actions";
-import { isAuthenticated } from "./modules/auth/store/auth.selectors";
+import { Store } from '@ngrx/store';
+import { webSocket } from 'rxjs/webSocket';
+import { isAuthenticated } from './modules/auth/store/auth.selectors';
+import { AtcState } from './modules/shared/store/atc.state';
+import { GetUser } from './modules/shared/store/user.actions';
 
 
 @Component({
@@ -12,7 +13,7 @@ import { isAuthenticated } from "./modules/auth/store/auth.selectors";
 })
 export class AtcComponent implements OnInit {
 
-  authenticated = this.store.select(isAuthenticated)
+  authenticated = this.store.select(isAuthenticated);
 
   constructor(private readonly store: Store<AtcState>) {
   }

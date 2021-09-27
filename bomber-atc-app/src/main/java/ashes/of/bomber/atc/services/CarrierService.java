@@ -1,7 +1,7 @@
 package ashes.of.bomber.atc.services;
 
-import ashes.of.bomber.atc.model.Carrier;
-import ashes.of.bomber.atc.model.Flight;
+import ashes.of.bomber.atc.models.Carrier;
+import ashes.of.bomber.atc.models.Flight;
 import ashes.of.bomber.carrier.dto.carrier.CarrierDto;
 import ashes.of.bomber.carrier.dto.flight.TestAppDto;
 import ashes.of.bomber.carrier.dto.requests.FlightStartedResponse;

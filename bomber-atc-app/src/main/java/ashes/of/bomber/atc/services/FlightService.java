@@ -1,8 +1,9 @@
 package ashes.of.bomber.atc.services;
 
-import ashes.of.bomber.atc.model.Flight;
+import ashes.of.bomber.atc.models.Flight;
 import ashes.of.bomber.carrier.dto.events.SinkEvent;
 import ashes.of.bomber.flight.plan.TestFlightPlan;
+import com.google.common.io.Files;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
@@ -42,7 +43,7 @@ public class FlightService {
         return flight;
     }
 
-    public void process(SinkEvent event) {
+    public void handle(SinkEvent event) {
         var flight = flights.computeIfAbsent(event.getFlightId(), flightId -> new Flight(new TestFlightPlan(flightId, List.of())));
         flight.add(event);
 
@@ -58,5 +59,9 @@ public class FlightService {
 
     public long getNextFlightId() {
         return flightIdSeq.incrementAndGet();
+    }
+
+    public Mono<Flight> getFlight(long flightId) {
+        return Mono.justOrEmpty(flights.get(flightId));
     }
 }
