@@ -1,10 +1,10 @@
 package ashes.of.bomber.example.accounts.tests;
 
 import ashes.of.bomber.builder.TestSuiteBuilder;
-import ashes.of.bomber.example.clients.AccountClient;
+import ashes.of.bomber.example.accounts.client.AccountClient;
+import ashes.of.bomber.example.dto.CreateAccountsRequest;
+import ashes.of.bomber.example.dto.CreateAccountsResponse;
 import ashes.of.bomber.example.models.User;
-import ashes.of.bomber.example.models.requests.CreateAccountsRequest;
-import ashes.of.bomber.example.models.requests.CreateAccountsResponse;
 import ashes.of.bomber.tools.Tools;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -35,7 +35,7 @@ public class AccountControllerLoadTest {
     }
 
     public static void create(TestSuiteBuilder<AccountControllerLoadTest> builder, AccountClient accountClient) {
-        builder .name("AccountControllerLoadTest")
+        builder.name("AccountControllerLoadTest")
                 .withContext(new AccountControllerLoadTest(accountClient))
                 .beforeSuite(true, AccountControllerLoadTest::beforeSuite)
                 .testCase(testCase -> testCase
@@ -73,7 +73,7 @@ public class AccountControllerLoadTest {
         var overall = tools.stopwatch();
         var create = tools.stopwatch("create");
         var client = context.getAccountClient();
-        client  .createAccounts(new CreateAccountsRequest().setUser(new User().setId(context.getRandomId(context))))
+        client.createAccounts(new CreateAccountsRequest().setUser(new User().setId(context.getRandomId(context))))
                 .map(CreateAccountsResponse::getAccounts)
                 .subscribe(accounts -> {
                     create.success();
@@ -82,7 +82,7 @@ public class AccountControllerLoadTest {
                             .findFirst()
                             .ifPresent(createdAccount -> {
                                 tools.measure("get", get -> {
-                                    client  .getAccount(createdAccount.getId())
+                                    client.getAccount(createdAccount.getId())
                                             .subscribe(account -> {
 
                                                 // todo check that get returned same account
@@ -93,7 +93,7 @@ public class AccountControllerLoadTest {
                                                 get.fail(th);
                                                 overall.fail(th);
                                             });
-                                        });
+                                });
                             });
 
                 }, th -> {

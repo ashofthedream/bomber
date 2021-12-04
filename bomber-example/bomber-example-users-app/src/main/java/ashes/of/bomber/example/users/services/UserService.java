@@ -1,10 +1,10 @@
 package ashes.of.bomber.example.users.services;
 
+import ashes.of.bomber.example.accounts.client.AccountClient;
+import ashes.of.bomber.example.dto.CreateAccountsRequest;
+import ashes.of.bomber.example.dto.CreateAccountsResponse;
+import ashes.of.bomber.example.dto.GetAccountsResponse;
 import ashes.of.bomber.example.models.User;
-import ashes.of.bomber.example.clients.AccountClient;
-import ashes.of.bomber.example.models.requests.CreateAccountsRequest;
-import ashes.of.bomber.example.models.requests.CreateAccountsResponse;
-import ashes.of.bomber.example.models.requests.GetAccountsResponse;
 import org.ajbrown.namemachine.NameGenerator;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;

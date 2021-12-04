@@ -1,9 +1,9 @@
 package ashes.of.bomber.example.users.controllers;
 
+import ashes.of.bomber.example.dto.CreateUserRequest;
+import ashes.of.bomber.example.dto.CreateUserResponse;
+import ashes.of.bomber.example.dto.GetUsersResponse;
 import ashes.of.bomber.example.models.User;
-import ashes.of.bomber.example.models.requests.CreateUserRequest;
-import ashes.of.bomber.example.models.requests.CreateUserResponse;
-import ashes.of.bomber.example.models.requests.GetUsersResponse;
 import ashes.of.bomber.example.users.services.UserService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

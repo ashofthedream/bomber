@@ -1,12 +1,12 @@
 package ashes.of.bomber.example.users.tests;
 
 import ashes.of.bomber.annotations.BeforeTestSuite;
-import ashes.of.bomber.annotations.LoadTestSettings;
 import ashes.of.bomber.annotations.LoadTestCase;
+import ashes.of.bomber.annotations.LoadTestSettings;
 import ashes.of.bomber.annotations.LoadTestSuite;
 import ashes.of.bomber.annotations.Throttle;
-import ashes.of.bomber.example.clients.UsersClient;
-import ashes.of.bomber.example.models.requests.CreateUserRequest;
+import ashes.of.bomber.example.dto.CreateUserRequest;
+import ashes.of.bomber.example.users.client.UsersClient;
 import ashes.of.bomber.tools.Stopwatch;
 import ashes.of.bomber.tools.Tools;
 import org.apache.logging.log4j.LogManager;

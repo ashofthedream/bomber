@@ -14,7 +14,7 @@ apply plugin: 'io.spring.dependency-management'
 
 tasks {
     bootJar {
-        archiveFileName = "bomber-example-users-app.jar"
+        archiveFileName = "bomber-example-app.jar"
     }
 }
 
@@ -35,7 +35,7 @@ configurations {
 dependencies {
     implementation project(':bomber-example:bomber-example-common')
     implementation project(':bomber-example:bomber-example-accounts-client')
-    implementation 'org.ajbrown:name-machine:1.0.0'
+    implementation project(':bomber-example:bomber-example-users-client')
 
     implementation 'org.springframework.boot:spring-boot-starter-log4j2'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
@@ -43,6 +43,5 @@ dependencies {
 
     testImplementation project(':bomber-core')
     testImplementation project(':bomber-runner')
-    testImplementation project(':bomber-example:bomber-example-users-tests')
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }

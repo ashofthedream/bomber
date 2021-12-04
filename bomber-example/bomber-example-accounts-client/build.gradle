@@ -1,0 +1,5 @@
+
+dependencies {
+    implementation project(':bomber-example:bomber-example-common')
+    implementation 'org.springframework.boot:spring-boot-starter-webflux:2.5.4'
+}

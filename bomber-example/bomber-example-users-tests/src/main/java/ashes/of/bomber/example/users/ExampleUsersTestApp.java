@@ -1,11 +1,11 @@
 package ashes.of.bomber.example.users;
 
-import ashes.of.bomber.annotations.LoadTestSettings;
 import ashes.of.bomber.annotations.LoadTestApp;
+import ashes.of.bomber.annotations.LoadTestSettings;
 import ashes.of.bomber.annotations.Throttle;
 import ashes.of.bomber.builder.BomberBuilder;
 import ashes.of.bomber.builder.TestAppBuilder;
-import ashes.of.bomber.example.clients.UsersClient;
+import ashes.of.bomber.example.users.client.UsersClient;
 import ashes.of.bomber.example.users.tests.UserControllerLoadTest;
 import ashes.of.bomber.example.utils.SleepUtils;
 import ashes.of.bomber.sink.histogram.HistogramTimelinePrintStreamPrinter;

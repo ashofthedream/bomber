@@ -1,10 +1,10 @@
 package ashes.of.bomber.example.accounts.controllers;
 
 import ashes.of.bomber.example.accounts.services.AccountService;
+import ashes.of.bomber.example.dto.CreateAccountsRequest;
+import ashes.of.bomber.example.dto.CreateAccountsResponse;
+import ashes.of.bomber.example.dto.GetAccountsResponse;
 import ashes.of.bomber.example.models.Account;
-import ashes.of.bomber.example.models.requests.CreateAccountsRequest;
-import ashes.of.bomber.example.models.requests.CreateAccountsResponse;
-import ashes.of.bomber.example.models.requests.GetAccountsResponse;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
