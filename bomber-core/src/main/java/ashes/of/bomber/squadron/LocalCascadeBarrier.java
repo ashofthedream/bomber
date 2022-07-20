@@ -63,7 +63,7 @@ public class LocalCascadeBarrier implements Barrier {
     public void enterCase(Test test) {
         NamedCascadeBarrier barrier = getOrCreateBarrier(test);
         String thread = Thread.currentThread().getName();
-        log.trace("enterCase test: {}, thread: {} try to start test barrier", test.getName(), thread);
+        log.trace("enterCase test: {}, thread: {} try to start test barrier", test.name(), thread);
         barrier.enter();
     }
 
@@ -71,7 +71,7 @@ public class LocalCascadeBarrier implements Barrier {
     public void leaveCase(Test test) {
         NamedCascadeBarrier barrier = getOrCreateBarrier(test);
         String thread = Thread.currentThread().getName();
-        log.trace("enterCase test: {}, thread: {} try to finish test barrier", test.getName(), thread);
+        log.trace("enterCase test: {}, thread: {} try to finish test barrier", test.name(), thread);
         barrier.leave();
     }
 

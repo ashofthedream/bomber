@@ -73,27 +73,27 @@ public class Runner {
     public TestFlightReport run(TestFlightPlan flightPlan, BooleanSupplier condition) {
         var current = this.state;
         if (current != null) {
-            throw new IllegalStateException("Invalid runner state: already exists for flightId: " + current.getPlan().getFlightId());
+            throw new IllegalStateException("Invalid runner state: already exists for flightId: " + current.getPlan().flightId());
         }
 
-        log.trace("Create flight state for flight: {}", flightPlan.getFlightId());
+        log.trace("Create flight state for flight: {}", flightPlan.flightId());
         var state = new TestFlightState(flightPlan, condition);
         this.state = state;
 
 
-        ThreadContext.put("flightId", String.valueOf(flightPlan.getFlightId()));
-        log.info("Start flight: {} with plan:", flightPlan.getFlightId());
+        ThreadContext.put("flightId", String.valueOf(flightPlan.flightId()));
+        log.info("Start flight: {} with plan:", flightPlan.flightId());
 
-        flightPlan.getTestApps().forEach(testApp -> {
-            log.info("Test app: {}", testApp.getName());
-            testApp.getTestSuites().forEach(testSuite -> {
-                log.info("    Test suite: {}", testSuite.getName());
-                testSuite.getTestCases().forEach(testCase -> {
-                    var settings = Optional.ofNullable(testCase.getConfiguration())
-                            .map(Configuration::getSettings)
+        flightPlan.testApps().forEach(testApp -> {
+            log.info("Test app: {}", testApp.name());
+            testApp.testSuites().forEach(testSuite -> {
+                log.info("    Test suite: {}", testSuite.name());
+                testSuite.testCases().forEach(testCase -> {
+                    var settings = Optional.ofNullable(testCase.configuration())
+                            .map(Configuration::settings)
                             .orElse(null);
 
-                    log.info("        Test case: {}, with: {}", testCase.getName(), settings);
+                    log.info("        Test case: {}, with: {}", testCase.name(), settings);
                 });
             });
         });
@@ -106,17 +106,17 @@ public class Runner {
                 .collect(Collectors.toList());
 
         
-        sendFlightStartedEvent(new FlightStartedEvent(state.getStartTime(), flightPlan.getFlightId()));
+        sendFlightStartedEvent(new FlightStartedEvent(state.getStartTime(), flightPlan.flightId()));
 
         try {
             var appsByName = apps.stream()
                     .collect(Collectors.toMap(TestApp::getName, app -> app));
 
-            var reports = flightPlan.getTestApps().stream()
+            var reports = flightPlan.testApps().stream()
                     .map(plan -> {
-                        var testApp = appsByName.get(plan.getName());
+                        var testApp = appsByName.get(plan.name());
                         if (testApp == null) {
-                            log.warn("Bomber has no app with name: {}", plan.getName());
+                            log.warn("Bomber has no app with name: {}", plan.name());
                             return new TestAppReport(plan, Instant.now(), Instant.now(), List.of());
                         }
 
@@ -133,10 +133,10 @@ public class Runner {
 
             Instant flightFinishTime = Instant.now();
             state.setFinishTime(flightFinishTime);
-            sendFlightFinishedEvent(new FlightFinishedEvent(flightFinishTime, flightPlan.getFlightId()));
+            sendFlightFinishedEvent(new FlightFinishedEvent(flightFinishTime, flightPlan.flightId()));
 
             ThreadContext.clearAll();
-            log.info("Flight finished: {}", flightPlan.getFlightId());
+            log.info("Flight finished: {}", flightPlan.flightId());
             return new TestFlightReport(flightPlan, state.getStartTime(), state.getFinishTime(), reports);
         } finally {
             log.debug("Stop watchers");
@@ -173,14 +173,14 @@ public class Runner {
         try {
             Map<String, TestSuite<?>> suitesByName = testApp.getTestSuitesByName();
 
-            var testSuiteReports = state.getPlan().getTestSuites()
+            var testSuiteReports = state.getPlan().testSuites()
                     .stream()
                     .map(plan -> {
-                        log.debug("Try to run test suite: {}", plan.getName());
-                        TestSuite<Object> testSuite = (TestSuite<Object>) suitesByName.get(plan.getName());
+                        log.debug("Try to run test suite: {}", plan.name());
+                        TestSuite<Object> testSuite = (TestSuite<Object>) suitesByName.get(plan.name());
                         if (testSuite == null) {
-                            log.warn("Test suite: {} not found", plan.getName());
-                            return new TestSuiteReport(plan.getName(), List.of());
+                            log.warn("Test suite: {} not found", plan.name());
+                            return new TestSuiteReport(plan.name(), List.of());
                         }
 
                         var testSuiteState = new TestSuiteState(state, plan, testSuite);
@@ -229,25 +229,25 @@ public class Runner {
         try {
             callBeforeSuite(testSuite);
 
-            List<TestCaseReport> reports = state.getPlan().getTestCases()
+            List<TestCaseReport> reports = state.getPlan().testCases()
                     .stream()
                     .map(plan -> {
-                        var testCase = testSuite.getTestCase(plan.getName());
+                        var testCase = testSuite.getTestCase(plan.name());
                         if (testCase == null) {
                             log.warn("Test case: {} not found in test suite: {}, but it exists in the plan",
-                                    plan.getName(), testSuite.getName());
+                                    plan.name(), testSuite.getName());
                             return null;
                         }
 
                         // merge configuration
                         var initial = testCase.getConfiguration();
-                        Configuration configuration = Optional.ofNullable(plan.getConfiguration())
+                        Configuration configuration = Optional.ofNullable(plan.configuration())
                                 .map(actual -> new Configuration(
                                         // todo get these properties from actual
-                                        initial.getDelayer(),
-                                        initial.getLimiter(),
-                                        initial.getBarrier(),
-                                        actual.getSettings()
+                                        initial.delayer(),
+                                        initial.limiter(),
+                                        initial.barrier(),
+                                        actual.settings()
                                 ))
                                 .orElse(initial);
 
@@ -276,18 +276,18 @@ public class Runner {
 
     private int determineWorkerThreadsCount(TestSuitePlan testSuitePlan, TestSuite<Object> testSuite) {
         log.debug("Determine worker threads count for test suite: {}", testSuite.getName());
-        return testSuitePlan.getTestCases().stream()
+        return testSuitePlan.testCases().stream()
                 .mapToInt(testCasePlan -> {
-                    var testCase = testSuite.getTestCase(testCasePlan.getName());
+                    var testCase = testSuite.getTestCase(testCasePlan.name());
                     if (testCase == null) {
-                        log.trace("No test case: {} found, return 0", testCasePlan.getName());
+                        log.trace("No test case: {} found, return 0", testCasePlan.name());
                         return 0;
                     }
 
-                    var configuration = Optional.ofNullable(testCasePlan.getConfiguration())
+                    var configuration = Optional.ofNullable(testCasePlan.configuration())
                             .orElse(testCase.getConfiguration());
 
-                    return configuration.getSettings().getThreadsCount();
+                    return configuration.settings().threadsCount();
                 })
                 .max()
                 .orElseThrow(() -> new RuntimeException("Can't determine thread count for test suite: " + testSuite.getName()));
@@ -331,7 +331,7 @@ public class Runner {
         var testCase = state.getTestCase();
         var testSuite = state.getTestSuite();
         var testApp = state.getTestApp();
-        var settings = state.getConfiguration().getSettings();
+        var settings = state.getConfiguration().settings();
 
         ThreadContext.put("testCase", testCase.getName());
         log.debug("Start test case: {}", testCase.getName());
@@ -342,11 +342,11 @@ public class Runner {
         var test = new Test(testApp.getName(), testSuite.getName(), testCase.getName());
         send(new TestCaseStartedEvent(state.getStartTime(), state.getFlightId(), test, settings));
 
-        log.debug("Run {} workers", settings.getThreadsCount());
+        log.debug("Run {} workers", settings.threadsCount());
 
         pool.getAcquired()
                 .stream()
-                .limit(settings.getThreadsCount())
+                .limit(settings.threadsCount())
                 .forEach(worker -> worker.run(state, sink, watchers));
 
         try {
@@ -436,7 +436,7 @@ public class Runner {
 
         return new TestCaseSnapshot(
                 state.getTestCase().getName(),
-                state.getConfiguration().getSettings(),
+                state.getConfiguration().settings(),
                 state.getStartTime(),
                 state.getFinishTime(),
                 state.getTotalIterationsCount(),

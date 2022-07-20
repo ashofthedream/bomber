@@ -32,7 +32,7 @@ public class UserControllerTest {
         @Override
         public void timeRecorded(Record record) {
             iterations.increment();
-            if (record.getError() != null)
+            if (record.error() != null)
                 errors.increment();
         }
 

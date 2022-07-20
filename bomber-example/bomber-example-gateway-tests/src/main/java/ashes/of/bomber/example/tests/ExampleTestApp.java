@@ -40,19 +40,19 @@ public class ExampleTestApp {
         var report = ExampleTestApp.create(appUrl, membersCount != null ? Integer.parseInt(membersCount) : 0)
                 .start();
 
-        report.getTestApps()
+        report.testApps()
                 .forEach(testApp -> {
                     log.info("test report for flight: {}", -1);
-                    testApp.getTestSuites()
+                    testApp.testSuites()
                             .forEach(testSuite -> {
-                                log.debug("TestSuite name: {}", testSuite.getName());
-                                testSuite.getTestCases()
+                                log.debug("TestSuite name: {}", testSuite.name());
+                                testSuite.testCases()
                                         .forEach(testCase -> {
                                             log.debug("TestCase name: {}, total iterations: {}, errors: {}, total time elapsed: {}ms",
-                                                    testCase.getName(),
-                                                    testCase.getTotalIterationsCount(),
-                                                    testCase.getTotalErrorsCount(),
-                                                    testCase.getTotalTimeElapsed());
+                                                    testCase.name(),
+                                                    testCase.iterationsCount(),
+                                                    testCase.errorsCount(),
+                                                    testCase.totalTimeElapsed());
                                         });
                             });
 

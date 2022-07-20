@@ -27,23 +27,23 @@ public class SettingsBuilder {
 
     public static SettingsBuilder of(Settings settings) {
         return new SettingsBuilder()
-                .setTime(settings.getDuration())
-                .setThreadsCount(settings.getThreadsCount())
-                .setThreadIterationsCount(settings.getThreadIterationsCount())
-                .setTotalIterationsCount(settings.getTotalIterationsCount());
+                .setDuration(settings.duration())
+                .setThreadsCount(settings.threadsCount())
+                .setThreadIterationsCount(settings.threadIterationsCount())
+                .setTotalIterationsCount(settings.totalIterationsCount());
     }
 
-    public SettingsBuilder setTime(Duration time) {
+    public SettingsBuilder setDuration(Duration time) {
         this.time = time;
         return this;
     }
 
     public SettingsBuilder setTime(long time, TimeUnit unit) {
-        return setTime(Duration.ofMillis(unit.toMillis(time)));
+        return setDuration(Duration.ofMillis(unit.toMillis(time)));
     }
 
     public SettingsBuilder setSeconds(long seconds) {
-        return setTime(Duration.ofSeconds(seconds));
+        return setDuration(Duration.ofSeconds(seconds));
     }
 
     public SettingsBuilder setThreadsCount(int threadsCount) {

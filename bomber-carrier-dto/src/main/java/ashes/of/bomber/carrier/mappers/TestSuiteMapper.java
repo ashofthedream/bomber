@@ -30,13 +30,13 @@ public class TestSuiteMapper {
     }
 
     public static TestSuiteDto toDto(TestSuitePlan testSuite) {
-        var testCases = testSuite.getTestCases()
+        var testCases = testSuite.testCases()
                 .stream()
                 .map(TestCaseMapper::toDto)
                 .collect(Collectors.toList());
 
         return new TestSuiteDto()
-                .setName(testSuite.getName())
+                .setName(testSuite.name())
                 .setTestCases(testCases);
     }
 }

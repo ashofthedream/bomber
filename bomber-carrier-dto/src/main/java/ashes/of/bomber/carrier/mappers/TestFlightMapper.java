@@ -28,13 +28,13 @@ public class TestFlightMapper {
     }
 
     public static TestFlightDto toDto(TestFlightPlan flight) {
-        var testApps = flight.getTestApps()
+        var testApps = flight.testApps()
                 .stream()
                 .map(TestAppMapper::toDto)
                 .collect(Collectors.toList());
 
         return new TestFlightDto()
-                .setId(flight.getFlightId())
+                .setId(flight.flightId())
                 .setTestApps(testApps);
     }
 
@@ -45,9 +45,9 @@ public class TestFlightMapper {
         }
 
         return new TestFlightSnapshotDto()
-                .setPlan(TestFlightMapper.toDto(snapshot.getPlan()))
-                .setCurrent(toDto(snapshot.getCurrent()))
-                .setWorkers(snapshot.getWorkers().stream()
+                .setPlan(TestFlightMapper.toDto(snapshot.plan()))
+                .setCurrent(toDto(snapshot.current()))
+                .setWorkers(snapshot.workers().stream()
                         .map(TestFlightMapper::toDto)
                         .collect(Collectors.toList()));
     }
@@ -59,8 +59,8 @@ public class TestFlightMapper {
         }
 
         return new TestAppSnapshotDto()
-                .setName(snapshot.getName())
-                .setCurrent(toDto(snapshot.getCurrent()));
+                .setName(snapshot.name())
+                .setCurrent(toDto(snapshot.current()));
     }
 
     @Nullable
@@ -70,8 +70,8 @@ public class TestFlightMapper {
         }
 
         return new TestSuiteSnapshotDto()
-                .setName(snapshot.getName())
-                .setCurrent(toDto(snapshot.getCurrent()));
+                .setName(snapshot.name())
+                .setCurrent(toDto(snapshot.current()));
     }
 
     @Nullable
@@ -81,19 +81,19 @@ public class TestFlightMapper {
         }
 
         return new TestCaseSnapshotDto()
-                .setName(snapshot.getName())
-                .setSettings(SettingsMapper.toDto(snapshot.getSettings()))
-                .setStartTime(snapshot.getStartTime().toEpochMilli())
-                .setFinishTime(snapshot.getFinishTime() != null ? snapshot.getFinishTime().toEpochMilli() : null)
-                .setCurrentIterationsCount(snapshot.getCurrentIterationsCount())
-                .setErrorsCount(snapshot.getErrorsCount());
+                .setName(snapshot.name())
+                .setSettings(SettingsMapper.toDto(snapshot.settings()))
+                .setStartTime(snapshot.startTime().toEpochMilli())
+                .setFinishTime(snapshot.finishTime() != null ? snapshot.finishTime().toEpochMilli() : null)
+                .setCurrentIterationsCount(snapshot.currentIterationsCount())
+                .setErrorsCount(snapshot.errorsCount());
     }
 
     public static WorkerSnapshotDto toDto(WorkerSnapshot state) {
         return new WorkerSnapshotDto()
-                .setName(state.getWorker())
-                .setIterationsCount(state.getCurrentIterationsCount())
-                .setRemainIterationsCount(state.getRemainIterationsCount())
-                .setErrorsCount(state.getErrorsCount());
+                .setName(state.worker())
+                .setIterationsCount(state.currentIterationsCount())
+                .setRemainIterationsCount(state.remainIterationsCount())
+                .setErrorsCount(state.errorsCount());
     }
 }

@@ -23,7 +23,7 @@ public class Measurements {
     }
 
     public void add(Record record) {
-        byLabel.computeIfAbsent(record.getLabel(), label -> new HistogramAndErrors())
-                .record(record.isSuccess(), record.getElapsed());
+        byLabel.computeIfAbsent(record.label(), label -> new HistogramAndErrors())
+                .record(record.success(), record.elapsed());
     }
 }

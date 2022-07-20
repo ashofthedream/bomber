@@ -31,7 +31,7 @@ public class WorkerState {
     }
 
     public long getRemainIterationsCount() {
-        return parent.getConfiguration().getSettings().getThreadIterationsCount() - getIterationsCount();
+        return parent.getConfiguration().settings().threadIterationsCount() - getIterationsCount();
     }
 
     public Iteration createIteration() {
@@ -82,14 +82,14 @@ public class WorkerState {
     }
 
     private boolean checkThreadIterations() {
-        var settings = parent.getConfiguration().getSettings();
-        return settings.getThreadIterationsCount() >= iterationsCount.incrementAndGet();
+        var settings = parent.getConfiguration().settings();
+        return settings.threadIterationsCount() >= iterationsCount.incrementAndGet();
     }
 
     private boolean checkTime() {
-        var settings = parent.getConfiguration().getSettings();
+        var settings = parent.getConfiguration().settings();
         var elapsed = System.currentTimeMillis() - parent.getStartTime().toEpochMilli();
-        return settings.getDuration().toMillis() >= elapsed;
+        return settings.duration().toMillis() >= elapsed;
     }
 
     public void start() {

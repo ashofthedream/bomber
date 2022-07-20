@@ -84,9 +84,9 @@ public class HistogramTimelineSink implements Sink {
 
     @Override
     public void timeRecorded(Record record) {
-        var it = record.getIteration();
-        var ts = it.getTimestamp().truncatedTo(resolution);
-        var test = record.getIteration().getTest();
+        var it = record.iteration();
+        var ts = it.timestamp().truncatedTo(resolution);
+        var test = record.iteration().test();
         timeline.computeIfAbsent(test, k -> new ConcurrentSkipListMap<>())
                 .computeIfAbsent(ts, timestamp -> new Measurements(test))
                 .add(record);
@@ -94,7 +94,7 @@ public class HistogramTimelineSink implements Sink {
 
     @Override
     public void afterTestCase(TestCaseFinishedEvent event) {
-        var measurements = timeline.get(event.getTest());
+        var measurements = timeline.get(event.test());
         if (measurements != null) {
             printer.print(resolution, measurements);
         }

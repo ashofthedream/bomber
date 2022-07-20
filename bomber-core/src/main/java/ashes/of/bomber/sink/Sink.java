@@ -12,5 +12,4 @@ public interface Sink extends EventHandler {
      */
     default void timeRecorded(Record record) {
     }
-
 }

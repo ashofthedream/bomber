@@ -19,33 +19,33 @@ public class DatadogSink implements Sink {
 
     @Override
     public void timeRecorded(Record record) {
-        Iteration it = record.getIteration();
-        String error = Optional.ofNullable(record.getError())
+        Iteration it = record.iteration();
+        String error = Optional.ofNullable(record.error())
                 .map(Throwable::getMessage)
                 .orElse("");
 
         client.timer("bomber_stopwatch_records")
-                .tag("testApp",     it.getTest().getTestApp())
-                .tag("testSuite",   it.getTest().getTestSuite())
-                .tag("testCase",    it.getTest().getTestCase())
-                .tag("thread",      it.getThread())
+                .tag("testApp",     it.test().testApp())
+                .tag("testSuite",   it.test().testSuite())
+                .tag("testCase",    it.test().testCase())
+                .tag("thread",      it.thread())
                 .tag("error",       error)
-                .tag("label",       record.getLabel())
-                .nanos(record.getElapsed());
+                .tag("label",       record.label())
+                .nanos(record.elapsed());
     }
 
     @Override
     public void afterEach(TestCaseAfterEachEvent event) {
-        String error = Optional.ofNullable(event.getThrowable())
+        String error = Optional.ofNullable(event.throwable())
                 .map(Throwable::getMessage)
                 .orElse("");
 
         client.timer("bomber_tests")
-                .tag("testApp",     event.getTest().getTestApp())
-                .tag("testSuite",   event.getTest().getTestSuite())
-                .tag("testCase",    event.getTest().getTestCase())
-                .tag("thread",      event.getWorker())
+                .tag("testApp",     event.test().testApp())
+                .tag("testSuite",   event.test().testSuite())
+                .tag("testCase",    event.test().testCase())
+                .tag("thread",      event.worker())
                 .tag("error",       error)
-                .nanos(event.getElapsed());
+                .nanos(event.elapsed());
     }
 }

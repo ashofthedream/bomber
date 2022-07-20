@@ -28,9 +28,9 @@ public class SettingsMapper {
             return null;
 
         return new SettingsDto()
-                .setDuration(settings.getDuration().toMillis())
-                .setThreadsCount(settings.getThreadsCount())
-                .setThreadIterationsCount(settings.getThreadIterationsCount())
-                .setTotalIterationsCount(settings.getTotalIterationsCount());
+                .setDuration(settings.duration().toMillis())
+                .setThreadsCount(settings.threadsCount())
+                .setThreadIterationsCount(settings.threadIterationsCount())
+                .setTotalIterationsCount(settings.totalIterationsCount());
     }
 }

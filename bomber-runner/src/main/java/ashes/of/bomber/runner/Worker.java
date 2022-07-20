@@ -103,11 +103,11 @@ public class Worker {
         ThreadContext.put("testCase", testCase.getName());
 
 
-        Limiter limiter = parent.getConfiguration().getLimiter().build();
-        Delayer delayer = parent.getConfiguration().getDelayer().build();
+        Limiter limiter = parent.getConfiguration().limiter().build();
+        Delayer delayer = parent.getConfiguration().delayer().build();
 
         // todo it's not working, ha-ha
-        Barrier barrier = parent.getConfiguration().getBarrier().build();
+        Barrier barrier = parent.getConfiguration().barrier().build();
 
         state.start();
 
@@ -137,12 +137,12 @@ public class Worker {
 
             if (parent.needUpdate()) {
                 var totalCount = parent.getTotalIterationsCount();
-                var settings = parent.getConfiguration().getSettings();
+                var settings = parent.getConfiguration().settings();
                 log.debug("Current progress. total iterations count: {}, remain count: {}, errors count: {}, remain time: {}ms",
                         totalCount,
-                        settings.getTotalIterationsCount() - totalCount,
+                        settings.totalIterationsCount() - totalCount,
                         parent.getErrorCount(),
-                        settings.getDuration().toMillis() - (System.currentTimeMillis() - parent.getStartTime().toEpochMilli())
+                        settings.duration().toMillis() - (System.currentTimeMillis() - parent.getStartTime().toEpochMilli())
                 );
             }
 
@@ -150,16 +150,16 @@ public class Worker {
             testSuite.beforeEach(it, context);
 
             send(sink, watchers, new TestCaseBeforeEachEvent(
-                    it.getTimestamp(),
-                    it.getFlightId(),
-                    it.getTest()
+                    it.timestamp(),
+                    it.flightId(),
+                    it.test()
             ));
 
             Tools tools = new Tools(it, record -> {
                 sink.timeRecorded(record);
                 state.addCaughtCount(1);
 
-                if (!record.isSuccess())
+                if (!record.success())
                     state.addError();
             });
 
@@ -174,11 +174,11 @@ public class Worker {
                 long expected = tools.getStopwatchCount() - (testCase.isAsync() ? 1 : 0);
                 state.addExpectedCount(expected);
                 send(sink, watchers, new TestCaseAfterEachEvent(
-                        it.getTimestamp(),
-                        it.getFlightId(),
-                        it.getTest(),
-                        it.getThread(),
-                        it.getNumber(),
+                        it.timestamp(),
+                        it.flightId(),
+                        it.test(),
+                        it.thread(),
+                        it.number(),
                         stopwatch.elapsed(),
                         null
                 ));
@@ -187,11 +187,11 @@ public class Worker {
                     stopwatch.fail(th);
 
                 send(sink, watchers, new TestCaseAfterEachEvent(
-                        it.getTimestamp(),
-                        it.getFlightId(),
-                        it.getTest(),
-                        it.getThread(),
-                        it.getNumber(),
+                        it.timestamp(),
+                        it.flightId(),
+                        it.test(),
+                        it.thread(),
+                        it.number(),
                         stopwatch.elapsed(),
                         th
                 ));

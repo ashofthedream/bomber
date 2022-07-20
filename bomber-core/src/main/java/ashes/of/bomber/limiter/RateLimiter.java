@@ -8,14 +8,7 @@ import java.util.concurrent.locks.LockSupport;
 
 public class RateLimiter implements Limiter {
 
-    private static class State {
-        private final double remain;
-        private final long timestamp;
-
-        public State(double remain, long timestamp) {
-            this.remain = remain;
-            this.timestamp = timestamp;
-        }
+    private record State(double remain, long timestamp) {
     }
 
     private final long tryouts = 5;
@@ -51,10 +44,10 @@ public class RateLimiter implements Limiter {
             if (permit.isAllowed())
                 return true;
 
-            if (permit.getTimeAwait() == 0)
+            if (permit.timeAwait() == 0)
                 return false;
 
-            LockSupport.parkUntil(Math.min(timeUntil, System.currentTimeMillis() + permit.getTimeAwait() / 1_000_000));
+            LockSupport.parkUntil(Math.min(timeUntil, System.currentTimeMillis() + permit.timeAwait() / 1_000_000));
         }
 
         return false;
@@ -67,10 +60,10 @@ public class RateLimiter implements Limiter {
             if (permit.isAllowed())
                 return true;
 
-            if (permit.getTimeAwait() == 0)
+            if (permit.timeAwait() == 0)
                 return false;
 
-            LockSupport.parkNanos(permit.getTimeAwait());
+            LockSupport.parkNanos(permit.timeAwait());
         }
     }
 
@@ -88,9 +81,9 @@ public class RateLimiter implements Limiter {
             var current = this.state.get();
 
             var opd = duration / (limit * 1.0);
-            var elapsed = now - current.timestamp;
+            var elapsed = now - current.timestamp();
             var additional = elapsed / opd;
-            var remain = Math.min(limit, current.remain + additional);
+            var remain = Math.min(limit, current.remain() + additional);
 
             if (remain >= count) {
                 if (this.state.compareAndSet(current, new State(remain - count, now))) {

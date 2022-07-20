@@ -8,7 +8,6 @@ import ashes.of.bomber.flight.plan.TestCasePlan;
 
 import java.time.Instant;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BooleanSupplier;
 
@@ -32,8 +31,8 @@ public class TestCaseState {
         this.plan = plan;
         this.testCase = testCase;
         this.configuration = configuration;
-        this.startLatch = new CountDownLatch(configuration.getSettings().getThreadsCount());
-        this.finishLatch = new CountDownLatch(configuration.getSettings().getThreadsCount());
+        this.startLatch = new CountDownLatch(configuration.settings().threadsCount());
+        this.finishLatch = new CountDownLatch(configuration.settings().threadsCount());
     }
 
     public TestApp getTestApp() {
@@ -114,6 +113,6 @@ public class TestCaseState {
     }
 
     private boolean incAndCheckTotalIterations() {
-        return configuration.getSettings().getTotalIterationsCount() >= totalIterationsCount.incrementAndGet();
+        return configuration.settings().totalIterationsCount() >= totalIterationsCount.incrementAndGet();
     }
 }

@@ -21,14 +21,14 @@ public class Log4jSink implements Sink {
 
     @Override
     public void timeRecorded(Record record) {
-        Level level = record.isSuccess() ? this.level : Level.WARN;
+        Level level = record.success() ? this.level : Level.WARN;
         log.log(level, "time {}: {}ms  #{}",
-                record.getLabel(), record.getElapsed() / 1_000_000.0, record.getIteration().getNumber(), record.getError());
+                record.label(), record.elapsed() / 1_000_000.0, record.iteration().number(), record.error());
     }
 
     @Override
     public void afterEach(TestCaseAfterEachEvent event) {
-        if (event.getThrowable() != null)
-            log.error("{} #{}", event.getTest().getName(), event.getNumber(), event.getThrowable());
+        if (event.throwable() != null)
+            log.error("{} #{}", event.test().name(), event.number(), event.throwable());
     }
 }

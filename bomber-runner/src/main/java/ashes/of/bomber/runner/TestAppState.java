@@ -47,7 +47,7 @@ public class TestAppState {
     }
 
     public long getFlightId() {
-        return parent.getPlan().getFlightId();
+        return parent.getPlan().flightId();
     }
 
     public TestSuiteState getCurrent() {

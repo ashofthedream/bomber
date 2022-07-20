@@ -2,31 +2,10 @@ package ashes.of.bomber.core;
 
 import java.util.Objects;
 
-public class Test {
-    private final String testApp;
-    private final String testSuite;
-    private final String testCase;
+public record Test(String testApp, String testSuite, String testCase) {
 
-    public Test(String testApp, String testSuite, String testCase) {
-        this.testApp = testApp;
-        this.testSuite = testSuite;
-        this.testCase = testCase;
-    }
-
-    public String getName() {
+    public String name() {
         return testApp + "." + testSuite + "." + testCase;
-    }
-
-    public String getTestApp() {
-        return testApp;
-    }
-
-    public String getTestSuite() {
-        return testSuite;
-    }
-
-    public String getTestCase() {
-        return testCase;
     }
 
     @Override
@@ -40,14 +19,5 @@ public class Test {
     @Override
     public int hashCode() {
         return Objects.hash(testApp, testSuite, testCase);
-    }
-
-    @Override
-    public String toString() {
-        return "Test{" +
-                "testApp='" + testApp + '\'' +
-                ", testSuite='" + testSuite + '\'' +
-                ", testCase='" + testCase + '\'' +
-                '}';
     }
 }

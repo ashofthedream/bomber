@@ -51,7 +51,7 @@ public class FlightService {
 
         Flight flight = new Flight(plan);
         active = flight;
-        flights.put(flight.getPlan().getFlightId(), flight);
+        flights.put(flight.getPlan().flightId(), flight);
         webSocketService.sendFlightStarted(flight);
         return flight;
     }
@@ -96,7 +96,7 @@ public class FlightService {
 
 
         if (flight.isOver()) {
-            log.info("Looks like flight: {} is over, remove from active", flight.getPlan().getFlightId());
+            log.info("Looks like flight: {} is over, remove from active", flight.getPlan().flightId());
             webSocketService.sendFlightFinished(flight);
             active = null;
         }

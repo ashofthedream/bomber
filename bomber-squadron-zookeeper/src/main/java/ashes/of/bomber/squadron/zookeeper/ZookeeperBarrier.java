@@ -31,26 +31,26 @@ public class ZookeeperBarrier implements Barrier {
     @Override
     public void enterCase(Test test) {
         try {
-            log.trace("enterCase test: {}", test.getName());
+            log.trace("enterCase test: {}", test);
             getOrCreateBarrier(test)
                     .enter(awaitTime.toMillis(), TimeUnit.MILLISECONDS);
         } catch (Exception e) {
-            log.error("enterCase failed. test: {}", test.getName(), e);
+            log.error("enterCase failed. test: {}", test, e);
         }
     }
 
     @Override
     public void leaveCase(Test test) {
         try {
-            log.trace("leaveCase test: {}", test.getName());
+            log.trace("leaveCase test: {}", test);
             getOrCreateBarrier(test)
                     .leave(awaitTime.toMillis(), TimeUnit.MILLISECONDS);
         } catch (Exception e) {
-            log.error("leaveCase failed. test: {}", test.getName(), e);
+            log.error("leaveCase failed. test: {}", test, e);
         }
     }
 
     private DistributedDoubleBarrier getOrCreateBarrier(Test test) {
-        return barriers.computeIfAbsent(test, t -> new DistributedDoubleBarrier(cf, "/bomber/barriers/" + t.getName(), members));
+        return barriers.computeIfAbsent(test, t -> new DistributedDoubleBarrier(cf, "/bomber/barriers/" + t.name(), members));
     }
 }

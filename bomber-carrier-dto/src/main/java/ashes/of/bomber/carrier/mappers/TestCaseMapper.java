@@ -17,13 +17,13 @@ public class TestCaseMapper {
     }
 
     public static TestCaseDto toDto(TestCasePlan testCase) {
-        var config = Optional.ofNullable(testCase.getConfiguration())
+        var config = Optional.ofNullable(testCase.configuration())
                 .map(ConfigurationMapper::toDto)
                 .orElse(null);
 
 
         return new TestCaseDto()
-                .setName(testCase.getName())
+                .setName(testCase.name())
                 .setConfiguration(config);
     }
 

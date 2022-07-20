@@ -17,6 +17,6 @@ public class ConfigurationMapper {
 
     public static ConfigurationDto toDto(Configuration config) {
         return new ConfigurationDto()
-                .setSettings(SettingsMapper.toDto(config.getSettings()));
+                .setSettings(SettingsMapper.toDto(config.settings()));
     }
 }

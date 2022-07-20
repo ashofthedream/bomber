@@ -55,7 +55,7 @@ public class ApplicationController {
         bomber.startAsync(plan);
 
         return Mono.just(new FlightStartedResponse()
-                .setId(plan.getFlightId()));
+                .setId(plan.flightId()));
     }
 
     @PostMapping("/carrier/applications/stop")

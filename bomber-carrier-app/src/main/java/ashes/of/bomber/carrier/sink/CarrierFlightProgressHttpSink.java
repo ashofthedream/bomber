@@ -54,8 +54,8 @@ public class CarrierFlightProgressHttpSink implements Sink {
                 .setId(SinkEvent.nextId())
                 .setType(TEST_FLIGHT_START)
                 .setCarrierId(registration.getServiceInstance().getId())
-                .setTimestamp(event.getTimestamp().toEpochMilli())
-                .setFlightId(event.getFlightId()));
+                .setTimestamp(event.timestamp().toEpochMilli())
+                .setFlightId(event.flightId()));
     }
 
     @Override
@@ -64,8 +64,8 @@ public class CarrierFlightProgressHttpSink implements Sink {
                 .setId(SinkEvent.nextId())
                 .setType(TEST_FLIGHT_FINISH)
                 .setCarrierId(registration.getServiceInstance().getId())
-                .setTimestamp(event.getTimestamp().toEpochMilli())
-                .setFlightId(event.getFlightId()));
+                .setTimestamp(event.timestamp().toEpochMilli())
+                .setFlightId(event.flightId()));
     }
 
     @Override
@@ -74,9 +74,9 @@ public class CarrierFlightProgressHttpSink implements Sink {
                 .setId(SinkEvent.nextId())
                 .setType(TEST_APP_START)
                 .setCarrierId(registration.getServiceInstance().getId())
-                .setTimestamp(event.getTimestamp().toEpochMilli())
-                .setFlightId(event.getFlightId())
-                .setTestApp(event.getTestApp()));
+                .setTimestamp(event.timestamp().toEpochMilli())
+                .setFlightId(event.flightId())
+                .setTestApp(event.testApp()));
     }
 
     @Override
@@ -85,10 +85,10 @@ public class CarrierFlightProgressHttpSink implements Sink {
                 .setId(SinkEvent.nextId())
                 .setType(TEST_SUITE_START)
                 .setCarrierId(registration.getServiceInstance().getId())
-                .setTimestamp(event.getTimestamp().toEpochMilli())
-                .setFlightId(event.getFlightId())
-                .setTestApp(event.getTestApp())
-                .setTestSuite(event.getTestSuite()));
+                .setTimestamp(event.timestamp().toEpochMilli())
+                .setFlightId(event.flightId())
+                .setTestApp(event.testApp())
+                .setTestSuite(event.testSuite()));
     }
 
     @Override
@@ -102,10 +102,10 @@ public class CarrierFlightProgressHttpSink implements Sink {
                     .setType(TEST_CASE_PROGRESS)
                     .setTimestamp(Instant.now().toEpochMilli())
                     .setCarrierId(registration.getServiceInstance().getId())
-                    .setFlightId(event.getFlightId())
-                    .setTestApp(event.getTest().getTestApp())
-                    .setTestSuite(event.getTest().getTestSuite())
-                    .setTestCase(event.getTest().getTestCase())
+                    .setFlightId(event.flightId())
+                    .setTestApp(event.test().testApp())
+                    .setTestSuite(event.test().testSuite())
+                    .setTestCase(event.test().testCase())
                     .setSnapshot(state));
         }
     }
@@ -116,11 +116,11 @@ public class CarrierFlightProgressHttpSink implements Sink {
                 .setId(SinkEvent.nextId())
                 .setType(TEST_CASE_START)
                 .setCarrierId(registration.getServiceInstance().getId())
-                .setTimestamp(event.getTimestamp().toEpochMilli())
-                .setFlightId(event.getFlightId())
-                .setTestApp(event.getTest().getTestApp())
-                .setTestSuite(event.getTest().getTestSuite())
-                .setTestCase(event.getTest().getTestCase()) );
+                .setTimestamp(event.timestamp().toEpochMilli())
+                .setFlightId(event.flightId())
+                .setTestApp(event.test().testApp())
+                .setTestSuite(event.test().testSuite())
+                .setTestCase(event.test().testCase()) );
     }
 
     @Override
@@ -129,11 +129,11 @@ public class CarrierFlightProgressHttpSink implements Sink {
                 .setId(SinkEvent.nextId())
                 .setType(TEST_CASE_FINISH)
                 .setCarrierId(registration.getServiceInstance().getId())
-                .setTimestamp(event.getTimestamp().toEpochMilli())
-                .setFlightId(event.getFlightId())
-                .setTestApp(event.getTest().getTestApp())
-                .setTestSuite(event.getTest().getTestSuite())
-                .setTestCase(event.getTest().getTestCase()) );
+                .setTimestamp(event.timestamp().toEpochMilli())
+                .setFlightId(event.flightId())
+                .setTestApp(event.test().testApp())
+                .setTestSuite(event.test().testSuite())
+                .setTestCase(event.test().testCase()) );
     }
 
     @Override
@@ -142,10 +142,10 @@ public class CarrierFlightProgressHttpSink implements Sink {
                 .setId(SinkEvent.nextId())
                 .setType(TEST_SUITE_FINISH)
                 .setCarrierId(registration.getServiceInstance().getId())
-                .setTimestamp(event.getTimestamp().toEpochMilli())
-                .setFlightId(event.getFlightId())
-                .setTestApp(event.getTestApp())
-                .setTestSuite(event.getTestSuite())
+                .setTimestamp(event.timestamp().toEpochMilli())
+                .setFlightId(event.flightId())
+                .setTestApp(event.testApp())
+                .setTestSuite(event.testSuite())
         );
     }
 
@@ -155,9 +155,9 @@ public class CarrierFlightProgressHttpSink implements Sink {
                 .setId(SinkEvent.nextId())
                 .setType(TEST_APP_FINISH)
                 .setCarrierId(registration.getServiceInstance().getId())
-                .setTimestamp(event.getTimestamp().toEpochMilli())
-                .setFlightId(event.getFlightId())
-                .setTestApp(event.getTestApp()));
+                .setTimestamp(event.timestamp().toEpochMilli())
+                .setFlightId(event.flightId())
+                .setTestApp(event.testApp()));
     }
 
     private void send(SinkEvent event) {

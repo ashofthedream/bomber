@@ -7,7 +7,6 @@ import ashes.of.bomber.sink.Sink;
 import org.influxdb.InfluxDB;
 import org.influxdb.dto.Point;
 
-import javax.annotation.Nullable;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -35,33 +34,33 @@ public class InfluxDbSink implements Sink {
                 .orElse("");
 
         db.write(Point.measurement(callCollectionName)
-                .time(it.getTimestamp().toEpochMilli(), TimeUnit.MILLISECONDS)
-                .tag("testApp",         it.getTest().getTestApp())
-                .tag("testSuite",       it.getTest().getTestSuite())
-                .tag("testCase",        it.getTest().getTestCase())
-                .tag("thread",          it.getThread())
+                .time(it.timestamp().toEpochMilli(), TimeUnit.MILLISECONDS)
+                .tag("testApp",         it.test().testApp())
+                .tag("testSuite",       it.test().testSuite())
+                .tag("testCase",        it.test().testCase())
+                .tag("thread",          it.thread())
                 .tag("error",           error)
                 .tag("label",           record.getLabel())
-                .addField("iteration",  it.getNumber())
+                .addField("iteration",  it.number())
                 .addField("elapsed",    record.getElapsed())
                 .build());
     }
 
     @Override
     public void afterEach(TestCaseAfterEachEvent event) {
-        String error = Optional.ofNullable(event.getThrowable())
+        String error = Optional.ofNullable(event.throwable())
                 .map(Throwable::getMessage)
                 .orElse("");
 
         db.write(Point.measurement(testCollectionName)
-                .time(event.getTimestamp().toEpochMilli(), TimeUnit.MILLISECONDS)
-                .tag("testApp",         event.getTest().getTestApp())
-                .tag("testSuite",       event.getTest().getTestSuite())
-                .tag("testCase",        event.getTest().getTestCase())
-                .tag("thread",          event.getWorker())
+                .time(event.timestamp().toEpochMilli(), TimeUnit.MILLISECONDS)
+                .tag("testApp",         event.test().testApp())
+                .tag("testSuite",       event.test().testSuite())
+                .tag("testCase",        event.test().testCase())
+                .tag("thread",          event.worker())
                 .tag("error",           error)
-                .addField("iteration",  event.getNumber())
-                .addField("elapsed",    event.getElapsed())
+                .addField("iteration",  event.number())
+                .addField("elapsed",    event.elapsed())
                 .build());
     }
 }

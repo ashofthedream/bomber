@@ -13,15 +13,15 @@ public class GarbageCollectorWatcher implements Watcher {
 
     @Override
     public void watch(TestFlightSnapshot flight) {
-        var testApp = flight.getCurrent();
+        var testApp = flight.current();
         if (testApp != null) {
-            ThreadContext.put("testApp", testApp.getName());
-            var testSuite = testApp.getCurrent();
+            ThreadContext.put("testApp", testApp.name());
+            var testSuite = testApp.current();
             if (testSuite != null) {
-                ThreadContext.put("testSuite", testSuite.getName());
-                var testCase = testSuite.getCurrent();
+                ThreadContext.put("testSuite", testSuite.name());
+                var testCase = testSuite.current();
                 if (testCase != null) {
-                    ThreadContext.put("testCase", testCase.getName());
+                    ThreadContext.put("testCase", testCase.name());
                 }
             }
         }

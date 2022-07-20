@@ -8,8 +8,6 @@ import java.util.stream.Collectors;
 
 public class TestAppMapper {
 
-
-
     public static TestAppDto toDto(TestApp app) {
         var testSuites = app.getTestSuites().stream()
                 .map(TestSuiteMapper::toDto)
@@ -30,13 +28,13 @@ public class TestAppMapper {
     }
 
     public static TestAppDto toDto(TestAppPlan plan) {
-        var testSuites = plan.getTestSuites()
+        var testSuites = plan.testSuites()
                 .stream()
                 .map(TestSuiteMapper::toDto)
                 .collect(Collectors.toList());
 
         return new TestAppDto()
-                .setName(plan.getName())
+                .setName(plan.name())
                 .setTestSuites(testSuites);
     }
 }
