@@ -69,7 +69,7 @@ public class Log4jWatcher implements Watcher {
 
 
         var settings = testCase.settings();
-        long totalIts = settings.totalIterationsCount();
+        long totalIts = settings.iterations();
         long currentIts = testCase.currentIterationsCount();
 
         long expectedCount = flight.workers()

@@ -6,5 +6,5 @@ import java.time.Duration;
 /**
  * Runner settings
  */
-public record Settings(Duration duration, int threadsCount, long threadIterationsCount, long totalIterationsCount) {
+public record Settings(Duration duration, int threads, long iterations) {
 }

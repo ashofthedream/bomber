@@ -1,6 +1,7 @@
-package ashes.of.bomber.builder;
+package ashes.of.bomber.processors;
 
 import ashes.of.bomber.annotations.LoadTestCase;
+import ashes.of.bomber.builder.TestCaseBuilder;
 import ashes.of.bomber.methods.TestCaseMethod;
 import ashes.of.bomber.tools.Tools;
 import org.apache.logging.log4j.LogManager;
@@ -14,7 +15,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class TestCaseProcessor<T> {
     private static final Logger log = LogManager.getLogger();
 
-    private final TestCaseBuilder<T>  builder;
+    private final TestCaseBuilder<T> builder;
 
     public TestCaseProcessor(TestCaseBuilder<T> builder) {
         this.builder = builder;

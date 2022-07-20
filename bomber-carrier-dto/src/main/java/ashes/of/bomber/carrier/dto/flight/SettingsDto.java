@@ -2,9 +2,8 @@ package ashes.of.bomber.carrier.dto.flight;
 
 public class SettingsDto {
     private long duration;
-    private int threadsCount;
-    private long threadIterationsCount;
-    private long totalIterationsCount;
+    private int threads;
+    private long iterations;
 
     public long getDuration() {
         return duration;
@@ -15,30 +14,21 @@ public class SettingsDto {
         return this;
     }
 
-    public int getThreadsCount() {
-        return threadsCount;
+    public int getThreads() {
+        return threads;
     }
 
-    public SettingsDto setThreadsCount(int threadsCount) {
-        this.threadsCount = threadsCount;
+    public SettingsDto setThreads(int threads) {
+        this.threads = threads;
         return this;
     }
 
-    public long getThreadIterationsCount() {
-        return threadIterationsCount;
+    public long getIterations() {
+        return iterations;
     }
 
-    public SettingsDto setThreadIterationsCount(long threadIterationsCount) {
-        this.threadIterationsCount = threadIterationsCount;
-        return this;
-    }
-
-    public long getTotalIterationsCount() {
-        return totalIterationsCount;
-    }
-
-    public SettingsDto setTotalIterationsCount(long totalIterationsCount) {
-        this.totalIterationsCount = totalIterationsCount;
+    public SettingsDto setIterations(long iterations) {
+        this.iterations = iterations;
         return this;
     }
 }

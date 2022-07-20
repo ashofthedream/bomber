@@ -55,9 +55,8 @@ public class ConfigurationBuilder {
         if (ann != null)
             settings(new SettingsBuilder()
                     .setTime(ann.time(), ann.timeUnit())
-                    .setThreadsCount(ann.threads())
-                    .setThreadIterationsCount(ann.threadIterations())
-                    .setTotalIterationsCount(ann.totalIterations())
+                    .setThreads(ann.threads())
+                    .setIterations(ann.iterations())
             );
 
         return this;

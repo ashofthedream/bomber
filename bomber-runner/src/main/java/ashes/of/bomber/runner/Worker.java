@@ -8,17 +8,14 @@ import ashes.of.bomber.events.TestCaseAfterEachEvent;
 import ashes.of.bomber.events.TestCaseBeforeEachEvent;
 import ashes.of.bomber.delayer.Delayer;
 import ashes.of.bomber.limiter.Limiter;
-import ashes.of.bomber.sink.Sink;
 import ashes.of.bomber.squadron.Barrier;
 import ashes.of.bomber.tools.Stopwatch;
 import ashes.of.bomber.tools.Tools;
-import ashes.of.bomber.watcher.Watcher;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 
 import javax.annotation.Nullable;
-import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.function.BooleanSupplier;
@@ -46,7 +43,6 @@ public class Worker {
     public WorkerSnapshot getSnapshot() {
         return new WorkerSnapshot(getName(),
                 state.getIterationsCount(),
-                state.getRemainIterationsCount(),
                 state.getErrorsCount(),
                 state.getExpectedRecordsCount(),
                 state.getCaughtRecordsCount()
@@ -140,7 +136,7 @@ public class Worker {
                 var settings = parent.getConfiguration().settings();
                 log.debug("Current progress. total iterations count: {}, remain count: {}, errors count: {}, remain time: {}ms",
                         totalCount,
-                        settings.totalIterationsCount() - totalCount,
+                        settings.iterations() - totalCount,
                         parent.getErrorCount(),
                         settings.duration().toMillis() - (System.currentTimeMillis() - parent.getStartTime().toEpochMilli())
                 );

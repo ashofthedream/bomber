@@ -30,10 +30,6 @@ public class WorkerState {
         return iterationsCount.get();
     }
 
-    public long getRemainIterationsCount() {
-        return parent.getConfiguration().settings().threadIterationsCount() - getIterationsCount();
-    }
-
     public Iteration createIteration() {
         String threadName = Thread.currentThread().getName();
         var test = new Test(
@@ -78,12 +74,7 @@ public class WorkerState {
 
     public BooleanSupplier createCondition() {
         var condition = parent.getCondition();
-        return () -> condition.getAsBoolean() && checkThreadIterations() && checkTime();
-    }
-
-    private boolean checkThreadIterations() {
-        var settings = parent.getConfiguration().settings();
-        return settings.threadIterationsCount() >= iterationsCount.incrementAndGet();
+        return () -> condition.getAsBoolean() && checkTime();
     }
 
     private boolean checkTime() {

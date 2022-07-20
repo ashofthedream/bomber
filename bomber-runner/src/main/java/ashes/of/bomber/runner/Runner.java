@@ -19,7 +19,6 @@ import ashes.of.bomber.flight.report.TestAppReport;
 import ashes.of.bomber.flight.report.TestCaseReport;
 import ashes.of.bomber.flight.report.TestFlightReport;
 import ashes.of.bomber.flight.report.TestSuiteReport;
-import ashes.of.bomber.sink.Sink;
 import ashes.of.bomber.snapshots.TestAppSnapshot;
 import ashes.of.bomber.snapshots.TestCaseSnapshot;
 import ashes.of.bomber.snapshots.TestFlightSnapshot;
@@ -42,13 +41,13 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.function.BooleanSupplier;
 import java.util.stream.Collectors;
 
 
 public class Runner {
     private static final Logger log = LogManager.getLogger();
 
+    private final CountDownLatch endLatch = new CountDownLatch(1);
     private final WorkerPool pool = new WorkerPool();
     private final EventMachine em;
     private final List<Watcher> watchers;
@@ -67,14 +66,14 @@ public class Runner {
     /**
      * Runs the test flight
      */
-    public TestFlightReport run(TestFlightPlan flightPlan, BooleanSupplier condition) {
+    public TestFlightReport run(TestFlightPlan flightPlan) {
         var current = this.state;
         if (current != null) {
             throw new IllegalStateException("Invalid runner state: already exists for flightId: " + current.getPlan().flightId());
         }
 
         log.trace("Create flight state for flight: {}", flightPlan.flightId());
-        var state = new TestFlightState(flightPlan, condition);
+        var state = new TestFlightState(flightPlan, () -> endLatch.getCount() > 0);
         this.state = state;
 
 
@@ -99,7 +98,7 @@ public class Runner {
         log.debug("Start watchers, watch every {}s", 1);
         ScheduledExecutorService watcherEx = Executors.newSingleThreadScheduledExecutor(BomberThreadFactory.watcher());
         List<ScheduledFuture<?>> wfs = watchers.stream()
-                .map(watcher -> watcherEx.scheduleAtFixedRate(() -> watcher.watch(getFlight()), 0, 1, TimeUnit.SECONDS))
+                .map(watcher -> watcherEx.scheduleAtFixedRate(() -> watcher.watch(getSnapshot()), 0, 1, TimeUnit.SECONDS))
                 .collect(Collectors.toList());
 
 
@@ -264,7 +263,7 @@ public class Runner {
                     var config = Optional.ofNullable(testCasePlan.configuration())
                             .orElse(testCase.getConfiguration());
 
-                    return config.settings().threadsCount();
+                    return config.settings().threads();
                 })
                 .max()
                 .orElseThrow(() -> new RuntimeException("Can't determine thread count for test suite: " + testSuite.getName()));
@@ -309,11 +308,11 @@ public class Runner {
         var test = new Test(testApp.getName(), testSuite.getName(), testCase.getName());
         em.dispatch(new TestCaseStartedEvent(state.getStartTime(), state.getFlightId(), test, settings));
 
-        log.debug("Run {} workers", settings.threadsCount());
+        log.debug("Run {} workers", settings.threads());
 
         pool.getAcquired()
                 .stream()
-                .limit(settings.threadsCount())
+                .limit(settings.threads())
                 .forEach(worker -> worker.run(state, em));
 
         try {
@@ -347,7 +346,7 @@ public class Runner {
 
     @Deprecated
     @Nullable
-    public TestFlightSnapshot getFlight() {
+    public TestFlightSnapshot getSnapshot() {
         var state = this.state;
         if (state == null) {
             return null;
@@ -399,5 +398,13 @@ public class Runner {
                 state.getTotalIterationsCount(),
                 state.getErrorCount()
         );
+    }
+
+    public void stop() {
+        endLatch.countDown();
+    }
+
+    public void await() throws InterruptedException {
+        endLatch.await();
     }
 }

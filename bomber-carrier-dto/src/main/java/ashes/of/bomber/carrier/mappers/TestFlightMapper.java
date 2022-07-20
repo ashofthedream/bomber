@@ -93,7 +93,6 @@ public class TestFlightMapper {
         return new WorkerSnapshotDto()
                 .setName(state.worker())
                 .setIterationsCount(state.currentIterationsCount())
-                .setRemainIterationsCount(state.remainIterationsCount())
                 .setErrorsCount(state.errorsCount());
     }
 }

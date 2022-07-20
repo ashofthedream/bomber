@@ -96,7 +96,7 @@ public class CarrierFlightProgressHttpSink implements Sink {
         var current = System.currentTimeMillis() / 1000;
         var last = lastUpdate.get();
         if (last != current && lastUpdate.compareAndSet(last, current)) {
-            var state = TestFlightMapper.toDto(bomber.getState());
+            var state = TestFlightMapper.toDto(bomber.getSnapshot());
             send(new SinkEvent()
                     .setId(SinkEvent.nextId())
                     .setType(TEST_CASE_PROGRESS)

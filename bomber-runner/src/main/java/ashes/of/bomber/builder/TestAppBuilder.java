@@ -2,7 +2,8 @@ package ashes.of.bomber.builder;
 
 import ashes.of.bomber.core.TestApp;
 import ashes.of.bomber.core.TestSuite;
-import ashes.of.bomber.runner.WorkerPool;
+import ashes.of.bomber.processors.TestAppProcessor;
+import ashes.of.bomber.processors.TestSuiteProcessor;
 import com.google.common.base.Preconditions;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -13,7 +14,6 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;

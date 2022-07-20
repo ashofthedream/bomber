@@ -19,7 +19,7 @@ import java.util.function.Supplier;
 public class AnnotationProcessingBenchmark {
 
     @LoadTestSuite
-    @LoadTestSettings(time = 20, threadIterations = 1_000_000)
+    @LoadTestSettings(time = 20, iterations = 1_000_000)
     public static class Test {
 
         private final Histogram histogram = new ConcurrentHistogram(2);
@@ -64,9 +64,7 @@ public class AnnotationProcessingBenchmark {
                 .name("suite-with-builder")
                 .withContext(test)
                 .config(config -> config
-                    .settings(settings -> settings
-                            .setThreadsCount(1)
-                            .setThreadIterationsCount(1_000_000)))
+                    .settings(settings -> settings.setThreads(1)))
                 .testCase("test", Test::test);
 
         new BomberBuilder()

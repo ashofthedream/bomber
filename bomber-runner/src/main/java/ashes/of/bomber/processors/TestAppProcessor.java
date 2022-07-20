@@ -1,8 +1,9 @@
-package ashes.of.bomber.builder;
+package ashes.of.bomber.processors;
 
 import ashes.of.bomber.annotations.LoadTestApp;
 import ashes.of.bomber.annotations.LoadTestSuite;
 import ashes.of.bomber.annotations.Provide;
+import ashes.of.bomber.builder.TestAppBuilder;
 import com.google.common.base.Strings;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -66,7 +67,6 @@ public class TestAppProcessor {
         AtomicReference<Object> object = new AtomicReference<>();
 
         builder.provide(ret, () -> {
-
             Object res = object.get();
             if (res == null) {
                 log.debug("init provider type: {}", ret);

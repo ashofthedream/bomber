@@ -13,24 +13,18 @@ public class SettingsBuilder {
     /**
      * Threads count
      */
-    private int threadsCount = 1;
-
-    /**
-     * Iterations count per each thread
-     */
-    private long threadIterationsCount = 1_000_000_000;
+    private int threads = 1;
 
     /**
      * Total iterations count
      */
-    private long totalIterationsCount = 1_000_000_000;
+    private long iterations = 1_000_000_000;
 
     public static SettingsBuilder of(Settings settings) {
         return new SettingsBuilder()
                 .setDuration(settings.duration())
-                .setThreadsCount(settings.threadsCount())
-                .setThreadIterationsCount(settings.threadIterationsCount())
-                .setTotalIterationsCount(settings.totalIterationsCount());
+                .setThreads(settings.threads())
+                .setIterations(settings.iterations());
     }
 
     public SettingsBuilder setDuration(Duration time) {
@@ -46,22 +40,17 @@ public class SettingsBuilder {
         return setDuration(Duration.ofSeconds(seconds));
     }
 
-    public SettingsBuilder setThreadsCount(int threadsCount) {
-        this.threadsCount = threadsCount;
+    public SettingsBuilder setThreads(int threads) {
+        this.threads = threads;
         return this;
     }
 
-    public SettingsBuilder setThreadIterationsCount(long threadIterationsCount) {
-        this.threadIterationsCount = threadIterationsCount;
-        return this;
-    }
-
-    public SettingsBuilder setTotalIterationsCount(long totalIterationsCount) {
-        this.totalIterationsCount = totalIterationsCount;
+    public SettingsBuilder setIterations(long iterations) {
+        this.iterations = iterations;
         return this;
     }
 
     public Settings build() {
-        return new Settings(time, threadsCount, threadIterationsCount, totalIterationsCount);
+        return new Settings(time, threads, iterations);
     }
 }

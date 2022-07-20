@@ -35,7 +35,7 @@ public class ExampleAccountsTestApp implements Supplier<TestAppBuilder> {
                 .name("ExampleAccountsTestApp")
                 .config(config -> config
                         .settings(new SettingsBuilder()
-                                .setThreadsCount(2)
+                                .setThreads(2)
                                 .setSeconds(10))
                         .barrier(barrier)
                         .limiter(new RateLimiter(10, Duration.ofSeconds(1))))

@@ -15,7 +15,7 @@ import org.apache.logging.log4j.Logger;
 import java.util.Random;
 
 @LoadTestSuite(name = "UserController")
-@LoadTestSettings(time = 30, totalIterations = 5000)
+@LoadTestSettings(time = 30, iterations = 5000)
 @Throttle(threshold = 100, shared = true)
 public class UserControllerLoadTest {
     private static final Logger log = LogManager.getLogger();

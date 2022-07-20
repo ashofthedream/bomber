@@ -15,7 +15,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 @LoadTestSuite(name = "lifecycleAll")
-@LoadTestSettings(time = 20, threadIterations = 10, threads = 2)
+@LoadTestSettings(time = 20, iterations = 20, threads = 2)
 public class AllLifecycleMethodsTest {
     private static final Logger log = LogManager.getLogger();
 

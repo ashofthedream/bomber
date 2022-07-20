@@ -3,7 +3,6 @@ package ashes.of.bomber.runner;
 import ashes.of.bomber.builder.BomberBuilder;
 import ashes.of.bomber.builder.TestAppBuilder;
 import ashes.of.bomber.builder.TestSuiteBuilder;
-import ashes.of.bomber.configuration.SettingsBuilder;
 import ashes.of.bomber.runner.tests.AllLifecycleMethodsTest;
 import ashes.of.bomber.runner.tests.Counters;
 import ashes.of.bomber.sink.Log4jSink;
@@ -25,8 +24,8 @@ public class BuilderLifecycleTest extends LifecycleTest {
                 .config(config -> config
                         .settings(settings -> settings
                                 .setSeconds(20)
-                                .setThreadsCount(2)
-                                .setThreadIterationsCount(10)))
+                                .setThreads(2)
+                                .setIterations(20)))
                 .beforeSuite(AllLifecycleMethodsTest::beforeSuite)
                 .beforeSuite(true, AllLifecycleMethodsTest::beforeSuiteOnlyOnce)
                 .beforeCase(AllLifecycleMethodsTest::beforeCase)

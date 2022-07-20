@@ -18,6 +18,11 @@ import java.util.concurrent.TimeUnit;
 public @interface LoadTestSettings {
 
     /**
+     * @return number of threads
+     */
+    int threads() default 1;
+
+    /**
      * @return load test stage time
      */
     long time() default 60;
@@ -28,17 +33,7 @@ public @interface LoadTestSettings {
     TimeUnit timeUnit() default TimeUnit.SECONDS;
 
     /**
-     * @return number of threads
-     */
-    int threads() default 1;
-
-    /**
      * @return number of total iterations for all threads
      */
-    long totalIterations() default 1_000_000_000;
-
-    /**
-     * @return number of iterations per each thread.
-     */
-    long threadIterations() default 1_000_000_000;
+    long iterations() default 1_000_000_000;
 }

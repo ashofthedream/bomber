@@ -31,8 +31,8 @@ public class TestCaseState {
         this.plan = plan;
         this.testCase = testCase;
         this.configuration = configuration;
-        this.startLatch = new CountDownLatch(configuration.settings().threadsCount());
-        this.finishLatch = new CountDownLatch(configuration.settings().threadsCount());
+        this.startLatch = new CountDownLatch(configuration.settings().threads());
+        this.finishLatch = new CountDownLatch(configuration.settings().threads());
     }
 
     public TestApp getTestApp() {
@@ -113,6 +113,6 @@ public class TestCaseState {
     }
 
     private boolean incAndCheckTotalIterations() {
-        return configuration.settings().totalIterationsCount() >= totalIterationsCount.incrementAndGet();
+        return configuration.settings().iterations() >= totalIterationsCount.incrementAndGet();
     }
 }

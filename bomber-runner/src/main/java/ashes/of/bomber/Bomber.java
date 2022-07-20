@@ -18,17 +18,14 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.CountDownLatch;
-import java.util.stream.Collectors;
 
 public class Bomber {
     private static final Logger log = LogManager.getLogger();
 
-    private volatile CountDownLatch endLatch = new CountDownLatch(1);
+    @Nullable
     private volatile Runner runner;
 
     private final EventMachine em = new EventMachine();
-    private final List<Sink> sinks = new CopyOnWriteArrayList<>();
     private final List<Watcher> watchers = new CopyOnWriteArrayList<>();
     private final List<TestApp> apps;
 
@@ -39,7 +36,7 @@ public class Bomber {
     }
 
     public Bomber addSink(Sink sink) {
-        sinks.add(sink);
+        sink.configure(em);
         return this;
     }
 
@@ -67,19 +64,16 @@ public class Bomber {
 
     public TestFlightReport start(TestFlightPlan flightPlan) {
         // todo check that application isn't idle
-
-        endLatch = new CountDownLatch(1);
-
         log.info("Init runner");
-        runner = new Runner(em, watchers, apps);
+        var r = new Runner(em, watchers, apps);
+
+        this.runner = r;
 
         try {
-            return runner.run(flightPlan, () -> endLatch.getCount() > 0);
+            return r.run(flightPlan);
         } finally {
             log.info("Flight is over, report is ready");
             ThreadContext.clearAll();
-            endLatch.countDown();
-            endLatch = null;
             runner = null;
         }
     }
@@ -87,7 +81,7 @@ public class Bomber {
     public TestFlightReport start() {
         var apps = this.apps.stream()
                 .map(TestApp::createDefaultAppPlan)
-                .collect(Collectors.toList());
+                .toList();
 
         var plan = new TestFlightPlan(System.currentTimeMillis() - 1630454400000L, apps);
 
@@ -100,25 +94,25 @@ public class Bomber {
     }
 
     public void stop() {
-        var latch = endLatch;
-        if (latch != null) {
-            latch.countDown();
+        var r = runner;
+        if (r != null) {
+            r.stop();
         }
     }
 
     public void await() throws InterruptedException {
-        var latch = endLatch;
-        if (latch != null) {
-            latch.await();
+        var r = runner;
+        if (r != null) {
+            r.await();
         }
     }
 
     @Nullable
     @Deprecated
-    public TestFlightSnapshot getState() {
-        var runner = this.runner;
-        if (runner != null) {
-            return runner.getFlight();
+    public TestFlightSnapshot getSnapshot() {
+        var r = runner;
+        if (r != null) {
+            return r.getSnapshot();
         }
 
         return null;

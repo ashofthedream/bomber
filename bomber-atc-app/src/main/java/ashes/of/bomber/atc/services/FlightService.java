@@ -20,8 +20,6 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static ashes.of.bomber.carrier.dto.events.SinkEventType.TEST_CASE_PROGRESS;
-
 @Service
 public class FlightService {
     private static final Logger log = LogManager.getLogger();
@@ -76,7 +74,7 @@ public class FlightService {
                                     .setTimeElapsed(System.currentTimeMillis() - snapshot.getStartTime())
                                     .setTimeTotal(settings.getDuration())
                                     .setCurrentIterationsCount(snapshot.getCurrentIterationsCount())
-                                    .setTotalIterationsCount(settings.getTotalIterationsCount())
+                                    .setTotalIterationsCount(settings.getIterations())
                                     .setErrorsCount(snapshot.getErrorsCount());
 
                             flight.addProgress(event.getCarrierId(), progress);

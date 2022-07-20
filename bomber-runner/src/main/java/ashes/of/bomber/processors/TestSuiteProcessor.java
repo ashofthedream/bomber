@@ -1,4 +1,4 @@
-package ashes.of.bomber.builder;
+package ashes.of.bomber.processors;
 
 import ashes.of.bomber.annotations.AfterEach;
 import ashes.of.bomber.annotations.AfterTestCase;
@@ -8,6 +8,7 @@ import ashes.of.bomber.annotations.BeforeTestCase;
 import ashes.of.bomber.annotations.BeforeTestSuite;
 import ashes.of.bomber.annotations.LoadTestCase;
 import ashes.of.bomber.annotations.LoadTestSuite;
+import ashes.of.bomber.builder.TestSuiteBuilder;
 import com.google.common.base.Strings;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
