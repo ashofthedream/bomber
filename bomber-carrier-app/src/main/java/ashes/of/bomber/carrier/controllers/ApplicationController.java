@@ -41,10 +41,7 @@ public class ApplicationController {
                 .collect(Collectors.toList());
 
 
-        var response = new GetApplicationsResponse()
-                .setTestApps(apps);
-
-        return Mono.just(response);
+        return Mono.just(new GetApplicationsResponse(apps));
     }
 
     @PostMapping("/carrier/applications/start")
@@ -54,8 +51,7 @@ public class ApplicationController {
 
         bomber.startAsync(plan);
 
-        return Mono.just(new FlightStartedResponse()
-                .setId(plan.flightId()));
+        return Mono.just(new FlightStartedResponse(plan.flightId()));
     }
 
     @PostMapping("/carrier/applications/stop")

@@ -7,13 +7,11 @@ import com.google.common.base.Preconditions;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.stream.Collectors;
 
 public class BomberBuilder {
 
-    private final List<Sink> sinks = new CopyOnWriteArrayList<>();
-    private final List<Watcher> watchers = new CopyOnWriteArrayList<>();
+    private final List<Sink> sinks = new ArrayList<>();
+    private final List<Watcher> watchers = new ArrayList<>();
     private final List<TestAppBuilder> applications = new ArrayList<>();
 
 
@@ -47,7 +45,7 @@ public class BomberBuilder {
 
         var apps = applications.stream()
                 .map(TestAppBuilder::build)
-                .collect(Collectors.toCollection(CopyOnWriteArrayList::new));
+                .toList();
 
         return new Bomber(sinks, watchers, apps);
     }

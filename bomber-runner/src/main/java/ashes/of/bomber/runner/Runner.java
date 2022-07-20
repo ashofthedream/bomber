@@ -4,6 +4,7 @@ import ashes.of.bomber.configuration.Configuration;
 import ashes.of.bomber.core.Test;
 import ashes.of.bomber.core.TestApp;
 import ashes.of.bomber.core.TestSuite;
+import ashes.of.bomber.events.EventMachine;
 import ashes.of.bomber.events.FlightFinishedEvent;
 import ashes.of.bomber.events.FlightStartedEvent;
 import ashes.of.bomber.events.TestAppFinishedEvent;
@@ -18,8 +19,6 @@ import ashes.of.bomber.flight.report.TestAppReport;
 import ashes.of.bomber.flight.report.TestCaseReport;
 import ashes.of.bomber.flight.report.TestFlightReport;
 import ashes.of.bomber.flight.report.TestSuiteReport;
-import ashes.of.bomber.sink.AsyncSink;
-import ashes.of.bomber.sink.MultiSink;
 import ashes.of.bomber.sink.Sink;
 import ashes.of.bomber.snapshots.TestAppSnapshot;
 import ashes.of.bomber.snapshots.TestCaseSnapshot;
@@ -51,17 +50,15 @@ public class Runner {
     private static final Logger log = LogManager.getLogger();
 
     private final WorkerPool pool = new WorkerPool();
-    private final List<Sink> sinks;
-    private final Sink sink;
+    private final EventMachine em;
     private final List<Watcher> watchers;
     private final List<TestApp> apps;
 
     @Nullable
     private volatile TestFlightState state;
 
-    public Runner(List<Sink> sinks, List<Watcher> watchers, List<TestApp> apps) {
-        this.sinks = sinks;
-        this.sink = new AsyncSink(new MultiSink(sinks));
+    public Runner(EventMachine em, List<Watcher> watchers, List<TestApp> apps) {
+        this.em = em;
         this.watchers = watchers;
         this.apps = apps;
     }
@@ -105,8 +102,8 @@ public class Runner {
                 .map(watcher -> watcherEx.scheduleAtFixedRate(() -> watcher.watch(getFlight()), 0, 1, TimeUnit.SECONDS))
                 .collect(Collectors.toList());
 
-        
-        sendFlightStartedEvent(new FlightStartedEvent(state.getStartTime(), flightPlan.flightId()));
+
+        em.dispatch(new FlightStartedEvent(state.getStartTime(), flightPlan.flightId()));
 
         try {
             var appsByName = apps.stream()
@@ -133,7 +130,7 @@ public class Runner {
 
             Instant flightFinishTime = Instant.now();
             state.setFinishTime(flightFinishTime);
-            sendFlightFinishedEvent(new FlightFinishedEvent(flightFinishTime, flightPlan.flightId()));
+            em.dispatch(new FlightFinishedEvent(flightFinishTime, flightPlan.flightId()));
 
             ThreadContext.clearAll();
             log.info("Flight finished: {}", flightPlan.flightId());
@@ -149,16 +146,6 @@ public class Runner {
         }
     }
 
-    private void sendFlightStartedEvent(FlightStartedEvent event) {
-        sink.beforeFlight(event);
-        watchers.forEach(watcher -> watcher.beforeFlight(event));
-    }
-
-    private void sendFlightFinishedEvent(FlightFinishedEvent event) {
-        sink.afterFlight(event);
-        watchers.forEach(watcher -> watcher.afterFlight(event));
-    }
-
 
     /**
      * Runs the test app
@@ -168,7 +155,7 @@ public class Runner {
         ThreadContext.put("testApp", testApp.getName());
         log.info("Start app: {}", testApp.getName());
 
-        send(new TestAppStartedEvent(state.getStartTime(), state.getFlightId(), testApp.getName()));
+        em.dispatch(new TestAppStartedEvent(state.getStartTime(), state.getFlightId(), testApp.getName()));
 
         try {
             Map<String, TestSuite<?>> suitesByName = testApp.getTestSuitesByName();
@@ -191,22 +178,12 @@ public class Runner {
 
             log.info("Finish application: {}", testApp.getName());
             state.finish();
-            send(new TestAppFinishedEvent(state.getFinishTime(), state.getFlightId(), testApp.getName()));
+            em.dispatch(new TestAppFinishedEvent(state.getFinishTime(), state.getFlightId(), testApp.getName()));
 
             return new TestAppReport(state.getPlan(), state.getStartTime(), state.getFinishTime(), testSuiteReports);
         } finally {
             ThreadContext.remove("testApp");
         }
-    }
-
-    private void send(TestAppStartedEvent event) {
-        sink.beforeTestApp(event);
-        watchers.forEach(watcher -> watcher.beforeTestApp(event));
-    }
-
-    private void send(TestAppFinishedEvent event) {
-        sink.afterTestApp(event);
-        watchers.forEach(watcher -> watcher.afterTestApp(event));
     }
 
 
@@ -221,7 +198,7 @@ public class Runner {
         log.trace("Reset before & after test suite lifecycle methods");
         testSuite.resetBeforeAndAfterSuite();
 
-        send(new TestSuiteStartedEvent(state.getStartTime(), state.getFlightId(), state.getParent().getTestApp().getName(), testSuite.getName()));
+        em.dispatch(new TestSuiteStartedEvent(state.getStartTime(), state.getFlightId(), state.getParent().getTestApp().getName(), testSuite.getName()));
 
         int threads = determineWorkerThreadsCount(state.getPlan(), testSuite);
         pool.acquire(threads);
@@ -262,7 +239,7 @@ public class Runner {
 
             log.info("Finish test suite: {}", testSuite.getName());
             state.finish();
-            send(new TestSuiteFinishedEvent(state.getFinishTime(), state.getFlightId(), state.getParent().getTestApp().getName(), testSuite.getName()));
+            em.dispatch(new TestSuiteFinishedEvent(state.getFinishTime(), state.getFlightId(), state.getParent().getTestApp().getName(), testSuite.getName()));
 
             return new TestSuiteReport(testSuite.getName(), reports);
         } catch (Throwable throwable) {
@@ -284,23 +261,13 @@ public class Runner {
                         return 0;
                     }
 
-                    var configuration = Optional.ofNullable(testCasePlan.configuration())
+                    var config = Optional.ofNullable(testCasePlan.configuration())
                             .orElse(testCase.getConfiguration());
 
-                    return configuration.settings().threadsCount();
+                    return config.settings().threadsCount();
                 })
                 .max()
                 .orElseThrow(() -> new RuntimeException("Can't determine thread count for test suite: " + testSuite.getName()));
-    }
-
-    private void send(TestSuiteStartedEvent event) {
-        sink.beforeTestSuite(event);
-        watchers.forEach(watcher -> watcher.beforeTestSuite(event));
-    }
-
-    private void send(TestSuiteFinishedEvent event) {
-        sink.afterTestSuite(event);
-        watchers.forEach(watcher -> watcher.afterTestSuite(event));
     }
 
     private void callBeforeSuite(TestSuite<Object> testSuite) throws InterruptedException {
@@ -340,14 +307,14 @@ public class Runner {
         testSuite.resetBeforeAndAfterCase();
 
         var test = new Test(testApp.getName(), testSuite.getName(), testCase.getName());
-        send(new TestCaseStartedEvent(state.getStartTime(), state.getFlightId(), test, settings));
+        em.dispatch(new TestCaseStartedEvent(state.getStartTime(), state.getFlightId(), test, settings));
 
         log.debug("Run {} workers", settings.threadsCount());
 
         pool.getAcquired()
                 .stream()
                 .limit(settings.threadsCount())
-                .forEach(worker -> worker.run(state, sink, watchers));
+                .forEach(worker -> worker.run(state, em));
 
         try {
             log.debug("Await end of test case: {}", testCase.getName());
@@ -364,7 +331,7 @@ public class Runner {
         log.info("Finish test case: {}", testCase.getName());
         state.finish();
 
-        send(new TestCaseFinishedEvent(state.getFinishTime(), state.getFlightId(), test));
+        em.dispatch(new TestCaseFinishedEvent(state.getFinishTime(), state.getFlightId(), test));
 
         var elapsed = state.getFinishTime().toEpochMilli() - state.getStartTime().toEpochMilli();
         ThreadContext.remove("testCase");
@@ -375,16 +342,6 @@ public class Runner {
                 state.getErrorCount(),
                 elapsed
         );
-    }
-
-    private void send(TestCaseStartedEvent event) {
-        sink.beforeTestCase(event);
-        watchers.forEach(watcher -> watcher.beforeTestCase(event));
-    }
-
-    private void send(TestCaseFinishedEvent event) {
-        sink.afterTestCase(event);
-        watchers.forEach(watcher -> watcher.afterTestCase(event));
     }
 
 

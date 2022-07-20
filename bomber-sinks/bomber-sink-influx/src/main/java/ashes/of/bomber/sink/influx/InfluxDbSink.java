@@ -28,8 +28,8 @@ public class InfluxDbSink implements Sink {
 
     @Override
     public void timeRecorded(Record record) {
-        Iteration it = record.getIteration();
-        String error = Optional.ofNullable(record.getError())
+        Iteration it = record.iteration();
+        String error = Optional.ofNullable(record.error())
                 .map(Throwable::getMessage)
                 .orElse("");
 
@@ -40,9 +40,9 @@ public class InfluxDbSink implements Sink {
                 .tag("testCase",        it.test().testCase())
                 .tag("thread",          it.thread())
                 .tag("error",           error)
-                .tag("label",           record.getLabel())
+                .tag("label",           record.label())
                 .addField("iteration",  it.number())
-                .addField("elapsed",    record.getElapsed())
+                .addField("elapsed",    record.elapsed())
                 .build());
     }
 

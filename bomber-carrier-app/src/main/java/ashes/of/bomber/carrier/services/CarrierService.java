@@ -39,17 +39,16 @@ public class CarrierService {
     }
 
 
-
     public Flux<ResponseEntity<Void>> event(SinkEvent event) {
         return getAtc()
                 .flatMap(atc -> {
-                URI uri = atc.getUri();
-                return webClient.post()
-                        .uri(uri + "/atc/sink")
-                        .body(BodyInserters.fromValue(event))
-                        .retrieve()
-                        .toBodilessEntity()
-                        .onErrorContinue((throwable, o) -> log.warn("Can't send status to ATC instance: {}, uri: {}", atc.getInstanceId(), atc.getUri(), throwable));
-        });
+                    URI uri = atc.getUri();
+                    return webClient.post()
+                            .uri(uri + "/atc/sink")
+                            .body(BodyInserters.fromValue(event))
+                            .retrieve()
+                            .toBodilessEntity()
+                            .onErrorContinue((throwable, o) -> log.warn("Can't send status to ATC instance: {}, uri: {}", atc.getInstanceId(), atc.getUri(), throwable));
+                });
     }
 }

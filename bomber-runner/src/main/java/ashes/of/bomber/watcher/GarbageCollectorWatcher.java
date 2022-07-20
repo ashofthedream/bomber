@@ -12,8 +12,8 @@ public class GarbageCollectorWatcher implements Watcher {
     private static final Logger log = LogManager.getLogger(new StringFormatterMessageFactory());
 
     @Override
-    public void watch(TestFlightSnapshot flight) {
-        var testApp = flight.current();
+    public void watch(TestFlightSnapshot snapshot) {
+        var testApp = snapshot.current();
         if (testApp != null) {
             ThreadContext.put("testApp", testApp.name());
             var testSuite = testApp.current();

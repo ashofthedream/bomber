@@ -51,7 +51,7 @@ public class CarrierService {
                 .uri(uri + "/carrier/applications")
                 .retrieve()
                 .bodyToMono(GetApplicationsResponse.class)
-                .map(response -> toCarrier(carrier, response.getTestApps()))
+                .map(response -> toCarrier(carrier, response.testApps()))
                 .onErrorContinue((throwable, o) -> log.warn("Can't get status of carrier: {}", carrier.getId(), throwable));
     }
 

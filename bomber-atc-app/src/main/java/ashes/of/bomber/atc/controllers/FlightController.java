@@ -66,7 +66,7 @@ public class FlightController {
                 .map(flights -> {
                     flight.setCarriersCount(flights.size());
                     var flightIds = flights.stream()
-                            .map(FlightStartedResponse::getId)
+                            .map(FlightStartedResponse::id)
                             .distinct()
                             .collect(Collectors.toList());
 
@@ -78,8 +78,7 @@ public class FlightController {
                             .findFirst()
                             .orElseThrow(() -> new RuntimeException("No flights started"));
 
-                    return new FlightStartedResponse()
-                            .setId(flightId);
+                    return new FlightStartedResponse(flightId);
                 });
     }
 

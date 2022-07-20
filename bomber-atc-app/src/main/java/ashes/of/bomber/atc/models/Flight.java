@@ -2,16 +2,12 @@ package ashes.of.bomber.atc.models;
 
 import ashes.of.bomber.carrier.dto.events.HistogramPointDto;
 import ashes.of.bomber.carrier.dto.events.SinkEvent;
-import ashes.of.bomber.carrier.dto.flight.TestAppSnapshotDto;
-import ashes.of.bomber.carrier.dto.flight.TestFlightSnapshotDto;
-import ashes.of.bomber.carrier.dto.flight.TestSuiteSnapshotDto;
 import ashes.of.bomber.flight.plan.TestFlightPlan;
 
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
-import java.util.Optional;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;

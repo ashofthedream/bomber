@@ -1,8 +1,8 @@
 package ashes.of.bomber.runner;
 
-import ashes.of.bomber.configuration.Settings;
 import ashes.of.bomber.core.Test;
 import ashes.of.bomber.core.TestSuite;
+import ashes.of.bomber.events.EventMachine;
 import ashes.of.bomber.snapshots.WorkerSnapshot;
 import ashes.of.bomber.events.TestCaseAfterEachEvent;
 import ashes.of.bomber.events.TestCaseBeforeEachEvent;
@@ -86,12 +86,12 @@ public class Worker {
         });
     }
 
-    public void run(TestCaseState state, Sink sink, List<Watcher> watchers) {
+    public void run(TestCaseState state, EventMachine events) {
         this.state = new WorkerState(state);
-        run(() -> run(this.state, sink, watchers));
+        run(() -> run(this.state, events));
     }
 
-    private void run(WorkerState state, Sink sink, List<Watcher> watchers) {
+    private void run(WorkerState state, EventMachine events) {
         var parent = state.getParent();
         var testCase = parent.getTestCase();
         var testSuite = parent.getParent().getTestSuite();
@@ -149,14 +149,10 @@ public class Worker {
             var it = state.createIteration();
             testSuite.beforeEach(it, context);
 
-            send(sink, watchers, new TestCaseBeforeEachEvent(
-                    it.timestamp(),
-                    it.flightId(),
-                    it.test()
-            ));
+            events.dispatch(new TestCaseBeforeEachEvent(it.timestamp(), it.flightId(), it.test()));
 
             Tools tools = new Tools(it, record -> {
-                sink.timeRecorded(record);
+                events.dispatch(record);
                 state.addCaughtCount(1);
 
                 if (!record.success())
@@ -173,7 +169,7 @@ public class Worker {
 
                 long expected = tools.getStopwatchCount() - (testCase.isAsync() ? 1 : 0);
                 state.addExpectedCount(expected);
-                send(sink, watchers, new TestCaseAfterEachEvent(
+                events.dispatch(new TestCaseAfterEachEvent(
                         it.timestamp(),
                         it.flightId(),
                         it.test(),
@@ -186,7 +182,7 @@ public class Worker {
                 if (!testCase.isAsync())
                     stopwatch.fail(th);
 
-                send(sink, watchers, new TestCaseAfterEachEvent(
+                events.dispatch(new TestCaseAfterEachEvent(
                         it.timestamp(),
                         it.flightId(),
                         it.test(),
@@ -235,16 +231,6 @@ public class Worker {
         log.debug("Finish test case: {}", testCase.getName());
         state.finish();
         ThreadContext.clearAll();
-    }
-
-    private void send(Sink sink, List<Watcher> watchers, TestCaseBeforeEachEvent event) {
-        sink.beforeEach(event);
-        watchers.forEach(watcher -> watcher.beforeEach(event));
-    }
-
-    private void send(Sink sink, List<Watcher> watchers, TestCaseAfterEachEvent event) {
-        sink.afterEach(event);
-        watchers.forEach(watcher -> watcher.afterEach(event));
     }
 
     public void runAfterSuite(TestSuite<Object> testSuite, CountDownLatch latch) {
