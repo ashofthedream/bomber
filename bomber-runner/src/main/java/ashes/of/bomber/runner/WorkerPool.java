@@ -11,7 +11,6 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.SynchronousQueue;
-import java.util.stream.IntStream;
 
 
 public class WorkerPool {
@@ -39,7 +38,7 @@ public class WorkerPool {
 
     private Worker createWorker() {
         BlockingQueue<Runnable> queue = new SynchronousQueue<>();
-        Thread thread = BomberThreadFactory.worker().newThread(() -> {
+        Thread thread = BomberThreadFactory.WORKER_FACTORY.newThread(() -> {
             while (true) {
                 try {
                     Runnable task = queue.take();

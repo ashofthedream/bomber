@@ -2,8 +2,12 @@ package ashes.of.bomber;
 
 import ashes.of.bomber.builder.TestAppBuilder;
 import ashes.of.bomber.core.TestApp;
+import ashes.of.bomber.core.TestSuite;
 import ashes.of.bomber.events.EventMachine;
+import ashes.of.bomber.flight.plan.TestAppPlan;
+import ashes.of.bomber.flight.plan.TestCasePlan;
 import ashes.of.bomber.flight.plan.TestFlightPlan;
+import ashes.of.bomber.flight.plan.TestSuitePlan;
 import ashes.of.bomber.flight.report.TestFlightReport;
 import ashes.of.bomber.runner.Runner;
 import ashes.of.bomber.sink.Sink;
@@ -18,6 +22,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
 
 public class Bomber {
     private static final Logger log = LogManager.getLogger();
@@ -79,15 +84,13 @@ public class Bomber {
     }
 
     public TestFlightReport start() {
-        var apps = this.apps.stream()
-                .map(TestApp::createDefaultAppPlan)
-                .toList();
-
-        var plan = new TestFlightPlan(System.currentTimeMillis() - 1630454400000L, apps);
-
-        return start(plan);
+        return start(defaultFlightPlan());
     }
 
+
+    public CompletableFuture<TestFlightReport> startAsync() {
+        return CompletableFuture.supplyAsync(this::start);
+    }
 
     public CompletableFuture<TestFlightReport> startAsync(TestFlightPlan plan) {
         return CompletableFuture.supplyAsync(() -> start(plan));
@@ -117,4 +120,30 @@ public class Bomber {
 
         return null;
     }
+
+
+    private TestFlightPlan defaultFlightPlan() {
+        var apps = this.apps.stream()
+                .map(this::defaultTestAppPlan)
+                .toList();
+
+        return new TestFlightPlan(System.currentTimeMillis() - 1630454400000L, apps);
+    }
+
+    private TestAppPlan defaultTestAppPlan(TestApp app) {
+        var suites = app.getTestSuites().stream()
+                .map(this::defaultTestSuitePlan)
+                .toList();
+
+        return new TestAppPlan(app.getName(), suites);
+    }
+
+    private TestSuitePlan defaultTestSuitePlan(TestSuite<?> testSuite) {
+        List<TestCasePlan> testCases = testSuite.getTestCases().stream()
+                .map(testCase -> new TestCasePlan(testCase.getName(), testCase.getConfiguration()))
+                .toList();
+
+        return new TestSuitePlan(testSuite.getName(), testCases);
+    }
+
 }

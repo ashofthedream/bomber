@@ -14,10 +14,14 @@ import java.util.function.Consumer;
 
 public class EventMachine implements EventDispatcher, EventHandler {
     private static final Logger log = LogManager.getLogger();
-    private static final Executor defaultExecutor = Executors.newFixedThreadPool(1, BomberThreadFactory.asyncSink());
 
+    private final Executor executor;
     private final Map<Class<?>, List<Consumer<Object>>> handlers = new ConcurrentHashMap<>();
-    private final Consumer<Object> empty = event -> log.warn("No handler found for event: {}", event);
+    private final Consumer<Object> empty = event -> log.debug("No handler found for event: {}", event.getClass());
+
+    public EventMachine() {
+        this.executor = Executors.newFixedThreadPool(1, BomberThreadFactory.SINK_FACTORY);
+    }
 
     @Override
     public <E> EventMachine handle(Class<E> cls, Consumer<E> handler) {
@@ -29,11 +33,11 @@ public class EventMachine implements EventDispatcher, EventHandler {
     @Override
     public <E> EventMachine dispatch(E event) {
         var handlers = this.handlers.getOrDefault(event.getClass(), List.of(empty));
-        defaultExecutor.execute(() -> propagate(event, handlers));
+        executor.execute(() -> propagate(event, handlers));
         return this;
     }
 
-    private <E> void propagate(Object event, List<Consumer<Object>> handlers) {
+    private void propagate(Object event, List<Consumer<Object>> handlers) {
         handlers.forEach(handler -> {
             try {
                 handler.accept(event);

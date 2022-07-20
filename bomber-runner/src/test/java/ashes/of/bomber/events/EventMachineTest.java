@@ -54,4 +54,18 @@ class EventMachineTest {
 
         assertEquals(0, first.get());
     }
+
+    @Test
+    public void handleShouldBeSafeForOtherHandlers() throws InterruptedException {
+        var first = new AtomicInteger();
+
+        handler.handle(FirstEvent.class, event -> { throw new RuntimeException("Can't dispatch"); });
+        handler.handle(FirstEvent.class, event -> first.incrementAndGet());
+
+        handler.dispatch(new FirstEvent("First 1"));
+
+        Thread.sleep(100);
+
+        assertEquals(1, first.get());
+    }
 }

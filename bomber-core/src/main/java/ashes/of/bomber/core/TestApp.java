@@ -33,17 +33,5 @@ public class TestApp {
                 .collect(Collectors.toMap(TestSuite::getName, suite -> suite));
     }
 
-    public TestAppPlan createDefaultAppPlan() {
-        var suites = getTestSuites().stream()
-                .map(testSuite -> {
-                    List<TestCasePlan> testCases = testSuite.getTestCases().stream()
-                            .map(testCase -> new TestCasePlan(testCase.getName(), testCase.getConfiguration()))
-                            .collect(Collectors.toList());
 
-                    return new TestSuitePlan(testSuite.getName(), testCases);
-                })
-                .collect(Collectors.toList());
-
-        return new TestAppPlan(name, suites);
-    }
 }

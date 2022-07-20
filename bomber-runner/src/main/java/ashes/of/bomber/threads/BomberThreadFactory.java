@@ -9,9 +9,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class BomberThreadFactory implements ThreadFactory {
     private static final Logger log = LogManager.getLogger();
 
-    private static final ThreadFactory watcherFactory = new BomberThreadFactory("watcher");
-    private static final ThreadFactory workerFactory = new BomberThreadFactory("worker");
-    private static final ThreadFactory asyncSinkFactory = new BomberThreadFactory("async-sink");
+    public static final ThreadFactory WATCHER_FACTORY = new BomberThreadFactory("watcher");
+    public static final ThreadFactory WORKER_FACTORY = new BomberThreadFactory("worker");
+    public static final ThreadFactory SINK_FACTORY = new BomberThreadFactory("sink");
 
     private final AtomicInteger threadNumberSeq = new AtomicInteger();
     private final String threadName;
@@ -27,17 +27,5 @@ public class BomberThreadFactory implements ThreadFactory {
         thread.setDaemon(true);
         thread.setUncaughtExceptionHandler((t, e) -> log.warn("Uncaught exception in thread: {}", t.getName(), e));
         return thread;
-    }
-
-    public static ThreadFactory worker() {
-        return workerFactory;
-    }
-
-    public static ThreadFactory watcher() {
-        return watcherFactory;
-    }
-
-    public static ThreadFactory asyncSink() {
-        return asyncSinkFactory;
     }
 }

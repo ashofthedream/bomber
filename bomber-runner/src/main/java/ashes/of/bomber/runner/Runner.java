@@ -96,7 +96,7 @@ public class Runner {
 
 
         log.debug("Start watchers, watch every {}s", 1);
-        ScheduledExecutorService watcherEx = Executors.newSingleThreadScheduledExecutor(BomberThreadFactory.watcher());
+        ScheduledExecutorService watcherEx = Executors.newSingleThreadScheduledExecutor(BomberThreadFactory.WATCHER_FACTORY);
         List<ScheduledFuture<?>> wfs = watchers.stream()
                 .map(watcher -> watcherEx.scheduleAtFixedRate(() -> watcher.watch(getSnapshot()), 0, 1, TimeUnit.SECONDS))
                 .collect(Collectors.toList());
