@@ -22,7 +22,7 @@ public class TestFlightMapper {
         var testApps = flight.getTestApps()
                 .stream()
                 .map(TestAppMapper::toPlan)
-                .collect(Collectors.toList());
+                .toList();
 
         return new TestFlightPlan(flight.getId(), testApps);
     }
@@ -31,7 +31,7 @@ public class TestFlightMapper {
         var testApps = flight.testApps()
                 .stream()
                 .map(TestAppMapper::toDto)
-                .collect(Collectors.toList());
+                .toList();
 
         return new TestFlightDto()
                 .setId(flight.flightId())
@@ -49,7 +49,7 @@ public class TestFlightMapper {
                 .setCurrent(toDto(snapshot.current()))
                 .setWorkers(snapshot.workers().stream()
                         .map(TestFlightMapper::toDto)
-                        .collect(Collectors.toList()));
+                        .toList());
     }
 
     @Nullable

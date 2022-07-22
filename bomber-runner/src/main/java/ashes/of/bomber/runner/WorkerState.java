@@ -16,6 +16,7 @@ public class WorkerState {
     private final AtomicLong expectedRecordsCount = new AtomicLong();
     private final AtomicLong caughtRecordsCount = new AtomicLong();
     private final AtomicLong errorsCount = new AtomicLong();
+    private volatile boolean finished = false;
 
     public WorkerState(TestCaseState parent) {
         this.parent = parent;
@@ -74,11 +75,11 @@ public class WorkerState {
 
     public BooleanSupplier createCondition() {
         var condition = parent.getCondition();
-        return () -> condition.getAsBoolean() && checkTime();
+        return () -> condition.getAsBoolean() && checkTime() && !finished;
     }
 
     private boolean checkTime() {
-        var settings = parent.getConfiguration().settings();
+        var settings = parent.getConfiguration().settings().get();
         var elapsed = System.currentTimeMillis() - parent.getStartTime().toEpochMilli();
         return settings.duration().toMillis() >= elapsed;
     }
@@ -92,6 +93,11 @@ public class WorkerState {
     }
 
     public void finish() {
-        parent.getFinishLatch().countDown();
+        parent.getFinishLatch().arrive();
+        finished = true;
+    }
+
+    public void markFinished() {
+        finished = true;
     }
 }

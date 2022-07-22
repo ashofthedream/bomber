@@ -1,7 +1,6 @@
 package ashes.of.bomber.limiter;
 
 import java.time.Duration;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.LockSupport;
 
@@ -23,21 +22,9 @@ public class RateLimiter implements Limiter {
         this.state = new AtomicReference<>(new State(limit, System.nanoTime()));
     }
 
-    public static Limiter withRate(int limit, Duration duration) {
-        return new RateLimiter(limit, duration);
-    }
-
-    public static Limiter withRate(int limit, long millis) {
-        return withRate(limit, Duration.ofMillis(millis));
-    }
-
-    public static Limiter withRate(int limit, long time, TimeUnit unit) {
-        return withRate(limit, unit.toMillis(time));
-    }
-
 
     @Override
-    public boolean waitForPermit(int count, long ms) {
+    public boolean await(int count, long ms) {
         long timeUntil = System.currentTimeMillis() + ms;
         while (timeUntil > System.currentTimeMillis()) {
             Permit permit = permit(count);
@@ -54,7 +41,7 @@ public class RateLimiter implements Limiter {
     }
 
     @Override
-    public boolean waitForPermit(int count) {
+    public boolean await(int count) {
         while (true) {
             Permit permit = permit(count);
             if (permit.isAllowed())
@@ -68,7 +55,7 @@ public class RateLimiter implements Limiter {
     }
 
     @Override
-    public boolean tryPermit(int count) {
+    public boolean permits(int count) {
         Permit permit = permit(count);
         return permit.isAllowed();
     }

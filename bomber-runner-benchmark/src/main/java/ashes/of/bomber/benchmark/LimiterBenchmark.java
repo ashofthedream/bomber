@@ -28,17 +28,17 @@ public class LimiterBenchmark {
 
     @Benchmark
     public boolean oneAnswerAlwaysPass() {
-        return oneAnswer.tryPermit();
+        return oneAnswer.permit();
     }
 
     @Benchmark
     public boolean rateAlwaysPass() {
-        return rateAlwaysPass.tryPermit();
+        return rateAlwaysPass.permit();
     }
 
     @Benchmark
     public boolean rateOnlyOnePass() {
-        return rateOnlyOnePass.tryPermit();
+        return rateOnlyOnePass.permit();
     }
 
     public static void main(String... args) throws RunnerException {

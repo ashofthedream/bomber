@@ -45,22 +45,35 @@ public class LocalCascadeBarrier implements Barrier {
 
 
     private final Map<Test, NamedCascadeBarrier> barriers = new ConcurrentHashMap<>();
-    private final int members;
     private final Barrier next;
 
+    private volatile int members;
 
-    public LocalCascadeBarrier(int members, Barrier next) {
-        this.members = members;
+    public LocalCascadeBarrier(Barrier next) {
         this.next = next;
     }
 
-    public LocalCascadeBarrier(int members) {
-        this(members, new NoBarrier());
+    public LocalCascadeBarrier() {
+        this(new NoBarrier());
     }
 
+    private boolean isNotInitialized() {
+        return this.members == 0;
+    }
+
+    @Override
+    public void init(int members) {
+        if (isNotInitialized()) {
+            this.members = members;
+            this.next.init(members);
+        }
+    }
 
     @Override
     public void enterCase(Test test) {
+        if (isNotInitialized())
+            throw new RuntimeException("Barrier is not initialized");
+
         NamedCascadeBarrier barrier = getOrCreateBarrier(test);
         String thread = Thread.currentThread().getName();
         log.trace("enterCase test: {}, thread: {} try to start test barrier", test.name(), thread);
@@ -69,6 +82,9 @@ public class LocalCascadeBarrier implements Barrier {
 
     @Override
     public void leaveCase(Test test) {
+        if (isNotInitialized())
+            throw new RuntimeException("Barrier is not initialized");
+
         NamedCascadeBarrier barrier = getOrCreateBarrier(test);
         String thread = Thread.currentThread().getName();
         log.trace("enterCase test: {}, thread: {} try to finish test barrier", test.name(), thread);

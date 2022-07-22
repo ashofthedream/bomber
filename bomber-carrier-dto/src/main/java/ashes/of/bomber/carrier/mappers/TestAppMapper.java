@@ -11,7 +11,7 @@ public class TestAppMapper {
     public static TestAppDto toDto(TestApp app) {
         var testSuites = app.getTestSuites().stream()
                 .map(TestSuiteMapper::toDto)
-                .collect(Collectors.toList());
+                .toList();
 
         return new TestAppDto()
                 .setName(app.getName())
@@ -22,7 +22,7 @@ public class TestAppMapper {
         var testSuites = dto.getTestSuites()
                 .stream()
                 .map(TestSuiteMapper::toPlan)
-                .collect(Collectors.toList());
+                .toList();
 
         return new TestAppPlan(dto.getName(), testSuites);
     }
@@ -31,7 +31,7 @@ public class TestAppMapper {
         var testSuites = plan.testSuites()
                 .stream()
                 .map(TestSuiteMapper::toDto)
-                .collect(Collectors.toList());
+                .toList();
 
         return new TestAppDto()
                 .setName(plan.name())

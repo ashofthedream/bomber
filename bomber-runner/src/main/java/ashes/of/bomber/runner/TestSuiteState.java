@@ -23,7 +23,7 @@ public class TestSuiteState {
         this.testSuite = testSuite;
     }
 
-    public TestAppState getParent() {
+    public TestAppState getAppState() {
         return parent;
     }
 
@@ -47,7 +47,7 @@ public class TestSuiteState {
         return parent.getFlightId();
     }
 
-    public TestCaseState getCurrent() {
+    public TestCaseState getCurrentCase() {
         return current;
     }
 

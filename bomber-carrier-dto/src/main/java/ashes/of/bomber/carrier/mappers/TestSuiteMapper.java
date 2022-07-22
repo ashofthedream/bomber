@@ -13,7 +13,7 @@ public class TestSuiteMapper {
         var testCases = testSuite.getTestCases()
                 .stream()
                 .map(TestCaseMapper::toPlan)
-                .collect(Collectors.toList());
+                .toList();
 
         return new TestSuitePlan(testSuite.getName(), testCases);
     }
@@ -22,7 +22,7 @@ public class TestSuiteMapper {
         var testCases = testSuite.getTestCases()
                 .stream()
                 .map(TestCaseMapper::toDto)
-                .collect(Collectors.toList());
+                .toList();
 
         return new TestSuiteDto()
                 .setName(testSuite.getName())
@@ -33,7 +33,7 @@ public class TestSuiteMapper {
         var testCases = testSuite.testCases()
                 .stream()
                 .map(TestCaseMapper::toDto)
-                .collect(Collectors.toList());
+                .toList();
 
         return new TestSuiteDto()
                 .setName(testSuite.name())

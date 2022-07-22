@@ -236,7 +236,7 @@ public interface RandomGenerator {
     default<K> Optional<K> randomKeyByWeight(Map<K, Double> map) {
         List<Weighed<K>> list = map.entrySet().stream()
                 .map(e -> new Weighed<>(e.getKey(), e.getValue()))
-                .collect(Collectors.toList());
+                .toList();
 
         return randomByWeight(list);
     }

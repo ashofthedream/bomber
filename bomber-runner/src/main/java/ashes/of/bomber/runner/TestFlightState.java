@@ -17,8 +17,6 @@ public class TestFlightState {
     private final Instant startTime = Instant.now();
     private volatile Instant finishTime;
 
-//    private final List<TestAppState> testApps = new CopyOnWriteArrayList<>();
-
     @Nullable
     private volatile TestAppState current;
 
@@ -31,7 +29,7 @@ public class TestFlightState {
         return plan;
     }
 
-    public TestAppState getCurrent() {
+    public TestAppState getCurrentApp() {
         return current;
     }
 
@@ -50,7 +48,6 @@ public class TestFlightState {
 
 
     public void attach(TestAppState state) {
-//        testApps.add(state);
         current = state;
     }
 

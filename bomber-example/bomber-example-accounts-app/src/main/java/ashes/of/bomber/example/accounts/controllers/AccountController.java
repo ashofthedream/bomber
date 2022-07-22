@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static ashes.of.bomber.example.utils.RandomUtils.withProbability;
 import static ashes.of.bomber.example.utils.SleepUtils.sleepQuietlyAround;
@@ -73,6 +72,7 @@ public class AccountController {
 
     @GetMapping("/accounts")
     public ResponseEntity<GetAccountsResponse> getAccounts() {
+        log.debug("getAccounts");
         sleepQuietlyAround(withProbability(0.05) ? 100 : 20);
 
         if (withProbability(0.001))
@@ -80,7 +80,7 @@ public class AccountController {
 
         List<Account> accounts = accountService.getAllAccounts()
                 .stream()
-                .collect(Collectors.toList());
+                .toList();
         return ResponseEntity.ok(new GetAccountsResponse()
                 .setAccounts(accounts));
     }

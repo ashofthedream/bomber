@@ -17,9 +17,9 @@ import java.time.temporal.ChronoUnit;
 public class ExampleTestApp {
     private static final Logger log = LogManager.getLogger();
 
-    public static Bomber create(String appUrl, int membersCount) {
-        var accountsApp = ExampleAccountsTestApp.create(appUrl, membersCount);
-        var usersApp = ExampleUsersTestApp.create(appUrl, membersCount);
+    public static Bomber create(String appUrl, boolean barrier) {
+        var accountsApp = ExampleAccountsTestApp.create(appUrl, barrier);
+        var usersApp = ExampleUsersTestApp.create(appUrl, barrier);
 
         return new BomberBuilder()
                 // log all times to console via log4j and HdrHistogram
@@ -35,9 +35,9 @@ public class ExampleTestApp {
 
     public static void main(String... args) {
         var appUrl = System.getenv().getOrDefault("EXAMPLE_APP_URL", "http://localhost:8081");
-        var membersCount = System.getenv().get("EXAMPLE_BARRIER_MEMBERS");
+        var useBarrier = System.getenv().getOrDefault("EXAMPLE_USE_BARRIER", "false");
 
-        var report = ExampleTestApp.create(appUrl, membersCount != null ? Integer.parseInt(membersCount) : 0)
+        var report = ExampleTestApp.create(appUrl, Boolean.parseBoolean(useBarrier))
                 .start();
 
         report.testApps()

@@ -12,7 +12,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.lang.reflect.Constructor;
-import java.util.Random;
 import java.util.function.Supplier;
 
 @Configuration
@@ -73,22 +72,5 @@ public class BomberConfiguration {
         });
 
         return builder.build();
-    }
-
-    private static final Random random = new Random();
-
-    public static void sleepQuietlyAround(long ms) {
-        sleepQuietly(ms, 0.2);
-    }
-
-    public static void sleepQuietly(long ms, double sp) {
-        try {
-            double spread = ms * Math.max(0.0, Math.min(sp, 1.0));
-            double timeout = ms + random.nextDouble() * spread * 2 - spread;
-
-            Thread.sleep(Math.round(timeout));
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
     }
 }

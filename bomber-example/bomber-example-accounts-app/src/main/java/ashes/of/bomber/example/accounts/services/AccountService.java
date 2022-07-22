@@ -39,7 +39,7 @@ public class AccountService {
         return accounts.values()
                 .stream()
                 .filter(account -> account.getUserId() == userId)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public Collection<Account> getAllAccounts() {

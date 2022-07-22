@@ -3,47 +3,47 @@ package ashes.of.bomber.limiter;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
-
 public interface Limiter {
 
     /**
-     * @see this#waitForPermit(long)
+     * @see this#await(long)
      */
-    default boolean waitForPermit(int count, Duration duration) {
-        return waitForPermit(count, duration.toMillis());
+    default boolean await(int count, Duration duration) {
+        return await(count, duration.toMillis());
     }
 
-    default boolean waitForPermit(Duration duration) {
-        return waitForPermit(1, duration.toMillis());
+    default boolean await(Duration duration) {
+        return await(1, duration.toMillis());
     }
 
     /**
-     * @see this#waitForPermit(long)
+     * @see this#await(long)
      */
-    default boolean waitForPermit(int count, long time, TimeUnit unit) {
-        return waitForPermit(count, unit.toMillis(time));
+    default boolean await(int count, long time, TimeUnit unit) {
+        return await(count, unit.toMillis(time));
     }
 
-    default boolean waitForPermit(long time, TimeUnit unit) {
-        return waitForPermit(1, unit.toMillis(time));
+    default boolean await(long time, TimeUnit unit) {
+        return await(1, unit.toMillis(time));
     }
 
-    default boolean waitForPermit(long ms) {
-        return waitForPermit(1, ms);
+    boolean await(int count, long ms);
+
+    default boolean await(long ms) {
+        return await(1, ms);
     }
 
-    boolean waitForPermit(int count, long ms);
 
-    default boolean waitForPermit() {
-        return waitForPermit(1);
+    boolean await(int count);
+
+    default boolean await() {
+        return await(1);
     }
 
-    boolean waitForPermit(int count);
 
+    boolean permits(int count);
 
-    default boolean tryPermit() {
-        return tryPermit(1);
+    default boolean permit() {
+        return permits(1);
     }
-
-    boolean tryPermit(int count);
 }

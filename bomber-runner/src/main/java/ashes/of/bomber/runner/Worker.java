@@ -23,6 +23,7 @@ import java.util.function.BooleanSupplier;
 public class Worker {
     private static final Logger log = LogManager.getLogger();
 
+    private final EventMachine em;
     private final BlockingQueue<Runnable> queue;
     private final Thread thread;
 
@@ -31,7 +32,8 @@ public class Worker {
     @Nullable
     private volatile Object context;
 
-    public Worker(BlockingQueue<Runnable> queue, Thread thread) {
+    public Worker(EventMachine em, BlockingQueue<Runnable> queue, Thread thread) {
+        this.em = em;
         this.queue = queue;
         this.thread = thread;
     }
@@ -59,6 +61,13 @@ public class Worker {
     }
 
 
+    public void finish() {
+        var state = this.state;
+        if (state != null) {
+            state.markFinished();
+        }
+    }
+
     private void run(Runnable task) {
         // a bit of busy-wait here, todo investigate
         for (int i = 0; i < 10000; i++) {
@@ -74,7 +83,7 @@ public class Worker {
     public void runBeforeSuite(TestSuite<Object> testSuite, CountDownLatch latch) {
         run(() -> {
             if (this.context != null)
-                log.error("Worker contains instance, this is looks like bug");
+                log.error("Worker has context, this is looks like bug");
 
             this.context = testSuite.getContext();
             testSuite.beforeSuite(context);
@@ -82,16 +91,17 @@ public class Worker {
         });
     }
 
-    public void run(TestCaseState state, EventMachine events) {
+    public void run(TestCaseState state) {
         this.state = new WorkerState(state);
-        run(() -> run(this.state, events));
+        run(() -> run(this.state));
     }
 
-    private void run(WorkerState state, EventMachine events) {
+    private void run(WorkerState state) {
+        state.getParent().getFinishLatch().register();
         var parent = state.getParent();
         var testCase = parent.getTestCase();
-        var testSuite = parent.getParent().getTestSuite();
-        var testApp = parent.getParent().getParent().getTestApp();
+        var testSuite = parent.getSuiteState().getTestSuite();
+        var testApp = parent.getSuiteState().getAppState().getTestApp();
 
         ThreadContext.put("flightId", String.valueOf(parent.getFlightId()));
         ThreadContext.put("testApp", testApp.getName());
@@ -99,11 +109,10 @@ public class Worker {
         ThreadContext.put("testCase", testCase.getName());
 
 
-        Limiter limiter = parent.getConfiguration().limiter().build();
-        Delayer delayer = parent.getConfiguration().delayer().build();
-
-        // todo it's not working, ha-ha
-        Barrier barrier = parent.getConfiguration().barrier().build();
+        var config = parent.getConfiguration();
+        Limiter limiter = config.limiter().get();
+        Delayer delayer = config.delayer().get();
+        Barrier barrier = config.barrier().get();
 
         state.start();
 
@@ -128,12 +137,12 @@ public class Worker {
         while (condition.getAsBoolean()) {
             delayer.delay();
 
-            if (!limiter.waitForPermit())
+            if (!limiter.await())
                 throw new RuntimeException("Limiter await failed");
 
             if (parent.needUpdate()) {
-                var totalCount = parent.getTotalIterationsCount();
-                var settings = parent.getConfiguration().settings();
+                var totalCount = parent.getIterationsCount();
+                var settings = config.settings().get();
                 log.debug("Current progress. total iterations count: {}, remain count: {}, errors count: {}, remain time: {}ms",
                         totalCount,
                         settings.iterations() - totalCount,
@@ -145,10 +154,10 @@ public class Worker {
             var it = state.createIteration();
             testSuite.beforeEach(it, context);
 
-            events.dispatch(new TestCaseBeforeEachEvent(it.timestamp(), it.flightId(), it.test()));
+            em.dispatch(new TestCaseBeforeEachEvent(it.timestamp(), it.flightId(), it.test()));
 
             Tools tools = new Tools(it, record -> {
-                events.dispatch(record);
+                em.dispatch(record);
                 state.addCaughtCount(1);
 
                 if (!record.success())
@@ -165,7 +174,7 @@ public class Worker {
 
                 long expected = tools.getStopwatchCount() - (testCase.isAsync() ? 1 : 0);
                 state.addExpectedCount(expected);
-                events.dispatch(new TestCaseAfterEachEvent(
+                em.dispatch(new TestCaseAfterEachEvent(
                         it.timestamp(),
                         it.flightId(),
                         it.test(),
@@ -178,7 +187,7 @@ public class Worker {
                 if (!testCase.isAsync())
                     stopwatch.fail(th);
 
-                events.dispatch(new TestCaseAfterEachEvent(
+                em.dispatch(new TestCaseAfterEachEvent(
                         it.timestamp(),
                         it.flightId(),
                         it.test(),

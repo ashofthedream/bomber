@@ -1,22 +1,23 @@
 package ashes.of.bomber.squadron.zookeeper;
 
+import ashes.of.bomber.configuration.Builder;
 import ashes.of.bomber.squadron.Barrier;
-import ashes.of.bomber.squadron.BarrierBuilder;
 import ashes.of.bomber.squadron.LocalCascadeBarrier;
 import com.google.common.base.Preconditions;
+import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.retry.RetryOneTime;
 
 import java.time.Duration;
+import java.util.function.Supplier;
 
 
-public class ZookeeperBarrierBuilder implements BarrierBuilder {
+public class ZookeeperBarrierBuilder implements Builder<Barrier> {
 
     private String url = "localhost:2181";
-    private int members = 1;
-    private int workers = 1;
-    private Duration awaitTime = Duration.ofMinutes(1);
+    private Duration wait = Duration.ofMinutes(1);
+    private RetryPolicy retry = new RetryOneTime(1000);
 
 
     public ZookeeperBarrierBuilder url(String url) {
@@ -24,25 +25,20 @@ public class ZookeeperBarrierBuilder implements BarrierBuilder {
         return this;
     }
 
-    public ZookeeperBarrierBuilder members(int members) {
-        this.members = members;
+    public ZookeeperBarrierBuilder retry(RetryPolicy retry) {
+        this.retry = retry;
         return this;
     }
 
-    public ZookeeperBarrierBuilder workers(int workers) {
-        this.workers = workers;
-        return this;
-    }
-
-    public ZookeeperBarrierBuilder awaitTime(Duration awaitTime) {
-        this.awaitTime = awaitTime;
+    public ZookeeperBarrierBuilder wait(Duration wait) {
+        this.wait = wait;
         return this;
     }
 
     @Override
-    public Barrier build() {
-        Preconditions.checkArgument(members > 0, "members should be greater than 0");
-        Preconditions.checkNotNull(awaitTime, "awaitTime should not be null");
+    public Supplier<Barrier> build() {
+        Preconditions.checkNotNull(retry, "retry is null");
+        Preconditions.checkNotNull(wait, "wait is null");
 
         CuratorFramework cf = CuratorFrameworkFactory.builder()
                 .connectString(url)
@@ -51,6 +47,7 @@ public class ZookeeperBarrierBuilder implements BarrierBuilder {
 
         cf.start();
 
-        return new LocalCascadeBarrier(workers, new ZookeeperBarrier(cf, members, awaitTime));
+        var barrier = new LocalCascadeBarrier(new ZookeeperBarrier(cf, wait));
+        return () -> barrier;
     }
 }

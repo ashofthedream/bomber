@@ -8,16 +8,10 @@ public class OneAnswerLimiter implements Limiter {
         this.permit = permit;
     }
 
-    public static Limiter alwaysPermit() {
-        return new OneAnswerLimiter(true);
-    }
 
-    public static Limiter neverPermit() {
-        return new OneAnswerLimiter(false);
-    }
 
     @Override
-    public boolean waitForPermit(int count, long ms) {
+    public boolean await(int count, long ms) {
         if (!permit) {
             try {
                 Thread.sleep(ms);
@@ -30,12 +24,12 @@ public class OneAnswerLimiter implements Limiter {
     }
 
     @Override
-    public boolean waitForPermit(int count) {
-        return waitForPermit(count, Long.MAX_VALUE);
+    public boolean await(int count) {
+        return await(count, Long.MAX_VALUE);
     }
 
     @Override
-    public boolean tryPermit(int count) {
+    public boolean permits(int count) {
         return permit;
     }
 }

@@ -1,9 +1,10 @@
 package ashes.of.bomber.configuration;
 
-import ashes.of.bomber.delayer.DelayerBuilder;
-import ashes.of.bomber.limiter.LimiterBuilder;
-import ashes.of.bomber.squadron.BarrierBuilder;
+import ashes.of.bomber.delayer.Delayer;
+import ashes.of.bomber.limiter.Limiter;
+import ashes.of.bomber.squadron.Barrier;
 
-public record Configuration(DelayerBuilder delayer, LimiterBuilder limiter, BarrierBuilder barrier, Settings settings) {
+import java.util.function.Supplier;
 
+public record Configuration(Supplier<Delayer> delayer, Supplier<Limiter> limiter, Supplier<Barrier> barrier, Supplier<Settings> settings) {
 }

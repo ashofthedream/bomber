@@ -1,5 +1,6 @@
 package ashes.of.bomber.runner;
 
+import ashes.of.bomber.events.EventMachine;
 import ashes.of.bomber.threads.BomberThreadFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -16,17 +17,19 @@ import java.util.concurrent.SynchronousQueue;
 public class WorkerPool {
     private static final Logger log = LogManager.getLogger();
 
+    private final EventMachine em;
     private final List<Worker> workers = new CopyOnWriteArrayList<>();
     private final BlockingQueue<Worker> available = new LinkedBlockingQueue<>();
     private final BlockingQueue<Worker> acquired = new LinkedBlockingQueue<>();
 
-    public WorkerPool(int count) {
+    public WorkerPool(EventMachine em, int count) {
+        this.em = em;
         for (int i = 0; i < count; i++)
             available.offer(createWorker());
     }
 
-    public WorkerPool() {
-        this(0);
+    public WorkerPool(EventMachine em) {
+        this(em, 0);
     }
 
     private static void uncaughtExceptionHandler(Thread t, Throwable e) {
@@ -53,7 +56,7 @@ public class WorkerPool {
         thread.setUncaughtExceptionHandler(WorkerPool::uncaughtExceptionHandler);
         thread.start();
 
-        Worker worker = new Worker(queue, thread);
+        Worker worker = new Worker(em, queue, thread);
 
         workers.add(worker);
         log.debug("Created new worker: {}", worker.getName());

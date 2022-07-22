@@ -17,9 +17,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
-import java.util.stream.Collectors;
-
-
 @RestController
 @RequestMapping
 public class ApplicationController {
@@ -38,8 +35,7 @@ public class ApplicationController {
         var apps = bomber.getApps()
                 .stream()
                 .map(TestAppMapper::toDto)
-                .collect(Collectors.toList());
-
+                .toList();
 
         return Mono.just(new GetApplicationsResponse(apps));
     }

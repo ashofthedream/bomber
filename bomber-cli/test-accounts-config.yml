@@ -1,0 +1,30 @@
+sinks:
+  - ashes.of.bomber.sink.histogram.HistogramTimelineSink
+
+configuration:
+  settings:
+    threads: 1
+    seconds: 10
+    iterations: 25
+
+testCases:
+  - name: All Accounts
+    async: true
+#    configuration:
+#      settings:
+#        threads: 1
+#        seconds: 10
+#        iterations: 100
+    http:
+      method: GET
+      url: http://localhost:8083/accounts
+
+#  - name: Get Accounts By Id
+#    configuration:
+#      settings:
+#        threads: 2
+#        seconds: 10
+#        iterations: 100
+#    http:
+#      method: GET
+#      url: http://localhost:8083/accounts/1

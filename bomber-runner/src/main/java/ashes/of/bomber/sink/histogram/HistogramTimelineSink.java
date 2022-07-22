@@ -84,6 +84,7 @@ public class HistogramTimelineSink implements Sink {
 
     @Override
     public void timeRecorded(Record record) {
+        log.error("HISTOGRAM SINK RECEIVE A RECORD: {}", record);
         var it = record.iteration();
         var ts = it.timestamp().truncatedTo(resolution);
         var test = record.iteration().test();

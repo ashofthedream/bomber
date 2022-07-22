@@ -2,10 +2,9 @@ package ashes.of.bomber.carrier.mappers;
 
 import ashes.of.bomber.carrier.dto.flight.SettingsDto;
 import ashes.of.bomber.configuration.Settings;
-import ashes.of.bomber.configuration.SettingsBuilder;
 
 import javax.annotation.Nullable;
-import java.util.concurrent.TimeUnit;
+import java.time.Duration;
 
 public class SettingsMapper {
 
@@ -14,11 +13,11 @@ public class SettingsMapper {
         if (settings == null)
             return null;
 
-        return new SettingsBuilder()
-                .setTime(settings.getDuration(), TimeUnit.MILLISECONDS)
-                .setThreads(settings.getThreads())
-                .setIterations(settings.getIterations())
-                .build();
+        return new Settings(
+                Duration.ofMillis(settings.getDuration()),
+                settings.getThreads(),
+                settings.getIterations()
+        );
     }
 
 

@@ -79,7 +79,7 @@ public class CarrierHistogramTimelineHttpSink implements Sink {
                                         );
                             });
                 })
-                .collect(Collectors.toList());
+                .toList();
 
         send(new SinkEvent()
                 .setId(SinkEvent.nextId())

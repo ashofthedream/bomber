@@ -20,16 +20,29 @@ public class ZookeeperBarrier implements Barrier {
 
     private final CuratorFramework cf;
     private final Duration awaitTime;
-    private final int members;
+    private volatile int members;
 
-    public ZookeeperBarrier(CuratorFramework cf, int members, Duration awaitTime) {
+    public ZookeeperBarrier(CuratorFramework cf, Duration awaitTime) {
         this.cf = cf;
-        this.members = members;
         this.awaitTime = awaitTime;
+    }
+
+    private boolean isNotInitialized() {
+        return this.members == 0;
+    }
+
+    @Override
+    public void init(int members) {
+        if (isNotInitialized()) {
+            this.members = members;
+        }
     }
 
     @Override
     public void enterCase(Test test) {
+        if (isNotInitialized())
+            throw new RuntimeException("Barrier is not initialized");
+
         try {
             log.trace("enterCase test: {}", test);
             getOrCreateBarrier(test)
@@ -41,6 +54,9 @@ public class ZookeeperBarrier implements Barrier {
 
     @Override
     public void leaveCase(Test test) {
+        if (isNotInitialized())
+            throw new RuntimeException("Barrier is not initialized");
+
         try {
             log.trace("leaveCase test: {}", test);
             getOrCreateBarrier(test)

@@ -3,6 +3,7 @@ package ashes.of.bomber.runner;
 import ashes.of.bomber.configuration.Configuration;
 import ashes.of.bomber.core.Test;
 import ashes.of.bomber.core.TestApp;
+import ashes.of.bomber.core.TestCase;
 import ashes.of.bomber.core.TestSuite;
 import ashes.of.bomber.events.EventMachine;
 import ashes.of.bomber.events.FlightFinishedEvent;
@@ -13,6 +14,7 @@ import ashes.of.bomber.events.TestCaseFinishedEvent;
 import ashes.of.bomber.events.TestCaseStartedEvent;
 import ashes.of.bomber.events.TestSuiteFinishedEvent;
 import ashes.of.bomber.events.TestSuiteStartedEvent;
+import ashes.of.bomber.flight.plan.TestCasePlan;
 import ashes.of.bomber.flight.plan.TestFlightPlan;
 import ashes.of.bomber.flight.plan.TestSuitePlan;
 import ashes.of.bomber.flight.report.TestAppReport;
@@ -41,6 +43,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 
@@ -48,7 +51,7 @@ public class Runner {
     private static final Logger log = LogManager.getLogger();
 
     private final CountDownLatch endLatch = new CountDownLatch(1);
-    private final WorkerPool pool = new WorkerPool();
+    private final WorkerPool pool;
     private final EventMachine em;
     private final List<Watcher> watchers;
     private final List<TestApp> apps;
@@ -58,6 +61,7 @@ public class Runner {
 
     public Runner(EventMachine em, List<Watcher> watchers, List<TestApp> apps) {
         this.em = em;
+        this.pool = new WorkerPool(em);
         this.watchers = watchers;
         this.apps = apps;
     }
@@ -83,13 +87,14 @@ public class Runner {
         flightPlan.testApps().forEach(testApp -> {
             log.info("Test app: {}", testApp.name());
             testApp.testSuites().forEach(testSuite -> {
-                log.info("    Test suite: {}", testSuite.name());
+                log.info("\tTest suite: {}", testSuite.name());
                 testSuite.testCases().forEach(testCase -> {
                     var settings = Optional.ofNullable(testCase.configuration())
                             .map(Configuration::settings)
+                            .map(Supplier::get)
                             .orElse(null);
 
-                    log.info("        Test case: {}, with: {}", testCase.name(), settings);
+                    log.info("\t\tTest case: {}, with: {}", testCase.name(), settings);
                 });
             });
         });
@@ -124,7 +129,7 @@ public class Runner {
                         return runTestApp(testAppState);
                     })
                     .filter(Objects::nonNull)
-                    .collect(Collectors.toList());
+                    .toList();
 
 
             Instant flightFinishTime = Instant.now();
@@ -173,7 +178,7 @@ public class Runner {
                         state.attach(testSuiteState);
                         return runTestSuite(testSuiteState);
                     })
-                    .collect(Collectors.toList());
+                    .toList();
 
             log.info("Finish application: {}", testApp.getName());
             state.finish();
@@ -190,6 +195,7 @@ public class Runner {
      * Runs the test suite
      */
     private TestSuiteReport runTestSuite(TestSuiteState state) {
+        var testApp = state.getAppState().getTestApp();
         var testSuite = state.getTestSuite();
         ThreadContext.put("testSuite", testSuite.getName());
         log.info("Start test suite: {}", testSuite.getName());
@@ -197,7 +203,7 @@ public class Runner {
         log.trace("Reset before & after test suite lifecycle methods");
         testSuite.resetBeforeAndAfterSuite();
 
-        em.dispatch(new TestSuiteStartedEvent(state.getStartTime(), state.getFlightId(), state.getParent().getTestApp().getName(), testSuite.getName()));
+        em.dispatch(new TestSuiteStartedEvent(state.getStartTime(), state.getFlightId(), testApp.getName(), testSuite.getName()));
 
         int threads = determineWorkerThreadsCount(state.getPlan(), testSuite);
         pool.acquire(threads);
@@ -216,29 +222,20 @@ public class Runner {
                         }
 
                         // merge configuration
-                        var initial = testCase.getConfiguration();
-                        Configuration configuration = Optional.ofNullable(plan.configuration())
-                                .map(actual -> new Configuration(
-                                        // todo get these properties from actual
-                                        initial.delayer(),
-                                        initial.limiter(),
-                                        initial.barrier(),
-                                        actual.settings()
-                                ))
-                                .orElse(initial);
+                        Configuration configuration = mergeConfiguration(plan, testCase);
 
                         var testCaseState = new TestCaseState(state, plan, testCase, configuration);
                         state.attach(testCaseState);
                         return runTestCase(testCaseState);
                     })
                     .filter(Objects::nonNull)
-                    .collect(Collectors.toList());
+                    .toList();
 
             callAfterSuite(testSuite);
 
             log.info("Finish test suite: {}", testSuite.getName());
             state.finish();
-            em.dispatch(new TestSuiteFinishedEvent(state.getFinishTime(), state.getFlightId(), state.getParent().getTestApp().getName(), testSuite.getName()));
+            em.dispatch(new TestSuiteFinishedEvent(state.getFinishTime(), state.getFlightId(), testApp.getName(), testSuite.getName()));
 
             return new TestSuiteReport(testSuite.getName(), reports);
         } catch (Throwable throwable) {
@@ -248,6 +245,20 @@ public class Runner {
             pool.releaseAll();
             ThreadContext.remove("testSuite");
         }
+    }
+
+    private Configuration mergeConfiguration(TestCasePlan plan, TestCase<Object> testCase) {
+        var initial = testCase.getConfiguration();
+        return Optional.ofNullable(plan.configuration())
+                .map(actual -> new Configuration(
+                        // todo get these properties from actual
+                        initial.delayer(),
+                        initial.limiter(),
+                        initial.barrier(),
+                        actual.settings()
+                ))
+                .orElse(initial);
+
     }
 
     private int determineWorkerThreadsCount(TestSuitePlan testSuitePlan, TestSuite<Object> testSuite) {
@@ -263,7 +274,7 @@ public class Runner {
                     var config = Optional.ofNullable(testCasePlan.configuration())
                             .orElse(testCase.getConfiguration());
 
-                    return config.settings().threads();
+                    return config.settings().get().threads();
                 })
                 .max()
                 .orElseThrow(() -> new RuntimeException("Can't determine thread count for test suite: " + testSuite.getName()));
@@ -297,7 +308,9 @@ public class Runner {
         var testCase = state.getTestCase();
         var testSuite = state.getTestSuite();
         var testApp = state.getTestApp();
-        var settings = state.getConfiguration().settings();
+        var config = state.getConfiguration();
+        var settings = config.settings().get();
+        var barrier = config.barrier().get();
 
         ThreadContext.put("testCase", testCase.getName());
         log.debug("Start test case: {}", testCase.getName());
@@ -308,12 +321,14 @@ public class Runner {
         var test = new Test(testApp.getName(), testSuite.getName(), testCase.getName());
         em.dispatch(new TestCaseStartedEvent(state.getStartTime(), state.getFlightId(), test, settings));
 
+        barrier.init(settings.threads());
+
         log.debug("Run {} workers", settings.threads());
 
         pool.getAcquired()
                 .stream()
                 .limit(settings.threads())
-                .forEach(worker -> worker.run(state, em));
+                .forEach(worker -> worker.run(state));
 
         try {
             log.debug("Await end of test case: {}", testCase.getName());
@@ -337,7 +352,7 @@ public class Runner {
         return new TestCaseReport(
                 testCase.getName(),
                 settings,
-                state.getTotalIterationsCount(),
+                state.getIterationsCount(),
                 state.getErrorCount(),
                 elapsed
         );
@@ -354,11 +369,11 @@ public class Runner {
 
         List<WorkerSnapshot> workers = pool.getAcquired().stream()
                 .map(Worker::getSnapshot)
-                .collect(Collectors.toList());
+                .toList();
 
         return new TestFlightSnapshot(
                 state.getPlan(),
-                toSnapshot(state.getCurrent()),
+                toSnapshot(state.getCurrentApp()),
                 workers
         );
     }
@@ -370,7 +385,7 @@ public class Runner {
 
         return new TestAppSnapshot(
                 state.getTestApp().getName(),
-                toSnapshot(state.getCurrent())
+                toSnapshot(state.getCurrentSuite())
         );
     }
 
@@ -381,7 +396,7 @@ public class Runner {
 
         return new TestSuiteSnapshot(
                 state.getTestSuite().getName(),
-                toSnapshot(state.getCurrent())
+                toSnapshot(state.getCurrentCase())
         );
     }
 
@@ -392,10 +407,10 @@ public class Runner {
 
         return new TestCaseSnapshot(
                 state.getTestCase().getName(),
-                state.getConfiguration().settings(),
+                state.getConfiguration().settings().get(),
                 state.getStartTime(),
                 state.getFinishTime(),
-                state.getTotalIterationsCount(),
+                state.getIterationsCount(),
                 state.getErrorCount()
         );
     }

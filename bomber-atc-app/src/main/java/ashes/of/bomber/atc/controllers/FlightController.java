@@ -68,7 +68,7 @@ public class FlightController {
                     var flightIds = flights.stream()
                             .map(FlightStartedResponse::id)
                             .distinct()
-                            .collect(Collectors.toList());
+                            .toList();
 
                     if (flightIds.size() > 1) {
                         log.warn("Non unique flights started: {}", flightIds);

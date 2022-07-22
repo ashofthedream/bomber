@@ -22,7 +22,6 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.stream.Collectors;
 
 public class Bomber {
     private static final Logger log = LogManager.getLogger();
@@ -49,6 +48,7 @@ public class Bomber {
         watchers.add(watcher);
         return this;
     }
+
 
     public List<TestApp> getApps() {
         return apps;

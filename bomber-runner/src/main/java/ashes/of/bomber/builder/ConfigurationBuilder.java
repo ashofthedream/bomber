@@ -3,32 +3,24 @@ package ashes.of.bomber.builder;
 import ashes.of.bomber.annotations.Delay;
 import ashes.of.bomber.annotations.LoadTestSettings;
 import ashes.of.bomber.annotations.Throttle;
-import ashes.of.bomber.delayer.Delayer;
-import ashes.of.bomber.delayer.DelayerBuilder;
-import ashes.of.bomber.delayer.NoDelayDelayer;
-import ashes.of.bomber.delayer.RandomDelayer;
-import ashes.of.bomber.configuration.SettingsBuilder;
-import ashes.of.bomber.limiter.Limiter;
+import ashes.of.bomber.configuration.Builder;
 import ashes.of.bomber.configuration.Configuration;
-import ashes.of.bomber.limiter.LimiterBuilder;
-import ashes.of.bomber.limiter.OneAnswerLimiter;
-import ashes.of.bomber.limiter.RateLimiter;
-import ashes.of.bomber.squadron.BarrierBuilder;
-import ashes.of.bomber.squadron.NoBarrier;
+import ashes.of.bomber.configuration.Settings;
+import ashes.of.bomber.delayer.Delayer;
+import ashes.of.bomber.limiter.Limiter;
+import ashes.of.bomber.squadron.Barrier;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Method;
 import java.util.Objects;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
-
 
 public class ConfigurationBuilder {
 
-    private BarrierBuilder barrier = NoBarrier::new;
-    private DelayerBuilder delayer = NoDelayDelayer::new;
-    private LimiterBuilder limiter = OneAnswerLimiter::alwaysPermit;
-    private SettingsBuilder settings = new SettingsBuilder();
+    private Builder<Barrier> barrier = BarrierBuilder::noBarrier;
+    private Builder<Delayer> delayer = DelayerBuilder::noDelay;
+    private Builder<Limiter> limiter = LimiterBuilder::noLimit;
+    private Builder<Settings> settings = new SettingsBuilder();
 
     public ConfigurationBuilder(ConfigurationBuilder config) {
         this.barrier = config.barrier;
@@ -40,14 +32,20 @@ public class ConfigurationBuilder {
     public ConfigurationBuilder() {
     }
 
-    public ConfigurationBuilder settings(SettingsBuilder settings) {
+    public ConfigurationBuilder settings(Builder<Settings> settings) {
         Objects.requireNonNull(settings, "settings is null");
         this.settings = settings;
         return this;
     }
 
     public ConfigurationBuilder settings(Consumer<SettingsBuilder> settings) {
-        settings.accept(this.settings);
+        var current = this.settings.build().get();
+        var builder = new SettingsBuilder()
+                .setThreads(current.threads())
+                .setIterations(current.iterations())
+                .setDuration(current.duration());
+        settings.accept(builder);
+        this.settings = builder;
         return this;
     }
 
@@ -63,25 +61,34 @@ public class ConfigurationBuilder {
     }
 
 
-    public ConfigurationBuilder barrier(BarrierBuilder barrier) {
+    public ConfigurationBuilder barrier(Builder<Barrier> barrier) {
         this.barrier = barrier;
         return this;
     }
 
 
+    /**
+     * Adds delayer which will be shared across all workers threads
+     *
+     * @param delayer shared limiter
+     * @return builder
+     */
     public ConfigurationBuilder delayer(Delayer delayer) {
         Objects.requireNonNull(delayer, "delayer is null");
-        return delayer(() -> delayer);
+        return delayer(() -> () -> delayer);
     }
 
-    public ConfigurationBuilder delayer(DelayerBuilder delayer) {
+    public ConfigurationBuilder delayer(Builder<Delayer> delayer) {
         this.delayer = delayer;
         return this;
     }
 
     public ConfigurationBuilder delayer(@Nullable Delay delay) {
         if (delay != null)
-            delayer(new RandomDelayer(delay.min(), delay.max(), delay.timeUnit()));
+            delayer(new DelayerBuilder()
+                    .min(delay.timeUnit().toMillis(delay.min()))
+                    .max(delay.timeUnit().toMillis(delay.max()))
+            );
 
         return this;
     }
@@ -94,7 +101,7 @@ public class ConfigurationBuilder {
      */
     public ConfigurationBuilder limiter(Limiter limiter) {
         Objects.requireNonNull(limiter, "limiter is null");
-        return limiter(() -> limiter);
+        return limiter(() -> () -> limiter);
     }
 
     /**
@@ -104,23 +111,22 @@ public class ConfigurationBuilder {
      * @param limiter shared request limiter
      * @return builder
      */
-    public ConfigurationBuilder limiter(LimiterBuilder limiter) {
+    public ConfigurationBuilder limiter(Builder<Limiter> limiter) {
         this.limiter = limiter;
         return this;
     }
 
     public ConfigurationBuilder limiter(@Nullable Throttle throttle) {
         if (throttle != null) {
-            Supplier<Limiter> limiter = () -> RateLimiter.withRate(throttle.threshold(), throttle.time(), throttle.timeUnit());
-            if (throttle.shared()) {
-                limiter(limiter.get());
-            } else {
-                limiter(limiter::get);
-            }
+            limiter(new LimiterBuilder()
+                    .shared(throttle.shared())
+                    .limit(throttle.threshold())
+                    .time(throttle.time(), throttle.timeUnit()));
         }
 
         return this;
     }
+
 
     public ConfigurationBuilder process(Class<?> cls) {
         settings(cls.getAnnotation(LoadTestSettings.class));
@@ -137,7 +143,8 @@ public class ConfigurationBuilder {
         return this;
     }
 
+
     public Configuration build() {
-        return new Configuration(delayer, limiter, barrier, settings.build());
+        return new Configuration(delayer.build(), limiter.build(), barrier.build(), settings.build());
     }
 }

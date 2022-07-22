@@ -3,6 +3,9 @@ package ashes.of.bomber.squadron;
 import ashes.of.bomber.core.Test;
 
 public interface Barrier {
-    default void enterCase(Test test) {}
-    default void leaveCase(Test test) {}
+
+    void init(int members);
+
+    void enterCase(Test test);
+    void leaveCase(Test test);
 }

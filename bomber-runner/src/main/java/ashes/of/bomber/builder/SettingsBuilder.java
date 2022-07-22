@@ -1,9 +1,13 @@
-package ashes.of.bomber.configuration;
+package ashes.of.bomber.builder;
+
+import ashes.of.bomber.configuration.Builder;
+import ashes.of.bomber.configuration.Settings;
 
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
-public class SettingsBuilder {
+public class SettingsBuilder implements Builder<Settings> {
 
     /**
      * Stage duration time
@@ -50,7 +54,11 @@ public class SettingsBuilder {
         return this;
     }
 
-    public Settings build() {
-        return new Settings(time, threads, iterations);
+    public Supplier<Settings> build() {
+        return build(time, threads, iterations);
+    }
+
+    public Supplier<Settings> build(Duration time, int threads, long iterations) {
+        return () -> new Settings(time, threads, iterations);
     }
 }

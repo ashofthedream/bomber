@@ -26,7 +26,7 @@ public class TestAppState {
         this.testApp = testApp;
     }
 
-    public TestFlightState getParent() {
+    public TestFlightState getFlightState() {
         return parent;
     }
 
@@ -50,7 +50,7 @@ public class TestAppState {
         return parent.getPlan().flightId();
     }
 
-    public TestSuiteState getCurrent() {
+    public TestSuiteState getCurrentSuite() {
         return current;
     }
 

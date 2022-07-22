@@ -23,10 +23,10 @@ class RateLimiterTest {
         RateLimiter limiter = new RateLimiter(10, Duration.ofMinutes(1));
 
         for (int i = 0; i < 10; i++) {
-            assertTrue(limiter.tryPermit());
+            assertTrue(limiter.permit());
         }
 
-        assertFalse(limiter.tryPermit());
+        assertFalse(limiter.permit());
     }
 
     @Test
@@ -34,12 +34,12 @@ class RateLimiterTest {
         RateLimiter limiter = new RateLimiter(10, Duration.ofSeconds(1));
 
         for (int i = 0; i < 10; i++) {
-            assertTrue(limiter.tryPermit());
+            assertTrue(limiter.permit());
         }
 
         Thread.sleep(1_000);
 
-        assertTrue(limiter.tryPermit());
+        assertTrue(limiter.permit());
     }
 
     @Test
@@ -47,14 +47,14 @@ class RateLimiterTest {
         RateLimiter limiter = new RateLimiter(10, Duration.ofSeconds(1));
 
         for (int i = 0; i < 10; i++) {
-            assertTrue(limiter.tryPermit());
+            assertTrue(limiter.permit());
         }
 
         Thread.sleep(100);
-        assertFalse(limiter.tryPermit(3));
+        assertFalse(limiter.permits(3));
 
         Thread.sleep(200);
-        assertTrue(limiter.tryPermit(3));
+        assertTrue(limiter.permits(3));
     }
 
     @Test
@@ -70,7 +70,7 @@ class RateLimiterTest {
                 return new AtomicLong(0);
             });
 
-            if (limiter.tryPermit())
+            if (limiter.permit())
                 current.incrementAndGet();
         }
 
@@ -101,7 +101,7 @@ class RateLimiterTest {
 
                 long count = 0;
                 for (int j = 0; j < 200; j++) {
-                    if (limiter.tryPermit())
+                    if (limiter.permit())
                         count++;
                 }
 
@@ -140,7 +140,7 @@ class RateLimiterTest {
 
                 long count = 0;
                 for (int j = 0; j < 100; j++) {
-                    if (limiter.tryPermit())
+                    if (limiter.permit())
                         count++;
 
                     try {

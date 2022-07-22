@@ -1,15 +1,17 @@
 package ashes.of.bomber.example.accounts;
 
+import ashes.of.bomber.builder.BarrierBuilder;
 import ashes.of.bomber.builder.BomberBuilder;
 import ashes.of.bomber.builder.TestAppBuilder;
-import ashes.of.bomber.configuration.SettingsBuilder;
+import ashes.of.bomber.builder.SettingsBuilder;
+import ashes.of.bomber.configuration.Builder;
 import ashes.of.bomber.example.accounts.client.AccountClient;
 import ashes.of.bomber.example.accounts.tests.AccountControllerLoadTest;
 import ashes.of.bomber.example.utils.SleepUtils;
 import ashes.of.bomber.limiter.RateLimiter;
 import ashes.of.bomber.sink.histogram.HistogramTimelinePrintStreamPrinter;
 import ashes.of.bomber.sink.histogram.HistogramTimelineSink;
-import ashes.of.bomber.squadron.BarrierBuilder;
+import ashes.of.bomber.squadron.Barrier;
 import ashes.of.bomber.squadron.NoBarrier;
 import ashes.of.bomber.squadron.zookeeper.ZookeeperBarrierBuilder;
 import ashes.of.bomber.watcher.Log4jWatcher;
@@ -27,9 +29,7 @@ import java.util.function.Supplier;
 public class ExampleAccountsTestApp implements Supplier<TestAppBuilder> {
     private static final Logger log = LogManager.getLogger();
 
-    public static TestAppBuilder create(String appUrl, int membersCount) {
-        BarrierBuilder barrier = membersCount > 1 ?
-                new ZookeeperBarrierBuilder().members(membersCount) : NoBarrier::new;
+    public static TestAppBuilder create(String appUrl, boolean barrier) {
 
         return new TestAppBuilder()
                 .name("ExampleAccountsTestApp")
@@ -37,7 +37,7 @@ public class ExampleAccountsTestApp implements Supplier<TestAppBuilder> {
                         .settings(new SettingsBuilder()
                                 .setThreads(2)
                                 .setSeconds(10))
-                        .barrier(barrier)
+                        .barrier(barrier ? new ZookeeperBarrierBuilder() : BarrierBuilder::noBarrier)
                         .limiter(new RateLimiter(10, Duration.ofSeconds(1))))
                 .createSuite(AccountControllerLoadTest::create, new AccountClient(appUrl));
     }
@@ -45,9 +45,9 @@ public class ExampleAccountsTestApp implements Supplier<TestAppBuilder> {
     @Override
     public TestAppBuilder get() {
         var url = System.getenv().getOrDefault("EXAMPLE_ACCOUNTS_APP_URL", "http://localhost:8083");
-        var membersCount = System.getenv().get("EXAMPLE_BARRIER_MEMBERS");
+        var useBarrier = System.getenv().getOrDefault("EXAMPLE_USE_BARRIER", "false");
 
-        return create(url, membersCount != null ? Integer.parseInt(membersCount) : 0);
+        return create(url, Boolean.parseBoolean(useBarrier));
     }
 
     public static void main(String... args) {
