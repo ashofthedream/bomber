@@ -9,7 +9,7 @@ import java.time.Duration;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-public class DelayerBuilder implements Builder<Delayer> {
+public class DelayerBuilder implements Builder<Supplier<Delayer>> {
 
     private boolean shared;
     private Duration min;

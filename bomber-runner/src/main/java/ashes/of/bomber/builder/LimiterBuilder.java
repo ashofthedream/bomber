@@ -10,7 +10,7 @@ import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
-public class LimiterBuilder implements Builder<Limiter> {
+public class LimiterBuilder implements Builder<Supplier<Limiter>> {
 
     private boolean shared;
     private int limit = 1;

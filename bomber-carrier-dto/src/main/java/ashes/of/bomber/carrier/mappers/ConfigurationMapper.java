@@ -9,14 +9,14 @@ public class ConfigurationMapper {
         return new Configuration(
                 () -> { throw new RuntimeException("Not supported yet"); },
                 () -> { throw new RuntimeException("Not supported yet"); },
-                () -> { throw new RuntimeException("Not supported yet"); },
-                () -> SettingsMapper.toSettingsOrNull(dto.getSettings())
+                null,
+                SettingsMapper.toSettingsOrNull(dto.getSettings())
         );
     }
 
 
     public static ConfigurationDto toDto(Configuration config) {
         return new ConfigurationDto()
-                .setSettings(SettingsMapper.toDto(config.settings().get()));
+                .setSettings(SettingsMapper.toDto(config.settings()));
     }
 }

@@ -5,14 +5,12 @@ import ashes.of.bomber.squadron.Barrier;
 import ashes.of.bomber.squadron.LocalCascadeBarrier;
 import ashes.of.bomber.squadron.NoBarrier;
 
-import java.util.function.Supplier;
-
 public class BarrierBuilder implements Builder<Barrier> {
 
     private boolean enabled;
 
-    public static Supplier<Barrier> noBarrier() {
-        return NoBarrier::new;
+    public static Barrier noBarrier() {
+        return new NoBarrier();
     }
 
     public BarrierBuilder enabled(boolean enabled) {
@@ -21,7 +19,7 @@ public class BarrierBuilder implements Builder<Barrier> {
     }
 
     @Override
-    public Supplier<Barrier> build() {
-        return enabled ? LocalCascadeBarrier::new : NoBarrier::new;
+    public Barrier build() {
+        return enabled ? new LocalCascadeBarrier() : new NoBarrier();
     }
 }

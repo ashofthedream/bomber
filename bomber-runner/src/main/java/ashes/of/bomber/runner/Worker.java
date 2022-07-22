@@ -112,7 +112,7 @@ public class Worker {
         var config = parent.getConfiguration();
         Limiter limiter = config.limiter().get();
         Delayer delayer = config.delayer().get();
-        Barrier barrier = config.barrier().get();
+        Barrier barrier = config.barrier();
 
         state.start();
 
@@ -142,7 +142,7 @@ public class Worker {
 
             if (parent.needUpdate()) {
                 var totalCount = parent.getIterationsCount();
-                var settings = config.settings().get();
+                var settings = config.settings();
                 log.debug("Current progress. total iterations count: {}, remain count: {}, errors count: {}, remain time: {}ms",
                         totalCount,
                         settings.iterations() - totalCount,
@@ -160,8 +160,8 @@ public class Worker {
                 em.dispatch(record);
                 state.addCaughtCount(1);
 
-                if (!record.success())
-                    state.addError();
+                if (record.success()) state.addSuccess();
+                else state.addError();
             });
 
             Stopwatch stopwatch = tools.stopwatch();

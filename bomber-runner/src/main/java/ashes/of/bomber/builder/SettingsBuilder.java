@@ -54,11 +54,7 @@ public class SettingsBuilder implements Builder<Settings> {
         return this;
     }
 
-    public Supplier<Settings> build() {
-        return build(time, threads, iterations);
-    }
-
-    public Supplier<Settings> build(Duration time, int threads, long iterations) {
-        return () -> new Settings(time, threads, iterations);
+    public Settings build() {
+        return new Settings(time, threads, iterations);
     }
 }

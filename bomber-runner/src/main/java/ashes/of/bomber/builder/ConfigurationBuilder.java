@@ -14,12 +14,13 @@ import javax.annotation.Nullable;
 import java.lang.reflect.Method;
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class ConfigurationBuilder {
 
+    private Builder<Supplier<Limiter>> limiter = LimiterBuilder::noLimit;
+    private Builder<Supplier<Delayer>> delayer = DelayerBuilder::noDelay;
     private Builder<Barrier> barrier = BarrierBuilder::noBarrier;
-    private Builder<Delayer> delayer = DelayerBuilder::noDelay;
-    private Builder<Limiter> limiter = LimiterBuilder::noLimit;
     private Builder<Settings> settings = new SettingsBuilder();
 
     public ConfigurationBuilder(ConfigurationBuilder config) {
@@ -39,12 +40,13 @@ public class ConfigurationBuilder {
     }
 
     public ConfigurationBuilder settings(Consumer<SettingsBuilder> settings) {
-        var current = this.settings.build().get();
+        var current = this.settings.build();
         var builder = new SettingsBuilder()
                 .setThreads(current.threads())
                 .setIterations(current.iterations())
                 .setDuration(current.duration());
         settings.accept(builder);
+
         this.settings = builder;
         return this;
     }
@@ -78,7 +80,7 @@ public class ConfigurationBuilder {
         return delayer(() -> () -> delayer);
     }
 
-    public ConfigurationBuilder delayer(Builder<Delayer> delayer) {
+    public ConfigurationBuilder delayer(Builder<Supplier<Delayer>> delayer) {
         this.delayer = delayer;
         return this;
     }
@@ -111,7 +113,7 @@ public class ConfigurationBuilder {
      * @param limiter shared request limiter
      * @return builder
      */
-    public ConfigurationBuilder limiter(Builder<Limiter> limiter) {
+    public ConfigurationBuilder limiter(Builder<Supplier<Limiter>> limiter) {
         this.limiter = limiter;
         return this;
     }

@@ -12,9 +12,10 @@ public class WorkerState {
 
     private final TestCaseState parent;
 
-    private final AtomicLong iterationsCount = new AtomicLong();
+    private final AtomicLong itSeq = new AtomicLong();
     private final AtomicLong expectedRecordsCount = new AtomicLong();
     private final AtomicLong caughtRecordsCount = new AtomicLong();
+    private final AtomicLong iterationsCount = new AtomicLong();
     private final AtomicLong errorsCount = new AtomicLong();
     private volatile boolean finished = false;
 
@@ -40,7 +41,7 @@ public class WorkerState {
 
         return new Iteration(
                 parent.getFlightId(),
-                iterationsCount.get(),
+                itSeq.get(),
                 threadName,
                 Instant.now(),
                 test);
@@ -51,7 +52,13 @@ public class WorkerState {
         return errorsCount.get();
     }
 
+
+    public void addSuccess() {
+        iterationsCount.incrementAndGet();
+    }
+
     public void addError() {
+        iterationsCount.incrementAndGet();
         errorsCount.incrementAndGet();
         parent.addError();
     }
@@ -79,7 +86,7 @@ public class WorkerState {
     }
 
     private boolean checkTime() {
-        var settings = parent.getConfiguration().settings().get();
+        var settings = parent.getConfiguration().settings();
         var elapsed = System.currentTimeMillis() - parent.getStartTime().toEpochMilli();
         return settings.duration().toMillis() >= elapsed;
     }
@@ -100,4 +107,5 @@ public class WorkerState {
     public void markFinished() {
         finished = true;
     }
+
 }

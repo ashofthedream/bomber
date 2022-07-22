@@ -91,7 +91,6 @@ public class Runner {
                 testSuite.testCases().forEach(testCase -> {
                     var settings = Optional.ofNullable(testCase.configuration())
                             .map(Configuration::settings)
-                            .map(Supplier::get)
                             .orElse(null);
 
                     log.info("\t\tTest case: {}, with: {}", testCase.name(), settings);
@@ -274,7 +273,7 @@ public class Runner {
                     var config = Optional.ofNullable(testCasePlan.configuration())
                             .orElse(testCase.getConfiguration());
 
-                    return config.settings().get().threads();
+                    return config.settings().threads();
                 })
                 .max()
                 .orElseThrow(() -> new RuntimeException("Can't determine thread count for test suite: " + testSuite.getName()));
@@ -309,8 +308,8 @@ public class Runner {
         var testSuite = state.getTestSuite();
         var testApp = state.getTestApp();
         var config = state.getConfiguration();
-        var settings = config.settings().get();
-        var barrier = config.barrier().get();
+        var settings = config.settings();
+        var barrier = config.barrier();
 
         ThreadContext.put("testCase", testCase.getName());
         log.debug("Start test case: {}", testCase.getName());
@@ -407,7 +406,7 @@ public class Runner {
 
         return new TestCaseSnapshot(
                 state.getTestCase().getName(),
-                state.getConfiguration().settings().get(),
+                state.getConfiguration().settings(),
                 state.getStartTime(),
                 state.getFinishTime(),
                 state.getIterationsCount(),

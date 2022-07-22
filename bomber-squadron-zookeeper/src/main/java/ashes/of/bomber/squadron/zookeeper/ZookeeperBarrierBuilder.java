@@ -10,8 +10,6 @@ import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.retry.RetryOneTime;
 
 import java.time.Duration;
-import java.util.function.Supplier;
-
 
 public class ZookeeperBarrierBuilder implements Builder<Barrier> {
 
@@ -36,7 +34,7 @@ public class ZookeeperBarrierBuilder implements Builder<Barrier> {
     }
 
     @Override
-    public Supplier<Barrier> build() {
+    public Barrier build() {
         Preconditions.checkNotNull(retry, "retry is null");
         Preconditions.checkNotNull(wait, "wait is null");
 
@@ -47,7 +45,6 @@ public class ZookeeperBarrierBuilder implements Builder<Barrier> {
 
         cf.start();
 
-        var barrier = new LocalCascadeBarrier(new ZookeeperBarrier(cf, wait));
-        return () -> barrier;
+        return new LocalCascadeBarrier(new ZookeeperBarrier(cf, wait));
     }
 }

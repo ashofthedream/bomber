@@ -6,5 +6,5 @@ import ashes.of.bomber.squadron.Barrier;
 
 import java.util.function.Supplier;
 
-public record Configuration(Supplier<Delayer> delayer, Supplier<Limiter> limiter, Supplier<Barrier> barrier, Supplier<Settings> settings) {
+public record Configuration(Supplier<Delayer> delayer, Supplier<Limiter> limiter, Barrier barrier, Settings settings) {
 }
