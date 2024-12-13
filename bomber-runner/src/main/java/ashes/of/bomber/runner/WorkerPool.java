@@ -5,31 +5,22 @@ import ashes.of.bomber.threads.BomberThreadFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Queue;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.Executor;
 import java.util.concurrent.SynchronousQueue;
 
 
-public class WorkerPool {
+public class WorkerPool implements Executor {
     private static final Logger log = LogManager.getLogger();
 
     private final EventMachine em;
     private final List<Worker> workers = new CopyOnWriteArrayList<>();
-    private final BlockingQueue<Worker> available = new LinkedBlockingQueue<>();
-    private final BlockingQueue<Worker> acquired = new LinkedBlockingQueue<>();
 
     public WorkerPool(EventMachine em, int count) {
         this.em = em;
         for (int i = 0; i < count; i++)
-            available.offer(createWorker());
-    }
-
-    public WorkerPool(EventMachine em) {
-        this(em, 0);
+            createWorker();
     }
 
     private static void uncaughtExceptionHandler(Thread t, Throwable e) {
@@ -40,11 +31,11 @@ public class WorkerPool {
 
 
     private Worker createWorker() {
-        BlockingQueue<Runnable> queue = new SynchronousQueue<>();
-        Thread thread = BomberThreadFactory.WORKER_FACTORY.newThread(() -> {
+        var queue = new SynchronousQueue<Runnable>();
+        var thread = BomberThreadFactory.WORKER_FACTORY.newThread(() -> {
             while (true) {
                 try {
-                    Runnable task = queue.take();
+                    var task = queue.take();
 
                     task.run();
                 } catch (Exception e) {
@@ -56,60 +47,27 @@ public class WorkerPool {
         thread.setUncaughtExceptionHandler(WorkerPool::uncaughtExceptionHandler);
         thread.start();
 
-        Worker worker = new Worker(em, queue, thread);
+        var worker = new Worker(em, queue, thread);
 
         workers.add(worker);
         log.debug("Created new worker: {}", worker.getName());
         return worker;
     }
 
-    public Worker acquire() {
-        Worker available = this.available.poll();
-        Worker worker = available != null ? available : createWorker();
-
-        log.debug("Acquire worker: {}", worker.getName());
-        acquired.add(worker);
-
-        return worker;
-    }
-
-    public List<Worker> acquire(int count) {
-        log.debug("Acquire {} workers", count);
-        List<Worker> workers = new ArrayList<>();
-        for (int i = 0; i < count; i++) {
-            workers.add(acquire());
-        }
-
-        return workers;
-    }
-
-    public void release(Worker worker) {
-        log.debug("Release worker: {}", worker.getName());
-        if (!acquired.remove(worker)) {
-            log.warn("woker: {} not in acquired workers, looks like bug", worker.getName());
-            return;
-        }
-
-        available.add(worker);
-    }
-
-    public void releaseAll() {
-        log.debug("Release all {} workers", acquired.size());
-        acquired.drainTo(available);
-    }
-
     public void shutdown() {
-        log.info("Shutdown WorkerPool, {} workers ({} available) will receive a stop signal", workers.size(), available.size());
-        available.clear();
-        if (acquired.isEmpty()) {
-            log.warn("Some threads still acquired: {}. Doesn't matter", acquired);
-        }
+        log.info("Shutdown WorkerPool, {} workers will receive a stop signal", workers.size());
 
         workers.forEach(Worker::stop);
         workers.clear();
     }
 
-    public Queue<Worker> getAcquired() {
-        return acquired;
+
+    public List<Worker> getWorkers() {
+        return workers;
+    }
+
+    @Override
+    public void execute(Runnable command) {
+
     }
 }

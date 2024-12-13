@@ -10,7 +10,7 @@ import java.util.function.BooleanSupplier;
 
 public class WorkerState {
 
-    private final TestCaseState parent;
+    private final TestCaseState testCase;
 
     private final AtomicLong itSeq = new AtomicLong();
     private final AtomicLong expectedRecordsCount = new AtomicLong();
@@ -19,14 +19,13 @@ public class WorkerState {
     private final AtomicLong errorsCount = new AtomicLong();
     private volatile boolean finished = false;
 
-    public WorkerState(TestCaseState parent) {
-        this.parent = parent;
+    public WorkerState(TestCaseState testCase) {
+        this.testCase = testCase;
     }
 
-    public TestCaseState getParent() {
-        return parent;
+    public TestCaseState getTestCase() {
+        return testCase;
     }
-
 
     public long getIterationsCount() {
         return iterationsCount.get();
@@ -35,12 +34,12 @@ public class WorkerState {
     public Iteration createIteration() {
         String threadName = Thread.currentThread().getName();
         var test = new Test(
-                parent.getTestApp().getName(),
-                parent.getTestSuite().getName(),
-                parent.getTestCase().getName());
+                testCase.getTestApp().getName(),
+                testCase.getTestSuite().getName(),
+                testCase.getTestCase().getName());
 
         return new Iteration(
-                parent.getFlightId(),
+                testCase.getFlightId(),
                 itSeq.get(),
                 threadName,
                 Instant.now(),
@@ -60,7 +59,7 @@ public class WorkerState {
     public void addError() {
         iterationsCount.incrementAndGet();
         errorsCount.incrementAndGet();
-        parent.addError();
+        testCase.addError();
     }
 
     public long getExpectedRecordsCount() {
@@ -81,26 +80,26 @@ public class WorkerState {
     }
 
     public BooleanSupplier createCondition() {
-        var condition = parent.getCondition();
+        var condition = testCase.getCondition();
         return () -> condition.getAsBoolean() && checkTime() && !finished;
     }
 
     private boolean checkTime() {
-        var settings = parent.getConfiguration().settings();
-        var elapsed = System.currentTimeMillis() - parent.getStartTime().toEpochMilli();
+        var settings = testCase.getConfiguration().settings();
+        var elapsed = System.currentTimeMillis() - testCase.getStartTime().toEpochMilli();
         return settings.duration().toMillis() >= elapsed;
     }
 
     public void start() {
-        parent.getStartLatch().countDown();
+        testCase.getStartLatch().countDown();
     }
 
     public boolean awaitStart(int seconds) throws InterruptedException {
-        return parent.getStartLatch().await(seconds, TimeUnit.SECONDS);
+        return testCase.getStartLatch().await(seconds, TimeUnit.SECONDS);
     }
 
     public void finish() {
-        parent.getFinishLatch().arrive();
+        testCase.getFinishLatch().arrive();
         finished = true;
     }
 

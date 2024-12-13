@@ -70,6 +70,11 @@ public class TestCaseState {
         return startLatch;
     }
 
+    public void onWorkerStart() {
+        startLatch.countDown();
+    }
+
+
     public Phaser getFinishLatch() {
         return finishLatch;
     }

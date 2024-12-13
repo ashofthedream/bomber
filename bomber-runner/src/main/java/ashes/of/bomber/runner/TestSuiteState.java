@@ -8,10 +8,13 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class TestSuiteState {
+
     private final TestAppState parent;
     private final TestSuitePlan plan;
     private final TestSuite<Object> testSuite;
     private final Instant startTime = Instant.now();
+
+    private volatile WorkerPool executor;
     private volatile Instant finishTime;
 
     private List<TestCaseState> testCases = new CopyOnWriteArrayList<>();
@@ -21,6 +24,15 @@ public class TestSuiteState {
         this.parent = parent;
         this.plan = plan;
         this.testSuite = testSuite;
+    }
+
+    public WorkerPool getExecutor() {
+        return executor;
+    }
+
+    public TestSuiteState setExecutor(WorkerPool executor) {
+        this.executor = executor;
+        return this;
     }
 
     public TestAppState getAppState() {
@@ -59,4 +71,5 @@ public class TestSuiteState {
         testCases.add(state);
         current = state;
     }
+
 }

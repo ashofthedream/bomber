@@ -72,7 +72,7 @@ public class FlightService {
                                     .setTestSuite(event.getTestSuite())
                                     .setTestCase(event.getTestCase())
                                     .setTimeElapsed(System.currentTimeMillis() - snapshot.getStartTime())
-                                    .setTimeTotal(settings.getDuration())
+                                    .setTimeTotal(settings.getTime())
                                     .setCurrentIterationsCount(snapshot.getCurrentIterationsCount())
                                     .setTotalIterationsCount(settings.getIterations())
                                     .setErrorsCount(snapshot.getErrorsCount());

@@ -25,7 +25,6 @@ import ashes.of.bomber.snapshots.TestAppSnapshot;
 import ashes.of.bomber.snapshots.TestCaseSnapshot;
 import ashes.of.bomber.snapshots.TestFlightSnapshot;
 import ashes.of.bomber.snapshots.TestSuiteSnapshot;
-import ashes.of.bomber.snapshots.WorkerSnapshot;
 import ashes.of.bomber.threads.BomberThreadFactory;
 import ashes.of.bomber.watcher.Watcher;
 import org.apache.logging.log4j.LogManager;
@@ -35,7 +34,6 @@ import org.apache.logging.log4j.ThreadContext;
 import javax.annotation.Nullable;
 import java.time.Instant;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
@@ -43,7 +41,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 
@@ -51,7 +48,6 @@ public class Runner {
     private static final Logger log = LogManager.getLogger();
 
     private final CountDownLatch endLatch = new CountDownLatch(1);
-    private final WorkerPool pool;
     private final EventMachine em;
     private final List<Watcher> watchers;
     private final List<TestApp> apps;
@@ -61,7 +57,6 @@ public class Runner {
 
     public Runner(EventMachine em, List<Watcher> watchers, List<TestApp> apps) {
         this.em = em;
-        this.pool = new WorkerPool(em);
         this.watchers = watchers;
         this.apps = apps;
     }
@@ -71,7 +66,7 @@ public class Runner {
      * Runs the test flight
      */
     public TestFlightReport run(TestFlightPlan flightPlan) {
-        var current = this.state;
+        var current = state;
         if (current != null) {
             throw new IllegalStateException("Invalid runner state: already exists for flightId: " + current.getPlan().flightId());
         }
@@ -83,7 +78,6 @@ public class Runner {
 
         ThreadContext.put("flightId", String.valueOf(flightPlan.flightId()));
         log.info("Start flight: {} with plan:", flightPlan.flightId());
-
         flightPlan.testApps().forEach(testApp -> {
             log.info("Test app: {}", testApp.name());
             testApp.testSuites().forEach(testSuite -> {
@@ -121,7 +115,6 @@ public class Runner {
                         }
 
                         // todo return report with error? but now fail fast approach used
-
                         var testAppState = new TestAppState(state, plan, testApp);
                         state.attach(testAppState);
 
@@ -143,7 +136,7 @@ public class Runner {
             wfs.forEach(wf -> wf.cancel(false));
             watcherEx.shutdown();
 
-            pool.shutdown();
+
 
             ThreadContext.clearAll();
         }
@@ -161,9 +154,9 @@ public class Runner {
         em.dispatch(new TestAppStartedEvent(state.getStartTime(), state.getFlightId(), testApp.getName()));
 
         try {
-            Map<String, TestSuite<?>> suitesByName = testApp.getTestSuitesByName();
+            var suitesByName = testApp.getTestSuitesByName();
 
-            var testSuiteReports = state.getPlan().testSuites()
+            var reports = state.getPlan().testSuites()
                     .stream()
                     .map(plan -> {
                         log.debug("Try to run test suite: {}", plan.name());
@@ -183,7 +176,7 @@ public class Runner {
             state.finish();
             em.dispatch(new TestAppFinishedEvent(state.getFinishTime(), state.getFlightId(), testApp.getName()));
 
-            return new TestAppReport(state.getPlan(), state.getStartTime(), state.getFinishTime(), testSuiteReports);
+            return new TestAppReport(state.getPlan(), state.getStartTime(), state.getFinishTime(), reports);
         } finally {
             ThreadContext.remove("testApp");
         }
@@ -205,12 +198,14 @@ public class Runner {
         em.dispatch(new TestSuiteStartedEvent(state.getStartTime(), state.getFlightId(), testApp.getName(), testSuite.getName()));
 
         int threads = determineWorkerThreadsCount(state.getPlan(), testSuite);
-        pool.acquire(threads);
+        var executor = new WorkerPool(em, threads);
+
+        state.setExecutor(executor);
 
         try {
-            callBeforeSuite(testSuite);
+            callBeforeSuite(executor, testSuite);
 
-            List<TestCaseReport> reports = state.getPlan().testCases()
+            var reports = state.getPlan().testCases()
                     .stream()
                     .map(plan -> {
                         var testCase = testSuite.getTestCase(plan.name());
@@ -221,16 +216,16 @@ public class Runner {
                         }
 
                         // merge configuration
-                        Configuration configuration = mergeConfiguration(plan, testCase);
+                        var configuration = mergeConfiguration(plan, testCase);
 
                         var testCaseState = new TestCaseState(state, plan, testCase, configuration);
                         state.attach(testCaseState);
-                        return runTestCase(testCaseState);
+                        return runTestCase(executor, testCaseState);
                     })
                     .filter(Objects::nonNull)
                     .toList();
 
-            callAfterSuite(testSuite);
+            callAfterSuite(executor, testSuite);
 
             log.info("Finish test suite: {}", testSuite.getName());
             state.finish();
@@ -241,7 +236,7 @@ public class Runner {
             log.error("Run test suite: {} failed", testSuite.getName(), throwable);
             return new TestSuiteReport(testSuite.getName(), List.of());
         } finally {
-            pool.releaseAll();
+            executor.shutdown();
             ThreadContext.remove("testSuite");
         }
     }
@@ -279,23 +274,27 @@ public class Runner {
                 .orElseThrow(() -> new RuntimeException("Can't determine thread count for test suite: " + testSuite.getName()));
     }
 
-    private void callBeforeSuite(TestSuite<Object> testSuite) throws InterruptedException {
-        var acquired = pool.getAcquired();
-        log.debug("Call beforeSuite for all workers: {}", acquired.size());
-        CountDownLatch latch = new CountDownLatch(acquired.size());
-        acquired.forEach(worker -> worker.runBeforeSuite(testSuite, latch));
+    private void callBeforeSuite(WorkerPool pool, TestSuite<Object> testSuite) throws InterruptedException {
+        var workers = pool.getWorkers();
+        log.debug("Call beforeSuite for all workers: {}", workers.size());
+        var latch = new CountDownLatch(workers.size());
+        workers.forEach(worker -> {
+            worker.run(() -> worker.runBeforeSuite(testSuite, latch));
+        });
 
-        log.debug("Await {} workers beforeSuite", acquired.size());
+        log.debug("Await {} workers beforeSuite", workers.size());
         latch.await();
     }
 
-    private void callAfterSuite(TestSuite<Object> testSuite) throws InterruptedException {
-        var acquired = pool.getAcquired();
-        log.debug("Call afterSuite for all workers: {}", acquired.size());
-        CountDownLatch latch = new CountDownLatch(acquired.size());
-        acquired.forEach(worker -> worker.runAfterSuite(testSuite, latch));
+    private void callAfterSuite(WorkerPool pool, TestSuite<Object> testSuite) throws InterruptedException {
+        var workers = pool.getWorkers();
+        log.debug("Call afterSuite for all workers: {}", workers.size());
+        var latch = new CountDownLatch(workers.size());
+        workers.forEach(worker -> {
+            worker.run(() -> worker.runAfterSuite(testSuite, latch));
+        });
 
-        log.debug("Await {} workers afterSuite", acquired.size());
+        log.debug("Await {} workers afterSuite", workers.size());
         latch.await();
     }
 
@@ -303,7 +302,7 @@ public class Runner {
     /**
      * Runs the test case
      */
-    private TestCaseReport runTestCase(TestCaseState state) {
+    private TestCaseReport runTestCase(WorkerPool executor, TestCaseState state) {
         var testCase = state.getTestCase();
         var testSuite = state.getTestSuite();
         var testApp = state.getTestApp();
@@ -324,10 +323,12 @@ public class Runner {
 
         log.debug("Run {} workers", settings.threads());
 
-        pool.getAcquired()
+        executor.getWorkers()
                 .stream()
                 .limit(settings.threads())
-                .forEach(worker -> worker.run(state));
+                .forEach(worker -> {
+                    worker.run(() -> worker.runTestCase(state));
+                });
 
         try {
             log.debug("Await end of test case: {}", testCase.getName());
@@ -366,9 +367,13 @@ public class Runner {
             return null;
         }
 
-        List<WorkerSnapshot> workers = pool.getAcquired().stream()
-                .map(Worker::getSnapshot)
-                .toList();
+        var workers = Optional.of(state)
+                .map(TestFlightState::getCurrentApp)
+                .map(TestAppState::getCurrentSuite)
+                .map(TestSuiteState::getExecutor)
+                .map(WorkerPool::getWorkers)
+                .map(list -> list.stream().map(Worker::getSnapshot).toList())
+                .orElseGet(List::of);
 
         return new TestFlightSnapshot(
                 state.getPlan(),

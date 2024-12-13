@@ -12,9 +12,11 @@ import java.util.function.BooleanSupplier;
 public class TestFlightState {
     private static final Logger log = LogManager.getLogger();
 
-    private final BooleanSupplier condition;
     private final TestFlightPlan plan;
+    private final BooleanSupplier condition;
     private final Instant startTime = Instant.now();
+
+    @Nullable
     private volatile Instant finishTime;
 
     @Nullable
@@ -29,16 +31,22 @@ public class TestFlightState {
         return plan;
     }
 
-    public TestAppState getCurrentApp() {
-        return current;
+    public BooleanSupplier getCondition() {
+        return condition;
     }
 
     public Instant getStartTime() {
         return startTime;
     }
 
+    @Nullable
     public Instant getFinishTime() {
         return finishTime;
+    }
+
+    @Nullable
+    public TestAppState getCurrentApp() {
+        return current;
     }
 
     public TestFlightState setFinishTime(Instant finishTime) {
@@ -46,12 +54,7 @@ public class TestFlightState {
         return this;
     }
 
-
     public void attach(TestAppState state) {
         current = state;
-    }
-
-    public BooleanSupplier getCondition() {
-        return condition;
     }
 }

@@ -2,8 +2,8 @@ package ashes.of.bomber.builder;
 
 import ashes.of.bomber.methods.TestCaseMethod;
 import ashes.of.bomber.core.TestCase;
+import com.google.common.base.Preconditions;
 
-import java.util.Objects;
 import java.util.function.Consumer;
 
 public class TestCaseBuilder<T> {
@@ -42,8 +42,8 @@ public class TestCaseBuilder<T> {
     }
 
     public TestCase<T> build() {
-        Objects.requireNonNull(name, "name is null");
-        Objects.requireNonNull(test, "test is null");
+        Preconditions.checkNotNull(name, "name is null");
+        Preconditions.checkNotNull(test, "test is null");
         return new TestCase<>(name, async, config.build(), test);
     }
 }

@@ -6,10 +6,6 @@ import ashes.of.bomber.events.EventMachine;
 import ashes.of.bomber.snapshots.WorkerSnapshot;
 import ashes.of.bomber.events.TestCaseAfterEachEvent;
 import ashes.of.bomber.events.TestCaseBeforeEachEvent;
-import ashes.of.bomber.delayer.Delayer;
-import ashes.of.bomber.limiter.Limiter;
-import ashes.of.bomber.squadron.Barrier;
-import ashes.of.bomber.tools.Stopwatch;
 import ashes.of.bomber.tools.Tools;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -18,7 +14,6 @@ import org.apache.logging.log4j.ThreadContext;
 import javax.annotation.Nullable;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
-import java.util.function.BooleanSupplier;
 
 public class Worker {
     private static final Logger log = LogManager.getLogger();
@@ -51,11 +46,6 @@ public class Worker {
         );
     }
 
-
-    public boolean isActive() {
-        return thread.isAlive();
-    }
-
     public void stop() {
         thread.stop();
     }
@@ -68,7 +58,7 @@ public class Worker {
         }
     }
 
-    private void run(Runnable task) {
+    public void run(Runnable task) {
         // a bit of busy-wait here, todo investigate
         for (int i = 0; i < 10000; i++) {
             boolean success = queue.offer(task);
@@ -81,24 +71,22 @@ public class Worker {
 
 
     public void runBeforeSuite(TestSuite<Object> testSuite, CountDownLatch latch) {
-        run(() -> {
-            if (this.context != null)
-                log.error("Worker has context, this is looks like bug");
+        if (this.context != null)
+            log.error("Worker has context, this is looks like bug");
 
-            this.context = testSuite.getContext();
-            testSuite.beforeSuite(context);
-            latch.countDown();
-        });
+        this.context = testSuite.getContext();
+        testSuite.beforeSuite(context);
+        latch.countDown();
     }
 
-    public void run(TestCaseState state) {
-        this.state = new WorkerState(state);
-        run(() -> run(this.state));
+    public void runTestCase(TestCaseState testCase) {
+        this.state = new WorkerState(testCase);
+        runTestCase(this.state);
     }
 
-    private void run(WorkerState state) {
-        state.getParent().getFinishLatch().register();
-        var parent = state.getParent();
+    private void runTestCase(WorkerState state) {
+        state.getTestCase().getFinishLatch().register();
+        var parent = state.getTestCase();
         var testCase = parent.getTestCase();
         var testSuite = parent.getSuiteState().getTestSuite();
         var testApp = parent.getSuiteState().getAppState().getTestApp();
@@ -110,9 +98,9 @@ public class Worker {
 
 
         var config = parent.getConfiguration();
-        Limiter limiter = config.limiter().get();
-        Delayer delayer = config.delayer().get();
-        Barrier barrier = config.barrier();
+        var limiter = config.limiter().get();
+        var delayer = config.delayer().get();
+        var barrier = config.barrier();
 
         state.start();
 
@@ -132,8 +120,7 @@ public class Worker {
         barrier.enterCase(test);
 
         log.info("Start test case: {}", testCase.getName());
-
-        BooleanSupplier condition = state.createCondition();
+        var condition = state.createCondition();
         while (condition.getAsBoolean()) {
             delayer.delay();
 
@@ -156,7 +143,7 @@ public class Worker {
 
             em.dispatch(new TestCaseBeforeEachEvent(it.timestamp(), it.flightId(), it.test()));
 
-            Tools tools = new Tools(it, record -> {
+            var tools = new Tools(it, record -> {
                 em.dispatch(record);
                 state.addCaughtCount(1);
 
@@ -164,7 +151,7 @@ public class Worker {
                 else state.addError();
             });
 
-            Stopwatch stopwatch = tools.stopwatch();
+            var stopwatch = tools.stopwatch();
             try {
                 // test
                 testCase.run(context, tools);
@@ -239,10 +226,8 @@ public class Worker {
     }
 
     public void runAfterSuite(TestSuite<Object> testSuite, CountDownLatch latch) {
-        run(() -> {
-            testSuite.afterSuite(context);
-            this.context = null;
-            latch.countDown();
-        });
+        testSuite.afterSuite(context);
+        this.context = null;
+        latch.countDown();
     }
 }

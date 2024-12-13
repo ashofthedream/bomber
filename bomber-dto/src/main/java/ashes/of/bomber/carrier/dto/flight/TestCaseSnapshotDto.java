@@ -1,5 +1,7 @@
 package ashes.of.bomber.carrier.dto.flight;
 
+import ashes.of.bomber.configuration.dto.SettingsDto;
+
 public class TestCaseSnapshotDto {
     private String name;
     private SettingsDto settings;

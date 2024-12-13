@@ -27,7 +27,7 @@ public class TestAppBuilder {
     private String name;
 
     private ProviderBuilder provider = new ProviderBuilder();
-    private ConfigurationBuilder config = new ConfigurationBuilder();
+    private ConfigurationBuilder configuration = new ConfigurationBuilder();
 
     /**
      * Test suites for run
@@ -47,12 +47,12 @@ public class TestAppBuilder {
     }
 
     public TestAppBuilder config(Consumer<ConfigurationBuilder> consumer) {
-        consumer.accept(config);
+        consumer.accept(configuration);
         return this;
     }
 
     public TestAppBuilder config(ConfigurationBuilder config) {
-        this.config = config;
+        this.configuration = config;
         return this;
     }
 
@@ -70,7 +70,7 @@ public class TestAppBuilder {
 
     private <T> TestSuiteBuilder<T> newSuiteBuilder() {
         return new TestSuiteBuilder<T>()
-                .config(new ConfigurationBuilder(config));
+                .config(new ConfigurationBuilder(configuration));
     }
 
     public <T> TestAppBuilder createSuite(Consumer<TestSuiteBuilder<T>> consumer) {
@@ -185,7 +185,7 @@ public class TestAppBuilder {
     }
 
     public TestApp build() {
-        Objects.requireNonNull(name, "name is null");
+        Preconditions.checkNotNull(name, "name is null");
         Preconditions.checkArgument(!testSuites.isEmpty(), "No test suites found");
 
         List<TestSuite<?>> suites = this.testSuites.stream()

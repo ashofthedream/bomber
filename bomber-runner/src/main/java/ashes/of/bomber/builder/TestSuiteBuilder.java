@@ -169,7 +169,7 @@ public class TestSuiteBuilder<T> {
     }
 
     public TestSuite<T> build() {
-        Objects.requireNonNull(name,     "name is null");
+        Preconditions.checkNotNull(name, "name is null");
         // todo it may be useful, but not today
         Preconditions.checkArgument(!testCases.isEmpty(), "No test cases found for test suite: " + name);
 

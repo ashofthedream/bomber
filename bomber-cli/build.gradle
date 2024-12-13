@@ -29,6 +29,7 @@ jar {
 
 dependencies {
     implementation project(':bomber-core')
+    implementation project(':bomber-dto')
     implementation project(':bomber-runner')
 
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.3'

@@ -43,7 +43,7 @@ public class RateLimiter implements Limiter {
     @Override
     public boolean await(int count) {
         while (true) {
-            Permit permit = permit(count);
+            var permit = permit(count);
             if (permit.isAllowed())
                 return true;
 
@@ -56,7 +56,7 @@ public class RateLimiter implements Limiter {
 
     @Override
     public boolean permits(int count) {
-        Permit permit = permit(count);
+        var permit = permit(count);
         return permit.isAllowed();
     }
 
@@ -65,7 +65,7 @@ public class RateLimiter implements Limiter {
         // todo what if count will be greater than limit?
         for (int t = 0; t < tryouts; t++) {
             var now = System.nanoTime();
-            var current = this.state.get();
+            var current = state.get();
 
             var opd = duration / (limit * 1.0);
             var elapsed = now - current.timestamp();
@@ -73,13 +73,12 @@ public class RateLimiter implements Limiter {
             var remain = Math.min(limit, current.remain() + additional);
 
             if (remain >= count) {
-                if (this.state.compareAndSet(current, new State(remain - count, now))) {
+                if (state.compareAndSet(current, new State(remain - count, now))) {
                     return new Permit(count, count,0);
                 }
 
                 continue;
             }
-
 
             return new Permit(count, 0, Math.round(opd * (count - remain)));
         }

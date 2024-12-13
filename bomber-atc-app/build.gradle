@@ -34,7 +34,7 @@ configurations {
 
 dependencies {
     implementation project(':bomber-core')
-    implementation project(':bomber-carrier-dto')
+    implementation project(':bomber-dto')
 
     implementation('org.springframework.cloud:spring-cloud-starter-loadbalancer') {
         exclude  group: 'org.springframework.cloud', module: 'spring-cloud-starter-netflix-ribbon'

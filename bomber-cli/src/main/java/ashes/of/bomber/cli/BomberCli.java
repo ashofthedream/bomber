@@ -6,11 +6,11 @@ import ashes.of.bomber.builder.ConfigurationBuilder;
 import ashes.of.bomber.builder.TestAppBuilder;
 import ashes.of.bomber.builder.TestCaseBuilder;
 import ashes.of.bomber.cli.config.BomberConfig;
-import ashes.of.bomber.cli.config.ConfigurationConfig;
 import ashes.of.bomber.cli.config.HttpRequestConfig;
-import ashes.of.bomber.cli.config.SettingsConfig;
 import ashes.of.bomber.cli.config.TestCaseConfig;
 import ashes.of.bomber.builder.SettingsBuilder;
+import ashes.of.bomber.configuration.dto.ConfigurationDto;
+import ashes.of.bomber.configuration.dto.SettingsDto;
 import ashes.of.bomber.sink.Sink;
 import ashes.of.bomber.utils.Sleep;
 import ashes.of.bomber.watcher.Watcher;
@@ -92,12 +92,18 @@ public class BomberCli implements Runnable {
 
     private BomberConfig createBomberConfigFromOptions() {
         var sinks = List.of(
-                "ashes.of.bomber.sink.histogram.HistogramTimelineSink"
+                "ashes.of.bomber.sink.histogram.HistogramTimelineSink",
+                "ashes.of.bomber.sink.histogram.HistogramSink"
         );
 
         var watchers = List.of();
-        var settings = new SettingsConfig(threadsCount, seconds, iterationsCount);
-        var configuration = new ConfigurationConfig(settings);
+        var settings = new SettingsDto()
+                .setTime(seconds)
+                .setThreads(threadsCount)
+                .setIterations(iterationsCount);
+
+        var configuration = new ConfigurationDto()
+                .setSettings(settings);
 
         if (params.size() < 2)
             throw new RuntimeException("please profile method, like GET or POST and URL");
@@ -158,25 +164,25 @@ public class BomberCli implements Runnable {
                 .build();
     }
 
-    private ConfigurationBuilder buildConfiguration(ConfigurationConfig cfg) {
+    private ConfigurationBuilder buildConfiguration(ConfigurationDto cfg) {
         var b = new ConfigurationBuilder();
 
-        if (cfg.settings() != null)
-            b.settings(buildSettings(cfg.settings()));
+        if (cfg.getSettings() != null)
+            b.settings(buildSettings(cfg.getSettings()));
 
         return b;
     }
 
-    private SettingsBuilder buildSettings(SettingsConfig cfg) {
+    private SettingsBuilder buildSettings(SettingsDto cfg) {
         var b = new SettingsBuilder();
-        if (cfg.threads() != null)
-            b.setThreads(cfg.threads());
+        if (cfg.getThreads() != null)
+            b.setThreads(cfg.getThreads());
 
-        if (cfg.seconds() != null)
-            b.setSeconds(cfg.seconds());
+        if (cfg.getTime() != null)
+            b.setSeconds(cfg.getTime());
 
-        if (cfg.iterations() != null)
-            b.setIterations(cfg.iterations());
+        if (cfg.getIterations() != null)
+            b.setIterations(cfg.getIterations());
 
         return b;
     }

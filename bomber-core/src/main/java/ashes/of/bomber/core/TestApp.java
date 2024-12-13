@@ -1,9 +1,5 @@
 package ashes.of.bomber.core;
 
-import ashes.of.bomber.flight.plan.TestAppPlan;
-import ashes.of.bomber.flight.plan.TestCasePlan;
-import ashes.of.bomber.flight.plan.TestSuitePlan;
-
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -32,6 +28,4 @@ public class TestApp {
         return testSuites.stream()
                 .collect(Collectors.toMap(TestSuite::getName, suite -> suite));
     }
-
-
 }

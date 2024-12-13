@@ -1,6 +1,6 @@
 package ashes.of.bomber.carrier.mappers;
 
-import ashes.of.bomber.carrier.dto.flight.SettingsDto;
+import ashes.of.bomber.configuration.dto.SettingsDto;
 import ashes.of.bomber.configuration.Settings;
 
 import javax.annotation.Nullable;
@@ -14,7 +14,7 @@ public class SettingsMapper {
             return null;
 
         return new Settings(
-                Duration.ofMillis(settings.getDuration()),
+                Duration.ofMillis(settings.getTime()),
                 settings.getThreads(),
                 settings.getIterations()
         );
@@ -26,7 +26,7 @@ public class SettingsMapper {
             return null;
 
         return new SettingsDto()
-                .setDuration(settings.duration().toMillis())
+                .setTime(settings.duration().toMillis())
                 .setThreads(settings.threads())
                 .setIterations(settings.iterations());
     }

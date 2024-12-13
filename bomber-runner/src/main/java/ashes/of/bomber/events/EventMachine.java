@@ -32,12 +32,14 @@ public class EventMachine implements EventDispatcher, EventHandler {
 
     @Override
     public <E> EventMachine dispatch(E event) {
-        var handlers = this.handlers.getOrDefault(event.getClass(), List.of(empty));
-        executor.execute(() -> propagate(event, handlers));
+        var handlers = this.handlers.get(event.getClass());
+        if (handlers != null) {
+            executor.execute(() -> propagate(event, handlers));
+        }
         return this;
     }
 
-    private void propagate(Object event, List<Consumer<Object>> handlers) {
+    private <E> void propagate(E event, List<Consumer<Object>> handlers) {
         handlers.forEach(handler -> {
             try {
                 handler.accept(event);
