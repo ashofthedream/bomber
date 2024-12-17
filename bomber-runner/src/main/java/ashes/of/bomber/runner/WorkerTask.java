@@ -8,9 +8,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BooleanSupplier;
 
-public class WorkerState {
+public class WorkerTask {
 
-    private final TestCaseState testCase;
+    private final TestCaseTask testCase;
 
     private final AtomicLong itSeq = new AtomicLong();
     private final AtomicLong expectedRecordsCount = new AtomicLong();
@@ -19,11 +19,11 @@ public class WorkerState {
     private final AtomicLong errorsCount = new AtomicLong();
     private volatile boolean finished = false;
 
-    public WorkerState(TestCaseState testCase) {
+    public WorkerTask(TestCaseTask testCase) {
         this.testCase = testCase;
     }
 
-    public TestCaseState getTestCase() {
+    public TestCaseTask getTestCase() {
         return testCase;
     }
 
@@ -34,9 +34,9 @@ public class WorkerState {
     public Iteration createIteration() {
         String threadName = Thread.currentThread().getName();
         var test = new Test(
-                testCase.getTestApp().getName(),
-                testCase.getTestSuite().getName(),
-                testCase.getTestCase().getName());
+                null,
+                testCase.getTestSuite().name(),
+                testCase.getTestCase().name());
 
         return new Iteration(
                 testCase.getFlightId(),
@@ -91,6 +91,7 @@ public class WorkerState {
     }
 
     public void start() {
+        testCase.getFinishLatch().register();
         testCase.getStartLatch().countDown();
     }
 

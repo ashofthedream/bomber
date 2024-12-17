@@ -112,7 +112,7 @@ public class TestSuiteBuilder<T> {
     public TestSuiteBuilder<T> testCase(TestCaseBuilder<T> builder) {
         Objects.requireNonNull(builder, "builder is null");
         var testCase = builder.build();
-        this.testCases.put(testCase.getName(), testCase);
+        this.testCases.put(testCase.name(), testCase);
         return this;
     }
 

@@ -1,20 +1,18 @@
 package ashes.of.bomber.carrier.mappers;
 
 import ashes.of.bomber.carrier.dto.flight.TestAppDto;
-import ashes.of.bomber.core.TestApp;
+import ashes.of.bomber.core.TestSuiteGroup;
 import ashes.of.bomber.flight.plan.TestAppPlan;
-
-import java.util.stream.Collectors;
 
 public class TestAppMapper {
 
-    public static TestAppDto toDto(TestApp app) {
-        var testSuites = app.getTestSuites().stream()
+    public static TestAppDto toDto(TestSuiteGroup app) {
+        var testSuites = app.testSuites().stream()
                 .map(TestSuiteMapper::toDto)
                 .toList();
 
         return new TestAppDto()
-                .setName(app.getName())
+                .setName(app.name())
                 .setTestSuites(testSuites);
     }
 

@@ -1,6 +1,6 @@
 package ashes.of.bomber.builder;
 
-import ashes.of.bomber.core.TestApp;
+import ashes.of.bomber.core.TestSuiteGroup;
 import ashes.of.bomber.core.TestSuite;
 import ashes.of.bomber.processors.TestAppProcessor;
 import ashes.of.bomber.processors.TestSuiteProcessor;
@@ -184,7 +184,7 @@ public class TestAppBuilder {
         return addSuite(b);
     }
 
-    public TestApp build() {
+    public TestSuiteGroup build() {
         Preconditions.checkNotNull(name, "name is null");
         Preconditions.checkArgument(!testSuites.isEmpty(), "No test suites found");
 
@@ -193,6 +193,6 @@ public class TestAppBuilder {
                 .map(TestSuiteBuilder::build)
                 .collect(Collectors.toList());
 
-        return new TestApp(name, suites);
+        return new TestSuiteGroup(name, suites);
     }
 }

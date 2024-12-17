@@ -22,7 +22,7 @@ public class Worker {
     private final BlockingQueue<Runnable> queue;
     private final Thread thread;
 
-    private volatile WorkerState state;
+    private volatile WorkerTask state;
 
     @Nullable
     private volatile Object context;
@@ -79,22 +79,19 @@ public class Worker {
         latch.countDown();
     }
 
-    public void runTestCase(TestCaseState testCase) {
-        this.state = new WorkerState(testCase);
+    public void runTestCase(TestCaseTask testCase) {
+        this.state = new WorkerTask(testCase);
         runTestCase(this.state);
     }
 
-    private void runTestCase(WorkerState state) {
-        state.getTestCase().getFinishLatch().register();
+    private void runTestCase(WorkerTask state) {
         var parent = state.getTestCase();
         var testCase = parent.getTestCase();
         var testSuite = parent.getSuiteState().getTestSuite();
-        var testApp = parent.getSuiteState().getAppState().getTestApp();
 
         ThreadContext.put("flightId", String.valueOf(parent.getFlightId()));
-        ThreadContext.put("testApp", testApp.getName());
-        ThreadContext.put("testSuite", testSuite.getName());
-        ThreadContext.put("testCase", testCase.getName());
+        ThreadContext.put("testSuite", testSuite.name());
+        ThreadContext.put("testCase", testCase.name());
 
 
         var config = parent.getConfiguration();
@@ -105,21 +102,21 @@ public class Worker {
         state.start();
 
         try {
-            log.trace("Await other workers to start test case: {}", testCase.getName());
+            log.trace("Await other workers to start test case: {}", testCase.name());
             if (!state.awaitStart(60))
                 log.warn("After 60s of waiting, worker started without all other workers (this isn't acceptable situation)");
 
         } catch (Throwable th) {
-            log.warn("Run testCase: {} failed", testCase.getName(), th);
+            log.warn("Run testCase: {} failed", testCase.name(), th);
         }
 
         testSuite.beforeCase(context);
 
-        var test = new Test(testApp.getName(), testSuite.getName(), testCase.getName());
+        var test = new Test(null, testSuite.name(), testCase.name());
         log.trace("Try start test case -> barrier enter");
         barrier.enterCase(test);
 
-        log.info("Start test case: {}", testCase.getName());
+        log.info("Start test case: {}", testCase.name());
         var condition = state.createCondition();
         while (condition.getAsBoolean()) {
             delayer.delay();
@@ -154,12 +151,12 @@ public class Worker {
             var stopwatch = tools.stopwatch();
             try {
                 // test
-                testCase.run(context, tools);
+                testCase.testCase().run(context, tools);
 
-                if (!testCase.isAsync())
+                if (!testCase.async())
                     stopwatch.success();
 
-                long expected = tools.getStopwatchCount() - (testCase.isAsync() ? 1 : 0);
+                long expected = tools.getStopwatchCount() - (testCase.async() ? 1 : 0);
                 state.addExpectedCount(expected);
                 em.dispatch(new TestCaseAfterEachEvent(
                         it.timestamp(),
@@ -171,7 +168,7 @@ public class Worker {
                         null
                 ));
             } catch (Throwable th) {
-                if (!testCase.isAsync())
+                if (!testCase.async())
                     stopwatch.fail(th);
 
                 em.dispatch(new TestCaseAfterEachEvent(
@@ -184,7 +181,7 @@ public class Worker {
                         th
                 ));
 
-                log.warn("Call test case: {} failed, it: {}", testCase.getName(), it, th);
+                log.warn("Call test case: {} failed, it: {}", testCase.name(), it, th);
             }
 
             testSuite.afterEach(it, context);
@@ -220,7 +217,7 @@ public class Worker {
 
         testSuite.afterCase(context);
 
-        log.debug("Finish test case: {}", testCase.getName());
+        log.debug("Finish test case: {}", testCase.name());
         state.finish();
         ThreadContext.clearAll();
     }

@@ -8,7 +8,7 @@
     </Appenders>
 
     <Loggers>
-        <Logger name="ashes.of.bomber" level="debug" />
+        <Logger name="ashes.of.bomber" level="trace" />
         <Root level="info">
             <AppenderRef ref="Console"/>
         </Root>

@@ -4,8 +4,6 @@ import ashes.of.bomber.carrier.dto.flight.TestSuiteDto;
 import ashes.of.bomber.core.TestSuite;
 import ashes.of.bomber.flight.plan.TestSuitePlan;
 
-import java.util.stream.Collectors;
-
 public class TestSuiteMapper {
 
 
@@ -25,7 +23,7 @@ public class TestSuiteMapper {
                 .toList();
 
         return new TestSuiteDto()
-                .setName(testSuite.getName())
+                .setName(testSuite.name())
                 .setTestCases(testCases);
     }
 

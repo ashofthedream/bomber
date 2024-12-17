@@ -44,6 +44,6 @@ public class TestCaseBuilder<T> {
     public TestCase<T> build() {
         Preconditions.checkNotNull(name, "name is null");
         Preconditions.checkNotNull(test, "test is null");
-        return new TestCase<>(name, async, config.build(), test);
+        return new TestCase<>(name, async, test, config.build());
     }
 }

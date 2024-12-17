@@ -12,42 +12,17 @@ import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-public class TestSuite<T> {
+public record TestSuite<T>(String name,
+                           Supplier<T> context,
+                           List<LifeCycleHolder<T>> beforeSuite,
+                           List<LifeCycleHolder<T>> beforeCase,
+                           List<LifeCycleHolder<T>> beforeEach,
+                           Map<String, TestCase<T>> testCases,
+                           List<LifeCycleHolder<T>> afterEach,
+                           List<LifeCycleHolder<T>> afterCase,
+                           List<LifeCycleHolder<T>> afterSuite) {
+
     private static final Logger log = LogManager.getLogger();
-
-    private final String name;
-    private final Supplier<T> context;
-    private final List<LifeCycleHolder<T>> beforeSuite;
-    private final List<LifeCycleHolder<T>> beforeCase;
-    private final List<LifeCycleHolder<T>> beforeEach;
-    private final Map<String, TestCase<T>> testCases;
-    private final List<LifeCycleHolder<T>> afterEach;
-    private final List<LifeCycleHolder<T>> afterCase;
-    private final List<LifeCycleHolder<T>> afterSuite;
-
-    public TestSuite(String name,
-                     Supplier<T> context,
-                     List<LifeCycleHolder<T>> beforeSuite,
-                     List<LifeCycleHolder<T>> beforeCase,
-                     List<LifeCycleHolder<T>> beforeEach,
-                     Map<String, TestCase<T>> testCases,
-                     List<LifeCycleHolder<T>> afterEach,
-                     List<LifeCycleHolder<T>> afterCase,
-                     List<LifeCycleHolder<T>> afterSuite) {
-        this.name = name;
-        this.context = context;
-        this.beforeSuite = beforeSuite;
-        this.beforeCase = beforeCase;
-        this.beforeEach = beforeEach;
-        this.testCases = testCases;
-        this.afterEach = afterEach;
-        this.afterCase = afterCase;
-        this.afterSuite = afterSuite;
-    }
-
-    public String getName() {
-        return name;
-    }
 
     public Object getContext() {
         return context.get();

@@ -1,19 +1,16 @@
 package ashes.of.bomber.example.users;
 
-import ashes.of.bomber.annotations.LoadTestApp;
+import ashes.of.bomber.annotations.LoadTestSuiteGroup;
 import ashes.of.bomber.annotations.LoadTestSettings;
 import ashes.of.bomber.annotations.Throttle;
 import ashes.of.bomber.builder.BarrierBuilder;
 import ashes.of.bomber.builder.BomberBuilder;
 import ashes.of.bomber.builder.TestAppBuilder;
-import ashes.of.bomber.configuration.Builder;
 import ashes.of.bomber.example.users.client.UsersClient;
 import ashes.of.bomber.example.users.tests.UserControllerLoadTest;
 import ashes.of.bomber.example.utils.SleepUtils;
 import ashes.of.bomber.sink.histogram.HistogramTimelinePrintStreamPrinter;
 import ashes.of.bomber.sink.histogram.HistogramTimelineSink;
-import ashes.of.bomber.squadron.Barrier;
-import ashes.of.bomber.squadron.NoBarrier;
 import ashes.of.bomber.squadron.zookeeper.ZookeeperBarrierBuilder;
 import ashes.of.bomber.watcher.Log4jWatcher;
 import org.apache.logging.log4j.LogManager;
@@ -25,7 +22,7 @@ import java.time.temporal.ChronoUnit;
 /**
  * Example test application with some test cases built via builder and annotations
  */
-@LoadTestApp(testSuites = {
+@LoadTestSuiteGroup(testSuites = {
         UserControllerLoadTest.class
 })
 @LoadTestSettings(threads = 2)

@@ -1,6 +1,6 @@
 package ashes.of.bomber;
 
-import ashes.of.bomber.annotations.LoadTestApp;
+import ashes.of.bomber.annotations.LoadTestSuiteGroup;
 import ashes.of.bomber.annotations.LoadTestCase;
 import ashes.of.bomber.annotations.LoadTestSettings;
 import ashes.of.bomber.annotations.LoadTestSuite;
@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class BomberTest {
     private static final Logger log = LogManager.getLogger();
 
-    @LoadTestApp
+    @LoadTestSuiteGroup
     @LoadTestSettings(time = 1)
     @LoadTestSuite
     public static class DummyLoadTest {

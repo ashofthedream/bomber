@@ -7,12 +7,12 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Marks class as load test app
+ * Marks class as load test suite group
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-public @interface LoadTestApp {
+public @interface LoadTestSuiteGroup {
 
     /**
      * @return test app name

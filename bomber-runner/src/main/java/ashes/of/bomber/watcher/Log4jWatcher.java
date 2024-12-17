@@ -43,15 +43,7 @@ public class Log4jWatcher implements Watcher {
 
     @Override
     public void watch(TestFlightSnapshot flight) {
-        var testApp = flight.current();
-        if (testApp == null) {
-            log.info("No test app running...");
-            return;
-        }
-
-        ThreadContext.put("testApp", testApp.name());
-
-        var testSuite = testApp.current();
+        var testSuite = flight.current();
         if (testSuite == null) {
             log.info("No test suite running...");
             return;

@@ -1,6 +1,6 @@
 package ashes.of.bomber.processors;
 
-import ashes.of.bomber.annotations.LoadTestApp;
+import ashes.of.bomber.annotations.LoadTestSuiteGroup;
 import ashes.of.bomber.annotations.LoadTestSuite;
 import ashes.of.bomber.annotations.Provide;
 import ashes.of.bomber.builder.TestAppBuilder;
@@ -41,7 +41,7 @@ public class TestAppProcessor {
             }
         }
 
-        LoadTestApp app = cls.getAnnotation(LoadTestApp.class);
+        LoadTestSuiteGroup app = cls.getAnnotation(LoadTestSuiteGroup.class);
         if (app == null)
             throw new RuntimeException("Test application class should be market with @LoadTestApp");
 
